@@ -5,7 +5,15 @@
 // Por eso se exige un ID token de Firebase válido y de un email autorizado
 // ANTES de llamar a Gemini.
 
-const MODELO = "gemini-2.5-flash";
+// Los nombres de la familia Flash cambian con las versiones y no todos están
+// disponibles para todas las claves: Google responde 404 al que no existe.
+// Se prueban en orden de preferencia y se usa el primero que conteste.
+const MODELOS = [
+  "gemini-2.5-flash",
+  "gemini-flash-latest",
+  "gemini-2.0-flash",
+  "gemini-1.5-flash"
+];
 
 // apiKey pública del proyecto Firebase (la misma que js/firebase-config.js).
 // No es un secreto: solo sirve para identificar el proyecto al validar el token.
@@ -83,9 +91,23 @@ function describirRegistros({ pesajes, comidas, ejercicios }) {
   return lineas.join("\n");
 }
 
-async function pedirConsejoAGemini(registros) {
+// Deja en los logs qué modelos acepta esta clave, para no volver a adivinar.
+async function registrarModelosDisponibles() {
+  try {
+    const respuesta = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models?key=${process.env.GEMINI_API_KEY}`
+    );
+    const datos = await respuesta.json();
+    const nombres = (datos.models || []).map((modelo) => modelo.name).join(", ");
+    console.error(`Modelos disponibles para esta clave: ${nombres || "(ninguno)"}`);
+  } catch (fallo) {
+    console.error(`No se pudo listar los modelos: ${fallo.message}`);
+  }
+}
+
+async function llamarAModelo(modelo, registros) {
   const respuesta = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${MODELO}:generateContent?key=${process.env.GEMINI_API_KEY}`,
+    `https://generativelanguage.googleapis.com/v1beta/models/${modelo}:generateContent?key=${process.env.GEMINI_API_KEY}`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -118,6 +140,27 @@ async function pedirConsejoAGemini(registros) {
   );
 
   return respuesta;
+}
+
+// Prueba los modelos en orden. Un 404 significa "ese nombre no existe para
+// esta clave": se pasa al siguiente. Cualquier otra respuesta se devuelve tal
+// cual, porque ya no es un problema de nombre (cuota, permisos, etc.).
+async function pedirConsejoAGemini(registros) {
+  let ultimaRespuesta;
+
+  for (const modelo of MODELOS) {
+    ultimaRespuesta = await llamarAModelo(modelo, registros);
+
+    if (ultimaRespuesta.status !== 404) {
+      if (ultimaRespuesta.ok) console.log(`Consejo generado con ${modelo}.`);
+      return ultimaRespuesta;
+    }
+
+    console.error(`El modelo ${modelo} no existe para esta clave, probando el siguiente.`);
+  }
+
+  await registrarModelosDisponibles();
+  return ultimaRespuesta;
 }
 
 module.exports = async (req, res) => {
