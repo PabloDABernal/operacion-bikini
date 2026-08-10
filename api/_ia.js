@@ -11,9 +11,11 @@
 // Los nombres de la familia Flash cambian con las versiones y no todos están
 // disponibles para todas las claves: Google responde 404 al que no existe.
 // Se prueban en orden de preferencia y se usa el primero que conteste.
+// gemini-flash-latest va primero porque es el que responde con la clave del
+// proyecto; probar antes 2.5-flash gastaba una llamada fallida en cada turno.
 const MODELOS = [
-  "gemini-2.5-flash",
   "gemini-flash-latest",
+  "gemini-2.5-flash",
   "gemini-2.0-flash",
   "gemini-1.5-flash"
 ];
@@ -140,12 +142,15 @@ async function llamarAGemini(cuerpo, etiqueta) {
     // presupuesto de salida corto se quedan sin margen y devuelven el JSON a
     // medias. Aquí no hace falta razonamiento largo: se desactiva y se da
     // margen de sobra. Los modelos que no lo soportan ignoran el campo.
+    // Los modelos antiguos (1.5, 2.0) no razonan ni entienden thinkingConfig.
+    const razona = !modelo.includes("1.5") && !modelo.includes("2.0");
+
     const cuerpoDelModelo = {
       ...cuerpo,
       generationConfig: {
         ...cuerpo.generationConfig,
         maxOutputTokens: 8192,
-        ...(modelo.includes("2.5") ? { thinkingConfig: { thinkingBudget: 0 } } : {})
+        ...(razona ? { thinkingConfig: { thinkingBudget: 0 } } : {})
       }
     };
 

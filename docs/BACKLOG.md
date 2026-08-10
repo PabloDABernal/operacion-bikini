@@ -8,6 +8,10 @@ Ideas surgidas durante la implementación, no implementadas. Una línea cada una
 - Probar la app en el móvil: las tres pestañas y los formularios de la spec 002 no se han verificado en pantalla pequeña (2026-08-10).
 - Repasar el aspecto general de la app (tipografía, espaciados, versión móvil) cuando v1 esté funcionalmente completa — la v1 prioriza que funcione sobre que esté pulido.
 
+## Técnico
+
+- La cascada de modelos de `api/_ia.js` se reordenó para que `gemini-flash-latest` vaya primero (2026-08-10): con la clave actual, `gemini-2.5-flash` da 404 y gastaba una llamada fallida en cada turno. Si algún día cambia la clave o Google renombra los modelos, hay que revisar ese orden.
+
 ## Seguridad / operativa
 
 - Los emails autorizados están en texto plano en un repo público. Alternativas si algún día molesta: lista blanca por UID o por hash SHA-256. Decisión consciente del usuario el 2026-08-10.

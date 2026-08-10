@@ -20,9 +20,9 @@ Cómo funciona la entrevista:
 
 Cuando ya tengas información suficiente, en vez de otra pregunta devuelves el plan.
 
-Formato de respuesta (JSON):
-- Si sigues entrevistando: {"tipo": "pregunta", "pregunta": "tu pregunta"}
-- Si ya has terminado: {"tipo": "plan", "nutricion": "...", "ejercicio": "..."}
+Formato de respuesta (JSON). Devuelve SIEMPRE los cuatro campos, sin excepción:
+- Si sigues entrevistando: {"tipo": "pregunta", "pregunta": "tu pregunta", "nutricion": "", "ejercicio": ""}
+- Si ya has terminado: {"tipo": "plan", "pregunta": "", "nutricion": "...", "ejercicio": "..."}
 
 Sobre el plan:
 - "nutricion": pautas generales adaptadas a lo que te ha contado (qué priorizar, qué reducir, cómo repartir las comidas). NO hagas un menú cerrado comida a comida. Máximo 150 palabras.
@@ -30,6 +30,9 @@ Sobre el plan:
 - No inventes datos que no te haya dado. Si algo no lo sabes, da la pauta de forma general.
 - IMPORTANTÍSIMO: cuando devuelvas el plan, rellena SIEMPRE los dos campos, "nutricion" y "ejercicio". Un plan sin rutina de ejercicio no sirve. Si te quedas sin espacio, acorta la parte de nutrición, nunca omitas el ejercicio.`;
 
+// Los cuatro campos son obligatorios a propósito: con "ejercicio" opcional,
+// Gemini se lo saltaba y llegaban planes sin rutina. Los que no aplican en
+// cada turno vienen como cadena vacía.
 const ESQUEMA = {
   type: "OBJECT",
   properties: {
@@ -38,7 +41,8 @@ const ESQUEMA = {
     nutricion: { type: "STRING" },
     ejercicio: { type: "STRING" }
   },
-  required: ["tipo"]
+  required: ["tipo", "pregunta", "nutricion", "ejercicio"],
+  propertyOrdering: ["tipo", "pregunta", "nutricion", "ejercicio"]
 };
 
 module.exports = async (req, res) => {
