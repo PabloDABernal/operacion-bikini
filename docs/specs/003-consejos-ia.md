@@ -1,6 +1,6 @@
 # 003 — Botón "Consejos" (primera integración con IA)
 
-- **Estado:** revisada
+- **Estado:** completada (probada a mano por el usuario el 2026-08-10)
 - **Fecha:** 2026-08-10
 - **Referencia en PRODUCTO.md:** líneas 18, 20 y 36 (botón "Consejos", disclaimer de IA, concepto "Consejo").
 - **Depende de:** specs 001 y 002, completadas.
@@ -148,6 +148,7 @@ Reglas de Firestore: misma protección que el resto de subcolecciones (`uid` pro
 | Sin streaming | Bastante más código en el proxy y en el cliente para un consejo de 200 palabras. |
 
 | **Vercel**, no Netlify | Decidido por el usuario. Netlify gratuito corta las funciones a 10 s sin poder ampliarlo; Vercel gratuito permite declarar hasta 60 s en `vercel.json`. Un consejo tarda ~5 s, pero el margen evita fallos en días lentos. |
+| El modelo se elige en cascada, no fijo | `gemini-2.5-flash` devolvió 404 con la clave del usuario. Los nombres de la familia Flash varían según la clave y la versión de la API, así que el proxy prueba varios en orden y usa el primero que responde. Si ninguno vale, deja en los logs la lista de modelos que sí acepta la clave. |
 | **Gemini Flash**, no Flash Lite | Decidido por el usuario: mejor calidad de consejo y más fiable respetando el formato de tres apartados. El nombre exacto del modelo y su cuota gratuita se verifican en la documentación de Google al implementar, porque cambian sin aviso. |
 | Espera máxima de 30 s en el cliente, `maxDuration` de 60 s en la función | La función tiene más margen que el cliente, así que un corte se ve siempre como error limpio del navegador y nunca como una función colgada consumiendo cuota. |
 | El token se valida contra el endpoint público de Google Identity Toolkit | No hace falta el SDK de Firebase Admin ni una clave de cuenta de servicio: bastan la `apiKey` pública y una llamada HTTP. Menos secretos que guardar en Vercel y ninguna dependencia que instalar. |
