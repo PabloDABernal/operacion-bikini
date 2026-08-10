@@ -152,10 +152,16 @@ module.exports = async (req, res) => {
     return res.status(400).json({ error: "sin-datos" });
   }
 
+  if (!process.env.GEMINI_API_KEY) {
+    console.error("Falta la variable de entorno GEMINI_API_KEY en este despliegue.");
+    return res.status(502).json({ error: "gemini-error" });
+  }
+
   let respuestaGemini;
   try {
     respuestaGemini = await pedirConsejoAGemini({ pesajes, comidas, ejercicios });
-  } catch {
+  } catch (fallo) {
+    console.error(`No se pudo llamar a Gemini: ${fallo.message}`);
     return res.status(502).json({ error: "gemini-inalcanzable" });
   }
 
@@ -163,6 +169,10 @@ module.exports = async (req, res) => {
     return res.status(429).json({ error: "cuota-agotada" });
   }
   if (!respuestaGemini.ok) {
+    // El detalle solo va a los logs de Vercel, nunca al navegador: el mensaje
+    // de error de Google puede incluir parte de la petición.
+    const detalle = await respuestaGemini.text().catch(() => "(sin cuerpo)");
+    console.error(`Gemini respondió ${respuestaGemini.status}: ${detalle}`);
     return res.status(502).json({ error: "gemini-error" });
   }
 
