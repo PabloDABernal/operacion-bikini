@@ -173,7 +173,9 @@ module.exports = async (req, res) => {
     // de error de Google puede incluir parte de la petición.
     const detalle = await respuestaGemini.text().catch(() => "(sin cuerpo)");
     console.error(`Gemini respondió ${respuestaGemini.status}: ${detalle}`);
-    return res.status(502).json({ error: "gemini-error" });
+    // Se devuelve solo el código HTTP, nunca el cuerpo del error: el mensaje de
+    // Google puede incluir parte de la petición. El código basta para diagnosticar.
+    return res.status(502).json({ error: "gemini-error", estado: respuestaGemini.status });
   }
 
   let consejo;
