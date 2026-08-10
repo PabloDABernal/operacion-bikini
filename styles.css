@@ -229,6 +229,74 @@ button:disabled {
   white-space: pre-wrap;
 }
 
+/* Consulta */
+
+#btn-empezar-consulta {
+  width: 100%;
+  background: #d81b60;
+  border-color: #d81b60;
+  color: #fff;
+  font-weight: 600;
+}
+
+#btn-empezar-consulta:disabled {
+  background: #ccc;
+  border-color: #ccc;
+}
+
+.mensaje {
+  padding: 0.6rem 0.85rem;
+  border-radius: 10px;
+  margin-bottom: 0.5rem;
+  max-width: 85%;
+  white-space: pre-wrap;
+}
+
+.mensaje-ia {
+  background: #f1e4ea;
+  border: 1px solid #e3cdd7;
+}
+
+.mensaje-usuario {
+  background: #eee;
+  border: 1px solid #ddd;
+  margin-left: auto;
+}
+
+#estado-consulta {
+  color: #555;
+  min-height: 1.2rem;
+}
+
+/* Botón que se lee como enlace: acción secundaria y poco tentadora. */
+.enlace {
+  background: none;
+  border: none;
+  color: #888;
+  text-decoration: underline;
+  padding: 0;
+  font-size: 0.85rem;
+}
+
+.plan {
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: #fff;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+}
+
+.plan h3 {
+  font-size: 0.9rem;
+  margin: 0.75rem 0 0.25rem;
+  color: #d81b60;
+}
+
+.plan p {
+  margin: 0;
+  white-space: pre-wrap;
+}
+
 /* Disclaimer: va al final del flujo, no anclado a la ventana,
    para no tapar contenido en pantallas pequeñas. */
 .disclaimer {

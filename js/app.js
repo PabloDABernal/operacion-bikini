@@ -44,6 +44,18 @@ import {
   mensajeDeErrorDeConsejo
 } from "./consejos.js";
 
+import {
+  MAXIMO_CARACTERES_RESPUESTA,
+  listarConsultas,
+  listarPlanes,
+  consultaEnCurso,
+  quedanConsultasHoy,
+  empezarConsulta,
+  responder,
+  abandonarConsulta,
+  mensajeDeErrorDeConsulta
+} from "./consulta.js";
+
 const pantallas = {
   cargando: document.getElementById("pantalla-cargando"),
   login: document.getElementById("pantalla-login"),
@@ -424,6 +436,179 @@ id("btn-pedir-consejo").addEventListener("click", async () => {
   }
 });
 
+// --- Consulta ------------------------------------------------------------
+
+let consultasCargadas = [];
+let consultaAbierta = null;
+
+// Id de la consulta que se acaba de terminar en esta sesión. Sirve para el
+// tercer estado de la pantalla: hilo completo a la vista y botón "Empezar
+// otra consulta". Se pierde al recargar, y entonces la pestaña vuelve al
+// estado inicial con el plan ya en el historial.
+let consultaReciénTerminada = null;
+
+function pintarHilo(consulta) {
+  const hilo = id("hilo-consulta");
+  hilo.innerHTML = "";
+  if (!consulta) return;
+
+  consulta.mensajes.forEach((mensaje) => {
+    const burbuja = document.createElement("div");
+    burbuja.className = `mensaje mensaje-${mensaje.de}`;
+    burbuja.textContent = mensaje.texto;
+    hilo.appendChild(burbuja);
+  });
+}
+
+function pintarPlanes(planes) {
+  const contenedor = id("lista-planes");
+  contenedor.innerHTML = "";
+  id("estado-planes").textContent = planes.length
+    ? ""
+    : "Aún no tienes ningún plan.";
+
+  planes.forEach((plan) => {
+    const tarjeta = document.createElement("article");
+    tarjeta.className = "plan";
+
+    const fecha = document.createElement("p");
+    fecha.className = "consejo-fecha";
+    fecha.textContent = formatearFechaYHora(plan.creadoEn);
+    tarjeta.appendChild(fecha);
+
+    [
+      ["Nutrición", plan.nutricion],
+      ["Ejercicio", plan.ejercicio]
+    ].forEach(([titulo, texto]) => {
+      const encabezado = document.createElement("h3");
+      encabezado.textContent = titulo;
+      const parrafo = document.createElement("p");
+      parrafo.textContent = texto;
+      tarjeta.append(encabezado, parrafo);
+    });
+
+    contenedor.appendChild(tarjeta);
+  });
+}
+
+// Los tres estados de la pantalla: consulta en curso, recién terminada, y
+// sin consulta (con o sin cupo para hoy).
+function pintarEstadoConsulta() {
+  const enCurso = Boolean(consultaAbierta);
+  const quedanHoy = quedanConsultasHoy(consultasCargadas);
+  const terminada = enCurso
+    ? null
+    : consultasCargadas.find((consulta) => consulta.id === consultaReciénTerminada);
+
+  id("form-respuesta").classList.toggle("oculta", !enCurso);
+  id("btn-abandonar").classList.toggle("oculta", !enCurso);
+  id("btn-empezar-consulta").classList.toggle("oculta", enCurso);
+
+  if (enCurso) {
+    id("aviso-consulta").textContent = "";
+  } else {
+    id("btn-empezar-consulta").disabled = !quedanHoy;
+    id("btn-empezar-consulta").textContent = terminada
+      ? "Empezar otra consulta"
+      : "Empezar consulta";
+    id("aviso-consulta").textContent = quedanHoy
+      ? terminada
+        ? "Consulta terminada. Tu plan es el primero de la lista."
+        : ""
+      : "Ya has pasado consulta 2 veces hoy.";
+  }
+
+  pintarHilo(consultaAbierta || terminada);
+}
+
+async function refrescarConsulta() {
+  try {
+    const [consultas, planes] = await Promise.all([
+      listarConsultas(uidActual),
+      listarPlanes(uidActual)
+    ]);
+    consultasCargadas = consultas;
+    consultaAbierta = consultaEnCurso(consultas);
+    pintarPlanes(planes);
+    pintarEstadoConsulta();
+  } catch {
+    id("error-consulta").textContent =
+      "No se ha podido cargar tu consulta. Comprueba tu conexión.";
+  }
+}
+
+// Envuelve las llamadas a la IA: bloquea la pantalla, muestra "Pensando…" y
+// traduce el error. Devuelve true si fue bien.
+async function conEspera(accion) {
+  const error = id("error-consulta");
+  error.textContent = "";
+  id("estado-consulta").textContent = "Pensando…";
+  id("btn-empezar-consulta").disabled = true;
+  id("btn-responder").disabled = true;
+
+  try {
+    await accion();
+    return true;
+  } catch (fallo) {
+    error.textContent = mensajeDeErrorDeConsulta(fallo.codigo);
+    return false;
+  } finally {
+    id("estado-consulta").textContent = "";
+    id("btn-responder").disabled = false;
+    id("btn-empezar-consulta").disabled = false;
+  }
+}
+
+id("btn-empezar-consulta").addEventListener("click", async () => {
+  consultaReciénTerminada = null;
+  const fueBien = await conEspera(() => empezarConsulta(uidActual, consultasCargadas));
+  if (fueBien) await refrescarConsulta();
+  else pintarEstadoConsulta();
+});
+
+id("form-respuesta").addEventListener("submit", async (evento) => {
+  evento.preventDefault();
+  const campo = id("respuesta-texto");
+  const error = id("error-consulta");
+  const texto = campo.value.trim();
+
+  if (!texto) {
+    error.textContent = "Escribe una respuesta.";
+    return;
+  }
+  if (texto.length > MAXIMO_CARACTERES_RESPUESTA) {
+    error.textContent = `Máximo ${MAXIMO_CARACTERES_RESPUESTA} caracteres.`;
+    return;
+  }
+
+  // La respuesta solo se borra si se ha enviado bien: si falla, se reintenta.
+  const idDeLaConsulta = consultaAbierta.id;
+  let termino = false;
+
+  const fueBien = await conEspera(async () => {
+    ({ termino } = await responder(uidActual, consultaAbierta, texto));
+  });
+
+  if (fueBien) {
+    campo.value = "";
+    if (termino) consultaReciénTerminada = idDeLaConsulta;
+    await refrescarConsulta();
+  }
+});
+
+id("btn-abandonar").addEventListener("click", async () => {
+  if (!confirm("¿Abandonar esta consulta? Se perderá la conversación.")) return;
+
+  try {
+    await abandonarConsulta(uidActual, consultaAbierta.id);
+    id("respuesta-texto").value = "";
+    await refrescarConsulta();
+  } catch {
+    id("error-consulta").textContent =
+      "No se ha podido abandonar la consulta. Comprueba tu conexión.";
+  }
+});
+
 // --- Arranque ------------------------------------------------------------
 
 function rellenarDesplegable(elementoId, opciones, porDefecto) {
@@ -449,12 +634,19 @@ function limpiarFormularios() {
   });
   rellenarDesplegable("comida-momento", MOMENTOS, MOMENTO_POR_DEFECTO);
   rellenarDesplegable("ejercicio-intensidad", INTENSIDADES, INTENSIDAD_POR_DEFECTO);
-  ["error-pesaje", "error-comida", "error-ejercicio", "error-consejo"].forEach(
-    (campo) => {
-      id(campo).textContent = "";
-    }
-  );
+  [
+    "error-pesaje",
+    "error-comida",
+    "error-ejercicio",
+    "error-consejo",
+    "error-consulta"
+  ].forEach((campo) => {
+    id(campo).textContent = "";
+  });
   id("estado-consejo").textContent = "";
+  id("estado-consulta").textContent = "";
+  id("respuesta-texto").value = "";
+  consultaReciénTerminada = null;
 }
 
 observarSesion(
@@ -477,6 +669,7 @@ observarSesion(
     listaComidas.refrescar();
     listaEjercicios.refrescar();
     refrescarConsejos();
+    refrescarConsulta();
   },
   () => {
     uidActual = null;

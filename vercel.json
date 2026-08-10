@@ -3,6 +3,9 @@
   "functions": {
     "api/consejo.js": {
       "maxDuration": 60
+    },
+    "api/consulta.js": {
+      "maxDuration": 60
     }
   }
 }
