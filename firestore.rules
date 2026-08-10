@@ -1,0 +1,33 @@
+rules_version = '2';
+
+// Barrera real de seguridad. El chequeo de la lista blanca que hace el
+// navegador (js/firebase-config.js) es solo para dar un mensaje claro: se
+// puede saltar. Esto no.
+//
+// Al añadir o quitar a alguien hay que tocar LOS DOS sitios y publicar ambos.
+// La lista va en minúsculas y se compara con el email del token en minúsculas,
+// igual que en el cliente.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function autorizado() {
+      return request.auth != null
+        && request.auth.token.email != null
+        && request.auth.token.email.lower() in [
+          'pantonbernal@gmail.com',
+          'angels_recio@hotmail.com'
+        ];
+    }
+
+    // Cada usuario solo entra en su propia subcolección de pesajes.
+    match /usuarios/{uid}/pesajes/{pesajeId} {
+      allow read, write: if autorizado() && request.auth.uid == uid;
+    }
+
+    // Todo lo demás, denegado.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
