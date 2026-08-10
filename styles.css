@@ -37,10 +37,51 @@ header {
   overflow-wrap: anywhere;
 }
 
+/* Pestañas */
+
+#pestanas {
+  display: flex;
+  gap: 0.25rem;
+  margin: 1rem 0;
+}
+
+.pestana {
+  flex: 1;
+  padding: 0.6rem 0.25rem;
+  background: #eee;
+  border: 1px solid #ccc;
+  color: #555;
+}
+
+.pestana.activa {
+  background: #d81b60;
+  border-color: #d81b60;
+  color: #fff;
+  font-weight: 700;
+}
+
+.seccion {
+  display: none;
+}
+
+.seccion.activa {
+  display: block;
+}
+
 form {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
+}
+
+textarea,
+select {
+  padding: 0.6rem;
+  font-size: 1rem;
+  font-family: inherit;
+  border: 1px solid #bbb;
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
 }
 
 label {
@@ -71,7 +112,9 @@ button:disabled {
 }
 
 #btn-entrar,
-#btn-guardar {
+#btn-guardar,
+#btn-guardar-comida,
+#btn-guardar-ejercicio {
   background: #d81b60;
   border-color: #d81b60;
   color: #fff;
@@ -90,12 +133,16 @@ button:disabled {
   margin: 0.5rem 0;
 }
 
-#lista-pesajes {
+#lista-pesajes,
+#lista-comidas,
+#lista-ejercicios {
   list-style: none;
   padding: 0;
 }
 
-#lista-pesajes li {
+#lista-pesajes li,
+#lista-comidas li,
+#lista-ejercicios li {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -107,10 +154,26 @@ button:disabled {
 .pesaje-fecha {
   color: #555;
   font-size: 0.9rem;
+  white-space: nowrap;
 }
 
 .pesaje-peso {
   font-weight: 700;
   margin-left: auto;
   margin-right: 0.75rem;
+}
+
+/* El texto libre de comidas y ejercicios se recorta si no cabe,
+   para que la fila no crezca ni empuje al botón de borrar. */
+.registro-texto {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.registro-detalle {
+  color: #555;
+  font-size: 0.9rem;
+  white-space: nowrap;
 }

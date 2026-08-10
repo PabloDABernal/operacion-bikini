@@ -36,23 +36,83 @@
       <button type="button" id="btn-salir">Cerrar sesión</button>
     </header>
 
-    <h2>Nuevo pesaje</h2>
-    <form id="form-pesaje">
-      <label for="peso">Peso (kg)</label>
-      <input type="text" id="peso" inputmode="decimal" placeholder="82,4">
+    <nav id="pestanas">
+      <button type="button" class="pestana" data-seccion="peso">Peso</button>
+      <button type="button" class="pestana" data-seccion="comidas">Comidas</button>
+      <button type="button" class="pestana" data-seccion="ejercicio">Ejercicio</button>
+    </nav>
 
-      <label for="fecha">Fecha</label>
-      <input type="date" id="fecha">
+    <!-- Sección: Peso (spec 001, solo cambia de sitio) -->
+    <div class="seccion" data-seccion="peso">
+      <h2>Nuevo pesaje</h2>
+      <form id="form-pesaje">
+        <label for="peso">Peso (kg)</label>
+        <input type="text" id="peso" inputmode="decimal" placeholder="82,4">
 
-      <button type="submit" id="btn-guardar">Guardar pesaje</button>
-    </form>
+        <label for="fecha">Fecha</label>
+        <input type="date" id="fecha">
 
-    <p id="error-pesaje" class="error" role="alert"></p>
+        <button type="submit" id="btn-guardar">Guardar pesaje</button>
+      </form>
 
-    <h2>Mis pesajes</h2>
-    <p id="estado-lista"></p>
-    <button type="button" id="btn-reintentar" class="oculta">Reintentar</button>
-    <ul id="lista-pesajes"></ul>
+      <p id="error-pesaje" class="error" role="alert"></p>
+
+      <h2>Mis pesajes</h2>
+      <p id="estado-lista"></p>
+      <button type="button" id="btn-reintentar" class="oculta">Reintentar</button>
+      <ul id="lista-pesajes"></ul>
+    </div>
+
+    <!-- Sección: Comidas -->
+    <div class="seccion" data-seccion="comidas">
+      <h2>Nueva comida</h2>
+      <form id="form-comida">
+        <label for="comida-texto">Qué has comido</label>
+        <textarea id="comida-texto" rows="2" placeholder="lentejas y una manzana"></textarea>
+
+        <label for="comida-momento">Momento</label>
+        <select id="comida-momento"></select>
+
+        <label for="comida-fecha">Fecha</label>
+        <input type="date" id="comida-fecha">
+
+        <button type="submit" id="btn-guardar-comida">Guardar comida</button>
+      </form>
+
+      <p id="error-comida" class="error" role="alert"></p>
+
+      <h2>Mis comidas</h2>
+      <p id="estado-comidas"></p>
+      <button type="button" id="btn-reintentar-comidas" class="oculta">Reintentar</button>
+      <ul id="lista-comidas"></ul>
+    </div>
+
+    <!-- Sección: Ejercicio -->
+    <div class="seccion" data-seccion="ejercicio">
+      <h2>Nuevo ejercicio</h2>
+      <form id="form-ejercicio">
+        <label for="ejercicio-texto">Qué has hecho</label>
+        <input type="text" id="ejercicio-texto" placeholder="bici">
+
+        <label for="ejercicio-minutos">Minutos</label>
+        <input type="text" id="ejercicio-minutos" inputmode="numeric" placeholder="45">
+
+        <label for="ejercicio-intensidad">Intensidad</label>
+        <select id="ejercicio-intensidad"></select>
+
+        <label for="ejercicio-fecha">Fecha</label>
+        <input type="date" id="ejercicio-fecha">
+
+        <button type="submit" id="btn-guardar-ejercicio">Guardar ejercicio</button>
+      </form>
+
+      <p id="error-ejercicio" class="error" role="alert"></p>
+
+      <h2>Mis ejercicios</h2>
+      <p id="estado-ejercicios"></p>
+      <button type="button" id="btn-reintentar-ejercicios" class="oculta">Reintentar</button>
+      <ul id="lista-ejercicios"></ul>
+    </div>
   </section>
 
   <!-- Pantalla de carga inicial, mientras Firebase decide si hay sesión -->

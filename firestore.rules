@@ -20,8 +20,16 @@ service cloud.firestore {
         ];
     }
 
-    // Cada usuario solo entra en su propia subcolección de pesajes.
+    // Cada usuario solo entra en sus propias subcolecciones.
     match /usuarios/{uid}/pesajes/{pesajeId} {
+      allow read, write: if autorizado() && request.auth.uid == uid;
+    }
+
+    match /usuarios/{uid}/comidas/{comidaId} {
+      allow read, write: if autorizado() && request.auth.uid == uid;
+    }
+
+    match /usuarios/{uid}/ejercicios/{ejercicioId} {
       allow read, write: if autorizado() && request.auth.uid == uid;
     }
 

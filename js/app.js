@@ -1,4 +1,4 @@
-// Arranque de la app y conexión entre pantallas.
+// Arranque de la app, pestañas y conexión de los tres registros.
 
 import {
   entrarConEmail,
@@ -9,13 +9,34 @@ import {
   ERROR_NO_AUTORIZADO
 } from "./auth.js";
 
+import { hoyISO, formatearFecha } from "./fechas.js";
+
 import {
-  hoyISO,
   validarPesaje,
   guardarPesaje,
   listarPesajes,
   borrarPesaje
 } from "./pesajes.js";
+
+import {
+  MOMENTOS,
+  MOMENTO_POR_DEFECTO,
+  etiquetaDeMomento,
+  validarComida,
+  guardarComida,
+  listarComidas,
+  borrarComida
+} from "./comidas.js";
+
+import {
+  INTENSIDADES,
+  INTENSIDAD_POR_DEFECTO,
+  etiquetaDeIntensidad,
+  validarEjercicio,
+  guardarEjercicio,
+  listarEjercicios,
+  borrarEjercicio
+} from "./ejercicios.js";
 
 const pantallas = {
   cargando: document.getElementById("pantalla-cargando"),
@@ -32,14 +53,6 @@ const errorLogin = document.getElementById("error-login");
 
 const emailUsuario = document.getElementById("email-usuario");
 const btnSalir = document.getElementById("btn-salir");
-const formPesaje = document.getElementById("form-pesaje");
-const inputPeso = document.getElementById("peso");
-const inputFecha = document.getElementById("fecha");
-const btnGuardar = document.getElementById("btn-guardar");
-const errorPesaje = document.getElementById("error-pesaje");
-const listaPesajes = document.getElementById("lista-pesajes");
-const estadoLista = document.getElementById("estado-lista");
-const btnReintentar = document.getElementById("btn-reintentar");
 
 let uidActual = null;
 
@@ -49,20 +62,28 @@ function mostrar(nombre) {
   });
 }
 
-function formatearFecha(iso) {
-  const [anio, mes, dia] = iso.split("-");
-  return `${dia}/${mes}/${anio}`;
+function id(nombre) {
+  return document.getElementById(nombre);
 }
 
-function formatearPeso(pesoKg) {
-  return `${pesoKg.toFixed(1).replace(".", ",")} kg`;
+// --- Pestañas ------------------------------------------------------------
+
+const PESTANA_INICIAL = "peso";
+
+function abrirPestana(nombre) {
+  document.querySelectorAll(".pestana").forEach((boton) => {
+    boton.classList.toggle("activa", boton.dataset.seccion === nombre);
+  });
+  document.querySelectorAll(".seccion").forEach((seccion) => {
+    seccion.classList.toggle("activa", seccion.dataset.seccion === nombre);
+  });
 }
+
+document.querySelectorAll(".pestana").forEach((boton) => {
+  boton.addEventListener("click", () => abrirPestana(boton.dataset.seccion));
+});
 
 // --- Login ---------------------------------------------------------------
-
-function mostrarErrorLogin(error) {
-  errorLogin.textContent = mensajeDeError(error.code);
-}
 
 formLogin.addEventListener("submit", async (evento) => {
   evento.preventDefault();
@@ -80,7 +101,7 @@ formLogin.addEventListener("submit", async (evento) => {
   try {
     await entrarConEmail(email, password);
   } catch (error) {
-    mostrarErrorLogin(error);
+    errorLogin.textContent = mensajeDeError(error.code);
   } finally {
     btnEntrar.disabled = false;
   }
@@ -92,7 +113,7 @@ btnGoogle.addEventListener("click", async () => {
   try {
     await entrarConGoogle();
   } catch (error) {
-    mostrarErrorLogin(error);
+    errorLogin.textContent = mensajeDeError(error.code);
   } finally {
     btnGoogle.disabled = false;
   }
@@ -100,86 +121,248 @@ btnGoogle.addEventListener("click", async () => {
 
 btnSalir.addEventListener("click", () => salir());
 
-// --- Pesajes -------------------------------------------------------------
+// --- Listas de registros -------------------------------------------------
 
-function pintarPesajes(pesajes) {
-  listaPesajes.innerHTML = "";
-  estadoLista.textContent = pesajes.length
-    ? ""
-    : "Aún no has apuntado ningún pesaje.";
+// Las tres listas (pesajes, comidas, ejercicios) se comportan igual: cargan,
+// pintan filas, permiten borrar y avisan si falla la conexión. Esto monta una.
+function crearLista(config) {
+  const lista = id(config.lista);
+  const estado = id(config.estado);
+  const reintentar = id(config.reintentar);
+  const error = id(config.error);
 
-  pesajes.forEach((pesaje) => {
-    const fila = document.createElement("li");
+  function pintar(registros) {
+    lista.innerHTML = "";
+    estado.textContent = registros.length ? "" : config.textoVacio;
 
-    const fecha = document.createElement("span");
-    fecha.className = "pesaje-fecha";
-    fecha.textContent = formatearFecha(pesaje.fecha);
+    registros.forEach((registro) => {
+      const fila = document.createElement("li");
 
-    const peso = document.createElement("span");
-    peso.className = "pesaje-peso";
-    peso.textContent = formatearPeso(pesaje.pesoKg);
+      const botonBorrar = document.createElement("button");
+      botonBorrar.type = "button";
+      botonBorrar.textContent = "Borrar";
+      botonBorrar.addEventListener("click", () => borrar(registro.id, botonBorrar));
 
-    const botonBorrar = document.createElement("button");
-    botonBorrar.type = "button";
-    botonBorrar.textContent = "Borrar";
-    botonBorrar.addEventListener("click", () => alBorrar(pesaje.id, botonBorrar));
-
-    fila.append(fecha, peso, botonBorrar);
-    listaPesajes.appendChild(fila);
-  });
-}
-
-async function refrescarLista() {
-  btnReintentar.classList.add("oculta");
-  try {
-    pintarPesajes(await listarPesajes(uidActual));
-  } catch {
-    listaPesajes.innerHTML = "";
-    estadoLista.textContent =
-      "No se han podido cargar tus pesajes. Comprueba tu conexión.";
-    btnReintentar.classList.remove("oculta");
+      fila.append(...config.celdas(registro), botonBorrar);
+      lista.appendChild(fila);
+    });
   }
+
+  async function refrescar() {
+    reintentar.classList.add("oculta");
+    try {
+      pintar(await config.cargar(uidActual));
+    } catch {
+      lista.innerHTML = "";
+      estado.textContent = config.errorCarga;
+      reintentar.classList.remove("oculta");
+    }
+  }
+
+  async function borrar(registroId, boton) {
+    if (!confirm(config.confirmacionBorrado)) return;
+
+    boton.disabled = true;
+    try {
+      await config.borrar(uidActual, registroId);
+      await refrescar();
+    } catch {
+      error.textContent = "No se ha podido borrar. Comprueba tu conexión.";
+      boton.disabled = false;
+    }
+  }
+
+  reintentar.addEventListener("click", refrescar);
+
+  return { refrescar };
 }
 
-btnReintentar.addEventListener("click", refrescarLista);
+function celda(texto, clase) {
+  const elemento = document.createElement("span");
+  elemento.className = clase;
+  elemento.textContent = texto;
+  return elemento;
+}
 
-formPesaje.addEventListener("submit", async (evento) => {
+// --- Peso ----------------------------------------------------------------
+
+const listaPeso = crearLista({
+  lista: "lista-pesajes",
+  estado: "estado-lista",
+  reintentar: "btn-reintentar",
+  error: "error-pesaje",
+  textoVacio: "Aún no has apuntado ningún pesaje.",
+  errorCarga: "No se han podido cargar tus pesajes. Comprueba tu conexión.",
+  confirmacionBorrado: "¿Borrar este pesaje?",
+  cargar: listarPesajes,
+  borrar: borrarPesaje,
+  celdas: (pesaje) => [
+    celda(formatearFecha(pesaje.fecha), "pesaje-fecha"),
+    celda(`${pesaje.pesoKg.toFixed(1).replace(".", ",")} kg`, "pesaje-peso")
+  ]
+});
+
+id("form-pesaje").addEventListener("submit", async (evento) => {
   evento.preventDefault();
-  errorPesaje.textContent = "";
+  const error = id("error-pesaje");
+  error.textContent = "";
 
-  const resultado = validarPesaje(inputPeso.value, inputFecha.value);
+  const resultado = validarPesaje(id("peso").value, id("fecha").value);
   if (resultado.error) {
-    errorPesaje.textContent = resultado.error;
+    error.textContent = resultado.error;
     return;
   }
 
-  btnGuardar.disabled = true;
+  const boton = id("btn-guardar");
+  boton.disabled = true;
   try {
     await guardarPesaje(uidActual, resultado.pesoKg, resultado.fecha);
-    inputPeso.value = "";
-    inputFecha.value = hoyISO();
-    await refrescarLista();
+    id("peso").value = "";
+    id("fecha").value = hoyISO();
+    await listaPeso.refrescar();
   } catch {
-    errorPesaje.textContent = "No se ha podido guardar. Comprueba tu conexión.";
+    error.textContent = "No se ha podido guardar. Comprueba tu conexión.";
   } finally {
-    btnGuardar.disabled = false;
+    boton.disabled = false;
   }
 });
 
-async function alBorrar(pesajeId, boton) {
-  if (!confirm("¿Borrar este pesaje?")) return;
+// --- Comidas -------------------------------------------------------------
 
+const listaComidas = crearLista({
+  lista: "lista-comidas",
+  estado: "estado-comidas",
+  reintentar: "btn-reintentar-comidas",
+  error: "error-comida",
+  textoVacio: "Aún no has apuntado ninguna comida.",
+  errorCarga: "No se han podido cargar tus comidas. Comprueba tu conexión.",
+  confirmacionBorrado: "¿Borrar esta comida?",
+  cargar: listarComidas,
+  borrar: borrarComida,
+  celdas: (comida) => [
+    celda(formatearFecha(comida.fecha), "pesaje-fecha"),
+    celda(etiquetaDeMomento(comida.momento), "registro-detalle"),
+    celda(comida.texto, "registro-texto")
+  ]
+});
+
+id("form-comida").addEventListener("submit", async (evento) => {
+  evento.preventDefault();
+  const error = id("error-comida");
+  error.textContent = "";
+
+  const resultado = validarComida(
+    id("comida-texto").value,
+    id("comida-momento").value,
+    id("comida-fecha").value
+  );
+  if (resultado.error) {
+    error.textContent = resultado.error;
+    return;
+  }
+
+  const boton = id("btn-guardar-comida");
   boton.disabled = true;
   try {
-    await borrarPesaje(uidActual, pesajeId);
-    await refrescarLista();
+    await guardarComida(uidActual, resultado.texto, resultado.momento, resultado.fecha);
+    id("comida-texto").value = "";
+    id("comida-momento").value = MOMENTO_POR_DEFECTO;
+    id("comida-fecha").value = hoyISO();
+    await listaComidas.refrescar();
   } catch {
-    errorPesaje.textContent = "No se ha podido borrar. Comprueba tu conexión.";
+    error.textContent = "No se ha podido guardar. Comprueba tu conexión.";
+  } finally {
     boton.disabled = false;
   }
-}
+});
+
+// --- Ejercicio -----------------------------------------------------------
+
+const listaEjercicios = crearLista({
+  lista: "lista-ejercicios",
+  estado: "estado-ejercicios",
+  reintentar: "btn-reintentar-ejercicios",
+  error: "error-ejercicio",
+  textoVacio: "Aún no has apuntado ningún ejercicio.",
+  errorCarga: "No se han podido cargar tus ejercicios. Comprueba tu conexión.",
+  confirmacionBorrado: "¿Borrar este ejercicio?",
+  cargar: listarEjercicios,
+  borrar: borrarEjercicio,
+  celdas: (ejercicio) => [
+    celda(formatearFecha(ejercicio.fecha), "pesaje-fecha"),
+    celda(ejercicio.texto, "registro-texto"),
+    celda(`${ejercicio.minutos} min`, "registro-detalle"),
+    celda(etiquetaDeIntensidad(ejercicio.intensidad), "registro-detalle")
+  ]
+});
+
+id("form-ejercicio").addEventListener("submit", async (evento) => {
+  evento.preventDefault();
+  const error = id("error-ejercicio");
+  error.textContent = "";
+
+  const resultado = validarEjercicio(
+    id("ejercicio-texto").value,
+    id("ejercicio-minutos").value,
+    id("ejercicio-intensidad").value,
+    id("ejercicio-fecha").value
+  );
+  if (resultado.error) {
+    error.textContent = resultado.error;
+    return;
+  }
+
+  const boton = id("btn-guardar-ejercicio");
+  boton.disabled = true;
+  try {
+    await guardarEjercicio(
+      uidActual,
+      resultado.texto,
+      resultado.minutos,
+      resultado.intensidad,
+      resultado.fecha
+    );
+    id("ejercicio-texto").value = "";
+    id("ejercicio-minutos").value = "";
+    id("ejercicio-intensidad").value = INTENSIDAD_POR_DEFECTO;
+    id("ejercicio-fecha").value = hoyISO();
+    await listaEjercicios.refrescar();
+  } catch {
+    error.textContent = "No se ha podido guardar. Comprueba tu conexión.";
+  } finally {
+    boton.disabled = false;
+  }
+});
 
 // --- Arranque ------------------------------------------------------------
+
+function rellenarDesplegable(elementoId, opciones, porDefecto) {
+  const select = id(elementoId);
+  select.innerHTML = "";
+  opciones.forEach(({ valor, etiqueta }) => {
+    const opcion = document.createElement("option");
+    opcion.value = valor;
+    opcion.textContent = etiqueta;
+    select.appendChild(opcion);
+  });
+  select.value = porDefecto;
+}
+
+function limpiarFormularios() {
+  ["peso", "comida-texto", "ejercicio-texto", "ejercicio-minutos"].forEach(
+    (campo) => {
+      id(campo).value = "";
+    }
+  );
+  ["fecha", "comida-fecha", "ejercicio-fecha"].forEach((campo) => {
+    id(campo).value = hoyISO();
+  });
+  rellenarDesplegable("comida-momento", MOMENTOS, MOMENTO_POR_DEFECTO);
+  rellenarDesplegable("ejercicio-intensidad", INTENSIDADES, INTENSIDAD_POR_DEFECTO);
+  ["error-pesaje", "error-comida", "error-ejercicio"].forEach((campo) => {
+    id(campo).textContent = "";
+  });
+}
 
 observarSesion(
   (usuario) => {
@@ -191,13 +374,15 @@ observarSesion(
 
     uidActual = usuario.uid;
     emailUsuario.textContent = usuario.email;
-    inputPeso.value = "";
-    inputFecha.value = hoyISO();
-    errorPesaje.textContent = "";
+    limpiarFormularios();
     errorLogin.textContent = "";
     inputPassword.value = "";
+    abrirPestana(PESTANA_INICIAL);
     mostrar("principal");
-    refrescarLista();
+
+    listaPeso.refrescar();
+    listaComidas.refrescar();
+    listaEjercicios.refrescar();
   },
   () => {
     uidActual = null;
