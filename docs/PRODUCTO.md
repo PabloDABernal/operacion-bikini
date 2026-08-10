@@ -6,11 +6,11 @@ Esta app sirve para que mi mujer y yo perdamos peso y nos sintamos bien con nues
 
 ## Para quién
 
-Dos usuarios (yo y mi mujer), cada uno con su cuenta y sus datos completamente separados: peso, comidas, ejercicio, fotos y conversaciones con la IA de un usuario no son visibles para el otro.
+Un grupo pequeño y cerrado de usuarios personales (empezando por mí, y probablemente mi mujer), cada uno con su cuenta y sus datos completamente separados: peso, comidas, ejercicio, fotos y conversaciones con la IA de un usuario no son visibles para el otro. No es una app pública ni de registro abierto — el acceso se concede manualmente (dando de alta la cuenta o permitiendo el inicio de sesión), no cualquiera con el enlace puede entrar.
 
 ## Qué hace (alcance actual — v1 beta, objetivo 31 de agosto)
 
-- Login separado por usuario (2 cuentas).
+- Login separado por usuario, con email/contraseña o cuenta de Google (a elección de cada uno).
 - Registro de pesajes (peso + fecha).
 - Registro de comidas.
 - Registro de ejercicio.
