@@ -115,5 +115,8 @@ module.exports = async (req, res) => {
     return res.status(200).json({ tipo: "pregunta", pregunta: respuesta.pregunta });
   }
 
+  // Llegar aquí significa que el JSON era válido pero no encaja con ninguno de
+  // los dos formatos esperados (p. ej. tipo "plan" sin plan dentro).
+  console.error(`Respuesta con forma inesperada: ${JSON.stringify(respuesta).slice(0, 300)}`);
   return res.status(502).json({ error: "respuesta-ilegible" });
 };

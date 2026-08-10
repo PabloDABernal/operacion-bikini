@@ -136,12 +136,25 @@ async function llamarAGemini(cuerpo, etiqueta) {
   let ultimaRespuesta;
 
   for (const modelo of MODELOS) {
+    // Los modelos 2.5 gastan tokens "pensando" antes de escribir, y con un
+    // presupuesto de salida corto se quedan sin margen y devuelven el JSON a
+    // medias. Aquí no hace falta razonamiento largo: se desactiva y se da
+    // margen de sobra. Los modelos que no lo soportan ignoran el campo.
+    const cuerpoDelModelo = {
+      ...cuerpo,
+      generationConfig: {
+        ...cuerpo.generationConfig,
+        maxOutputTokens: 4096,
+        ...(modelo.includes("2.5") ? { thinkingConfig: { thinkingBudget: 0 } } : {})
+      }
+    };
+
     ultimaRespuesta = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/${modelo}:generateContent?key=${process.env.GEMINI_API_KEY}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(cuerpo)
+        body: JSON.stringify(cuerpoDelModelo)
       }
     );
 
@@ -191,10 +204,38 @@ async function generarJson(res, cuerpo, etiqueta) {
     return null;
   }
 
+  let datos;
   try {
-    const datos = await respuesta.json();
-    return JSON.parse(datos.candidates[0].content.parts[0].text);
+    datos = await respuesta.json();
   } catch {
+    console.error("Gemini devolvió algo que no es JSON.");
+    res.status(502).json({ error: "respuesta-ilegible" });
+    return null;
+  }
+
+  const candidato = datos.candidates && datos.candidates[0];
+  const parte = candidato && candidato.content && candidato.content.parts
+    ? candidato.content.parts[0]
+    : null;
+
+  if (!parte || typeof parte.text !== "string") {
+    // finishReason dice si se cortó por longitud (MAX_TOKENS) o por filtros
+    // de seguridad (SAFETY), que son problemas muy distintos.
+    console.error(
+      `Respuesta sin texto. finishReason=${candidato ? candidato.finishReason : "(sin candidato)"}, ` +
+        `promptFeedback=${JSON.stringify(datos.promptFeedback || null)}`
+    );
+    res.status(502).json({ error: "respuesta-ilegible" });
+    return null;
+  }
+
+  try {
+    return JSON.parse(parte.text);
+  } catch {
+    console.error(
+      `JSON ilegible (finishReason=${candidato.finishReason}, ${parte.text.length} caracteres): ` +
+        parte.text.slice(0, 300)
+    );
     res.status(502).json({ error: "respuesta-ilegible" });
     return null;
   }
