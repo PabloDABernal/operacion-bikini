@@ -138,19 +138,17 @@ async function llamarAGemini(cuerpo, etiqueta) {
   let ultimaRespuesta;
 
   for (const modelo of MODELOS) {
-    // Los modelos 2.5 gastan tokens "pensando" antes de escribir, y con un
-    // presupuesto de salida corto se quedan sin margen y devuelven el JSON a
-    // medias. Aquí no hace falta razonamiento largo: se desactiva y se da
-    // margen de sobra. Los modelos que no lo soportan ignoran el campo.
-    // Los modelos antiguos (1.5, 2.0) no razonan ni entienden thinkingConfig.
-    const razona = !modelo.includes("1.5") && !modelo.includes("2.0");
-
+    // Margen de salida amplio para que quepan los dos bloques del plan.
+    //
+    // Aquí hubo un intento de desactivar el razonamiento con thinkingConfig
+    // para ahorrar tokens: gemini-flash-latest lo rechaza con un 400, así que
+    // se quitó. Si algún día se vuelve a intentar, hay que probarlo modelo a
+    // modelo antes de darlo por bueno.
     const cuerpoDelModelo = {
       ...cuerpo,
       generationConfig: {
         ...cuerpo.generationConfig,
-        maxOutputTokens: 8192,
-        ...(razona ? { thinkingConfig: { thinkingBudget: 0 } } : {})
+        maxOutputTokens: 8192
       }
     };
 

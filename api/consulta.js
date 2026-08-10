@@ -41,8 +41,7 @@ const ESQUEMA = {
     nutricion: { type: "STRING" },
     ejercicio: { type: "STRING" }
   },
-  required: ["tipo", "pregunta", "nutricion", "ejercicio"],
-  propertyOrdering: ["tipo", "pregunta", "nutricion", "ejercicio"]
+  required: ["tipo", "pregunta", "nutricion", "ejercicio"]
 };
 
 module.exports = async (req, res) => {
