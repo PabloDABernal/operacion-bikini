@@ -33,6 +33,10 @@ service cloud.firestore {
       allow read, write: if autorizado() && request.auth.uid == uid;
     }
 
+    match /usuarios/{uid}/consejos/{consejoId} {
+      allow read, write: if autorizado() && request.auth.uid == uid;
+    }
+
     // Todo lo demás, denegado.
     match /{document=**} {
       allow read, write: if false;

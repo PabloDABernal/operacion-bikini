@@ -45,8 +45,14 @@ header {
   margin: 1rem 0;
 }
 
+#pestanas {
+  flex-wrap: wrap;
+}
+
 .pestana {
-  flex: 1;
+  /* Se encogen para caber en móvil; si no llegan, saltan de fila.
+     Nunca deben provocar scroll horizontal. */
+  flex: 1 1 6rem;
   padding: 0.6rem 0.25rem;
   background: #eee;
   border: 1px solid #ccc;
@@ -176,4 +182,59 @@ button:disabled {
   color: #555;
   font-size: 0.9rem;
   white-space: nowrap;
+}
+
+/* Consejos */
+
+.explicacion {
+  color: #555;
+  font-size: 0.9rem;
+  margin-top: 0;
+}
+
+#btn-pedir-consejo {
+  width: 100%;
+  background: #d81b60;
+  border-color: #d81b60;
+  color: #fff;
+  font-weight: 600;
+}
+
+#estado-consejo {
+  color: #555;
+  min-height: 1.2rem;
+}
+
+.consejo {
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: #fff;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+}
+
+.consejo-fecha {
+  color: #888;
+  font-size: 0.8rem;
+}
+
+.consejo h3 {
+  font-size: 0.9rem;
+  margin: 0.75rem 0 0.25rem;
+  color: #d81b60;
+}
+
+.consejo p {
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+/* Disclaimer: va al final del flujo, no anclado a la ventana,
+   para no tapar contenido en pantallas pequeñas. */
+.disclaimer {
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid #ddd;
+  color: #777;
+  font-size: 0.75rem;
 }

@@ -38,6 +38,12 @@ import {
   borrarEjercicio
 } from "./ejercicios.js";
 
+import {
+  pedirConsejo,
+  listarConsejos,
+  mensajeDeErrorDeConsejo
+} from "./consejos.js";
+
 const pantallas = {
   cargando: document.getElementById("pantalla-cargando"),
   login: document.getElementById("pantalla-login"),
@@ -334,6 +340,90 @@ id("form-ejercicio").addEventListener("submit", async (evento) => {
   }
 });
 
+// --- Consejos ------------------------------------------------------------
+
+// No usa crearLista(): los consejos no se borran y cada uno se pinta como
+// una tarjeta con tres apartados, no como una fila.
+let consejosCargados = [];
+
+function formatearFechaYHora(creadoEn) {
+  if (!creadoEn) return "";
+  const fecha = creadoEn.toDate();
+  const dosDigitos = (numero) => String(numero).padStart(2, "0");
+  return (
+    `${dosDigitos(fecha.getDate())}/${dosDigitos(fecha.getMonth() + 1)}/` +
+    `${fecha.getFullYear()} ${dosDigitos(fecha.getHours())}:${dosDigitos(fecha.getMinutes())}`
+  );
+}
+
+function pintarConsejos(consejos) {
+  const contenedor = id("lista-consejos");
+  contenedor.innerHTML = "";
+  id("estado-consejos").textContent = consejos.length
+    ? ""
+    : "Aún no has pedido ningún consejo.";
+
+  consejos.forEach((consejo) => {
+    const tarjeta = document.createElement("article");
+    tarjeta.className = "consejo";
+
+    const fecha = document.createElement("p");
+    fecha.className = "consejo-fecha";
+    fecha.textContent = formatearFechaYHora(consejo.creadoEn);
+    tarjeta.appendChild(fecha);
+
+    [
+      ["Qué veo", consejo.queVeo],
+      ["Qué hacer esta semana", consejo.queHacer],
+      ["Ojo con esto", consejo.ojoCon]
+    ].forEach(([titulo, texto]) => {
+      const encabezado = document.createElement("h3");
+      encabezado.textContent = titulo;
+      const parrafo = document.createElement("p");
+      parrafo.textContent = texto;
+      tarjeta.append(encabezado, parrafo);
+    });
+
+    contenedor.appendChild(tarjeta);
+  });
+}
+
+async function refrescarConsejos() {
+  id("btn-reintentar-consejos").classList.add("oculta");
+  try {
+    consejosCargados = await listarConsejos(uidActual);
+    pintarConsejos(consejosCargados);
+  } catch {
+    consejosCargados = [];
+    id("lista-consejos").innerHTML = "";
+    id("estado-consejos").textContent =
+      "No se han podido cargar tus consejos. Comprueba tu conexión.";
+    id("btn-reintentar-consejos").classList.remove("oculta");
+  }
+}
+
+id("btn-reintentar-consejos").addEventListener("click", refrescarConsejos);
+
+id("btn-pedir-consejo").addEventListener("click", async () => {
+  const boton = id("btn-pedir-consejo");
+  const error = id("error-consejo");
+  const estado = id("estado-consejo");
+
+  error.textContent = "";
+  estado.textContent = "Pensando…";
+  boton.disabled = true;
+
+  try {
+    await pedirConsejo(uidActual, consejosCargados);
+    await refrescarConsejos();
+  } catch (fallo) {
+    error.textContent = mensajeDeErrorDeConsejo(fallo.codigo);
+  } finally {
+    estado.textContent = "";
+    boton.disabled = false;
+  }
+});
+
 // --- Arranque ------------------------------------------------------------
 
 function rellenarDesplegable(elementoId, opciones, porDefecto) {
@@ -359,9 +449,12 @@ function limpiarFormularios() {
   });
   rellenarDesplegable("comida-momento", MOMENTOS, MOMENTO_POR_DEFECTO);
   rellenarDesplegable("ejercicio-intensidad", INTENSIDADES, INTENSIDAD_POR_DEFECTO);
-  ["error-pesaje", "error-comida", "error-ejercicio"].forEach((campo) => {
-    id(campo).textContent = "";
-  });
+  ["error-pesaje", "error-comida", "error-ejercicio", "error-consejo"].forEach(
+    (campo) => {
+      id(campo).textContent = "";
+    }
+  );
+  id("estado-consejo").textContent = "";
 }
 
 observarSesion(
@@ -383,6 +476,7 @@ observarSesion(
     listaPeso.refrescar();
     listaComidas.refrescar();
     listaEjercicios.refrescar();
+    refrescarConsejos();
   },
   () => {
     uidActual = null;

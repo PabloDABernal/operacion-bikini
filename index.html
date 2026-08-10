@@ -40,6 +40,7 @@
       <button type="button" class="pestana" data-seccion="peso">Peso</button>
       <button type="button" class="pestana" data-seccion="comidas">Comidas</button>
       <button type="button" class="pestana" data-seccion="ejercicio">Ejercicio</button>
+      <button type="button" class="pestana" data-seccion="consejos">Consejos</button>
     </nav>
 
     <!-- Sección: Peso (spec 001, solo cambia de sitio) -->
@@ -113,6 +114,28 @@
       <button type="button" id="btn-reintentar-ejercicios" class="oculta">Reintentar</button>
       <ul id="lista-ejercicios"></ul>
     </div>
+
+    <!-- Sección: Consejos -->
+    <div class="seccion" data-seccion="consejos">
+      <h2>Consejos de la IA</h2>
+      <p class="explicacion">
+        Analiza tus pesajes, comidas y ejercicio de los últimos 14 días.
+      </p>
+
+      <button type="button" id="btn-pedir-consejo">Pedir consejo</button>
+      <p id="estado-consejo"></p>
+      <p id="error-consejo" class="error" role="alert"></p>
+
+      <p id="estado-consejos"></p>
+      <button type="button" id="btn-reintentar-consejos" class="oculta">Reintentar</button>
+      <div id="lista-consejos"></div>
+    </div>
+
+    <p class="disclaimer">
+      Los consejos y planes de esta app los genera una inteligencia artificial y
+      pueden ser inexactos. No sustituyen a un médico o nutricionista. Ante dudas,
+      molestias o falta de resultados, consulta a un profesional.
+    </p>
   </section>
 
   <!-- Pantalla de carga inicial, mientras Firebase decide si hay sesión -->
