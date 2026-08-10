@@ -143,6 +143,7 @@ Instrucciones a la IA: español, tuteo, una sola pregunta por turno, sin diagnó
 - **Dos pestañas abiertas con la misma consulta**: la última respuesta enviada gana; no se intenta sincronizar en tiempo real.
 - **Empezar consulta desde dos pestañas a la vez**: podrían crearse dos consultas "en curso". Al recargar se toma la más reciente y la otra queda huérfana en Firestore, sin romper nada. Con dos usuarios personales no compensa añadir bloqueos para evitarlo.
 - **La IA devuelve pregunta y plan a la vez**: se toma el plan y se ignora la pregunta.
+- **El plan llega sin la rutina de ejercicio**: pasa cuando la IA se queda sin espacio tras extenderse en la nutrición. En vez de perder toda la entrevista, el proxy pide en una segunda llamada solo el bloque que falta, con la conversación como contexto. Si tampoco entonces la devuelve, el turno falla con `La IA no ha sabido responder. Inténtalo de nuevo.` y la consulta sigue abierta para reintentar.
 - **La IA hace varias preguntas en un mismo turno**: se muestra tal cual; el prompt lo desaconseja pero no se corta.
 - **Respuesta con saltos de línea o emojis**: se guarda y se muestra tal cual.
 - **Llegar a las 25 preguntas**: se genera el plan aunque la IA quisiera seguir.

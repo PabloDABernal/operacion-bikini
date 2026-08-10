@@ -144,7 +144,7 @@ async function llamarAGemini(cuerpo, etiqueta) {
       ...cuerpo,
       generationConfig: {
         ...cuerpo.generationConfig,
-        maxOutputTokens: 4096,
+        maxOutputTokens: 8192,
         ...(modelo.includes("2.5") ? { thinkingConfig: { thinkingBudget: 0 } } : {})
       }
     };
@@ -227,6 +227,12 @@ async function generarJson(res, cuerpo, etiqueta) {
     );
     res.status(502).json({ error: "respuesta-ilegible" });
     return null;
+  }
+
+  // STOP es el final normal. Cualquier otra cosa (MAX_TOKENS, SAFETY) explica
+  // por qué el JSON puede venir a medias o con campos ausentes.
+  if (candidato.finishReason && candidato.finishReason !== "STOP") {
+    console.error(`Generación terminada por ${candidato.finishReason}, la respuesta puede venir incompleta.`);
   }
 
   try {
