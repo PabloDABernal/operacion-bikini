@@ -56,6 +56,15 @@ import {
   mensajeDeErrorDeConsulta
 } from "./consulta.js";
 
+import {
+  listarFotos,
+  subirFotoDeHoy,
+  borrarFoto,
+  hayFotoDeHoy,
+  miniaturaDe,
+  mensajeDeErrorDeFoto
+} from "./fotos.js";
+
 const pantallas = {
   cargando: document.getElementById("pantalla-cargando"),
   login: document.getElementById("pantalla-login"),
@@ -609,6 +618,123 @@ id("btn-abandonar").addEventListener("click", async () => {
   }
 });
 
+// --- Fotos ---------------------------------------------------------------
+
+let fotosCargadas = [];
+let fotoEnVisor = null;
+
+function pintarFotos(fotos) {
+  const rejilla = id("rejilla-fotos");
+  rejilla.innerHTML = "";
+  id("estado-fotos").textContent = fotos.length
+    ? ""
+    : "Aún no has subido ninguna foto.";
+
+  fotos.forEach((foto) => {
+    const boton = document.createElement("button");
+    boton.type = "button";
+    boton.className = "foto";
+
+    const imagen = document.createElement("img");
+    imagen.src = miniaturaDe(foto.url);
+    imagen.alt = `Foto del ${formatearFecha(foto.fecha)}`;
+    imagen.loading = "lazy";
+
+    const fecha = document.createElement("span");
+    fecha.textContent = formatearFecha(foto.fecha);
+
+    boton.append(imagen, fecha);
+    boton.addEventListener("click", () => abrirVisor(foto));
+    rejilla.appendChild(boton);
+  });
+}
+
+async function refrescarFotos() {
+  try {
+    fotosCargadas = await listarFotos(uidActual);
+    pintarFotos(fotosCargadas);
+  } catch {
+    id("estado-fotos").textContent =
+      "No se han podido cargar tus fotos. Comprueba tu conexión.";
+  }
+}
+
+function abrirVisor(foto) {
+  fotoEnVisor = foto;
+  id("visor-imagen").src = foto.url;
+  id("visor-fecha").textContent = formatearFecha(foto.fecha);
+  id("visor").classList.remove("oculta");
+}
+
+function cerrarVisor() {
+  fotoEnVisor = null;
+  id("visor").classList.add("oculta");
+  id("visor-imagen").src = "";
+}
+
+id("btn-cerrar-visor").addEventListener("click", cerrarVisor);
+
+// Cerrar tocando el fondo, pero no al tocar la foto o los botones.
+id("visor").addEventListener("click", (evento) => {
+  if (evento.target === id("visor")) cerrarVisor();
+});
+
+document.addEventListener("keydown", (evento) => {
+  if (evento.key === "Escape" && fotoEnVisor) cerrarVisor();
+});
+
+id("btn-borrar-foto").addEventListener("click", async () => {
+  if (!confirm("¿Borrar esta foto?")) return;
+
+  const foto = fotoEnVisor;
+  const boton = id("btn-borrar-foto");
+  boton.disabled = true;
+
+  try {
+    await borrarFoto(uidActual, foto);
+    cerrarVisor();
+    await refrescarFotos();
+  } catch {
+    // El visor se queda abierto: la foto sigue ahí y se puede reintentar.
+    id("visor-fecha").textContent = "No se ha podido borrar la foto. Inténtalo de nuevo.";
+  } finally {
+    boton.disabled = false;
+  }
+});
+
+id("btn-subir-foto").addEventListener("click", () => {
+  id("error-foto").textContent = "";
+
+  if (hayFotoDeHoy(fotosCargadas) && !confirm("Ya tienes una foto de hoy. ¿La sustituyes?")) {
+    return;
+  }
+
+  id("archivo-foto").click();
+});
+
+id("archivo-foto").addEventListener("change", async (evento) => {
+  const archivo = evento.target.files[0];
+  if (!archivo) return;
+
+  const boton = id("btn-subir-foto");
+  const estado = id("estado-foto");
+  id("error-foto").textContent = "";
+  estado.textContent = "Subiendo…";
+  boton.disabled = true;
+
+  try {
+    await subirFotoDeHoy(uidActual, archivo);
+    await refrescarFotos();
+  } catch (fallo) {
+    id("error-foto").textContent = mensajeDeErrorDeFoto(fallo.codigo);
+  } finally {
+    estado.textContent = "";
+    boton.disabled = false;
+    // Sin esto, elegir el mismo archivo dos veces seguidas no dispara nada.
+    evento.target.value = "";
+  }
+});
+
 // --- Arranque ------------------------------------------------------------
 
 function rellenarDesplegable(elementoId, opciones, porDefecto) {
@@ -639,12 +765,15 @@ function limpiarFormularios() {
     "error-comida",
     "error-ejercicio",
     "error-consejo",
-    "error-consulta"
+    "error-consulta",
+    "error-foto"
   ].forEach((campo) => {
     id(campo).textContent = "";
   });
   id("estado-consejo").textContent = "";
   id("estado-consulta").textContent = "";
+  id("estado-foto").textContent = "";
+  cerrarVisor();
   id("respuesta-texto").value = "";
   consultaReciénTerminada = null;
 }
@@ -670,6 +799,7 @@ observarSesion(
     listaEjercicios.refrescar();
     refrescarConsejos();
     refrescarConsulta();
+    refrescarFotos();
   },
   () => {
     uidActual = null;

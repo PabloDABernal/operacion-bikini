@@ -297,6 +297,89 @@ button:disabled {
   white-space: pre-wrap;
 }
 
+/* Fotos */
+
+#btn-subir-foto {
+  width: 100%;
+  background: #d81b60;
+  border-color: #d81b60;
+  color: #fff;
+  font-weight: 600;
+}
+
+#rejilla-fotos {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(6.5rem, 1fr));
+  gap: 0.5rem;
+}
+
+.foto {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+  text-align: center;
+}
+
+.foto img {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  background: #eee;
+}
+
+.foto span {
+  font-size: 0.75rem;
+  color: #555;
+}
+
+/* Visor: pantalla completa sobre fondo oscuro */
+
+#visor {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  z-index: 10;
+}
+
+#visor.oculta {
+  display: none;
+}
+
+#visor-caja {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  align-items: center;
+  max-width: 100%;
+}
+
+#visor-imagen {
+  max-width: 100%;
+  max-height: 70vh;
+  border-radius: 6px;
+}
+
+#visor-fecha {
+  color: #fff;
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+#visor-botones {
+  display: flex;
+  gap: 0.75rem;
+}
+
 /* Disclaimer: va al final del flujo, no anclado a la ventana,
    para no tapar contenido en pantallas pequeñas. */
 .disclaimer {

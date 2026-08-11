@@ -42,6 +42,7 @@
       <button type="button" class="pestana" data-seccion="ejercicio">Ejercicio</button>
       <button type="button" class="pestana" data-seccion="consejos">Consejos</button>
       <button type="button" class="pestana" data-seccion="consulta">Consulta</button>
+      <button type="button" class="pestana" data-seccion="fotos">Fotos</button>
     </nav>
 
     <!-- Sección: Peso (spec 001, solo cambia de sitio) -->
@@ -163,6 +164,24 @@
       <div id="lista-planes"></div>
     </div>
 
+    <!-- Sección: Fotos -->
+    <div class="seccion" data-seccion="fotos">
+      <h2>Fotos de progreso</h2>
+      <p class="explicacion">
+        Una foto al día. Lo que la báscula no siempre enseña.
+      </p>
+
+      <button type="button" id="btn-subir-foto">Subir foto de hoy</button>
+      <!-- capture no fuerza la cámara: deja elegir entre hacerla y buscarla -->
+      <input type="file" id="archivo-foto" accept="image/*" class="oculta">
+
+      <p id="estado-foto"></p>
+      <p id="error-foto" class="error" role="alert"></p>
+
+      <p id="estado-fotos"></p>
+      <div id="rejilla-fotos"></div>
+    </div>
+
     <p class="disclaimer">
       Los consejos y planes de esta app los genera una inteligencia artificial y
       pueden ser inexactos. No sustituyen a un médico o nutricionista. Ante dudas,
@@ -174,6 +193,18 @@
   <section id="pantalla-cargando" class="pantalla">
     <p>Cargando…</p>
   </section>
+
+  <!-- Vista ampliada de una foto -->
+  <div id="visor" class="oculta">
+    <div id="visor-caja">
+      <img id="visor-imagen" alt="Foto de progreso">
+      <p id="visor-fecha"></p>
+      <div id="visor-botones">
+        <button type="button" id="btn-borrar-foto">Borrar</button>
+        <button type="button" id="btn-cerrar-visor">Cerrar</button>
+      </div>
+    </div>
+  </div>
 
   <script type="module" src="js/app.js"></script>
 </body>

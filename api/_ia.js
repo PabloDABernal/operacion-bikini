@@ -1,12 +1,14 @@
 // Piezas compartidas por las funciones de IA (api/consejo.js, api/consulta.js).
 //
-// El repositorio es público, así que las URLs de estas funciones son conocidas:
-// sin validar quién llama, cualquiera podría agotar la cuota gratuita diaria.
-// De ahí que todo lo de aquí gire alrededor de exigir un ID token válido ANTES
-// de gastar una sola llamada a Gemini.
+// La validación de credenciales vive ahora en api/_auth.js, porque la comparte
+// con la función de fotos. Se re-exporta desde aquí para que consejo.js y
+// consulta.js no tengan que cambiar: son las dos piezas ya probadas en
+// producción y no compensa tocarlas por una reorganización interna.
 //
 // El prefijo "_" del nombre evita que Vercel publique este archivo como una
 // ruta más de la API.
+
+const { peticionAutorizada } = require("./_auth");
 
 // Los nombres de la familia Flash cambian con las versiones y no todos están
 // disponibles para todas las claves: Google responde 404 al que no existe.
@@ -19,71 +21,6 @@ const MODELOS = [
   "gemini-2.0-flash",
   "gemini-1.5-flash"
 ];
-
-// apiKey pública del proyecto Firebase (la misma que js/firebase-config.js).
-// No es un secreto: solo sirve para identificar el proyecto al validar el token.
-const FIREBASE_API_KEY = "AIzaSyCLYCIknr0aJDO0E8Sp4YmAMW3Hpnxo8Bw";
-
-// Tercera copia de la lista blanca, en minúsculas (cliente y firestore.rules
-// tienen las otras dos). Al añadir a alguien hay que tocar las tres.
-const EMAILS_AUTORIZADOS = [
-  "pantonbernal@gmail.com",
-  "angels_recio@hotmail.com"
-];
-
-// Valida el ID token contra el endpoint público de Google Identity Toolkit.
-// No hace falta el SDK de Firebase Admin ni una cuenta de servicio.
-async function emailDelToken(idToken) {
-  const respuesta = await fetch(
-    `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${FIREBASE_API_KEY}`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ idToken })
-    }
-  );
-
-  if (!respuesta.ok) return null;
-
-  const datos = await respuesta.json();
-  const usuario = datos.users && datos.users[0];
-  if (!usuario || !usuario.email) return null;
-
-  return usuario.email.toLowerCase();
-}
-
-// Comprueba método y credenciales. Si algo falla, responde e indica que la
-// petición ya está contestada; quien llama solo tiene que dejar de trabajar.
-// Devuelve true si se puede continuar.
-async function peticionAutorizada(req, res) {
-  if (req.method !== "POST") {
-    res.status(405).json({ error: "metodo-no-permitido" });
-    return false;
-  }
-
-  const cabecera = req.headers.authorization || "";
-  const idToken = cabecera.startsWith("Bearer ") ? cabecera.slice(7) : "";
-
-  if (!idToken) {
-    res.status(401).json({ error: "sin-token" });
-    return false;
-  }
-
-  let email;
-  try {
-    email = await emailDelToken(idToken);
-  } catch {
-    res.status(401).json({ error: "token-no-verificable" });
-    return false;
-  }
-
-  if (!email || !EMAILS_AUTORIZADOS.includes(email)) {
-    res.status(401).json({ error: "no-autorizado" });
-    return false;
-  }
-
-  return true;
-}
 
 // Resumen de los registros del usuario, en texto plano para el prompt.
 function describirRegistros({ pesajes = [], comidas = [], ejercicios = [] }) {
