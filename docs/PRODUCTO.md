@@ -38,5 +38,5 @@ Un grupo pequeño y cerrado de usuarios personales (empezando por mí, y probabl
 
 ## Roadmap por fases
 
-- **v1 (beta, deadline 31 de agosto)**: todo el alcance descrito arriba (registro completo + consejos + consulta + fotos), priorizando que funcione sobre que esté pulido visualmente.
+- **v1 (beta, deadline 31 de agosto)**: todo el alcance descrito arriba (registro completo + consejos + consulta + fotos), priorizando que funcione sobre que esté pulido visualmente. **Terminada y probada el 11 de agosto de 2026** (specs 001 a 005), 20 días antes del plazo.
 - **v2 (después, sin fecha)**: mejoras de visualización (gráficas de evolución de peso, comparativas de fotos lado a lado), notificaciones/recordatorios, pulido de UX. A decidir más adelante.

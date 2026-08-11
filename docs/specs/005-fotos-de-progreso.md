@@ -1,6 +1,6 @@
 # 005 — Fotos de progreso y collage de evolución
 
-- **Estado:** revisada
+- **Estado:** completada (probada a mano por el usuario desde el móvil el 2026-08-11)
 - **Fecha:** 2026-08-11
 - **Referencia en PRODUCTO.md:** líneas 17 y 34 (una foto de progreso por día con seguimiento visual, concepto "Foto de progreso").
 - **Depende de:** specs 001 a 004, completadas. Reutiliza la validación de token del proxy (spec 003).
