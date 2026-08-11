@@ -24,6 +24,16 @@
 
 Las ideas nuevas que surjan durante la implementación NO se implementan sobre la marcha: se anotan en `docs/BACKLOG.md` con una línea y se sigue con la spec actual. Recordárselo al usuario si él mismo propone desviarse a mitad de spec.
 
+## Publicar reglas de Firestore
+
+Cuando una spec toque `firestore.rules`, publicarlas con la CLI en vez de pedirle al usuario que las copie en la consola:
+
+```
+npx --yes firebase-tools deploy --only firestore:rules
+```
+
+Requiere `firebase login` hecho una vez en el equipo. Publicar SIEMPRE antes de decirle al usuario que pruebe: si el código va por delante de las reglas, la app falla con errores de permisos que parecen bugs.
+
 ## Flujo de trabajo estándar
 
 1. `/nueva-spec` → crear la spec de la feature
