@@ -1,6 +1,6 @@
 # 004 — Botón "Pasar consulta" (entrevista guiada y plan)
 
-- **Estado:** revisada — implementada y desplegada, PENDIENTE de la prueba manual. El 2026-08-10 se agotó la cuota diaria de Gemini depurando el formato de respuesta; la entrevista llegó a funcionar (varias preguntas encadenadas) pero no se pudo ver un plan completo. Retomar por ahí.
+- **Estado:** completada (probada a mano por el usuario el 2026-08-11, con la cuota de Gemini ya reiniciada). El 2026-08-10 hubo que depurar el formato de respuesta: Gemini omitía la rutina de ejercicio porque el campo era opcional en el esquema. Se arregló marcando todos los campos como obligatorios.
 - **Fecha:** 2026-08-10
 - **Referencia en PRODUCTO.md:** líneas 19, 35 y 37 (botón "Pasar consulta", conceptos "Consulta" y "Plan").
 - **Depende de:** specs 001, 002 y 003, completadas. Reutiliza el proxy de IA de la 003.
