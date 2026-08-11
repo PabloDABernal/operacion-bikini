@@ -6,7 +6,7 @@ Ideas surgidas durante la implementación, no implementadas. Una línea cada una
 
 - **Propuesta v2 completa** (usabilidad, gráficas, gamificación) en `docs/propuestas/v2-usabilidad-y-gamificacion.md`, redactada el 2026-08-11 a petición del usuario. Pendiente de debatir: hay 5 decisiones suyas al final del documento, una de ellas obliga a tocar `PRODUCTO.md`.
 
-- Pulir la pantalla de login: el botón "Entrar con Google" queda encogido y pegado a la izquierda (está fuera del `<form>`, no hereda el ancho), y el separador "o" es casi invisible. Detectado 2026-08-10 al desplegar la spec 001.
+- PRODUCTO.md llama "collage de evolución" (líneas 17 y 34) a lo que la spec 005 implementó como cuadrícula cronológica de miniaturas. No es deriva —la spec lo decidió a conciencia— pero conviene ajustar la palabra en PRODUCTO.md o decidir si el collage de verdad (una sola imagen compuesta) entra en v2. Detectado en la auditoría del 2026-08-11.
 - Repasar el aspecto general de la app (tipografía, espaciados, versión móvil) cuando v1 esté funcionalmente completa — la v1 prioriza que funcione sobre que esté pulido.
 
 ## Técnico

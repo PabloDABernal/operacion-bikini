@@ -14,11 +14,11 @@
 
 ## Stack
 
-- Frontend: HTML/JS/CSS puro (sin framework), desplegado en GitHub Pages.
+- Frontend: HTML/JS/CSS puro (sin framework), desplegado en Vercel junto a las funciones serverless (GitHub Pages se descartó en la spec 003).
 - Auth/BBDD: Firebase (Auth con email/contraseña + Google, y Firestore), capa gratuita (Spark). Grupo pequeño y cerrado de usuarios, datos separados por `uid`.
 - Fotos: Cloudinary (plan gratuito, sin tarjeta) — Firebase Storage descartado por exigir plan de pago Blaze.
 - IA: API gratuita de Google Gemini (familia Flash), llamada solo desde una función serverless en Vercel (proxy), nunca desde el navegador.
-- Despliegue: GitHub Pages (frontend) + Vercel (función proxy IA/Cloudinary) + Firebase (Auth/Firestore), todo en capas gratuitas, sin tarjeta.
+- Despliegue: todo en Vercel (web estática + funciones de IA y de firma de Cloudinary, mismo dominio) + Firebase (Auth/Firestore, reglas publicadas con la CLI), todo en capas gratuitas, sin tarjeta.
 
 ## Anti scope-creep
 

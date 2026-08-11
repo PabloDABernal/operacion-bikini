@@ -19,10 +19,11 @@ const firebaseConfig = {
 
 // Lista blanca de emails autorizados, SIEMPRE en minúsculas.
 //
-// IMPORTANTE: esta lista está duplicada en firestore.rules a propósito.
-// Aquí sirve para dar un mensaje claro al usuario; allí es la barrera real.
-// Al añadir o quitar a alguien hay que tocar LOS DOS sitios y redesplegar
-// ambos (frontend en GitHub Pages y reglas en la consola de Firebase).
+// IMPORTANTE: esta lista está duplicada en firestore.rules y en api/_auth.js
+// a propósito. Aquí sirve para dar un mensaje claro al usuario; en las reglas
+// está la barrera de los datos, y en el servidor la de la cuota de IA y fotos.
+// Al añadir o quitar a alguien hay que tocar LOS TRES sitios, desplegar en
+// Vercel y publicar las reglas (npx firebase-tools deploy --only firestore:rules).
 export const EMAILS_AUTORIZADOS = [
   "pantonbernal@gmail.com",
   "angels_recio@hotmail.com"

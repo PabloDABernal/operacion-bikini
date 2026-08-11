@@ -32,4 +32,4 @@
 
 ## Backlog técnico (deuda conocida, no de producto)
 
-- (vacío por ahora)
+La deuda técnica se anota en `docs/BACKLOG.md`, apartado "Técnico", junto al resto de ideas pendientes. Se dejó de duplicar aquí el 2026-08-11: tener dos listas garantizaba que una de las dos mintiera.
