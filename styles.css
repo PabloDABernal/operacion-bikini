@@ -399,6 +399,94 @@ button:disabled {
   gap: 0.75rem;
 }
 
+/* Ajustes */
+
+#btn-guardar-ajustes {
+  background: #d81b60;
+  border-color: #d81b60;
+  color: #fff;
+  font-weight: 600;
+}
+
+#aviso-ajustes:not(:empty) {
+  color: #0f766e;
+  font-weight: 600;
+}
+
+/* Zona de peligro: se distingue del resto a propósito. Borrar datos no
+   debe parecerse a guardar un pesaje. */
+.zona-peligro {
+  border: 2px solid #c62828;
+  border-radius: 6px;
+  padding: 1rem;
+  margin-top: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.zona-peligro h2 {
+  color: #c62828;
+  margin: 0;
+}
+
+.advertencia {
+  color: #c62828;
+  font-weight: 600;
+  margin: 0;
+}
+
+#casillas-reinicio {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.casilla-reinicio {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+}
+
+.casilla-reinicio input {
+  margin: 0;
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+.casilla-reinicio .cuenta {
+  color: #777;
+  font-size: 0.85rem;
+}
+
+#btn-borrar-seleccion,
+#btn-borrar-definitivo {
+  background: #c62828;
+  border-color: #c62828;
+  color: #fff;
+  font-weight: 700;
+}
+
+#btn-borrar-seleccion:disabled,
+#btn-borrar-definitivo:disabled {
+  background: #eee;
+  border-color: #ccc;
+  color: #999;
+}
+
+#confirmacion-reinicio {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  border-top: 1px solid #f0c9c9;
+  padding-top: 0.75rem;
+}
+
+#confirmacion-reinicio.oculta {
+  display: none;
+}
+
 /* Disclaimer: va al final del flujo, no anclado a la ventana,
    para no tapar contenido en pantallas pequeñas. */
 .disclaimer {

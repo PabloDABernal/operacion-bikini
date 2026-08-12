@@ -65,6 +65,15 @@ import {
   mensajeDeErrorDeFoto
 } from "./fotos.js";
 
+import { validarAjustes, leerAjustes, guardarAjustes } from "./ajustes.js";
+
+import {
+  TIPOS,
+  contarTodo,
+  describirSeleccion,
+  borrarSeleccion
+} from "./reinicio.js";
+
 const pantallas = {
   cargando: document.getElementById("pantalla-cargando"),
   login: document.getElementById("pantalla-login"),
@@ -735,6 +744,184 @@ id("archivo-foto").addEventListener("change", async (evento) => {
   }
 });
 
+// Refresca todas las listas de la app. Se usa al entrar y después de un
+// borrado, para que ninguna pestaña siga enseñando datos que ya no existen.
+function refrescarTodo() {
+  return Promise.all([
+    listaPeso.refrescar(),
+    listaComidas.refrescar(),
+    listaEjercicios.refrescar(),
+    refrescarConsejos(),
+    refrescarConsulta(),
+    refrescarFotos()
+  ]);
+}
+
+// --- Ajustes -------------------------------------------------------------
+
+async function refrescarAjustes() {
+  try {
+    const ajustes = await leerAjustes(uidActual);
+    id("peso-objetivo").value =
+      ajustes.pesoObjetivoKg == null
+        ? ""
+        : String(ajustes.pesoObjetivoKg).replace(".", ",");
+    id("altura").value = ajustes.alturaCm == null ? "" : ajustes.alturaCm;
+    id("fecha-objetivo").value = ajustes.fechaObjetivo || "";
+  } catch {
+    id("error-ajustes").textContent =
+      "No se han podido cargar los ajustes. Comprueba tu conexión.";
+  }
+}
+
+id("form-ajustes").addEventListener("submit", async (evento) => {
+  evento.preventDefault();
+  const error = id("error-ajustes");
+  const aviso = id("aviso-ajustes");
+  error.textContent = "";
+  aviso.textContent = "";
+
+  const resultado = validarAjustes(
+    id("peso-objetivo").value,
+    id("altura").value,
+    id("fecha-objetivo").value
+  );
+
+  if (resultado.error) {
+    error.textContent = resultado.error;
+    return;
+  }
+
+  const boton = id("btn-guardar-ajustes");
+  boton.disabled = true;
+  try {
+    await guardarAjustes(uidActual, resultado);
+    aviso.textContent = "Ajustes guardados.";
+    setTimeout(() => {
+      aviso.textContent = "";
+    }, 4000);
+  } catch {
+    error.textContent = "No se han podido guardar los ajustes. Comprueba tu conexión.";
+  } finally {
+    boton.disabled = false;
+  }
+});
+
+// --- Reiniciar datos -----------------------------------------------------
+
+let recuentos = {};
+
+// La selección exacta que se le enseñó al usuario en el aviso. Se borra ESTA,
+// no lo que digan las casillas en el momento de pulsar: si algo cambiara por
+// medio, se borraría algo que el usuario no llegó a leer.
+let seleccionAvisada = [];
+
+function seleccionActual() {
+  return TIPOS.map((tipo) => tipo.clave).filter(
+    (clave) => id(`casilla-${clave}`).checked
+  );
+}
+
+// Cualquier cambio en las casillas vuelve al principio: no se puede marcar una
+// cosa, confirmar, y que acabe borrándose otra.
+function reiniciarConfirmacion() {
+  seleccionAvisada = [];
+  id("confirmacion-reinicio").classList.add("oculta");
+  id("palabra-borrar").value = "";
+  id("btn-borrar-definitivo").disabled = true;
+  id("btn-borrar-seleccion").disabled = seleccionActual().length === 0;
+}
+
+function pintarCasillas() {
+  const contenedor = id("casillas-reinicio");
+  contenedor.innerHTML = "";
+
+  TIPOS.forEach((tipo) => {
+    const etiqueta = document.createElement("label");
+    etiqueta.className = "casilla-reinicio";
+
+    const casilla = document.createElement("input");
+    casilla.type = "checkbox";
+    casilla.id = `casilla-${tipo.clave}`;
+    casilla.addEventListener("change", reiniciarConfirmacion);
+
+    const texto = document.createElement("span");
+    texto.textContent = tipo.etiqueta.charAt(0).toUpperCase() + tipo.etiqueta.slice(1);
+
+    const cuenta = document.createElement("span");
+    cuenta.className = "cuenta";
+    cuenta.textContent = `(${recuentos[tipo.clave] ?? 0})`;
+
+    etiqueta.append(casilla, texto, cuenta);
+    contenedor.appendChild(etiqueta);
+  });
+}
+
+async function refrescarRecuentos() {
+  try {
+    recuentos = await contarTodo(uidActual);
+    pintarCasillas();
+    reiniciarConfirmacion();
+  } catch {
+    id("error-reinicio").textContent =
+      "No se han podido contar tus datos. Comprueba tu conexión.";
+  }
+}
+
+// Paso 1: enseñar exactamente qué se va a borrar, con números.
+id("btn-borrar-seleccion").addEventListener("click", () => {
+  const seleccion = seleccionActual();
+  if (!seleccion.length) return;
+
+  seleccionAvisada = seleccion;
+  const resumen = describirSeleccion(seleccion, recuentos);
+  id("error-reinicio").textContent = "";
+  id("aviso-reinicio").textContent = resumen
+    ? `Vas a borrar para siempre: ${resumen}.`
+    : "No hay nada que borrar de lo que has marcado.";
+  id("confirmacion-reinicio").classList.remove("oculta");
+});
+
+// Paso 2: la palabra exacta, en mayúsculas.
+id("palabra-borrar").addEventListener("input", (evento) => {
+  id("btn-borrar-definitivo").disabled = evento.target.value !== "BORRAR";
+});
+
+// Paso 3: la confirmación del navegador, y solo entonces se borra.
+id("btn-borrar-definitivo").addEventListener("click", async () => {
+  const seleccion = seleccionAvisada;
+  if (!seleccion.length) return;
+
+  if (!confirm("¿Seguro? Esta acción no se puede deshacer.")) return;
+
+  const estado = id("estado-reinicio");
+  const error = id("error-reinicio");
+
+  error.textContent = "";
+  estado.textContent = "Borrando…";
+  id("btn-borrar-definitivo").disabled = true;
+  id("btn-borrar-seleccion").disabled = true;
+
+  try {
+    await borrarSeleccion(uidActual, seleccion);
+    estado.textContent = "Datos borrados.";
+    await refrescarRecuentos();
+    await refrescarTodo();
+  } catch {
+    // Las casillas y la palabra se quedan como están, para reintentar de un
+    // clic. Los recuentos sí se actualizan: enseñan qué llegó a borrarse.
+    estado.textContent = "";
+    error.textContent = "No se han podido borrar todos los datos. Vuelve a intentarlo.";
+    recuentos = await contarTodo(uidActual).catch(() => recuentos);
+    pintarCasillas();
+    seleccion.forEach((clave) => {
+      id(`casilla-${clave}`).checked = true;
+    });
+    id("btn-borrar-definitivo").disabled = false;
+    id("btn-borrar-seleccion").disabled = false;
+  }
+});
+
 // --- Arranque ------------------------------------------------------------
 
 function rellenarDesplegable(elementoId, opciones, porDefecto) {
@@ -766,7 +953,11 @@ function limpiarFormularios() {
     "error-ejercicio",
     "error-consejo",
     "error-consulta",
-    "error-foto"
+    "error-foto",
+    "error-ajustes",
+    "aviso-ajustes",
+    "error-reinicio",
+    "estado-reinicio"
   ].forEach((campo) => {
     id(campo).textContent = "";
   });
@@ -794,12 +985,10 @@ observarSesion(
     abrirPestana(PESTANA_INICIAL);
     mostrar("principal");
 
-    listaPeso.refrescar();
-    listaComidas.refrescar();
-    listaEjercicios.refrescar();
-    refrescarConsejos();
-    refrescarConsulta();
-    refrescarFotos();
+    id("email-ajustes").textContent = usuario.email;
+    refrescarTodo();
+    refrescarAjustes();
+    refrescarRecuentos();
   },
   () => {
     uidActual = null;

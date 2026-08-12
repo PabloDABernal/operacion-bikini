@@ -20,6 +20,11 @@ service cloud.firestore {
         ];
     }
 
+    // Ajustes del usuario: objetivo de peso, altura y fecha objetivo.
+    match /usuarios/{uid} {
+      allow read, write: if autorizado() && request.auth.uid == uid;
+    }
+
     // Cada usuario solo entra en sus propias subcolecciones.
     match /usuarios/{uid}/pesajes/{pesajeId} {
       allow read, write: if autorizado() && request.auth.uid == uid;

@@ -33,7 +33,6 @@
   <section id="pantalla-principal" class="pantalla oculta">
     <header>
       <span id="email-usuario"></span>
-      <button type="button" id="btn-salir">Cerrar sesión</button>
     </header>
 
     <nav id="pestanas">
@@ -43,6 +42,7 @@
       <button type="button" class="pestana" data-seccion="consejos">Consejos</button>
       <button type="button" class="pestana" data-seccion="consulta">Consulta</button>
       <button type="button" class="pestana" data-seccion="fotos">Fotos</button>
+      <button type="button" class="pestana" data-seccion="ajustes">Ajustes</button>
     </nav>
 
     <!-- Sección: Peso (spec 001, solo cambia de sitio) -->
@@ -180,6 +180,53 @@
 
       <p id="estado-fotos"></p>
       <div id="rejilla-fotos"></div>
+    </div>
+
+    <!-- Sección: Ajustes -->
+    <div class="seccion" data-seccion="ajustes">
+      <h2>Mi objetivo</h2>
+      <form id="form-ajustes">
+        <label for="peso-objetivo">Peso objetivo (kg)</label>
+        <input type="text" id="peso-objetivo" inputmode="decimal" placeholder="78,5">
+
+        <label for="altura">Altura (cm)</label>
+        <input type="text" id="altura" inputmode="numeric" placeholder="176">
+
+        <label for="fecha-objetivo">Fecha objetivo</label>
+        <input type="date" id="fecha-objetivo">
+
+        <button type="submit" id="btn-guardar-ajustes">Guardar</button>
+      </form>
+
+      <p id="aviso-ajustes" class="explicacion"></p>
+      <p id="error-ajustes" class="error" role="alert"></p>
+
+      <h2>Sesión</h2>
+      <p class="explicacion">Has entrado como <span id="email-ajustes"></span>.</p>
+      <button type="button" id="btn-salir">Cerrar sesión</button>
+
+      <div class="zona-peligro">
+        <h2>Reiniciar datos</h2>
+        <p class="advertencia">Esto borra tus datos para siempre. No hay vuelta atrás.</p>
+
+        <div id="casillas-reinicio"></div>
+
+        <button type="button" id="btn-borrar-seleccion" disabled>
+          Borrar lo seleccionado
+        </button>
+
+        <div id="confirmacion-reinicio" class="oculta">
+          <p id="aviso-reinicio" class="advertencia"></p>
+          <label for="palabra-borrar">Escribe BORRAR para confirmar</label>
+          <input type="text" id="palabra-borrar" autocomplete="off">
+          <button type="button" id="btn-borrar-definitivo" disabled>
+            Borrar definitivamente
+          </button>
+        </div>
+
+        <p id="estado-reinicio"></p>
+        <p id="error-reinicio" class="error" role="alert"></p>
+      </div>
     </div>
 
     <p class="disclaimer">
