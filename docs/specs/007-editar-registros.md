@@ -1,6 +1,6 @@
 # 007 — Editar registros de peso, comida y ejercicio
 
-- **Estado:** revisada
+- **Estado:** completada (probada por el usuario en producción el 2026-08-12)
 - **Fecha:** 2026-08-12
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (v2)", primer punto ("Corregir lo apuntado"), y los conceptos Pesaje / Comida / Ejercicio.
 

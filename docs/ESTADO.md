@@ -2,7 +2,7 @@
 
 Documento para retomar el trabajo en frío. Se actualiza al terminar cada spec.
 
-**Última actualización:** 12 de agosto de 2026
+**Última actualización:** 12 de agosto de 2026 (spec 007 terminada)
 
 ## Dónde estamos
 
@@ -10,7 +10,7 @@ Documento para retomar el trabajo en frío. Se actualiza al terminar cada spec.
 
 **https://operacion-bikini.vercel.app**
 
-La **v2 está empezada**: su alcance se decidió el 11 de agosto (ver `docs/PRODUCTO.md`, apartado "Qué hará (v2)") y la primera spec ya está terminada.
+La **v2 está empezada**: su alcance se decidió el 11 de agosto (ver `docs/PRODUCTO.md`, apartado "Qué hará (v2)"). Ya están terminadas la spec 006 (ajustes y reinicio) y la 007 (editar registros).
 
 ## Specs
 
@@ -22,6 +22,7 @@ La **v2 está empezada**: su alcance se decidió el 11 de agosto (ver `docs/PROD
 | 004 | Botón "Pasar consulta": entrevista guiada que genera un plan | ✅ completada |
 | 005 | Fotos de progreso con Cloudinary, subida firmada | ✅ completada |
 | 006 | Ajustes de usuario y reinicio de datos | ✅ completada |
+| 007 | Editar pesajes, comidas y ejercicios ya guardados (incluida la fecha) | ✅ completada |
 
 ## Qué toca ahora
 
@@ -42,6 +43,7 @@ Decisiones de v2 ya tomadas por el usuario el 11 de agosto:
 
 ## Cosas que hay que saber antes de tocar nada
 
+- **Cómo se prueba**: el usuario prueba SIEMPRE en producción (https://operacion-bikini.vercel.app). Para que pueda probar algo hay que hacer commit y `git push`: Vercel despliega solo desde `main`. Nada de servidores locales.
 - **Reglas de Firestore**: se publican con `npx --yes firebase-tools deploy --only firestore:rules`. Ya no se copian a mano en la consola. Hacerlo SIEMPRE antes de pedirle al usuario que pruebe.
 - **Modelo de IA**: con la clave del proyecto solo responde `gemini-flash-latest`; `gemini-2.5-flash` da 404. Y la API rechaza con 400 tanto `thinkingConfig` como `propertyOrdering`. Está documentado en `api/_ia.js`.
 - **Esquemas de respuesta de Gemini**: todos los campos deben ir como `required`, aunque no apliquen en cada turno (los vacíos, como cadena vacía). Con campos opcionales, el modelo se los salta y llegan planes sin rutina.
