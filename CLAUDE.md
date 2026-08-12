@@ -1,5 +1,7 @@
 # Reglas del proyecto
 
+**Al empezar una sesión, leer `docs/ESTADO.md`**: dice en qué punto está el proyecto, qué toca ahora y qué trampas hay (modelo de IA que funciona, cómo se publican las reglas, etc.). Se actualiza al terminar cada spec.
+
 ## Metodología (innegociable)
 
 1. **Documentos antes que código.** Ningún cambio de producto/funcionalidad se implementa si no está reflejado primero en `docs/PRODUCTO.md`. Ningún cambio de arquitectura se implementa si no está en `docs/ARQUITECTURA.md`. Si el usuario pide algo que contradice `docs/PRODUCTO.md`, PARAR y preguntar si quiere actualizarlo primero.
@@ -42,3 +44,4 @@ Requiere `firebase login` hecho una vez en el equipo. Publicar SIEMPRE antes de 
 4. Agente `revisor-codigo` → verificar que el código cumple la spec
 5. Agente `guardian-vision` → verificar que no hay scope creep ni contradicciones con `docs/PRODUCTO.md`
 6. El usuario prueba la build de verdad → solo entonces la spec pasa a "completada"
+7. Actualizar `docs/ESTADO.md` con el nuevo punto de partida

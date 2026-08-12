@@ -1,6 +1,6 @@
 # 006 — Ajustes de usuario y reinicio de datos
 
-- **Estado:** revisada
+- **Estado:** completada (probada a mano por el usuario el 2026-08-12)
 - **Fecha:** 2026-08-11
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (v2)", puntos 1 y 2.
 - **Depende de:** specs 001 a 005, completadas. Primera spec de la v2.
