@@ -203,6 +203,57 @@ button:disabled {
   white-space: nowrap;
 }
 
+/* Gráfica de peso, comparador y calendario (spec 008) */
+
+.bloque-grafica svg,
+.bloque-calendario svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.grafica-eje {
+  font-size: 9px;
+  fill: #555;
+}
+
+.comparador {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0.75rem 0 0;
+}
+
+.comparador-detalle {
+  color: #555;
+  font-size: 0.9rem;
+  margin: 0.25rem 0 0;
+  min-height: 1.2rem;
+}
+
+/* El calendario son 12 columnas de cuadraditos: a pantalla completa se
+   estiraría hasta quedar ridículo, así que se le pone tope. */
+.bloque-calendario {
+  max-width: 320px;
+  margin-top: 0.5rem;
+}
+
+.casilla {
+  fill: #eee;
+  cursor: pointer;
+}
+
+.casilla.nivel-1 {
+  fill: #f4b6cd;
+}
+
+.casilla.nivel-2 {
+  fill: #e8709f;
+}
+
+.casilla.nivel-3 {
+  fill: #d81b60;
+}
+
 /* Fila en edición: los campos no caben en una línea en móvil, así que esta
    fila sí se parte en varias. */
 

@@ -12,6 +12,19 @@ import {
 import { hoyISO, formatearFecha } from "./fechas.js";
 
 import {
+  pesosPorDia,
+  mediaMovil,
+  compararSemanas,
+  calendarioDeConstancia
+} from "./grafica.js";
+
+import {
+  dibujarGrafica,
+  dibujarCalendario,
+  textoDeCasilla
+} from "./grafica-svg.js";
+
+import {
   validarPesaje,
   guardarPesaje,
   actualizarPesaje,
@@ -261,6 +274,10 @@ function crearLista(config) {
       estado.textContent = config.errorCarga;
       reintentar.classList.remove("oculta");
     }
+    // La gráfica se alimenta de estos mismos datos, sin volver a leerlos de
+    // Firestore. Se avisa también cuando la carga falla: así se repinta vacía
+    // en vez de quedarse enseñando lo de antes.
+    if (config.alRefrescar) config.alRefrescar();
   }
 
   async function borrar(registroId, botonBorrar) {
@@ -278,7 +295,7 @@ function crearLista(config) {
 
   reintentar.addEventListener("click", refrescar);
 
-  return { refrescar };
+  return { refrescar, obtenerRegistros: () => registros };
 }
 
 function celda(texto, clase) {
@@ -338,9 +355,86 @@ function campoDesplegable(opciones, valorActual, clase) {
   return elemento;
 }
 
+// --- Gráfica, comparador y calendario ------------------------------------
+
+// El peso objetivo vive en Ajustes; se cachea aquí para que la gráfica no
+// tenga que volver a leerlo de Firestore cada vez que se repinta.
+let pesoObjetivoActual = null;
+
+function pintarComparador(diarios) {
+  const comparacion = compararSemanas(diarios, hoyISO());
+
+  if (!comparacion) {
+    id("comparador").textContent = "";
+    id("comparador-detalle").textContent =
+      "Aún no hay datos suficientes para comparar semanas.";
+    return;
+  }
+
+  const { actual, anterior, diferencia } = comparacion;
+  const redondeada = Math.round(diferencia * 10) / 10;
+
+  // Ni verde ni rojo: se premia la conducta, no los kilos (PRODUCTO.md).
+  id("comparador").textContent =
+    redondeada === 0
+      ? "Igual que la semana pasada"
+      : `${redondeada > 0 ? "+" : "−"}${Math.abs(redondeada)
+          .toFixed(1)
+          .replace(".", ",")} kg esta semana`;
+
+  const enKg = (valor) => `${valor.toFixed(1).replace(".", ",")} kg`;
+  id("comparador-detalle").textContent =
+    `media ${enKg(actual)} · semana pasada ${enKg(anterior)}`;
+}
+
+function pintarCalendario(pesajes, comidas, ejercicios) {
+  const contenedor = id("calendario");
+  const detalle = id("calendario-detalle");
+
+  const casillas = calendarioDeConstancia(
+    { pesajes, comidas, ejercicios },
+    hoyISO()
+  );
+
+  contenedor.innerHTML = "";
+  detalle.textContent = "";
+  contenedor.appendChild(
+    dibujarCalendario(casillas, (casilla) => {
+      // Con el ratón basta el <title>; en el móvil no hay hover, así que el
+      // toque escribe el detalle aquí debajo.
+      detalle.textContent = textoDeCasilla(casilla);
+    })
+  );
+}
+
+function refrescarGrafica() {
+  const pesajes = listaPeso.obtenerRegistros();
+  const diarios = mediaMovil(pesosPorDia(pesajes));
+
+  const contenedor = id("grafica-peso");
+  const vacia = id("grafica-vacia");
+  contenedor.innerHTML = "";
+
+  const svg = dibujarGrafica(diarios, pesoObjetivoActual, pesajes.length);
+  if (svg) {
+    contenedor.appendChild(svg);
+    vacia.textContent = "";
+  } else {
+    vacia.textContent = "Apunta algún pesaje más para ver la evolución.";
+  }
+
+  pintarComparador(diarios);
+  pintarCalendario(
+    pesajes,
+    listaComidas.obtenerRegistros(),
+    listaEjercicios.obtenerRegistros()
+  );
+}
+
 // --- Peso ----------------------------------------------------------------
 
 const listaPeso = crearLista({
+  alRefrescar: () => refrescarGrafica(),
   lista: "lista-pesajes",
   estado: "estado-lista",
   reintentar: "btn-reintentar",
@@ -398,6 +492,7 @@ id("form-pesaje").addEventListener("submit", async (evento) => {
 // --- Comidas -------------------------------------------------------------
 
 const listaComidas = crearLista({
+  alRefrescar: () => refrescarGrafica(),
   lista: "lista-comidas",
   estado: "estado-comidas",
   reintentar: "btn-reintentar-comidas",
@@ -458,6 +553,7 @@ id("form-comida").addEventListener("submit", async (evento) => {
 // --- Ejercicio -----------------------------------------------------------
 
 const listaEjercicios = crearLista({
+  alRefrescar: () => refrescarGrafica(),
   lista: "lista-ejercicios",
   estado: "estado-ejercicios",
   reintentar: "btn-reintentar-ejercicios",
@@ -929,6 +1025,8 @@ function refrescarTodo() {
 async function refrescarAjustes() {
   try {
     const ajustes = await leerAjustes(uidActual);
+    pesoObjetivoActual = ajustes.pesoObjetivoKg ?? null;
+    refrescarGrafica();
     id("peso-objetivo").value =
       ajustes.pesoObjetivoKg == null
         ? ""
@@ -963,6 +1061,9 @@ id("form-ajustes").addEventListener("submit", async (evento) => {
   boton.disabled = true;
   try {
     await guardarAjustes(uidActual, resultado);
+    // La línea de objetivo de la gráfica sale de aquí.
+    pesoObjetivoActual = resultado.pesoObjetivoKg ?? null;
+    refrescarGrafica();
     aviso.textContent = "Ajustes guardados.";
     setTimeout(() => {
       aviso.textContent = "";
