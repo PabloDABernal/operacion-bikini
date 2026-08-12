@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Para que la barra del navegador acompañe y no haya destello blanco -->
+  <meta name="theme-color" content="#12141A">
   <title>OperaciónBikini</title>
   <link rel="stylesheet" href="styles.css">
 </head>
@@ -35,16 +37,6 @@
       <span id="email-usuario"></span>
     </header>
 
-    <nav id="pestanas">
-      <button type="button" class="pestana" data-seccion="peso">Peso</button>
-      <button type="button" class="pestana" data-seccion="comidas">Comidas</button>
-      <button type="button" class="pestana" data-seccion="ejercicio">Ejercicio</button>
-      <button type="button" class="pestana" data-seccion="consejos">Consejos</button>
-      <button type="button" class="pestana" data-seccion="consulta">Consulta</button>
-      <button type="button" class="pestana" data-seccion="fotos">Fotos</button>
-      <button type="button" class="pestana" data-seccion="ajustes">Ajustes</button>
-    </nav>
-
     <!-- Sección: Peso (spec 001, solo cambia de sitio) -->
     <div class="seccion" data-seccion="peso">
       <h2>Nuevo pesaje</h2>
@@ -59,6 +51,7 @@
       </form>
 
       <p id="error-pesaje" class="error" role="alert"></p>
+      <p id="guardado-pesaje" class="guardado" role="status"></p>
 
       <!-- Gráfica y comparador (spec 008) -->
       <h2>Cómo va</h2>
@@ -91,6 +84,7 @@
       </form>
 
       <p id="error-comida" class="error" role="alert"></p>
+      <p id="guardado-comida" class="guardado" role="status"></p>
 
       <h2>Mis comidas</h2>
       <p id="estado-comidas"></p>
@@ -118,6 +112,7 @@
       </form>
 
       <p id="error-ejercicio" class="error" role="alert"></p>
+      <p id="guardado-ejercicio" class="guardado" role="status"></p>
 
       <h2>Mis ejercicios</h2>
       <p id="estado-ejercicios"></p>
@@ -242,7 +237,29 @@
       pueden ser inexactos. No sustituyen a un médico o nutricionista. Ante dudas,
       molestias o falta de resultados, consulta a un profesional.
     </p>
+
+    <!-- Navegación inferior (spec 009). Lo del día a día a un toque; lo
+         ocasional, dentro de "Más". -->
+    <nav id="nav-inferior" aria-label="Secciones">
+      <div class="interior">
+        <button type="button" class="nav-boton" data-seccion="peso">Peso</button>
+        <button type="button" class="nav-boton" data-seccion="comidas">Comidas</button>
+        <button type="button" class="nav-boton" data-seccion="ejercicio">Ejercicio</button>
+        <button type="button" class="nav-boton" id="btn-mas" aria-haspopup="dialog">Más</button>
+      </div>
+    </nav>
   </section>
+
+  <!-- Panel "Más": el resto de secciones, a dos toques -->
+  <div id="panel-mas" class="oculta" role="dialog" aria-modal="true" aria-label="Más secciones">
+    <div class="hoja">
+      <button type="button" class="panel-destino" data-seccion="consejos">Consejos</button>
+      <button type="button" class="panel-destino" data-seccion="consulta">Consulta</button>
+      <button type="button" class="panel-destino" data-seccion="fotos">Fotos</button>
+      <button type="button" class="panel-destino" data-seccion="ajustes">Ajustes</button>
+      <button type="button" id="btn-cerrar-panel" class="enlace">Cerrar</button>
+    </div>
+  </div>
 
   <!-- Pantalla de carga inicial, mientras Firebase decide si hay sesión -->
   <section id="pantalla-cargando" class="pantalla">

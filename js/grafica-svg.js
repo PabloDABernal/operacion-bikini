@@ -3,16 +3,13 @@
 // SVG construido a mano, sin librerías: son unas pocas formas y así el stack
 // sigue sin dependencias ni peso de descarga (ver ARQUITECTURA.md).
 //
-// Los colores son los que ya usa la app. El sistema de color y el modo oscuro
-// son la spec siguiente; aquí no se adelanta nada.
+// Aquí no hay ni un color: cada forma lleva su clase y el color lo pone
+// styles.css con las variables de la paleta (spec 009). Si no, la paleta
+// viviría en dos sitios y uno de los dos acabaría mintiendo.
 
 import { diasEntre, formatearFecha } from "./fechas.js";
 
 const NS = "http://www.w3.org/2000/svg";
-
-const COLOR_MEDIA = "#d81b60";
-const COLOR_PUNTOS = "#bbb";
-const COLOR_OBJETIVO = "#555";
 
 // Ancho de la banda de margen a cada lado del objetivo.
 export const MARGEN_OBJETIVO_KG = 1;
@@ -111,8 +108,7 @@ export function dibujarGrafica(diarios, pesoObjetivo, totalPesajes) {
         y: arriba,
         width: anchoUtil,
         height: Math.max(abajo - arriba, 0),
-        fill: COLOR_OBJETIVO,
-        "fill-opacity": "0.1"
+        class: "grafica-banda"
       })
     );
     svg.appendChild(
@@ -121,8 +117,7 @@ export function dibujarGrafica(diarios, pesoObjetivo, totalPesajes) {
         y1: y(pesoObjetivo),
         x2: MARGEN.izquierda + anchoUtil,
         y2: y(pesoObjetivo),
-        stroke: COLOR_OBJETIVO,
-        "stroke-width": "1",
+        class: "grafica-objetivo",
         "stroke-dasharray": "4 3"
       })
     );
@@ -135,7 +130,7 @@ export function dibujarGrafica(diarios, pesoObjetivo, totalPesajes) {
         cx: x(dia.fecha),
         cy: y(dia.peso),
         r: "2",
-        fill: COLOR_PUNTOS
+        class: "grafica-punto"
       })
     );
   });
@@ -154,9 +149,7 @@ export function dibujarGrafica(diarios, pesoObjetivo, totalPesajes) {
   svg.appendChild(
     elemento("polyline", {
       points: puntosLinea.join(" "),
-      fill: "none",
-      stroke: COLOR_MEDIA,
-      "stroke-width": "2",
+      class: "grafica-media",
       "stroke-linejoin": "round",
       "stroke-linecap": "round"
     })

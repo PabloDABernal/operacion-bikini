@@ -11,6 +11,8 @@ Ideas surgidas durante la implementación, no implementadas. Una línea cada una
 - Editar la fecha de una foto de progreso: hoy la fecha es el ID del documento en Firestore y el nombre del archivo en Cloudinary, así que cambiarla obliga a mover ambos. Fuera de la spec 007.
 - Selector de rango temporal en la gráfica de peso (30 días / 90 días / todo), cuando haya meses de historial que enseñar. Fuera de la spec 008 por eso mismo.
 - Tocar un punto de la gráfica de peso para ver su fecha y su peso exactos. Fuera de la spec 008.
+- Iconos en la barra de navegación inferior (la spec 009 la deja solo con texto).
+- Ocultar la barra inferior automáticamente al abrir el teclado en Android, si al usarla resulta molesta. Detectado como riesgo en la spec 009.
 - Repasar el aspecto general de la app (tipografía, espaciados, versión móvil) cuando v1 esté funcionalmente completa — la v1 prioriza que funcione sobre que esté pulido.
 
 ## Técnico

@@ -1,4 +1,41 @@
-/* Estilos mínimos: la v1 prioriza que funcione sobre que esté pulido. */
+/* Sistema visual "nocturna deportiva" (spec 009).
+   Oscura siempre: no hay tema claro ni interruptor. Los colores viven aquí y
+   solo aquí — ni en el HTML ni en el JS hay hexadecimales sueltos. */
+
+:root {
+  /* Paleta elegida por el usuario el 2026-08-11. Los cuatro primeros son los
+     de la propuesta; el resto se deriva de ellos. */
+  --fondo: #12141a;
+  --superficie: #1b1e26;
+  --superficie-alta: #232733;
+  --borde: #2f3441;
+  --tinta: #e8eaf0;
+  --tinta-suave: #9aa1b4;
+  --acento: #ff4d6d;
+  --apoyo: #4cc9f0;
+  /* Texto sobre el coral: casi negro, porque blanco sobre coral no se lee. */
+  --sobre-acento: #12141a;
+  /* El #c62828 de antes era ilegible sobre fondo oscuro. */
+  --error: #ff8a95;
+
+  --e1: 0.25rem;
+  --e2: 0.5rem;
+  --e3: 0.75rem;
+  --e4: 1rem;
+  --e6: 1.5rem;
+  --e8: 2rem;
+
+  --radio: 10px;
+  --radio-s: 6px;
+  --sombra: 0 -2px 16px rgba(0, 0, 0, 0.5);
+
+  --ancho-columna: 32rem;
+  --barra-alto: 3.5rem;
+
+  /* Que el navegador pinte de oscuro lo suyo: calendarios de los campos de
+     fecha, barras de scroll y el fondo antes de que cargue el CSS. */
+  color-scheme: dark;
+}
 
 * {
   box-sizing: border-box;
@@ -6,11 +43,14 @@
 
 body {
   font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-  max-width: 32rem;
+  max-width: var(--ancho-columna);
   margin: 0 auto;
-  padding: 1rem;
-  background: #fafafa;
-  color: #222;
+  padding: var(--e4);
+  /* Hueco para que la barra inferior no tape el final del contenido. */
+  padding-bottom: calc(var(--barra-alto) + env(safe-area-inset-bottom) + var(--e6));
+  background: var(--fondo);
+  color: var(--tinta);
+  line-height: 1.5;
 }
 
 .pantalla.oculta,
@@ -18,52 +58,34 @@ body {
   display: none;
 }
 
+h1,
+h2,
+h3 {
+  line-height: 1.25;
+}
+
 h1 {
   text-align: center;
+}
+
+h2 {
+  font-size: 1.1rem;
+  margin: var(--e6) 0 var(--e2);
 }
 
 header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 1rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid #ddd;
+  gap: var(--e4);
+  padding-bottom: var(--e2);
+  border-bottom: 1px solid var(--borde);
 }
 
 #email-usuario {
   font-size: 0.9rem;
-  color: #555;
+  color: var(--tinta-suave);
   overflow-wrap: anywhere;
-}
-
-/* Pestañas */
-
-#pestanas {
-  display: flex;
-  gap: 0.25rem;
-  margin: 1rem 0;
-}
-
-#pestanas {
-  flex-wrap: wrap;
-}
-
-.pestana {
-  /* Se encogen para caber en móvil; si no llegan, saltan de fila.
-     Nunca deben provocar scroll horizontal. */
-  flex: 1 1 6rem;
-  padding: 0.6rem 0.25rem;
-  background: #eee;
-  border: 1px solid #ccc;
-  color: #555;
-}
-
-.pestana.activa {
-  background: #d81b60;
-  border-color: #d81b60;
-  color: #fff;
-  font-weight: 700;
 }
 
 .seccion {
@@ -74,63 +96,195 @@ header {
   display: block;
 }
 
+/* Navegación inferior ----------------------------------------------------
+
+   Fija abajo en todos los tamaños. En pantallas anchas la barra llega de
+   lado a lado, pero sus botones se quedan en la columna de contenido: unos
+   botones estirados a lo largo de un monitor quedan ridículos. */
+
+#nav-inferior {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 20;
+  background: var(--superficie);
+  border-top: 1px solid var(--borde);
+  box-shadow: var(--sombra);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+#nav-inferior .interior {
+  max-width: var(--ancho-columna);
+  margin: 0 auto;
+  display: flex;
+}
+
+.nav-boton {
+  flex: 1;
+  min-width: 0;
+  height: var(--barra-alto);
+  padding: 0 var(--e1);
+  background: none;
+  border: none;
+  border-radius: 0;
+  color: var(--tinta-suave);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+}
+
+.nav-boton.activa {
+  color: var(--acento);
+  /* Además del color, una marca arriba: el color solo no basta para
+     distinguirlo de un vistazo. */
+  box-shadow: inset 0 2px 0 var(--acento);
+}
+
+/* Panel "Más" ------------------------------------------------------------ */
+
+#panel-mas {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: flex;
+  align-items: flex-end;
+  background: rgba(0, 0, 0, 0.6);
+}
+
+#panel-mas.oculta {
+  display: none;
+}
+
+#panel-mas .hoja {
+  width: 100%;
+  max-width: var(--ancho-columna);
+  margin: 0 auto;
+  background: var(--superficie-alta);
+  border-top: 1px solid var(--borde);
+  border-radius: var(--radio) var(--radio) 0 0;
+  padding: var(--e4);
+  padding-bottom: calc(var(--e4) + env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  gap: var(--e2);
+  animation: subir 0.15s ease-out;
+}
+
+@keyframes subir {
+  from {
+    transform: translateY(100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #panel-mas .hoja {
+    animation: none;
+  }
+}
+
+.panel-destino {
+  width: 100%;
+  text-align: left;
+  background: var(--superficie);
+  border-color: var(--borde);
+  color: var(--tinta);
+  font-size: 1rem;
+}
+
+.panel-destino.activa {
+  border-color: var(--acento);
+  color: var(--acento);
+  font-weight: 700;
+}
+
+/* Formularios y botones -------------------------------------------------- */
+
 form {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: var(--e1);
 }
 
+input,
 textarea,
 select {
-  padding: 0.6rem;
+  padding: var(--e3);
   font-size: 1rem;
   font-family: inherit;
-  border: 1px solid #bbb;
-  border-radius: 4px;
-  margin-bottom: 0.5rem;
+  background: var(--superficie-alta);
+  color: var(--tinta);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio-s);
+  margin-bottom: var(--e2);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--tinta-suave);
+}
+
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+button:focus-visible {
+  outline: 2px solid var(--apoyo);
+  outline-offset: 2px;
 }
 
 label {
   font-size: 0.85rem;
   font-weight: 600;
-}
-
-input {
-  padding: 0.6rem;
-  font-size: 1rem;
-  border: 1px solid #bbb;
-  border-radius: 4px;
-  margin-bottom: 0.5rem;
+  color: var(--tinta-suave);
 }
 
 button {
-  padding: 0.6rem 1rem;
+  padding: var(--e3) var(--e4);
   font-size: 1rem;
-  border: 1px solid #888;
-  border-radius: 4px;
-  background: #fff;
+  font-family: inherit;
+  border: 1px solid var(--borde);
+  border-radius: var(--radio-s);
+  background: var(--superficie-alta);
+  color: var(--tinta);
   cursor: pointer;
 }
 
 button:disabled {
-  opacity: 0.5;
+  opacity: 0.45;
   cursor: default;
 }
 
+/* La acción principal de cada pantalla, en coral. */
 #btn-entrar,
 #btn-guardar,
 #btn-guardar-comida,
-#btn-guardar-ejercicio {
-  background: #d81b60;
-  border-color: #d81b60;
-  color: #fff;
+#btn-guardar-ejercicio,
+#btn-guardar-ajustes,
+#btn-pedir-consejo,
+#btn-empezar-consulta,
+#btn-subir-foto {
+  background: var(--acento);
+  border-color: var(--acento);
+  color: var(--sobre-acento);
+  font-weight: 700;
+}
+
+#btn-pedir-consejo,
+#btn-empezar-consulta,
+#btn-subir-foto,
+#btn-google {
+  width: 100%;
+}
+
+#btn-google {
   font-weight: 600;
 }
 
-/* Está fuera del <form>, así que no hereda su ancho: se lo damos aquí. */
-#btn-google {
-  width: 100%;
-  font-weight: 600;
+#btn-empezar-consulta:disabled {
+  background: var(--superficie-alta);
+  border-color: var(--borde);
+  color: var(--tinta-suave);
 }
 
 /* Separador con una línea a cada lado de la "o", que suelta en medio
@@ -138,10 +292,10 @@ button:disabled {
 .separador {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  color: #888;
+  gap: var(--e3);
+  color: var(--tinta-suave);
   font-size: 0.85rem;
-  margin: 1.25rem 0 0.75rem;
+  margin: 1.25rem 0 var(--e3);
 }
 
 .separador::before,
@@ -149,14 +303,24 @@ button:disabled {
   content: "";
   flex: 1;
   height: 1px;
-  background: #ddd;
+  background: var(--borde);
 }
 
 .error {
-  color: #c62828;
+  color: var(--error);
   min-height: 1.2rem;
-  margin: 0.5rem 0;
+  margin: var(--e2) 0;
 }
+
+/* Confirmación breve al guardar (spec 009): que se note que ha pasado algo. */
+.guardado:not(:empty) {
+  color: var(--apoyo);
+  font-weight: 600;
+  min-height: 1.2rem;
+  margin: var(--e2) 0 0;
+}
+
+/* Listas de registros ---------------------------------------------------- */
 
 #lista-pesajes,
 #lista-comidas,
@@ -171,13 +335,20 @@ button:disabled {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.6rem 0;
-  border-bottom: 1px solid #ddd;
+  gap: var(--e2);
+  padding: var(--e3) 0;
+  border-bottom: 1px solid var(--borde);
+}
+
+#lista-pesajes li button,
+#lista-comidas li button,
+#lista-ejercicios li button {
+  padding: var(--e2) var(--e3);
+  font-size: 0.85rem;
 }
 
 .pesaje-fecha {
-  color: #555;
+  color: var(--tinta-suave);
   font-size: 0.9rem;
   white-space: nowrap;
 }
@@ -185,7 +356,7 @@ button:disabled {
 .pesaje-peso {
   font-weight: 700;
   margin-left: auto;
-  margin-right: 0.75rem;
+  margin-right: var(--e3);
 }
 
 /* El texto libre de comidas y ejercicios se recorta si no cabe,
@@ -198,12 +369,12 @@ button:disabled {
 }
 
 .registro-detalle {
-  color: #555;
+  color: var(--tinta-suave);
   font-size: 0.9rem;
   white-space: nowrap;
 }
 
-/* Gráfica de peso, comparador y calendario (spec 008) */
+/* Gráfica de peso y comparador (spec 008) -------------------------------- */
 
 .bloque-grafica svg,
 .bloque-calendario svg {
@@ -214,19 +385,39 @@ button:disabled {
 
 .grafica-eje {
   font-size: 9px;
-  fill: #555;
+  fill: var(--tinta-suave);
+}
+
+.grafica-media {
+  fill: none;
+  stroke: var(--acento);
+  stroke-width: 2;
+}
+
+.grafica-punto {
+  fill: var(--borde);
+}
+
+.grafica-objetivo {
+  stroke: var(--tinta-suave);
+  stroke-width: 1;
+}
+
+.grafica-banda {
+  fill: var(--tinta-suave);
+  fill-opacity: 0.12;
 }
 
 .comparador {
-  font-size: 1.5rem;
+  font-size: 1.75rem;
   font-weight: 700;
-  margin: 0.75rem 0 0;
+  margin: var(--e3) 0 0;
 }
 
 .comparador-detalle {
-  color: #555;
+  color: var(--tinta-suave);
   font-size: 0.9rem;
-  margin: 0.25rem 0 0;
+  margin: var(--e1) 0 0;
   min-height: 1.2rem;
 }
 
@@ -237,24 +428,28 @@ button:disabled {
    quedar ridículo, así que se le pone tope. */
 .bloque-calendario {
   max-width: 320px;
-  margin-top: 0.5rem;
+  margin-top: var(--e2);
 }
 
 .casilla {
-  fill: #eee;
+  fill: var(--superficie-alta);
   cursor: pointer;
 }
 
+/* Los tres niveles son el mismo coral con más o menos fuerza: así no hay
+   colores nuevos que mantener aparte de la paleta. */
 .casilla.nivel-1 {
-  fill: #f4b6cd;
+  fill: var(--acento);
+  fill-opacity: 0.3;
 }
 
 .casilla.nivel-2 {
-  fill: #e8709f;
+  fill: var(--acento);
+  fill-opacity: 0.6;
 }
 
 .casilla.nivel-3 {
-  fill: #d81b60;
+  fill: var(--acento);
 }
 
 /* Fila en edición: los campos no caben en una línea en móvil, así que esta
@@ -270,7 +465,7 @@ button:disabled {
 .fila-edicion select,
 .fila-edicion textarea {
   margin: 0;
-  padding: 0.35rem;
+  padding: var(--e2);
   font-size: 0.95rem;
 }
 
@@ -298,133 +493,89 @@ button:disabled {
   width: auto;
 }
 
-/* Consejos */
+/* Consejos --------------------------------------------------------------- */
 
 .explicacion {
-  color: #555;
+  color: var(--tinta-suave);
   font-size: 0.9rem;
   margin-top: 0;
 }
 
-#btn-pedir-consejo {
-  width: 100%;
-  background: #d81b60;
-  border-color: #d81b60;
-  color: #fff;
-  font-weight: 600;
-}
-
-#estado-consejo {
-  color: #555;
+#estado-consejo,
+#estado-consulta {
+  color: var(--tinta-suave);
   min-height: 1.2rem;
 }
 
-.consejo {
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  background: #fff;
-  padding: 0.75rem 1rem;
-  margin-bottom: 1rem;
+.consejo,
+.plan {
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  background: var(--superficie);
+  padding: var(--e3) var(--e4);
+  margin-bottom: var(--e4);
 }
 
 .consejo-fecha {
-  color: #888;
+  color: var(--tinta-suave);
   font-size: 0.8rem;
 }
 
-.consejo h3 {
+/* En cian y no en coral: el coral no se usa para texto pequeño, solo para
+   acciones y para la sección activa de la barra. */
+.consejo h3,
+.plan h3 {
   font-size: 0.9rem;
-  margin: 0.75rem 0 0.25rem;
-  color: #d81b60;
+  margin: var(--e3) 0 var(--e1);
+  color: var(--apoyo);
 }
 
-.consejo p {
+.consejo p,
+.plan p {
   margin: 0;
   white-space: pre-wrap;
 }
 
-/* Consulta */
-
-#btn-empezar-consulta {
-  width: 100%;
-  background: #d81b60;
-  border-color: #d81b60;
-  color: #fff;
-  font-weight: 600;
-}
-
-#btn-empezar-consulta:disabled {
-  background: #ccc;
-  border-color: #ccc;
-}
+/* Consulta --------------------------------------------------------------- */
 
 .mensaje {
-  padding: 0.6rem 0.85rem;
-  border-radius: 10px;
-  margin-bottom: 0.5rem;
+  padding: var(--e3) var(--e4);
+  border-radius: var(--radio);
+  margin-bottom: var(--e2);
   max-width: 85%;
   white-space: pre-wrap;
 }
 
+/* La IA habla desde la izquierda con un borde de acento; tú desde la
+   derecha. Se distinguen por sitio y por color, no solo por color. */
 .mensaje-ia {
-  background: #f1e4ea;
-  border: 1px solid #e3cdd7;
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-left: 3px solid var(--acento);
 }
 
 .mensaje-usuario {
-  background: #eee;
-  border: 1px solid #ddd;
+  background: var(--superficie-alta);
+  border: 1px solid var(--borde);
   margin-left: auto;
-}
-
-#estado-consulta {
-  color: #555;
-  min-height: 1.2rem;
 }
 
 /* Botón que se lee como enlace: acción secundaria y poco tentadora. */
 .enlace {
   background: none;
   border: none;
-  color: #888;
+  color: var(--tinta-suave);
   text-decoration: underline;
   padding: 0;
   font-size: 0.85rem;
 }
 
-.plan {
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  background: #fff;
-  padding: 0.75rem 1rem;
-  margin-bottom: 1rem;
-}
-
-.plan h3 {
-  font-size: 0.9rem;
-  margin: 0.75rem 0 0.25rem;
-  color: #d81b60;
-}
-
-.plan p {
-  margin: 0;
-  white-space: pre-wrap;
-}
-
-/* Fotos */
-
-#btn-subir-foto {
-  width: 100%;
-  background: #d81b60;
-  border-color: #d81b60;
-  color: #fff;
-  font-weight: 600;
-}
+/* Fotos ------------------------------------------------------------------ */
 
 #rejilla-fotos {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(6.5rem, 1fr));
-  gap: 0.5rem;
+  gap: var(--e2);
 }
 
 .foto {
@@ -442,27 +593,27 @@ button:disabled {
   width: 100%;
   aspect-ratio: 1 / 1;
   object-fit: cover;
-  border-radius: 6px;
-  border: 1px solid #ddd;
-  background: #eee;
+  border-radius: var(--radio-s);
+  border: 1px solid var(--borde);
+  background: var(--superficie-alta);
 }
 
 .foto span {
   font-size: 0.75rem;
-  color: #555;
+  color: var(--tinta-suave);
 }
 
-/* Visor: pantalla completa sobre fondo oscuro */
+/* Visor: pantalla completa. Va por encima de la barra y del panel "Más". */
 
 #visor {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.85);
+  background: rgba(0, 0, 0, 0.9);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1rem;
-  z-index: 10;
+  padding: var(--e4);
+  z-index: 40;
 }
 
 #visor.oculta {
@@ -472,7 +623,7 @@ button:disabled {
 #visor-caja {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: var(--e3);
   align-items: center;
   max-width: 100%;
 }
@@ -480,53 +631,46 @@ button:disabled {
 #visor-imagen {
   max-width: 100%;
   max-height: 70vh;
-  border-radius: 6px;
+  border-radius: var(--radio-s);
 }
 
 #visor-fecha {
-  color: #fff;
+  color: var(--tinta);
   margin: 0;
   font-size: 0.9rem;
 }
 
 #visor-botones {
   display: flex;
-  gap: 0.75rem;
+  gap: var(--e3);
 }
 
-/* Ajustes */
-
-#btn-guardar-ajustes {
-  background: #d81b60;
-  border-color: #d81b60;
-  color: #fff;
-  font-weight: 600;
-}
+/* Ajustes ---------------------------------------------------------------- */
 
 #aviso-ajustes:not(:empty) {
-  color: #0f766e;
+  color: var(--apoyo);
   font-weight: 600;
 }
 
 /* Zona de peligro: se distingue del resto a propósito. Borrar datos no
    debe parecerse a guardar un pesaje. */
 .zona-peligro {
-  border: 2px solid #c62828;
-  border-radius: 6px;
-  padding: 1rem;
-  margin-top: 2rem;
+  border: 2px solid var(--error);
+  border-radius: var(--radio);
+  padding: var(--e4);
+  margin-top: var(--e8);
   display: flex;
   flex-direction: column;
-  gap: 0.6rem;
+  gap: var(--e3);
 }
 
 .zona-peligro h2 {
-  color: #c62828;
+  color: var(--error);
   margin: 0;
 }
 
 .advertencia {
-  color: #c62828;
+  color: var(--error);
   font-weight: 600;
   margin: 0;
 }
@@ -540,7 +684,7 @@ button:disabled {
 .casilla-reinicio {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--e2);
   font-size: 0.95rem;
 }
 
@@ -548,34 +692,35 @@ button:disabled {
   margin: 0;
   width: 1.1rem;
   height: 1.1rem;
+  accent-color: var(--acento);
 }
 
 .casilla-reinicio .cuenta {
-  color: #777;
+  color: var(--tinta-suave);
   font-size: 0.85rem;
 }
 
 #btn-borrar-seleccion,
 #btn-borrar-definitivo {
-  background: #c62828;
-  border-color: #c62828;
-  color: #fff;
+  background: var(--error);
+  border-color: var(--error);
+  color: var(--sobre-acento);
   font-weight: 700;
 }
 
 #btn-borrar-seleccion:disabled,
 #btn-borrar-definitivo:disabled {
-  background: #eee;
-  border-color: #ccc;
-  color: #999;
+  background: var(--superficie-alta);
+  border-color: var(--borde);
+  color: var(--tinta-suave);
 }
 
 #confirmacion-reinicio {
   display: flex;
   flex-direction: column;
   gap: 0.4rem;
-  border-top: 1px solid #f0c9c9;
-  padding-top: 0.75rem;
+  border-top: 1px solid var(--borde);
+  padding-top: var(--e3);
 }
 
 #confirmacion-reinicio.oculta {
@@ -585,9 +730,9 @@ button:disabled {
 /* Disclaimer: va al final del flujo, no anclado a la ventana,
    para no tapar contenido en pantallas pequeñas. */
 .disclaimer {
-  margin-top: 2rem;
-  padding-top: 1rem;
-  border-top: 1px solid #ddd;
-  color: #777;
+  margin-top: var(--e8);
+  padding-top: var(--e4);
+  border-top: 1px solid var(--borde);
+  color: var(--tinta-suave);
   font-size: 0.75rem;
 }

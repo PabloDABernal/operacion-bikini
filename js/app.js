@@ -116,18 +116,101 @@ function id(nombre) {
 
 const PESTANA_INICIAL = "peso";
 
+// Las secciones que viven dentro del panel "Más" en vez de tener botón propio
+// en la barra inferior.
+const SECCIONES_DEL_PANEL = ["consejos", "consulta", "fotos", "ajustes"];
+
+const panelMas = id("panel-mas");
+
 function abrirPestana(nombre) {
-  document.querySelectorAll(".pestana").forEach((boton) => {
-    boton.classList.toggle("activa", boton.dataset.seccion === nombre);
-  });
   document.querySelectorAll(".seccion").forEach((seccion) => {
     seccion.classList.toggle("activa", seccion.dataset.seccion === nombre);
   });
+
+  document.querySelectorAll(".nav-boton").forEach((boton) => {
+    boton.classList.toggle("activa", boton.dataset.seccion === nombre);
+  });
+
+  // Estando en Fotos o en Ajustes no hay botón propio que encender, así que se
+  // enciende "Más": si no, no se sabría dónde estás.
+  id("btn-mas").classList.toggle("activa", SECCIONES_DEL_PANEL.includes(nombre));
+
+  document.querySelectorAll(".panel-destino").forEach((boton) => {
+    boton.classList.toggle("activa", boton.dataset.seccion === nombre);
+  });
+
+  // Desde arriba: al cambiar de sección se ve el principio, no donde te
+  // quedaste en la sección anterior.
+  window.scrollTo(0, 0);
 }
 
-document.querySelectorAll(".pestana").forEach((boton) => {
-  boton.addEventListener("click", () => abrirPestana(boton.dataset.seccion));
+function abrirPanel() {
+  panelMas.classList.remove("oculta");
+  // El foco entra en el panel para que el teclado no se quede detrás.
+  panelMas.querySelector(".panel-destino").focus();
+}
+
+function cerrarPanel() {
+  panelMas.classList.add("oculta");
+}
+
+document.querySelectorAll(".nav-boton[data-seccion]").forEach((boton) => {
+  boton.addEventListener("click", () => {
+    cerrarPanel();
+    abrirPestana(boton.dataset.seccion);
+  });
 });
+
+id("btn-mas").addEventListener("click", abrirPanel);
+id("btn-cerrar-panel").addEventListener("click", cerrarPanel);
+
+document.querySelectorAll(".panel-destino").forEach((boton) => {
+  boton.addEventListener("click", () => {
+    cerrarPanel();
+    abrirPestana(boton.dataset.seccion);
+  });
+});
+
+// Tocar la capa oscurecida de detrás cierra el panel; tocar la hoja no.
+panelMas.addEventListener("click", (evento) => {
+  if (evento.target === panelMas) cerrarPanel();
+});
+
+document.addEventListener("keydown", (evento) => {
+  if (panelMas.classList.contains("oculta")) return;
+
+  if (evento.key === "Escape") {
+    cerrarPanel();
+    return;
+  }
+
+  // El panel tapa la barra, pero sus botones siguen siendo alcanzables con el
+  // tabulador: sin esto, el foco se escapa detrás de la capa oscurecida y se
+  // puede pulsar algo que no se ve.
+  if (evento.key !== "Tab") return;
+
+  const focarizables = [...panelMas.querySelectorAll("button")];
+  const primero = focarizables[0];
+  const ultimo = focarizables[focarizables.length - 1];
+
+  if (evento.shiftKey && document.activeElement === primero) {
+    evento.preventDefault();
+    ultimo.focus();
+  } else if (!evento.shiftKey && document.activeElement === ultimo) {
+    evento.preventDefault();
+    primero.focus();
+  }
+});
+
+// Confirmación breve al guardar: sin esto, guardar un pesaje no produce
+// ninguna señal visible más allá de que el campo se vacía.
+function avisarGuardado(elementoId) {
+  const aviso = id(elementoId);
+  aviso.textContent = "Guardado";
+  setTimeout(() => {
+    aviso.textContent = "";
+  }, 3000);
+}
 
 // --- Login ---------------------------------------------------------------
 
@@ -408,7 +491,8 @@ const listaPeso = crearLista({
   estado: "estado-lista",
   reintentar: "btn-reintentar",
   error: "error-pesaje",
-  textoVacio: "Aún no has apuntado ningún pesaje.",
+  textoVacio:
+    "Aún no has apuntado ningún pesaje. Pésate al levantarte, antes de desayunar: es el momento más comparable.",
   errorCarga: "No se han podido cargar tus pesajes. Comprueba tu conexión.",
   confirmacionBorrado: "¿Borrar este pesaje?",
   cargar: listarPesajes,
@@ -448,6 +532,7 @@ id("form-pesaje").addEventListener("submit", async (evento) => {
   boton.disabled = true;
   try {
     await guardarPesaje(uidActual, resultado.pesoKg, resultado.fecha);
+    avisarGuardado("guardado-pesaje");
     id("peso").value = "";
     id("fecha").value = hoyISO();
     await listaPeso.refrescar();
@@ -465,7 +550,8 @@ const listaComidas = crearLista({
   estado: "estado-comidas",
   reintentar: "btn-reintentar-comidas",
   error: "error-comida",
-  textoVacio: "Aún no has apuntado ninguna comida.",
+  textoVacio:
+    'Aún no has apuntado ninguna comida. No hace falta detalle: "lentejas y una manzana" vale.',
   errorCarga: "No se han podido cargar tus comidas. Comprueba tu conexión.",
   confirmacionBorrado: "¿Borrar esta comida?",
   cargar: listarComidas,
@@ -507,6 +593,7 @@ id("form-comida").addEventListener("submit", async (evento) => {
   boton.disabled = true;
   try {
     await guardarComida(uidActual, resultado.texto, resultado.momento, resultado.fecha);
+    avisarGuardado("guardado-comida");
     id("comida-texto").value = "";
     id("comida-momento").value = MOMENTO_POR_DEFECTO;
     id("comida-fecha").value = hoyISO();
@@ -525,7 +612,8 @@ const listaEjercicios = crearLista({
   estado: "estado-ejercicios",
   reintentar: "btn-reintentar-ejercicios",
   error: "error-ejercicio",
-  textoVacio: "Aún no has apuntado ningún ejercicio.",
+  textoVacio:
+    'Aún no has apuntado ningún ejercicio. Cuenta también andar: "paseo con el carro, 40 minutos".',
   errorCarga: "No se han podido cargar tus ejercicios. Comprueba tu conexión.",
   confirmacionBorrado: "¿Borrar este ejercicio?",
   cargar: listarEjercicios,
@@ -588,6 +676,7 @@ id("form-ejercicio").addEventListener("submit", async (evento) => {
       resultado.intensidad,
       resultado.fecha
     );
+    avisarGuardado("guardado-ejercicio");
     id("ejercicio-texto").value = "";
     id("ejercicio-minutos").value = "";
     id("ejercicio-intensidad").value = INTENSIDAD_POR_DEFECTO;
@@ -1227,6 +1316,7 @@ observarSesion(
   },
   () => {
     uidActual = null;
+    cerrarPanel();
     mostrar("login");
     errorLogin.textContent = mensajeDeError(ERROR_NO_AUTORIZADO);
   }
