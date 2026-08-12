@@ -1,9 +1,10 @@
-// Alta, listado y borrado de comidas.
+// Alta, edición, listado y borrado de comidas.
 
 import {
   collection,
   addDoc,
   deleteDoc,
+  updateDoc,
   doc,
   getDocs,
   query,
@@ -68,6 +69,17 @@ export function guardarComida(uid, texto, momento, fecha) {
     momento,
     fecha,
     creadoEn: serverTimestamp()
+  });
+}
+
+// creadoEn no se toca al editar: es lo que desempata el orden entre dos
+// registros del mismo día y momento.
+export function actualizarComida(uid, comidaId, texto, momento, fecha) {
+  return updateDoc(doc(db, "usuarios", uid, "comidas", comidaId), {
+    texto,
+    momento,
+    fecha,
+    editadoEn: serverTimestamp()
   });
 }
 

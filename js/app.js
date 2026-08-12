@@ -14,6 +14,7 @@ import { hoyISO, formatearFecha } from "./fechas.js";
 import {
   validarPesaje,
   guardarPesaje,
+  actualizarPesaje,
   listarPesajes,
   borrarPesaje
 } from "./pesajes.js";
@@ -24,6 +25,7 @@ import {
   etiquetaDeMomento,
   validarComida,
   guardarComida,
+  actualizarComida,
   listarComidas,
   borrarComida
 } from "./comidas.js";
@@ -34,6 +36,7 @@ import {
   etiquetaDeIntensidad,
   validarEjercicio,
   guardarEjercicio,
+  actualizarEjercicio,
   listarEjercicios,
   borrarEjercicio
 } from "./ejercicios.js";
@@ -160,51 +163,116 @@ btnSalir.addEventListener("click", () => salir());
 // --- Listas de registros -------------------------------------------------
 
 // Las tres listas (pesajes, comidas, ejercicios) se comportan igual: cargan,
-// pintan filas, permiten borrar y avisan si falla la conexión. Esto monta una.
+// pintan filas, permiten editar y borrar, y avisan si falla la conexión. Esto
+// monta una.
+//
+// Los registros cargados se guardan aquí en memoria y `pintar()` trabaja solo
+// con ellos: abrir, cancelar o cambiar de fila en edición no vuelve a llamar a
+// Firestore. Solo `refrescar()` (guardar, borrar, reintentar) va a la red.
 function crearLista(config) {
   const lista = id(config.lista);
   const estado = id(config.estado);
   const reintentar = id(config.reintentar);
   const error = id(config.error);
 
-  function pintar(registros) {
+  let registros = [];
+  let editandoId = null;
+
+  function pintar() {
     lista.innerHTML = "";
     estado.textContent = registros.length ? "" : config.textoVacio;
 
     registros.forEach((registro) => {
-      const fila = document.createElement("li");
-
-      const botonBorrar = document.createElement("button");
-      botonBorrar.type = "button";
-      botonBorrar.textContent = "Borrar";
-      botonBorrar.addEventListener("click", () => borrar(registro.id, botonBorrar));
-
-      fila.append(...config.celdas(registro), botonBorrar);
-      lista.appendChild(fila);
+      lista.appendChild(
+        registro.id === editandoId ? filaEditable(registro) : filaDeLectura(registro)
+      );
     });
+  }
+
+  function filaDeLectura(registro) {
+    const fila = document.createElement("li");
+
+    const botonEditar = botonDeFila("Editar", () => {
+      // Solo una fila en edición a la vez: abrir esta cierra la anterior y
+      // descarta lo que hubiera escrito, sin preguntar.
+      editandoId = registro.id;
+      error.textContent = "";
+      pintar();
+    });
+
+    const botonBorrar = botonDeFila("Borrar", () => borrar(registro.id, botonBorrar));
+
+    fila.append(...config.celdas(registro), botonEditar, botonBorrar);
+    return fila;
+  }
+
+  function filaEditable(registro) {
+    const fila = document.createElement("li");
+    fila.className = "fila-edicion";
+
+    const campos = config.campos(registro);
+
+    const botonGuardar = botonDeFila("Guardar", () =>
+      guardar(registro.id, campos, botonGuardar)
+    );
+    const botonCancelar = botonDeFila("Cancelar", () => {
+      editandoId = null;
+      error.textContent = "";
+      pintar();
+    });
+
+    fila.append(...campos.elementos, botonGuardar, botonCancelar);
+    return fila;
+  }
+
+  async function guardar(registroId, campos, botonGuardar) {
+    error.textContent = "";
+
+    // Los mismos validadores y los mismos mensajes que el formulario de alta.
+    const resultado = campos.validar();
+    if (resultado.error) {
+      error.textContent = resultado.error;
+      return;
+    }
+
+    botonGuardar.disabled = true;
+    try {
+      await config.actualizar(uidActual, registroId, resultado);
+      // refrescar() recarga y reordena: si ha cambiado la fecha, la fila se
+      // coloca sola donde le toca.
+      await refrescar();
+    } catch {
+      error.textContent = "No se ha podido guardar. Comprueba tu conexión.";
+      botonGuardar.disabled = false;
+    }
   }
 
   async function refrescar() {
     reintentar.classList.add("oculta");
+    // Una recarga cierra cualquier edición abierta: puede venir de otra parte
+    // de la app (un reinicio de datos desde Ajustes) y los datos ya no valen.
+    editandoId = null;
     try {
-      pintar(await config.cargar(uidActual));
+      registros = await config.cargar(uidActual);
+      pintar();
     } catch {
+      registros = [];
       lista.innerHTML = "";
       estado.textContent = config.errorCarga;
       reintentar.classList.remove("oculta");
     }
   }
 
-  async function borrar(registroId, boton) {
+  async function borrar(registroId, botonBorrar) {
     if (!confirm(config.confirmacionBorrado)) return;
 
-    boton.disabled = true;
+    botonBorrar.disabled = true;
     try {
       await config.borrar(uidActual, registroId);
       await refrescar();
     } catch {
       error.textContent = "No se ha podido borrar. Comprueba tu conexión.";
-      boton.disabled = false;
+      botonBorrar.disabled = false;
     }
   }
 
@@ -217,6 +285,56 @@ function celda(texto, clase) {
   const elemento = document.createElement("span");
   elemento.className = clase;
   elemento.textContent = texto;
+  return elemento;
+}
+
+function botonDeFila(texto, alPulsar) {
+  const elemento = document.createElement("button");
+  elemento.type = "button";
+  elemento.textContent = texto;
+  elemento.addEventListener("click", alPulsar);
+  return elemento;
+}
+
+// --- Campos de una fila en edición ---------------------------------------
+
+function campoFecha(valor) {
+  const elemento = document.createElement("input");
+  elemento.type = "date";
+  elemento.value = valor;
+  elemento.className = "edicion-fecha";
+  return elemento;
+}
+
+function campoTexto(valor, clase, modo) {
+  const elemento = document.createElement("input");
+  elemento.type = "text";
+  elemento.value = valor;
+  elemento.className = clase;
+  if (modo) elemento.inputMode = modo;
+  return elemento;
+}
+
+function campoArea(valor, clase) {
+  const elemento = document.createElement("textarea");
+  elemento.rows = 2;
+  elemento.value = valor;
+  elemento.className = clase;
+  return elemento;
+}
+
+// rellenarDesplegable() no sirve aquí: siempre selecciona el valor por
+// defecto, y al editar hay que dejar puesto el del registro.
+function campoDesplegable(opciones, valorActual, clase) {
+  const elemento = document.createElement("select");
+  elemento.className = clase;
+  opciones.forEach(({ valor, etiqueta }) => {
+    const opcion = document.createElement("option");
+    opcion.value = valor;
+    opcion.textContent = etiqueta;
+    elemento.appendChild(opcion);
+  });
+  elemento.value = valorActual;
   return elemento;
 }
 
@@ -235,7 +353,21 @@ const listaPeso = crearLista({
   celdas: (pesaje) => [
     celda(formatearFecha(pesaje.fecha), "pesaje-fecha"),
     celda(`${pesaje.pesoKg.toFixed(1).replace(".", ",")} kg`, "pesaje-peso")
-  ]
+  ],
+  campos: (pesaje) => {
+    const fecha = campoFecha(pesaje.fecha);
+    const peso = campoTexto(
+      pesaje.pesoKg.toFixed(1).replace(".", ","),
+      "edicion-peso",
+      "decimal"
+    );
+    return {
+      elementos: [fecha, peso],
+      validar: () => validarPesaje(peso.value, fecha.value)
+    };
+  },
+  actualizar: (uid, pesajeId, valores) =>
+    actualizarPesaje(uid, pesajeId, valores.pesoKg, valores.fecha)
 });
 
 id("form-pesaje").addEventListener("submit", async (evento) => {
@@ -279,7 +411,18 @@ const listaComidas = crearLista({
     celda(formatearFecha(comida.fecha), "pesaje-fecha"),
     celda(etiquetaDeMomento(comida.momento), "registro-detalle"),
     celda(comida.texto, "registro-texto")
-  ]
+  ],
+  campos: (comida) => {
+    const fecha = campoFecha(comida.fecha);
+    const momento = campoDesplegable(MOMENTOS, comida.momento, "edicion-momento");
+    const texto = campoArea(comida.texto, "edicion-texto");
+    return {
+      elementos: [fecha, momento, texto],
+      validar: () => validarComida(texto.value, momento.value, fecha.value)
+    };
+  },
+  actualizar: (uid, comidaId, valores) =>
+    actualizarComida(uid, comidaId, valores.texto, valores.momento, valores.fecha)
 });
 
 id("form-comida").addEventListener("submit", async (evento) => {
@@ -329,7 +472,31 @@ const listaEjercicios = crearLista({
     celda(ejercicio.texto, "registro-texto"),
     celda(`${ejercicio.minutos} min`, "registro-detalle"),
     celda(etiquetaDeIntensidad(ejercicio.intensidad), "registro-detalle")
-  ]
+  ],
+  campos: (ejercicio) => {
+    const fecha = campoFecha(ejercicio.fecha);
+    const texto = campoTexto(ejercicio.texto, "edicion-texto");
+    const minutos = campoTexto(String(ejercicio.minutos), "edicion-minutos", "numeric");
+    const intensidad = campoDesplegable(
+      INTENSIDADES,
+      ejercicio.intensidad,
+      "edicion-intensidad"
+    );
+    return {
+      elementos: [fecha, texto, minutos, intensidad],
+      validar: () =>
+        validarEjercicio(texto.value, minutos.value, intensidad.value, fecha.value)
+    };
+  },
+  actualizar: (uid, ejercicioId, valores) =>
+    actualizarEjercicio(
+      uid,
+      ejercicioId,
+      valores.texto,
+      valores.minutos,
+      valores.intensidad,
+      valores.fecha
+    )
 });
 
 id("form-ejercicio").addEventListener("submit", async (evento) => {

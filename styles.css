@@ -203,6 +203,47 @@ button:disabled {
   white-space: nowrap;
 }
 
+/* Fila en edición: los campos no caben en una línea en móvil, así que esta
+   fila sí se parte en varias. */
+
+#lista-pesajes li.fila-edicion,
+#lista-comidas li.fila-edicion,
+#lista-ejercicios li.fila-edicion {
+  flex-wrap: wrap;
+}
+
+.fila-edicion input,
+.fila-edicion select,
+.fila-edicion textarea {
+  margin: 0;
+  padding: 0.35rem;
+  font-size: 0.95rem;
+}
+
+.fila-edicion .edicion-fecha,
+.fila-edicion .edicion-momento,
+.fila-edicion .edicion-intensidad {
+  flex: 0 0 auto;
+}
+
+.fila-edicion .edicion-peso,
+.fila-edicion .edicion-minutos {
+  flex: 0 0 5rem;
+  width: 5rem;
+}
+
+/* El texto libre se queda con lo que sobre y empuja los botones a la
+   siguiente línea si hace falta. */
+.fila-edicion .edicion-texto {
+  flex: 1 1 8rem;
+  min-width: 0;
+}
+
+.fila-edicion button {
+  flex: 0 0 auto;
+  width: auto;
+}
+
 /* Consejos */
 
 .explicacion {

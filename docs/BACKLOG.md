@@ -7,6 +7,8 @@ Ideas surgidas durante la implementación, no implementadas. Una línea cada una
 - **Propuesta v2 completa** (usabilidad, gráficas, gamificación) en `docs/propuestas/v2-usabilidad-y-gamificacion.md`, redactada el 2026-08-11 a petición del usuario. Pendiente de debatir: hay 5 decisiones suyas al final del documento, una de ellas obliga a tocar `PRODUCTO.md`.
 
 - PRODUCTO.md llama "collage de evolución" (líneas 17 y 34) a lo que la spec 005 implementó como cuadrícula cronológica de miniaturas. No es deriva —la spec lo decidió a conciencia— pero conviene ajustar la palabra en PRODUCTO.md o decidir si el collage de verdad (una sola imagen compuesta) entra en v2. Detectado en la auditoría del 2026-08-11.
+- Alta múltiple / botón "repetir en otra fecha" para rellenar varios días de golpe (útil para probar y para el "lo de siempre" de v2). Surgió al decidir la spec 007; se dejó fuera porque el alta con fecha pasada, una a una, ya cubre el caso.
+- Editar la fecha de una foto de progreso: hoy la fecha es el ID del documento en Firestore y el nombre del archivo en Cloudinary, así que cambiarla obliga a mover ambos. Fuera de la spec 007.
 - Repasar el aspecto general de la app (tipografía, espaciados, versión móvil) cuando v1 esté funcionalmente completa — la v1 prioriza que funcione sobre que esté pulido.
 
 ## Técnico

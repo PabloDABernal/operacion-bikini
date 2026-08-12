@@ -1,9 +1,10 @@
-// Alta, listado y borrado de ejercicios.
+// Alta, edición, listado y borrado de ejercicios.
 
 import {
   collection,
   addDoc,
   deleteDoc,
+  updateDoc,
   doc,
   getDocs,
   query,
@@ -72,6 +73,18 @@ export function guardarEjercicio(uid, texto, minutos, intensidad, fecha) {
     intensidad,
     fecha,
     creadoEn: serverTimestamp()
+  });
+}
+
+// creadoEn no se toca al editar: es lo que desempata el orden entre dos
+// registros del mismo día.
+export function actualizarEjercicio(uid, ejercicioId, texto, minutos, intensidad, fecha) {
+  return updateDoc(doc(db, "usuarios", uid, "ejercicios", ejercicioId), {
+    texto,
+    minutos,
+    intensidad,
+    fecha,
+    editadoEn: serverTimestamp()
   });
 }
 

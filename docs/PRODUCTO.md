@@ -21,6 +21,7 @@ Un grupo pequeño y cerrado de usuarios personales (empezando por mí, y probabl
 
 ## Qué hará (v2, decidida el 11 de agosto de 2026)
 
+- **Corregir lo apuntado**: cualquier pesaje, comida o ejercicio ya guardado se puede editar después (todos sus campos, incluida la fecha), sin tener que borrarlo y volver a crearlo. Las fotos de progreso siguen ligadas a su fecha de subida.
 - Pantalla de **Ajustes** con los datos personales de cada usuario: peso objetivo, altura y fecha objetivo. Desde ahí también se cierra sesión.
 - **Reinicio de datos**: cada usuario puede borrar sus propios datos eligiendo qué tipos (pesajes, comidas, ejercicio, consejos, consultas y planes, fotos), con una confirmación de tres pasos. La cuenta no se borra.
 - **Gráfica de evolución del peso** con media móvil de 7 días y línea de objetivo, calendario de constancia y comparación con la semana anterior.
@@ -39,9 +40,9 @@ Un grupo pequeño y cerrado de usuarios personales (empezando por mí, y probabl
 
 ## Conceptos clave del dominio
 
-- **Pesaje**: registro puntual de peso con fecha.
-- **Comida**: registro de una ingesta (qué se ha comido, cuándo).
-- **Ejercicio**: registro de una actividad física (qué, duración/intensidad, cuándo).
+- **Pesaje**: registro puntual de peso con fecha. Se puede corregir después.
+- **Comida**: registro de una ingesta (qué se ha comido, cuándo). Se puede corregir después.
+- **Ejercicio**: registro de una actividad física (qué, duración/intensidad, cuándo). Se puede corregir después.
 - **Foto de progreso**: foto asociada a una fecha, para seguimiento visual y collage de evolución.
 - **Consulta**: conversación guiada por la IA (tipo entrevista) que termina generando un plan de nutrición y ejercicio.
 - **Consejo**: feedback puntual generado por la IA a partir del historial reciente, sin ser una conversación guiada completa.

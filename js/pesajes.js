@@ -1,9 +1,11 @@
-// Alta, listado y borrado de pesajes. Cada usuario solo toca su subcolección.
+// Alta, edición, listado y borrado de pesajes. Cada usuario solo toca su
+// subcolección.
 
 import {
   collection,
   addDoc,
   deleteDoc,
+  updateDoc,
   doc,
   getDocs,
   query,
@@ -46,6 +48,16 @@ export function guardarPesaje(uid, pesoKg, fecha) {
     pesoKg,
     fecha,
     creadoEn: serverTimestamp()
+  });
+}
+
+// creadoEn no se toca al editar: es lo que desempata el orden entre dos
+// registros del mismo día.
+export function actualizarPesaje(uid, pesajeId, pesoKg, fecha) {
+  return updateDoc(doc(db, "usuarios", uid, "pesajes", pesajeId), {
+    pesoKg,
+    fecha,
+    editadoEn: serverTimestamp()
   });
 }
 
