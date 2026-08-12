@@ -23,16 +23,20 @@ La **v2 está empezada**: su alcance se decidió el 11 de agosto (ver `docs/PROD
 | 005 | Fotos de progreso con Cloudinary, subida firmada | ✅ completada |
 | 006 | Ajustes de usuario y reinicio de datos | ✅ completada |
 | 007 | Editar pesajes, comidas y ejercicios ya guardados (incluida la fecha) | ✅ completada |
+| 008 | Gráfica de peso con media móvil y objetivo, y comparador semanal | ✅ completada |
 
 ## Qué toca ahora
 
 La v2 se acordó hacerla entera, en este orden (`docs/propuestas/v2-usabilidad-y-gamificacion.md`, apartado 9):
 
-1. **Rediseño visual** en dirección "nocturna deportiva" (oscura de serie, coral y cian) **con navegación inferior** en móvil. Es lo siguiente. Urge algo más de lo previsto: ya hay **siete pestañas** apelotonadas en dos filas.
-2. Gráfica de peso con media móvil de 7 días y línea de objetivo (el peso objetivo ya se guarda desde la spec 006).
-3. Pantalla "Hoy" y repetir comida ("lo de siempre").
-4. Detalle nutricional automático por IA: grupos de alimentos y calorías en rango, con una llamada al día.
-5. Puntos, rachas con día de gracia y emblemas.
+El orden se ha ido reordenando sobre la marcha a petición del usuario. Lo que queda:
+
+1. **Pantalla "Hoy"**: lo apuntado hoy de un vistazo, repetir comida ("lo de siempre") y el **calendario de constancia**. El calendario ya está programado y probado en la spec 008 (`calendarioDeConstancia()` en `js/grafica.js`, `dibujarCalendario()` y `textoDeCasilla()` en `js/grafica-svg.js`, y sus estilos en `styles.css`): esta spec solo tiene que colgarlo de la pantalla nueva.
+2. **Rediseño visual** en dirección "nocturna deportiva" (oscura de serie, coral y cian) **con navegación inferior** en móvil. Urge: ya hay **siete pestañas** apelotonadas en dos filas, y la de "Hoy" serán ocho.
+3. Detalle nutricional automático por IA: grupos de alimentos y calorías en rango, con una llamada al día.
+4. Puntos, rachas con día de gracia y emblemas.
+
+Ya hechas de la v2: ajustes y reinicio (006), editar registros (007) y la gráfica de peso (008).
 
 Decisiones de v2 ya tomadas por el usuario el 11 de agosto:
 

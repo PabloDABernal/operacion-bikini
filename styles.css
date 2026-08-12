@@ -230,8 +230,11 @@ button:disabled {
   min-height: 1.2rem;
 }
 
-/* El calendario son 12 columnas de cuadraditos: a pantalla completa se
-   estiraría hasta quedar ridículo, así que se le pone tope. */
+/* Calendario de constancia: dibujado y con estilos, pero todavía sin pantalla
+   donde colgarse. Va en la pantalla "Hoy", que es otra spec.
+
+   Son 12 columnas de cuadraditos: a pantalla completa se estiraría hasta
+   quedar ridículo, así que se le pone tope. */
 .bloque-calendario {
   max-width: 320px;
   margin-top: 0.5rem;

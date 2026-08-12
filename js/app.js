@@ -11,18 +11,12 @@ import {
 
 import { hoyISO, formatearFecha } from "./fechas.js";
 
-import {
-  pesosPorDia,
-  mediaMovil,
-  compararSemanas,
-  calendarioDeConstancia
-} from "./grafica.js";
+// El calendario de constancia se calcula y se dibuja en esos mismos módulos
+// (calendarioDeConstancia, dibujarCalendario, textoDeCasilla), pero todavía no
+// se cuelga de ninguna pantalla: va en la pantalla "Hoy", que es otra spec.
+import { pesosPorDia, mediaMovil, compararSemanas } from "./grafica.js";
 
-import {
-  dibujarGrafica,
-  dibujarCalendario,
-  textoDeCasilla
-} from "./grafica-svg.js";
+import { dibujarGrafica } from "./grafica-svg.js";
 
 import {
   validarPesaje,
@@ -355,7 +349,7 @@ function campoDesplegable(opciones, valorActual, clase) {
   return elemento;
 }
 
-// --- Gráfica, comparador y calendario ------------------------------------
+// --- Gráfica y comparador ------------------------------------------------
 
 // El peso objetivo vive en Ajustes; se cachea aquí para que la gráfica no
 // tenga que volver a leerlo de Firestore cada vez que se repinta.
@@ -387,26 +381,6 @@ function pintarComparador(diarios) {
     `media ${enKg(actual)} · semana pasada ${enKg(anterior)}`;
 }
 
-function pintarCalendario(pesajes, comidas, ejercicios) {
-  const contenedor = id("calendario");
-  const detalle = id("calendario-detalle");
-
-  const casillas = calendarioDeConstancia(
-    { pesajes, comidas, ejercicios },
-    hoyISO()
-  );
-
-  contenedor.innerHTML = "";
-  detalle.textContent = "";
-  contenedor.appendChild(
-    dibujarCalendario(casillas, (casilla) => {
-      // Con el ratón basta el <title>; en el móvil no hay hover, así que el
-      // toque escribe el detalle aquí debajo.
-      detalle.textContent = textoDeCasilla(casilla);
-    })
-  );
-}
-
 function refrescarGrafica() {
   const pesajes = listaPeso.obtenerRegistros();
   const diarios = mediaMovil(pesosPorDia(pesajes));
@@ -424,11 +398,6 @@ function refrescarGrafica() {
   }
 
   pintarComparador(diarios);
-  pintarCalendario(
-    pesajes,
-    listaComidas.obtenerRegistros(),
-    listaEjercicios.obtenerRegistros()
-  );
 }
 
 // --- Peso ----------------------------------------------------------------
@@ -492,7 +461,6 @@ id("form-pesaje").addEventListener("submit", async (evento) => {
 // --- Comidas -------------------------------------------------------------
 
 const listaComidas = crearLista({
-  alRefrescar: () => refrescarGrafica(),
   lista: "lista-comidas",
   estado: "estado-comidas",
   reintentar: "btn-reintentar-comidas",
@@ -553,7 +521,6 @@ id("form-comida").addEventListener("submit", async (evento) => {
 // --- Ejercicio -----------------------------------------------------------
 
 const listaEjercicios = crearLista({
-  alRefrescar: () => refrescarGrafica(),
   lista: "lista-ejercicios",
   estado: "estado-ejercicios",
   reintentar: "btn-reintentar-ejercicios",

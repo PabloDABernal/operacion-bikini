@@ -1,6 +1,6 @@
 # 008 — Gráfica de peso, comparador semanal y calendario de constancia
 
-- **Estado:** revisada
+- **Estado:** completada (probada por el usuario en producción el 2026-08-12; tras probarla pidió subir el formulario por encima de la gráfica y llevarse el calendario a la pantalla "Hoy")
 - **Fecha:** 2026-08-12
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (v2)", punto "Gráfica de evolución del peso" (actualizado el 2026-08-12 para incluir la banda de margen).
 
@@ -35,13 +35,14 @@ Que al abrir la pestaña **Peso** se vea de un vistazo cómo va la cosa: una gr�
   4. **Banda de margen**: franja sombreada de ±1 kg alrededor del objetivo. Solo si existe objetivo.
 - Ejes mínimos: etiquetas de peso a la izquierda y de fecha abajo (primera y última, para no amontonar).
 - **Comparador semanal**: diferencia entre la media de los últimos 7 días y la media de los 7 anteriores, en grande y con signo.
-- **Calendario de constancia**: cuadrícula de las últimas 12 semanas, un cuadradito por día, con 4 niveles de intensidad según cuántos de los tres tipos (peso, comida, ejercicio) se apuntaron ese día.
+- El **cálculo y el dibujo del calendario de constancia** (`calendarioDeConstancia()` en `js/grafica.js`, `dibujarCalendario()` y `textoDeCasilla()` en `js/grafica-svg.js`), listos y probados, pero **sin colgarlos de ninguna pantalla todavía**: los usará la spec de la pantalla "Hoy".
 - Todo se recalcula al guardar, editar o borrar cualquier registro.
 
 ### NO entra (explícitamente fuera)
 
 - **Selector de rango temporal** (30 / 90 días / todo): la gráfica pinta siempre todo el historial. Con dos semanas de datos un selector no aporta nada; se añadirá cuando haya meses de historial.
-- **Gráficas de comidas o de ejercicio**: solo peso. El calendario sí los cuenta, pero no los grafica.
+- **El calendario de constancia como parte de la pestaña Peso**: se implementó ahí y el usuario, al probarlo el 2026-08-12, decidió que su sitio es la pantalla **"Hoy"**. El código se queda hecho; la pantalla que lo enseña es otra spec.
+- **Gráficas de comidas o de ejercicio**: solo peso.
 - **Zoom, desplazamiento o tocar un punto para ver su valor** en la gráfica de peso. El calendario sí tiene el detalle al tocar, porque sin él los cuadraditos no se entienden.
 - **Predicción o proyección** de cuándo se alcanzará el objetivo.
 - **Rediseño visual**: la gráfica usa los colores actuales de la app. El sistema de color y el modo oscuro son la spec siguiente; esta no se adelanta.
@@ -52,7 +53,13 @@ Que al abrir la pestaña **Peso** se vea de un vistazo cómo va la cosa: una gr�
 
 ### Dónde va
 
-En `index.html`, dentro de `<div class="seccion" data-seccion="peso">`, **antes** de `<h2>Nuevo pesaje</h2>`, un bloque nuevo con tres partes en este orden: gráfica, comparador, calendario.
+En `index.html`, dentro de `<div class="seccion" data-seccion="peso">`, en este orden:
+
+1. El formulario **"Nuevo pesaje"**, que sigue siendo lo primero: se entra en la pestaña a apuntar, no a mirar.
+2. El bloque nuevo: **gráfica** y debajo el **comparador**.
+3. La lista **"Mis pesajes"**, como hasta ahora.
+
+Decidido así por el usuario el 2026-08-12, después de ver la primera versión con la gráfica arriba del todo.
 
 ### Gráfica
 
