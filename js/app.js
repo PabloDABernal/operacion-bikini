@@ -9,7 +9,13 @@ import {
   ERROR_NO_AUTORIZADO
 } from "./auth.js";
 
-import { hoyISO, formatearFecha } from "./fechas.js";
+import {
+  hoyISO,
+  horaActual,
+  formatearFecha,
+  formatearHora,
+  formatearFechaConHora
+} from "./fechas.js";
 
 import {
   pesosPorDia,
@@ -463,6 +469,14 @@ function campoFecha(valor) {
   return elemento;
 }
 
+function campoHoraEdicion(valor) {
+  const elemento = document.createElement("input");
+  elemento.type = "time";
+  elemento.value = valor || "";
+  elemento.className = "edicion-hora";
+  return elemento;
+}
+
 function campoTexto(valor, clase, modo) {
   const elemento = document.createElement("input");
   elemento.type = "text";
@@ -561,6 +575,10 @@ function fechaLarga(iso) {
 
 // Una línea del resumen: la etiqueta, lo último apuntado hoy (si hay algo) y
 // un + que lleva a la pantalla donde se apunta. Sin nada apuntado, solo el +.
+function conHora(registro, texto) {
+  return registro.hora ? `${texto} · ${formatearHora(registro.hora)}` : texto;
+}
+
 function lineaDeResumen(etiqueta, ultimo, seccion) {
   const fila = document.createElement("li");
   fila.append(celda(etiqueta, "resumen-etiqueta"), celda(ultimo ?? "", "resumen-valor"));
@@ -589,13 +607,19 @@ function pintarResumen(registros) {
   lista.append(
     lineaDeResumen(
       "Peso",
-      pesaje ? `${pesaje.pesoKg.toFixed(1).replace(".", ",")} kg` : null,
+      pesaje
+        ? conHora(pesaje, `${pesaje.pesoKg.toFixed(1).replace(".", ",")} kg`)
+        : null,
       "peso"
     ),
-    lineaDeResumen("Comidas", comida ? comida.texto : null, "comidas"),
+    lineaDeResumen(
+      "Comidas",
+      comida ? conHora(comida, comida.texto) : null,
+      "comidas"
+    ),
     lineaDeResumen(
       "Ejercicio",
-      ejercicio ? `${ejercicio.texto} · ${ejercicio.minutos} min` : null,
+      ejercicio ? conHora(ejercicio, `${ejercicio.texto} · ${ejercicio.minutos} min`) : null,
       "ejercicio"
     )
   );
@@ -691,23 +715,24 @@ const listaPeso = crearLista({
   cargar: listarPesajes,
   borrar: borrarPesaje,
   celdas: (pesaje) => [
-    celda(formatearFecha(pesaje.fecha), "pesaje-fecha"),
+    celda(formatearFechaConHora(pesaje.fecha, pesaje.hora), "pesaje-fecha"),
     celda(`${pesaje.pesoKg.toFixed(1).replace(".", ",")} kg`, "pesaje-peso")
   ],
   campos: (pesaje) => {
     const fecha = campoFecha(pesaje.fecha);
+    const hora = campoHoraEdicion(pesaje.hora);
     const peso = campoTexto(
       pesaje.pesoKg.toFixed(1).replace(".", ","),
       "edicion-peso",
       "decimal"
     );
     return {
-      elementos: [fecha, peso],
-      validar: () => validarPesaje(peso.value, fecha.value)
+      elementos: [fecha, hora, peso],
+      validar: () => validarPesaje(peso.value, fecha.value, hora.value)
     };
   },
   actualizar: (uid, pesajeId, valores) =>
-    actualizarPesaje(uid, pesajeId, valores.pesoKg, valores.fecha)
+    actualizarPesaje(uid, pesajeId, valores.pesoKg, valores.fecha, valores.hora)
 });
 
 id("form-pesaje").addEventListener("submit", async (evento) => {
@@ -715,7 +740,11 @@ id("form-pesaje").addEventListener("submit", async (evento) => {
   const error = id("error-pesaje");
   error.textContent = "";
 
-  const resultado = validarPesaje(id("peso").value, id("fecha").value);
+  const resultado = validarPesaje(
+    id("peso").value,
+    id("fecha").value,
+    id("hora").value
+  );
   if (resultado.error) {
     error.textContent = resultado.error;
     return;
@@ -724,10 +753,11 @@ id("form-pesaje").addEventListener("submit", async (evento) => {
   const boton = id("btn-guardar");
   boton.disabled = true;
   try {
-    await guardarPesaje(uidActual, resultado.pesoKg, resultado.fecha);
+    await guardarPesaje(uidActual, resultado.pesoKg, resultado.fecha, resultado.hora);
     avisarGuardado("guardado-pesaje");
     id("peso").value = "";
     id("fecha").value = hoyISO();
+    id("hora").value = horaActual();
     await listaPeso.refrescar();
   } catch {
     error.textContent = "No se ha podido guardar. Comprueba tu conexión.";
@@ -792,21 +822,29 @@ const listaComidas = crearLista({
   cargar: listarComidas,
   borrar: borrarComida,
   celdas: (comida) => [
-    celda(formatearFecha(comida.fecha), "pesaje-fecha"),
+    celda(formatearFechaConHora(comida.fecha, comida.hora), "pesaje-fecha"),
     celda(etiquetaDeMomento(comida.momento), "registro-detalle"),
     celda(comida.texto, "registro-texto")
   ],
   campos: (comida) => {
     const fecha = campoFecha(comida.fecha);
+    const hora = campoHoraEdicion(comida.hora);
     const momento = campoDesplegable(MOMENTOS, comida.momento, "edicion-momento");
     const texto = campoArea(comida.texto, "edicion-texto");
     return {
-      elementos: [fecha, momento, texto],
-      validar: () => validarComida(texto.value, momento.value, fecha.value)
+      elementos: [fecha, hora, momento, texto],
+      validar: () => validarComida(texto.value, momento.value, fecha.value, hora.value)
     };
   },
   actualizar: (uid, comidaId, valores) =>
-    actualizarComida(uid, comidaId, valores.texto, valores.momento, valores.fecha)
+    actualizarComida(
+      uid,
+      comidaId,
+      valores.texto,
+      valores.momento,
+      valores.fecha,
+      valores.hora
+    )
 });
 
 id("form-comida").addEventListener("submit", async (evento) => {
@@ -817,7 +855,8 @@ id("form-comida").addEventListener("submit", async (evento) => {
   const resultado = validarComida(
     id("comida-texto").value,
     id("comida-momento").value,
-    id("comida-fecha").value
+    id("comida-fecha").value,
+    id("comida-hora").value
   );
   if (resultado.error) {
     error.textContent = resultado.error;
@@ -827,11 +866,18 @@ id("form-comida").addEventListener("submit", async (evento) => {
   const boton = id("btn-guardar-comida");
   boton.disabled = true;
   try {
-    await guardarComida(uidActual, resultado.texto, resultado.momento, resultado.fecha);
+    await guardarComida(
+      uidActual,
+      resultado.texto,
+      resultado.momento,
+      resultado.fecha,
+      resultado.hora
+    );
     avisarGuardado("guardado-comida");
     id("comida-texto").value = "";
     id("comida-momento").value = MOMENTO_POR_DEFECTO;
     id("comida-fecha").value = hoyISO();
+    id("comida-hora").value = horaActual();
     await listaComidas.refrescar();
   } catch {
     error.textContent = "No se ha podido guardar. Comprueba tu conexión.";
@@ -860,13 +906,14 @@ const listaEjercicios = crearLista({
   cargar: listarEjercicios,
   borrar: borrarEjercicio,
   celdas: (ejercicio) => [
-    celda(formatearFecha(ejercicio.fecha), "pesaje-fecha"),
+    celda(formatearFechaConHora(ejercicio.fecha, ejercicio.hora), "pesaje-fecha"),
     celda(ejercicio.texto, "registro-texto"),
     celda(`${ejercicio.minutos} min`, "registro-detalle"),
     celda(etiquetaDeIntensidad(ejercicio.intensidad), "registro-detalle")
   ],
   campos: (ejercicio) => {
     const fecha = campoFecha(ejercicio.fecha);
+    const hora = campoHoraEdicion(ejercicio.hora);
     const texto = campoTexto(ejercicio.texto, "edicion-texto");
     const minutos = campoTexto(String(ejercicio.minutos), "edicion-minutos", "numeric");
     const intensidad = campoDesplegable(
@@ -875,9 +922,15 @@ const listaEjercicios = crearLista({
       "edicion-intensidad"
     );
     return {
-      elementos: [fecha, texto, minutos, intensidad],
+      elementos: [fecha, hora, texto, minutos, intensidad],
       validar: () =>
-        validarEjercicio(texto.value, minutos.value, intensidad.value, fecha.value)
+        validarEjercicio(
+          texto.value,
+          minutos.value,
+          intensidad.value,
+          fecha.value,
+          hora.value
+        )
     };
   },
   actualizar: (uid, ejercicioId, valores) =>
@@ -887,7 +940,8 @@ const listaEjercicios = crearLista({
       valores.texto,
       valores.minutos,
       valores.intensidad,
-      valores.fecha
+      valores.fecha,
+      valores.hora
     )
 });
 
@@ -900,7 +954,8 @@ id("form-ejercicio").addEventListener("submit", async (evento) => {
     id("ejercicio-texto").value,
     id("ejercicio-minutos").value,
     id("ejercicio-intensidad").value,
-    id("ejercicio-fecha").value
+    id("ejercicio-fecha").value,
+    id("ejercicio-hora").value
   );
   if (resultado.error) {
     error.textContent = resultado.error;
@@ -915,13 +970,15 @@ id("form-ejercicio").addEventListener("submit", async (evento) => {
       resultado.texto,
       resultado.minutos,
       resultado.intensidad,
-      resultado.fecha
+      resultado.fecha,
+      resultado.hora
     );
     avisarGuardado("guardado-ejercicio");
     id("ejercicio-texto").value = "";
     id("ejercicio-minutos").value = "";
     id("ejercicio-intensidad").value = INTENSIDAD_POR_DEFECTO;
     id("ejercicio-fecha").value = hoyISO();
+    id("ejercicio-hora").value = horaActual();
     await listaEjercicios.refrescar();
   } catch {
     error.textContent = "No se ha podido guardar. Comprueba tu conexión.";
@@ -1514,6 +1571,10 @@ function limpiarFormularios() {
   );
   ["fecha", "comida-fecha", "ejercicio-fecha"].forEach((campo) => {
     id(campo).value = hoyISO();
+  });
+  // La hora se propone, no se impone: viene rellena y se puede vaciar.
+  ["hora", "comida-hora", "ejercicio-hora"].forEach((campo) => {
+    id(campo).value = horaActual();
   });
   rellenarDesplegable("comida-momento", MOMENTOS, MOMENTO_POR_DEFECTO);
   rellenarDesplegable("ejercicio-intensidad", INTENSIDADES, INTENSIDAD_POR_DEFECTO);

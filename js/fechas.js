@@ -15,6 +15,33 @@ export function formatearFecha(iso) {
   return `${dia}/${mes}/${anio}`;
 }
 
+// La hora va como texto "HH:MM" en hora local, igual que las fechas: no se
+// convierte a ninguna zona horaria ni se guarda como instante.
+export function horaActual() {
+  const ahora = new Date();
+  const horas = String(ahora.getHours()).padStart(2, "0");
+  const minutos = String(ahora.getMinutes()).padStart(2, "0");
+  return `${horas}:${minutos}`;
+}
+
+// Devuelve el mensaje de error, o null si la hora vale. Vacía es válida: la
+// hora es opcional en todos los registros.
+export function errorDeHora(hora) {
+  if (!hora) return null;
+  return /^([01]\d|2[0-3]):[0-5]\d$/.test(hora) ? null : "La hora no es válida.";
+}
+
+// Sin cero delante: "8:34", no "08:34".
+export function formatearHora(hora) {
+  const [horas, minutos] = hora.split(":");
+  return `${Number(horas)}:${minutos}`;
+}
+
+// Fecha y hora juntas para las listas. Sin hora, solo la fecha.
+export function formatearFechaConHora(fecha, hora) {
+  return hora ? `${formatearFecha(fecha)} ${formatearHora(hora)}` : formatearFecha(fecha);
+}
+
 // Devuelve el mensaje de error, o null si la fecha vale.
 export function errorDeFecha(fecha) {
   if (!fecha) return "Introduce una fecha.";
@@ -59,11 +86,23 @@ export function diaDeLaSemana(iso) {
   return (new Date(anio, mes - 1, dia, 12).getDay() + 6) % 7;
 }
 
-// Ordena de más reciente a más antiguo por fecha y, a igualdad, por creadoEn.
+// Ordena de más reciente a más antiguo por fecha, luego por hora y, a
+// igualdad, por creadoEn.
+//
+// Los registros sin hora van DESPUÉS de los que la tienen: si no, uno antiguo
+// sin hora se colaría por delante de los de esta mañana.
+//
 // creadoEn es null en el instante en que el servidor aún no ha resuelto
 // serverTimestamp(); ese documento se considera el más reciente.
 export function compararPorFechaYCreacion(a, b) {
   if (a.fecha !== b.fecha) return a.fecha < b.fecha ? 1 : -1;
+
+  if (a.hora !== b.hora) {
+    if (!a.hora) return 1;
+    if (!b.hora) return -1;
+    return a.hora < b.hora ? 1 : -1;
+  }
+
   const msA = a.creadoEn ? a.creadoEn.toMillis() : Infinity;
   const msB = b.creadoEn ? b.creadoEn.toMillis() : Infinity;
   return msB - msA;

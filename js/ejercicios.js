@@ -13,7 +13,8 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 import { db } from "./firebase-config.js";
-import { errorDeFecha, compararPorFechaYCreacion } from "./fechas.js";
+import { errorDeFecha, errorDeHora, compararPorFechaYCreacion } from "./fechas.js";
+import { campoHora } from "./pesajes.js";
 
 const MAX_CARACTERES = 200;
 const MINUTOS_MIN = 1;
@@ -37,7 +38,7 @@ function coleccionDe(uid) {
 }
 
 // Devuelve { texto, minutos, intensidad, fecha } o { error }.
-export function validarEjercicio(textoBruto, minutosBruto, intensidad, fecha) {
+export function validarEjercicio(textoBruto, minutosBruto, intensidad, fecha, hora) {
   const texto = String(textoBruto ?? "").trim();
 
   if (texto === "") {
@@ -61,29 +62,44 @@ export function validarEjercicio(textoBruto, minutosBruto, intensidad, fecha) {
   if (errorFecha) {
     return { error: errorFecha };
   }
+  const errorHora = errorDeHora(hora);
+  if (errorHora) {
+    return { error: errorHora };
+  }
 
   // Los decimales se redondean en silencio: 45,6 -> 46
-  return { texto, minutos: Math.round(minutos), intensidad, fecha };
-}
-
-export function guardarEjercicio(uid, texto, minutos, intensidad, fecha) {
-  return addDoc(coleccionDe(uid), {
+  return {
     texto,
-    minutos,
+    minutos: Math.round(minutos),
     intensidad,
     fecha,
-    creadoEn: serverTimestamp()
-  });
+    hora: hora || ""
+  };
+}
+
+export function guardarEjercicio(uid, texto, minutos, intensidad, fecha, hora) {
+  const ejercicio = { texto, minutos, intensidad, fecha, creadoEn: serverTimestamp() };
+  if (hora) ejercicio.hora = hora;
+  return addDoc(coleccionDe(uid), ejercicio);
 }
 
 // creadoEn no se toca al editar: es lo que desempata el orden entre dos
 // registros del mismo día.
-export function actualizarEjercicio(uid, ejercicioId, texto, minutos, intensidad, fecha) {
+export function actualizarEjercicio(
+  uid,
+  ejercicioId,
+  texto,
+  minutos,
+  intensidad,
+  fecha,
+  hora
+) {
   return updateDoc(doc(db, "usuarios", uid, "ejercicios", ejercicioId), {
     texto,
     minutos,
     intensidad,
     fecha,
+    hora: campoHora(hora),
     editadoEn: serverTimestamp()
   });
 }

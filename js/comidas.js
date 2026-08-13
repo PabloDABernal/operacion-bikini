@@ -13,7 +13,8 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 import { db } from "./firebase-config.js";
-import { errorDeFecha, compararPorFechaYCreacion } from "./fechas.js";
+import { errorDeFecha, errorDeHora, compararPorFechaYCreacion } from "./fechas.js";
+import { campoHora } from "./pesajes.js";
 
 const MAX_CARACTERES = 500;
 
@@ -45,7 +46,7 @@ function coleccionDe(uid) {
 }
 
 // Devuelve { texto, momento, fecha } o { error }.
-export function validarComida(textoBruto, momento, fecha) {
+export function validarComida(textoBruto, momento, fecha, hora) {
   const texto = String(textoBruto ?? "").trim();
 
   if (texto === "") {
@@ -59,26 +60,28 @@ export function validarComida(textoBruto, momento, fecha) {
   if (errorFecha) {
     return { error: errorFecha };
   }
+  const errorHora = errorDeHora(hora);
+  if (errorHora) {
+    return { error: errorHora };
+  }
 
-  return { texto, momento, fecha };
+  return { texto, momento, fecha, hora: hora || "" };
 }
 
-export function guardarComida(uid, texto, momento, fecha) {
-  return addDoc(coleccionDe(uid), {
-    texto,
-    momento,
-    fecha,
-    creadoEn: serverTimestamp()
-  });
+export function guardarComida(uid, texto, momento, fecha, hora) {
+  const comida = { texto, momento, fecha, creadoEn: serverTimestamp() };
+  if (hora) comida.hora = hora;
+  return addDoc(coleccionDe(uid), comida);
 }
 
 // creadoEn no se toca al editar: es lo que desempata el orden entre dos
 // registros del mismo día y momento.
-export function actualizarComida(uid, comidaId, texto, momento, fecha) {
+export function actualizarComida(uid, comidaId, texto, momento, fecha, hora) {
   return updateDoc(doc(db, "usuarios", uid, "comidas", comidaId), {
     texto,
     momento,
     fecha,
+    hora: campoHora(hora),
     editadoEn: serverTimestamp()
   });
 }
