@@ -23,6 +23,13 @@ function carpetaDe(uid) {
   return `usuarios/${uid}/fotos`;
 }
 
+// La foto de perfil vive fuera de la carpeta de fotos de progreso a propósito:
+// así reiniciar las fotos (spec 006) no se la lleva por delante, y la acción
+// "borrar" —que solo acepta rutas dentro de esa carpeta— no puede tocarla.
+function rutaDePerfil(uid) {
+  return `usuarios/${uid}/perfil`;
+}
+
 module.exports = async (req, res) => {
   const sesion = await peticionAutorizada(req, res);
   if (!sesion) return;
@@ -61,6 +68,24 @@ module.exports = async (req, res) => {
     const parametros = {
       overwrite: "true",
       public_id: `${carpeta}/${cuerpo.fecha}`,
+      timestamp
+    };
+
+    return res.status(200).json({
+      cloudName,
+      apiKey,
+      timestamp,
+      publicId: parametros.public_id,
+      firma: firmar(parametros, secreto)
+    });
+  }
+
+  // Una sola foto de perfil por usuario: siempre el mismo nombre, siempre
+  // sobrescribiendo. No hay fecha ni nada que validar.
+  if (cuerpo.accion === "perfil") {
+    const parametros = {
+      overwrite: "true",
+      public_id: rutaDePerfil(sesion.uid),
       timestamp
     };
 

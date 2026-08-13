@@ -34,7 +34,12 @@
   <!-- Pantalla principal -->
   <section id="pantalla-principal" class="pantalla oculta">
     <header>
-      <span id="email-usuario"></span>
+      <div class="identidad">
+        <button type="button" id="btn-perfil" class="avatar" aria-label="Cambiar foto de perfil"></button>
+        <input type="file" id="archivo-perfil" accept="image/*" class="oculta">
+        <span id="email-usuario"></span>
+      </div>
+      <p id="estado-perfil" class="explicacion" role="status"></p>
     </header>
 
     <!-- Sección: Hoy (spec 010) -->
@@ -226,6 +231,16 @@
       <p class="explicacion">Has entrado como <span id="email-ajustes"></span>.</p>
       <button type="button" id="btn-salir">Cerrar sesión</button>
 
+      <!-- PROVISIONAL (spec 011): al quitar el panel "Más", estas tres
+           secciones se quedaron sin puerta. La spec 012 les pone accesos
+           directos en "Hoy" y este bloque desaparece. -->
+      <h2>Más secciones</h2>
+      <div id="atajos-provisionales">
+        <button type="button" class="atajo" data-seccion="consulta">Consulta</button>
+        <button type="button" class="atajo" data-seccion="consejos">Consejos</button>
+        <button type="button" class="atajo" data-seccion="fotos">Fotos</button>
+      </div>
+
       <div class="zona-peligro">
         <h2>Reiniciar datos</h2>
         <p class="advertencia">Esto borra tus datos para siempre. No hay vuelta atrás.</p>
@@ -264,21 +279,10 @@
         <button type="button" class="nav-boton" data-seccion="peso">Peso</button>
         <button type="button" class="nav-boton" data-seccion="comidas">Comidas</button>
         <button type="button" class="nav-boton" data-seccion="ejercicio">Ejercicio</button>
-        <button type="button" class="nav-boton" id="btn-mas" aria-haspopup="dialog">Más</button>
+        <button type="button" class="nav-boton" data-seccion="ajustes">Ajustes</button>
       </div>
     </nav>
   </section>
-
-  <!-- Panel "Más": el resto de secciones, a dos toques -->
-  <div id="panel-mas" class="oculta" role="dialog" aria-modal="true" aria-label="Más secciones">
-    <div class="hoja">
-      <button type="button" class="panel-destino" data-seccion="consejos">Consejos</button>
-      <button type="button" class="panel-destino" data-seccion="consulta">Consulta</button>
-      <button type="button" class="panel-destino" data-seccion="fotos">Fotos</button>
-      <button type="button" class="panel-destino" data-seccion="ajustes">Ajustes</button>
-      <button type="button" id="btn-cerrar-panel" class="enlace">Cerrar</button>
-    </div>
-  </div>
 
   <!-- Pantalla de carga inicial, mientras Firebase decide si hay sesión -->
   <section id="pantalla-cargando" class="pantalla">

@@ -55,7 +55,7 @@ Igual que la deja la spec 009, pero el quinto botón es **Ajustes** en vez de **
 - A partir de **48rem** de ancho, la barra deja de estar fija abajo y pasa a la cabecera: usuario a la izquierda, botones a la derecha, en la misma fila.
 - El `padding-bottom` que reservaba el hueco de la barra desaparece en ese tamaño: si no, quedaría un agujero al final de la página.
 - El cambio es solo CSS. **El HTML y el JS son los mismos**: los mismos botones, el mismo `abrirPestana()`. Nada de duplicar la barra ni de escuchar el tamaño de la ventana desde JS.
-- Cómo, sin reordenar el HTML: hoy `header` va al principio de `#pantalla-principal` y `#nav-inferior` al final, después de todas las secciones. En pantalla ancha, `#pantalla-principal` pasa a ser un contenedor `flex` en columna y la barra sube a la cabecera con `order`, dejando de estar fija. En móvil no se toca nada y sigue con `position: fixed`.
+- Cómo, sin reordenar el HTML: hoy `header` va al principio de `#pantalla-principal` y `#nav-inferior` al final, después de todas las secciones. En pantalla ancha, `#pantalla-principal` pasa a ser una **rejilla de dos columnas**: la cabecera se coloca en la fila 1 columna 1 y la barra en la fila 1 columna 2, así que comparten fila; todo lo demás ocupa el ancho entero. Con `flex` en columna no valdría: cada hijo ocuparía su propia línea y quedarían apilados. En móvil no se toca nada y la barra sigue con `position: fixed`.
 - Si la fila no cabe, la cabecera se parte en dos líneas (usuario arriba, botones debajo) antes que provocar scroll horizontal.
 
 ### Acceso provisional a Consulta, Consejos y Fotos
@@ -75,7 +75,8 @@ Al quitar el panel "Más", esas tres secciones se quedan sin puerta hasta que la
 - Mientras sube: el botón se deshabilita y sale `Subiendo…` junto a la cabecera.
 - Al terminar: se guarda la URL en el documento de ajustes y el círculo se repinta con la foto nueva.
 - Si falla: `No se ha podido subir la foto. Comprueba tu conexión.` y todo se queda como estaba.
-- La imagen se pide a Cloudinary ya recortada y pequeña, con las mismas transformaciones que ya usan las miniaturas de las fotos de progreso, para no gastar cuota de más.
+- La imagen se pide a Cloudinary ya recortada y pequeña (`c_fill,g_face,w_200,h_200`), siguiendo el patrón de las miniaturas de las fotos de progreso pero con dos cambios: la mitad de tamaño, porque el círculo es pequeño, y encuadre por cara en vez de automático, que para un avatar es lo que se quiere.
+- Antes de subir se redimensiona en el navegador, igual que las fotos de progreso: una foto de móvil son varios MB y la cuota gratuita se gasta en transferencia.
 
 ### Subida firmada
 

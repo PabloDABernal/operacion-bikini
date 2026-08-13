@@ -67,9 +67,24 @@ export function validarAjustes(pesoTexto, alturaTexto, fecha) {
 export async function leerAjustes(uid) {
   const instantanea = await getDoc(referenciaDe(uid));
   if (!instantanea.exists()) {
-    return { pesoObjetivoKg: null, alturaCm: null, fechaObjetivo: null };
+    return {
+      pesoObjetivoKg: null,
+      alturaCm: null,
+      fechaObjetivo: null,
+      fotoPerfil: null
+    };
   }
-  return instantanea.data();
+  return { fotoPerfil: null, ...instantanea.data() };
+}
+
+// La foto va por su lado y no pasa por validarAjustes(): así guardar el peso
+// objetivo no puede borrar la foto, ni subir una foto tocar el objetivo.
+export function guardarFotoPerfil(uid, url) {
+  return setDoc(
+    referenciaDe(uid),
+    { fotoPerfil: url, actualizadoEn: serverTimestamp() },
+    { merge: true }
+  );
 }
 
 // merge para no pisar nada que otra spec añada aquí en el futuro.

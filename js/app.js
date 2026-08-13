@@ -83,7 +83,14 @@ import {
   mensajeDeErrorDeFoto
 } from "./fotos.js";
 
-import { validarAjustes, leerAjustes, guardarAjustes } from "./ajustes.js";
+import {
+  validarAjustes,
+  leerAjustes,
+  guardarAjustes,
+  guardarFotoPerfil
+} from "./ajustes.js";
+
+import { subirFotoDePerfil, recorteRedondo } from "./perfil.js";
 
 import {
   TIPOS,
@@ -124,12 +131,6 @@ function id(nombre) {
 
 const PESTANA_INICIAL = "hoy";
 
-// Las secciones que viven dentro del panel "Más" en vez de tener botón propio
-// en la barra inferior.
-const SECCIONES_DEL_PANEL = ["consejos", "consulta", "fotos", "ajustes"];
-
-const panelMas = id("panel-mas");
-
 function abrirPestana(nombre) {
   document.querySelectorAll(".seccion").forEach((seccion) => {
     seccion.classList.toggle("activa", seccion.dataset.seccion === nombre);
@@ -139,75 +140,15 @@ function abrirPestana(nombre) {
     boton.classList.toggle("activa", boton.dataset.seccion === nombre);
   });
 
-  // Estando en Fotos o en Ajustes no hay botón propio que encender, así que se
-  // enciende "Más": si no, no se sabría dónde estás.
-  id("btn-mas").classList.toggle("activa", SECCIONES_DEL_PANEL.includes(nombre));
-
-  document.querySelectorAll(".panel-destino").forEach((boton) => {
-    boton.classList.toggle("activa", boton.dataset.seccion === nombre);
-  });
-
   // Desde arriba: al cambiar de sección se ve el principio, no donde te
   // quedaste en la sección anterior.
   window.scrollTo(0, 0);
 }
 
-function abrirPanel() {
-  panelMas.classList.remove("oculta");
-  // El foco entra en el panel para que el teclado no se quede detrás.
-  panelMas.querySelector(".panel-destino").focus();
-}
-
-function cerrarPanel() {
-  panelMas.classList.add("oculta");
-}
-
-document.querySelectorAll(".nav-boton[data-seccion]").forEach((boton) => {
-  boton.addEventListener("click", () => {
-    cerrarPanel();
-    abrirPestana(boton.dataset.seccion);
-  });
-});
-
-id("btn-mas").addEventListener("click", abrirPanel);
-id("btn-cerrar-panel").addEventListener("click", cerrarPanel);
-
-document.querySelectorAll(".panel-destino").forEach((boton) => {
-  boton.addEventListener("click", () => {
-    cerrarPanel();
-    abrirPestana(boton.dataset.seccion);
-  });
-});
-
-// Tocar la capa oscurecida de detrás cierra el panel; tocar la hoja no.
-panelMas.addEventListener("click", (evento) => {
-  if (evento.target === panelMas) cerrarPanel();
-});
-
-document.addEventListener("keydown", (evento) => {
-  if (panelMas.classList.contains("oculta")) return;
-
-  if (evento.key === "Escape") {
-    cerrarPanel();
-    return;
-  }
-
-  // El panel tapa la barra, pero sus botones siguen siendo alcanzables con el
-  // tabulador: sin esto, el foco se escapa detrás de la capa oscurecida y se
-  // puede pulsar algo que no se ve.
-  if (evento.key !== "Tab") return;
-
-  const focarizables = [...panelMas.querySelectorAll("button")];
-  const primero = focarizables[0];
-  const ultimo = focarizables[focarizables.length - 1];
-
-  if (evento.shiftKey && document.activeElement === primero) {
-    evento.preventDefault();
-    ultimo.focus();
-  } else if (!evento.shiftKey && document.activeElement === ultimo) {
-    evento.preventDefault();
-    primero.focus();
-  }
+// La barra y los atajos provisionales de Ajustes hacen lo mismo: llevar a una
+// sección. El botón lo dice en su data-seccion.
+document.querySelectorAll(".nav-boton, .atajo").forEach((boton) => {
+  boton.addEventListener("click", () => abrirPestana(boton.dataset.seccion));
 });
 
 // Confirmación breve al guardar: sin esto, guardar un pesaje no produce
@@ -257,6 +198,51 @@ btnGoogle.addEventListener("click", async () => {
 });
 
 btnSalir.addEventListener("click", () => salir());
+
+// --- Foto de perfil ------------------------------------------------------
+
+// Sin foto se enseña la inicial del email. El email siempre viene de Firebase
+// Auth, pero por si acaso queda un interrogante en vez de un círculo mudo.
+function pintarAvatar(url, email) {
+  const avatar = id("btn-perfil");
+  avatar.innerHTML = "";
+
+  if (url) {
+    const imagen = document.createElement("img");
+    imagen.src = recorteRedondo(url);
+    imagen.alt = "";
+    avatar.appendChild(imagen);
+    return;
+  }
+
+  avatar.textContent = (email || "?").charAt(0).toUpperCase();
+}
+
+id("btn-perfil").addEventListener("click", () => id("archivo-perfil").click());
+
+id("archivo-perfil").addEventListener("change", async (evento) => {
+  const archivo = evento.target.files[0];
+  if (!archivo) return;
+
+  const estado = id("estado-perfil");
+  const avatar = id("btn-perfil");
+
+  estado.textContent = "Subiendo…";
+  avatar.disabled = true;
+
+  try {
+    const url = await subirFotoDePerfil(archivo);
+    await guardarFotoPerfil(uidActual, url);
+    pintarAvatar(url, emailUsuario.textContent);
+    estado.textContent = "";
+  } catch {
+    estado.textContent = "No se ha podido subir la foto. Comprueba tu conexión.";
+  } finally {
+    avatar.disabled = false;
+    // Sin esto, elegir el mismo archivo dos veces seguidas no dispara nada.
+    evento.target.value = "";
+  }
+});
 
 // --- Listas de registros -------------------------------------------------
 
@@ -512,10 +498,7 @@ function lineaDeResumen(etiqueta, valor, seccion, textoBoton) {
 
   if (valor === null) {
     fila.appendChild(
-      botonDeFila(textoBoton, () => {
-        cerrarPanel();
-        abrirPestana(seccion);
-      })
+      botonDeFila(textoBoton, () => abrirPestana(seccion))
     );
   }
 
@@ -1220,6 +1203,7 @@ async function refrescarAjustes() {
   try {
     const ajustes = await leerAjustes(uidActual);
     pesoObjetivoActual = ajustes.pesoObjetivoKg ?? null;
+    pintarAvatar(ajustes.fotoPerfil, emailUsuario.textContent);
     refrescarGrafica();
     id("peso-objetivo").value =
       ajustes.pesoObjetivoKg == null
@@ -1441,6 +1425,9 @@ observarSesion(
 
     uidActual = usuario.uid;
     emailUsuario.textContent = usuario.email;
+    // La inicial mientras llegan los ajustes; si hay foto, la pinta encima
+    // refrescarAjustes() en cuanto la lee.
+    pintarAvatar(null, usuario.email);
     limpiarFormularios();
     errorLogin.textContent = "";
     inputPassword.value = "";
@@ -1454,7 +1441,6 @@ observarSesion(
   },
   () => {
     uidActual = null;
-    cerrarPanel();
     mostrar("login");
     errorLogin.textContent = mensajeDeError(ERROR_NO_AUTORIZADO);
   }
