@@ -85,9 +85,15 @@
       <p id="comparador-detalle" class="comparador-detalle"></p>
 
       <h2>Mis pesajes</h2>
+      <div class="filtro-dia">
+        <label for="filtro-pesajes">Ver un día</label>
+        <input type="date" id="filtro-pesajes">
+        <button type="button" id="btn-quitar-filtro-pesajes" class="enlace oculta">Quitar filtro</button>
+      </div>
       <p id="estado-lista"></p>
       <button type="button" id="btn-reintentar" class="oculta">Reintentar</button>
       <ul id="lista-pesajes"></ul>
+      <button type="button" id="btn-desplegar-pesajes" class="desplegar oculta"></button>
     </div>
 
     <!-- Sección: Comidas -->
@@ -109,10 +115,23 @@
       <p id="error-comida" class="error" role="alert"></p>
       <p id="guardado-comida" class="guardado" role="status"></p>
 
+      <div id="bloque-lo-de-siempre" class="oculta">
+        <h2>Lo de siempre</h2>
+        <div id="lo-de-siempre"></div>
+        <p id="error-repetir" class="error" role="alert"></p>
+        <p id="guardado-repetir" class="guardado" role="status"></p>
+      </div>
+
       <h2>Mis comidas</h2>
+      <div class="filtro-dia">
+        <label for="filtro-comidas">Ver un día</label>
+        <input type="date" id="filtro-comidas">
+        <button type="button" id="btn-quitar-filtro-comidas" class="enlace oculta">Quitar filtro</button>
+      </div>
       <p id="estado-comidas"></p>
       <button type="button" id="btn-reintentar-comidas" class="oculta">Reintentar</button>
       <ul id="lista-comidas"></ul>
+      <button type="button" id="btn-desplegar-comidas" class="desplegar oculta"></button>
     </div>
 
     <!-- Sección: Ejercicio -->
@@ -138,9 +157,15 @@
       <p id="guardado-ejercicio" class="guardado" role="status"></p>
 
       <h2>Mis ejercicios</h2>
+      <div class="filtro-dia">
+        <label for="filtro-ejercicios">Ver un día</label>
+        <input type="date" id="filtro-ejercicios">
+        <button type="button" id="btn-quitar-filtro-ejercicios" class="enlace oculta">Quitar filtro</button>
+      </div>
       <p id="estado-ejercicios"></p>
       <button type="button" id="btn-reintentar-ejercicios" class="oculta">Reintentar</button>
       <ul id="lista-ejercicios"></ul>
+      <button type="button" id="btn-desplegar-ejercicios" class="desplegar oculta"></button>
     </div>
 
     <!-- Sección: Consejos -->

@@ -462,6 +462,47 @@ button:disabled {
   font-weight: 700;
 }
 
+/* Filtro por día y desplegado de las listas (spec 013) */
+
+.filtro-dia {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--e2);
+  margin-bottom: var(--e2);
+}
+
+.filtro-dia label {
+  margin: 0;
+}
+
+.filtro-dia input {
+  margin: 0;
+  padding: var(--e2);
+  font-size: 0.9rem;
+}
+
+.desplegar {
+  width: 100%;
+  font-size: 0.9rem;
+  color: var(--tinta-suave);
+}
+
+#lo-de-siempre {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e2);
+}
+
+.boton-repetir {
+  width: 100%;
+  text-align: left;
+  /* Un texto largo no debe estirar el botón ni partirlo en tres líneas. */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* Listas de registros ---------------------------------------------------- */
 
 #lista-pesajes,

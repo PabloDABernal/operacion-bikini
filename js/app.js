@@ -256,6 +256,9 @@ id("archivo-perfil").addEventListener("change", async (evento) => {
 
 // --- Listas de registros -------------------------------------------------
 
+// Cuántos registros (o días, en comidas y ejercicio) se ven sin desplegar.
+const RECORTE = 3;
+
 // Las tres listas (pesajes, comidas, ejercicios) se comportan igual: cargan,
 // pintan filas, permiten editar y borrar, y avisan si falla la conexión. Esto
 // monta una.
@@ -269,19 +272,75 @@ function crearLista(config) {
   const reintentar = id(config.reintentar);
   const error = id(config.error);
 
+  const filtro = id(config.filtro);
+  const botonQuitarFiltro = id(config.quitarFiltro);
+  const botonDesplegar = id(config.desplegar);
+
   let registros = [];
   let editandoId = null;
+  let desplegada = false;
+
+  // Qué se ve de todo lo cargado: el filtro manda sobre el recorte, y con
+  // filtro puesto se enseña el día entero.
+  function visibles() {
+    if (filtro.value) {
+      return registros.filter((registro) => registro.fecha === filtro.value);
+    }
+    if (desplegada) return registros;
+
+    // En peso se recortan registros; en comidas y ejercicio, días: un día con
+    // cinco comidas no debe comerse la lista entera.
+    if (config.recortarPorDias) {
+      const dias = [...new Set(registros.map((registro) => registro.fecha))];
+      const ultimos = dias.slice(0, RECORTE);
+      return registros.filter((registro) => ultimos.includes(registro.fecha));
+    }
+    return registros.slice(0, RECORTE);
+  }
 
   function pintar() {
-    lista.innerHTML = "";
-    estado.textContent = registros.length ? "" : config.textoVacio;
+    const aPintar = visibles();
 
-    registros.forEach((registro) => {
+    lista.innerHTML = "";
+    estado.textContent = aPintar.length
+      ? ""
+      : filtro.value
+        ? config.textoSinEseDia
+        : config.textoVacio;
+
+    aPintar.forEach((registro) => {
       lista.appendChild(
         registro.id === editandoId ? filaEditable(registro) : filaDeLectura(registro)
       );
     });
+
+    botonQuitarFiltro.classList.toggle("oculta", !filtro.value);
+
+    // El botón de desplegar sobra si no hay nada escondido, y con filtro
+    // puesto se enseña el día entero, así que tampoco pinta nada.
+    const hayEscondidos = !filtro.value && aPintar.length < registros.length;
+    botonDesplegar.classList.toggle("oculta", !hayEscondidos && !desplegada);
+    botonDesplegar.textContent = desplegada
+      ? "Ver menos"
+      : `Ver todos (${registros.length})`;
   }
+
+  filtro.addEventListener("change", () => {
+    editandoId = null;
+    pintar();
+  });
+
+  botonQuitarFiltro.addEventListener("click", () => {
+    filtro.value = "";
+    // Vuelve a recortada, no a como estuviera antes: un solo estado.
+    desplegada = false;
+    pintar();
+  });
+
+  botonDesplegar.addEventListener("click", () => {
+    desplegada = !desplegada;
+    pintar();
+  });
 
   function filaDeLectura(registro) {
     const fila = document.createElement("li");
@@ -603,6 +662,7 @@ function refrescarHoy() {
   pintarResumen(registros);
   pintarRangos();
   pintarCalendario(registros);
+  pintarLoDeSiempre(registros.comidas);
 }
 
 // Las tres listas avisan aquí cuando cargan, guardan, editan o borran. Todo
@@ -620,6 +680,10 @@ const listaPeso = crearLista({
   estado: "estado-lista",
   reintentar: "btn-reintentar",
   error: "error-pesaje",
+  filtro: "filtro-pesajes",
+  quitarFiltro: "btn-quitar-filtro-pesajes",
+  desplegar: "btn-desplegar-pesajes",
+  textoSinEseDia: "No hay pesajes de ese día.",
   textoVacio:
     "Aún no has apuntado ningún pesaje. Pésate al levantarte, antes de desayunar: es el momento más comparable.",
   errorCarga: "No se han podido cargar tus pesajes. Comprueba tu conexión.",
@@ -674,12 +738,53 @@ id("form-pesaje").addEventListener("submit", async (evento) => {
 
 // --- Comidas -------------------------------------------------------------
 
+// "Lo de siempre": las comidas que más repites, para apuntarlas de un toque.
+// Vive aquí y no en "Hoy" (donde estuvo en la spec 010) porque su sitio es la
+// pantalla donde se apuntan comidas.
+function pintarLoDeSiempre(comidas) {
+  const bloque = id("bloque-lo-de-siempre");
+  const contenedor = id("lo-de-siempre");
+  const habituales = loDeSiempre(comidas, hoyISO());
+
+  bloque.classList.toggle("oculta", habituales.length === 0);
+  contenedor.innerHTML = "";
+
+  habituales.forEach((habitual) => {
+    const boton = botonDeFila(
+      `${etiquetaDeMomento(habitual.momento)} · ${habitual.texto}`,
+      () => repetirComida(habitual, boton)
+    );
+    boton.className = "boton-repetir";
+    contenedor.appendChild(boton);
+  });
+}
+
+async function repetirComida(habitual, boton) {
+  const error = id("error-repetir");
+  error.textContent = "";
+  boton.disabled = true;
+
+  try {
+    await guardarComida(uidActual, habitual.texto, habitual.momento, hoyISO());
+    avisarGuardado("guardado-repetir");
+    await listaComidas.refrescar();
+  } catch {
+    error.textContent = "No se ha podido guardar. Comprueba tu conexión.";
+    boton.disabled = false;
+  }
+}
+
 const listaComidas = crearLista({
   alRefrescar: () => refrescarPantallas(),
   lista: "lista-comidas",
   estado: "estado-comidas",
   reintentar: "btn-reintentar-comidas",
   error: "error-comida",
+  filtro: "filtro-comidas",
+  quitarFiltro: "btn-quitar-filtro-comidas",
+  desplegar: "btn-desplegar-comidas",
+  textoSinEseDia: "No hay comidas de ese día.",
+  recortarPorDias: true,
   textoVacio:
     'Aún no has apuntado ninguna comida. No hace falta detalle: "lentejas y una manzana" vale.',
   errorCarga: "No se han podido cargar tus comidas. Comprueba tu conexión.",
@@ -743,6 +848,11 @@ const listaEjercicios = crearLista({
   estado: "estado-ejercicios",
   reintentar: "btn-reintentar-ejercicios",
   error: "error-ejercicio",
+  filtro: "filtro-ejercicios",
+  quitarFiltro: "btn-quitar-filtro-ejercicios",
+  desplegar: "btn-desplegar-ejercicios",
+  textoSinEseDia: "No hay ejercicios de ese día.",
+  recortarPorDias: true,
   textoVacio:
     'Aún no has apuntado ningún ejercicio. Cuenta también andar: "paseo con el carro, 40 minutos".',
   errorCarga: "No se han podido cargar tus ejercicios. Comprueba tu conexión.",
