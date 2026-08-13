@@ -1,6 +1,6 @@
 # 010 — Pantalla "Hoy"
 
-- **Estado:** revisada
+- **Estado:** completada (probada por el usuario en producción el 2026-08-13). En la prueba pidió cambios: fuera "lo de siempre" (se va a la pantalla de Comidas), botón **+** en cada línea del resumen, accesos directos a Consulta/Consejos/Fotos y calendario con rango elegible. Eso son las specs 011, 012 y 013.
 - **Fecha:** 2026-08-13
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (v2)", punto "Pantalla Hoy" (añadido el 2026-08-12 al llevarse allí el calendario de constancia).
 

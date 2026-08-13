@@ -24,19 +24,28 @@ La **v2 está empezada**: su alcance se decidió el 11 de agosto (ver `docs/PROD
 | 006 | Ajustes de usuario y reinicio de datos | ✅ completada |
 | 007 | Editar pesajes, comidas y ejercicios ya guardados (incluida la fecha) | ✅ completada |
 | 008 | Gráfica de peso con media móvil y objetivo, y comparador semanal | ✅ completada |
+| 009 | Rediseño "nocturna deportiva" y navegación inferior | ✅ completada |
+| 010 | Pantalla "Hoy" | ✅ completada |
 
 ## Qué toca ahora
 
 La v2 se acordó hacerla entera, en este orden (`docs/propuestas/v2-usabilidad-y-gamificacion.md`, apartado 9):
 
-El orden se ha ido reordenando sobre la marcha a petición del usuario. Lo que queda:
+El 13 de agosto el usuario probó la app con un mes de datos sembrados y dio una tanda larga de correcciones. De ahí salen **siete specs**, en este orden (alcance completo en `docs/PRODUCTO.md`, apartado "Ampliación de la v2"):
 
-1. **Pantalla "Hoy"**: lo apuntado hoy de un vistazo, repetir comida ("lo de siempre") y el **calendario de constancia**. El calendario ya está programado y probado en la spec 008 (`calendarioDeConstancia()` en `js/grafica.js`, `dibujarCalendario()` y `textoDeCasilla()` en `js/grafica-svg.js`, y sus estilos en `styles.css`): esta spec solo tiene que colgarlo de la pantalla nueva.
-2. **Rediseño visual** en dirección "nocturna deportiva" (oscura de serie, coral y cian) **con navegación inferior** en móvil. Urge: ya hay **siete pestañas** apelotonadas en dos filas, y la de "Hoy" serán ocho.
-3. Detalle nutricional automático por IA: grupos de alimentos y calorías en rango, con una llamada al día.
-4. Puntos, rachas con día de gracia y emblemas.
+| Spec | Qué es |
+|---|---|
+| 011 | Navegación por dispositivo (barra abajo en móvil, arriba en escritorio), "Más" pasa a ser Ajustes, y foto de perfil junto al usuario |
+| 012 | "Hoy" afinada: botón **+** por línea del resumen, accesos directos a Consulta/Consejos/Fotos, fuera "lo de siempre", calendario con rango elegible (por defecto 1 mes) |
+| 013 | Listas cortas en Peso, Comidas y Ejercicio (últimos registros, desplegar o buscar por día) y comidas frecuentes en la pantalla de Comidas |
+| 014 | Hora opcional en pesajes, comidas y ejercicios, propuesta al apuntar y editable |
+| 015 | Peso: gráfica con rango elegible, orden gráfica → pesajes → estadísticas, y sección de estadísticas |
+| 016 | "Iniciar operación bikini": onboarding conversacional que rellena los ajustes y guarda un perfil que la IA usa después |
+| 017 | Consultas especializadas: tabla de ejercicio o dieta detallada, gastando una consulta del día |
 
-Ya hechas de la v2: ajustes y reinicio (006), editar registros (007) y la gráfica de peso (008).
+Después de esas siete, sigue pendiente lo que ya estaba decidido de la v2: **detalle nutricional por IA** (grupos de alimentos y calorías en rango, una llamada al día) y **gamificación** (puntos, rachas con día de gracia y emblemas).
+
+Ya hechas de la v2: ajustes y reinicio (006), editar registros (007), gráfica de peso (008), rediseño nocturno (009) y pantalla "Hoy" (010).
 
 Decisiones de v2 ya tomadas por el usuario el 11 de agosto:
 

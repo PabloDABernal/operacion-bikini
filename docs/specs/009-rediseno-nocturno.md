@@ -1,6 +1,6 @@
 # 009 — Rediseño visual "nocturna deportiva" y navegación inferior
 
-- **Estado:** revisada
+- **Estado:** completada (probada por el usuario en producción el 2026-08-13). En la prueba pidió que en escritorio los botones vayan arriba junto al usuario y que "Más" pase a ser Ajustes: eso es la spec 011.
 - **Fecha:** 2026-08-12
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (v2)", punto "Rediseño visual" (actualizado el 2026-08-12: siempre oscura, y barra inferior también en escritorio).
 

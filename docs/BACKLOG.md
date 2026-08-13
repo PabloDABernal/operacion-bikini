@@ -11,6 +11,8 @@ Ideas surgidas durante la implementación, no implementadas. Una línea cada una
 - Editar la fecha de una foto de progreso: hoy la fecha es el ID del documento en Firestore y el nombre del archivo en Cloudinary, así que cambiarla obliga a mover ambos. Fuera de la spec 007.
 - Selector de rango temporal en la gráfica de peso (30 días / 90 días / todo), cuando haya meses de historial que enseñar. Fuera de la spec 008 por eso mismo.
 - Tocar un punto de la gráfica de peso para ver su fecha y su peso exactos. Fuera de la spec 008.
+- Elegir el encuadre de la foto de perfil al subirla (la spec 011 recorta centrado, sin editor).
+- Quitar la foto de perfil y volver a la inicial del email (la spec 011 solo deja sustituirla).
 - Repetir un ejercicio de los habituales, como "lo de siempre" hace con las comidas. Fuera de la spec 010 porque un ejercicio repetido casi nunca dura lo mismo.
 - Que la pantalla "Hoy" se actualice sola al pasar la medianoche con la app abierta. Fuera de la spec 010: no se monta un temporizador para eso.
 - Iconos en la barra de navegación inferior (la spec 009 la deja solo con texto).
