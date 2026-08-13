@@ -55,13 +55,13 @@ function mediaDelTramo(diarios, desde, hasta) {
   return dentro.reduce((suma, dia) => suma + dia.peso, 0) / dentro.length;
 }
 
-// Compara los 7 días que terminan hoy con los 7 anteriores. Devuelve null si
+// Compara los N días que terminan hoy con los N anteriores. Devuelve null si
 // falta cualquiera de los dos tramos: sin las dos mitades no hay comparación
 // que valga.
-export function compararSemanas(diarios, hoy) {
-  const inicioActual = sumarDias(hoy, -6);
-  const finAnterior = sumarDias(hoy, -7);
-  const inicioAnterior = sumarDias(hoy, -13);
+export function compararVentanas(diarios, hoy, dias) {
+  const inicioActual = sumarDias(hoy, -(dias - 1));
+  const finAnterior = sumarDias(hoy, -dias);
+  const inicioAnterior = sumarDias(hoy, -(dias * 2 - 1));
 
   const actual = mediaDelTramo(diarios, inicioActual, hoy);
   const anterior = mediaDelTramo(diarios, inicioAnterior, finAnterior);
@@ -69,6 +69,10 @@ export function compararSemanas(diarios, hoy) {
   if (actual === null || anterior === null) return null;
 
   return { actual, anterior, diferencia: actual - anterior };
+}
+
+export function compararSemanas(diarios, hoy) {
+  return compararVentanas(diarios, hoy, 7);
 }
 
 // Los tres tipos que cuentan para la constancia, en el orden en que se

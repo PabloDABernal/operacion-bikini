@@ -79,13 +79,11 @@
       <p id="error-pesaje" class="error" role="alert"></p>
       <p id="guardado-pesaje" class="guardado" role="status"></p>
 
-      <!-- Gráfica y comparador (spec 008) -->
+      <!-- Gráfica con rango (specs 008 y 015) -->
       <h2>Cómo va</h2>
+      <div id="rangos-grafica" class="rangos"></div>
       <div id="grafica-peso" class="bloque-grafica"></div>
       <p id="grafica-vacia" class="explicacion"></p>
-
-      <p id="comparador" class="comparador"></p>
-      <p id="comparador-detalle" class="comparador-detalle"></p>
 
       <h2>Mis pesajes</h2>
       <div class="filtro-dia">
@@ -97,6 +95,10 @@
       <button type="button" id="btn-reintentar" class="oculta">Reintentar</button>
       <ul id="lista-pesajes"></ul>
       <button type="button" id="btn-desplegar-pesajes" class="desplegar oculta"></button>
+
+      <!-- Estadísticas (spec 015) -->
+      <h2>Estadísticas</h2>
+      <ul id="estadisticas" class="resumen"></ul>
     </div>
 
     <!-- Sección: Comidas -->

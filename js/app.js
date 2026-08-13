@@ -12,17 +12,15 @@ import {
 import {
   hoyISO,
   horaActual,
+  sumarDias,
   formatearFecha,
   formatearHora,
   formatearFechaConHora
 } from "./fechas.js";
 
-import {
-  pesosPorDia,
-  mediaMovil,
-  compararSemanas,
-  calendarioDeConstancia
-} from "./grafica.js";
+import { pesosPorDia, mediaMovil, calendarioDeConstancia } from "./grafica.js";
+
+import { estadisticasDePeso } from "./estadisticas.js";
 
 import {
   dibujarGrafica,
@@ -509,47 +507,107 @@ function campoDesplegable(opciones, valorActual, clase) {
   return elemento;
 }
 
-// --- Gráfica y comparador ------------------------------------------------
+// --- Gráfica de peso -----------------------------------------------------
 
 // El peso objetivo vive en Ajustes; se cachea aquí para que la gráfica no
 // tenga que volver a leerlo de Firestore cada vez que se repinta.
 let pesoObjetivoActual = null;
 
-function pintarComparador(diarios) {
-  const comparacion = compararSemanas(diarios, hoyISO());
+// --- Estadísticas de peso ------------------------------------------------
 
-  if (!comparacion) {
-    id("comparador").textContent = "";
-    id("comparador-detalle").textContent =
-      "Aún no hay datos suficientes para comparar semanas.";
-    return;
-  }
+// Ni verde ni rojo: se premia la conducta, no los kilos (PRODUCTO.md).
+function conSigno(kg) {
+  const signo = kg > 0 ? "+" : "−";
+  return `${signo}${Math.abs(kg).toFixed(1).replace(".", ",")} kg`;
+}
 
-  const { actual, anterior, diferencia } = comparacion;
-  const redondeada = Math.round(diferencia * 10) / 10;
+function lineaDeEstadistica(etiqueta, valor, detalle) {
+  const fila = document.createElement("li");
+  fila.append(celda(etiqueta, "resumen-etiqueta"), celda(valor, "resumen-valor"));
+  if (detalle) fila.appendChild(celda(detalle, "registro-detalle"));
+  return fila;
+}
 
-  // Ni verde ni rojo: se premia la conducta, no los kilos (PRODUCTO.md).
-  id("comparador").textContent =
-    redondeada === 0
-      ? "Igual que la semana pasada"
-      : `${redondeada > 0 ? "+" : "−"}${Math.abs(redondeada)
-          .toFixed(1)
-          .replace(".", ",")} kg esta semana`;
+function pintarEstadisticas(diarios) {
+  const { semana, mes, total, objetivo } = estadisticasDePeso(
+    diarios,
+    hoyISO(),
+    pesoObjetivoActual
+  );
+  const lista = id("estadisticas");
+  const sinDatos = "Aún no hay datos suficientes";
 
-  const enKg = (valor) => `${valor.toFixed(1).replace(".", ",")} kg`;
-  id("comparador-detalle").textContent =
-    `media ${enKg(actual)} · semana pasada ${enKg(anterior)}`;
+  const variacion = (valor, textoIgual) => {
+    if (valor === null) return sinDatos;
+    return valor === 0 ? textoIgual : conSigno(valor);
+  };
+
+  lista.innerHTML = "";
+  lista.append(
+    lineaDeEstadistica(
+      "Últimos 7 días",
+      variacion(semana, "Igual que la semana pasada")
+    ),
+    lineaDeEstadistica("Últimos 30 días", variacion(mes, "Igual que hace un mes")),
+    lineaDeEstadistica(
+      "Desde que empezaste",
+      total ? conSigno(total.diferencia) : "Necesitas al menos dos pesajes",
+      total ? `en ${total.dias} ${total.dias === 1 ? "día" : "días"}` : ""
+    ),
+    lineaDeEstadistica(
+      "Para el objetivo",
+      !objetivo
+        ? "Ponte un peso objetivo en Ajustes"
+        : objetivo.alcanzado
+          ? "¡Objetivo alcanzado!"
+          : `Te faltan ${objetivo.faltan.toFixed(1).replace(".", ",")} kg`
+    )
+  );
+}
+
+const RANGOS_GRAFICA = [
+  { etiqueta: "1 sem", dias: 7 },
+  { etiqueta: "1 mes", dias: 30 },
+  { etiqueta: "3 meses", dias: 90 },
+  { etiqueta: "6 meses", dias: 180 },
+  { etiqueta: "1 año", dias: 365 },
+  { etiqueta: "Todo", dias: null }
+];
+
+let diasGrafica = 30;
+
+function pintarRangosGrafica() {
+  const contenedor = id("rangos-grafica");
+  contenedor.innerHTML = "";
+
+  RANGOS_GRAFICA.forEach(({ etiqueta, dias }) => {
+    const boton = botonDeFila(etiqueta, () => {
+      diasGrafica = dias;
+      refrescarGrafica();
+    });
+    boton.className = "rango";
+    boton.classList.toggle("activa", dias === diasGrafica);
+    contenedor.appendChild(boton);
+  });
 }
 
 function refrescarGrafica() {
   const pesajes = listaPeso.obtenerRegistros();
-  const diarios = mediaMovil(pesosPorDia(pesajes));
+
+  // La media móvil se calcula con TODOS los pesajes y solo después se recorta
+  // la ventana que se pinta: si se calculara sobre lo visible, los primeros
+  // días de cada rango enseñarían una media inventada.
+  const todos = mediaMovil(pesosPorDia(pesajes));
+  const desde = diasGrafica === null ? null : sumarDias(hoyISO(), -(diasGrafica - 1));
+  const diarios = desde ? todos.filter((dia) => dia.fecha >= desde) : todos;
 
   const contenedor = id("grafica-peso");
   const vacia = id("grafica-vacia");
   contenedor.innerHTML = "";
 
-  const svg = dibujarGrafica(diarios, pesoObjetivoActual, pesajes.length);
+  pintarRangosGrafica();
+
+  const svg = dibujarGrafica(diarios, pesoObjetivoActual, diarios.length);
   if (svg) {
     contenedor.appendChild(svg);
     vacia.textContent = "";
@@ -557,7 +615,9 @@ function refrescarGrafica() {
     vacia.textContent = "Apunta algún pesaje más para ver la evolución.";
   }
 
-  pintarComparador(diarios);
+  // Las estadísticas miran siempre todo el historial: si cambiaran con el
+  // rango, "últimos 7 días" significaría cosas distintas según un botón.
+  pintarEstadisticas(todos);
 }
 
 // --- Hoy -----------------------------------------------------------------
