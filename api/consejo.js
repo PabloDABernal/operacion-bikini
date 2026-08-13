@@ -18,6 +18,16 @@ Devuelve un JSON con exactamente estas tres claves:
 - "queHacer": dos o tres pautas concretas y realizables para esta semana.
 - "ojoCon": un aviso o riesgo concreto al que prestar atención.`;
 
+// Lo que la IA ya sabe de esta persona, para no dar consejos genéricos.
+function contexto(nombre, perfil) {
+  if (!nombre && !perfil) return "";
+  return (
+    "\n\n" +
+    (nombre ? `Me llamo ${nombre}.` : "") +
+    (perfil ? ` Esto es lo que ya sabes de mí: ${perfil}` : "")
+  );
+}
+
 module.exports = async (req, res) => {
   if (!(await peticionAutorizada(req, res))) return;
 
@@ -41,7 +51,11 @@ module.exports = async (req, res) => {
             {
               text:
                 "Estos son mis datos de los últimos 14 días:\n\n" +
-                describirRegistros({ pesajes, comidas, ejercicios })
+                describirRegistros({ pesajes, comidas, ejercicios }) +
+                // Lo que salió de la entrevista de bienvenida (spec 016): el
+                // consejo deja de ser genérico y tiene en cuenta a quién se lo
+                // está dando.
+                contexto(req.body.nombre, req.body.perfil)
             }
           ]
         }

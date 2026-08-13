@@ -204,6 +204,11 @@
       </p>
 
       <button type="button" id="btn-empezar-consulta">Empezar consulta</button>
+      <p id="explicacion-inicial" class="explicacion oculta">
+        Es la entrevista de bienvenida: te preguntará cómo quieres que te llame,
+        tus medidas y tus gustos, y dejará tus ajustes rellenos para que la IA
+        te conozca a partir de ahora.
+      </p>
       <p id="aviso-consulta" class="explicacion"></p>
 
       <div id="hilo-consulta"></div>
@@ -259,6 +264,10 @@
 
         <label for="fecha-objetivo">Fecha objetivo</label>
         <input type="date" id="fecha-objetivo">
+
+        <label for="perfil">Lo que la IA sabe de ti</label>
+        <textarea id="perfil" rows="5" maxlength="2000"
+          placeholder="Lo rellena sola la entrevista de bienvenida. Puedes corregirlo."></textarea>
 
         <button type="submit" id="btn-guardar-ajustes">Guardar</button>
       </form>

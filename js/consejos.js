@@ -14,6 +14,7 @@ import { hoyISO } from "./fechas.js";
 import { listarPesajes } from "./pesajes.js";
 import { listarComidas } from "./comidas.js";
 import { listarEjercicios } from "./ejercicios.js";
+import { leerAjustes } from "./ajustes.js";
 
 const DIAS_DE_HISTORIAL = 14;
 const MAXIMO_POR_DIA = 5;
@@ -109,6 +110,10 @@ export async function pedirConsejo(uid, consejosActuales) {
     throw error;
   }
 
+  // Lo que la IA sabe de esta persona (spec 016): con esto el consejo deja de
+  // ser genérico. Si no se puede leer, se pide igual, solo que sin contexto.
+  const ajustes = await leerAjustes(uid).catch(() => ({}));
+
   const idToken = await auth.currentUser.getIdToken();
 
   // El navegador corta antes que la función (60 s), así que un corte siempre
@@ -123,7 +128,11 @@ export async function pedirConsejo(uid, consejosActuales) {
         "Content-Type": "application/json",
         Authorization: `Bearer ${idToken}`
       },
-      body: JSON.stringify({ registros }),
+      body: JSON.stringify({
+        registros,
+        nombre: ajustes.nombre || "",
+        perfil: ajustes.perfil || ""
+      }),
       signal: cancelar
     });
   } catch {

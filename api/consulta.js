@@ -30,7 +30,23 @@ Sobre el plan:
 - No inventes datos que no te haya dado. Si algo no lo sabes, da la pauta de forma general.
 - IMPORTANTÍSIMO: cuando devuelvas el plan, rellena SIEMPRE los dos campos, "nutricion" y "ejercicio". Un plan sin rutina de ejercicio no sirve. Si te quedas sin espacio, acorta la parte de nutrición, nunca omitas el ejercicio.`;
 
-// Los cuatro campos son obligatorios a propósito: con "ejercicio" opcional,
+// La entrevista de bienvenida (spec 016): además del plan, saca los datos que
+// van a Ajustes y un retrato de la persona que la IA reutilizará después.
+const INSTRUCCIONES_INICIAL = `${INSTRUCCIONES}
+
+ESTA ES LA ENTREVISTA DE BIENVENIDA. Además de lo anterior:
+- Tu PRIMERA pregunta es cómo quiere que le llames. Nada más.
+- A lo largo de la conversación tienes que averiguar sí o sí: altura en centímetros, peso actual, peso objetivo, para cuándo, qué comidas le gustan y cuáles no soporta, alergias e intolerancias, qué ejercicio disfruta, con qué material cuenta (gimnasio, pesas en casa, nada) y si tiene lesiones o limitaciones.
+- Sigue siendo UNA pregunta por turno.
+
+Cuando devuelvas el plan, rellena también estos campos:
+- "nombre": cómo quiere que le llamen.
+- "alturaCm": solo el número en centímetros, por ejemplo "176". Vacío si no lo ha dicho.
+- "pesoObjetivoKg": solo el número en kilos, por ejemplo "78.5". Vacío si no lo ha dicho.
+- "fechaObjetivo": en formato AAAA-MM-DD. Vacío si no ha dado plazo.
+- "perfil": un retrato en prosa de esta persona para que otro nutricionista pueda aconsejarla sin volver a entrevistarla: gustos, aversiones, alergias, ejercicio que disfruta, material, limitaciones y horarios. Máximo 200 palabras.`;
+
+// Todos los campos son obligatorios a propósito: con "ejercicio" opcional,
 // Gemini se lo saltaba y llegaban planes sin rutina. Los que no aplican en
 // cada turno vienen como cadena vacía.
 const ESQUEMA = {
@@ -39,10 +55,35 @@ const ESQUEMA = {
     tipo: { type: "STRING", enum: ["pregunta", "plan"] },
     pregunta: { type: "STRING" },
     nutricion: { type: "STRING" },
-    ejercicio: { type: "STRING" }
+    ejercicio: { type: "STRING" },
+    nombre: { type: "STRING" },
+    alturaCm: { type: "STRING" },
+    pesoObjetivoKg: { type: "STRING" },
+    fechaObjetivo: { type: "STRING" },
+    perfil: { type: "STRING" }
   },
-  required: ["tipo", "pregunta", "nutricion", "ejercicio"]
+  required: [
+    "tipo",
+    "pregunta",
+    "nutricion",
+    "ejercicio",
+    "nombre",
+    "alturaCm",
+    "pesoObjetivoKg",
+    "fechaObjetivo",
+    "perfil"
+  ]
 };
+
+// Lo que la IA ya sabe de esta persona, para no volver a preguntarlo.
+function contexto(nombre, perfil) {
+  if (!nombre && !perfil) return "";
+  return (
+    "\n\n" +
+    (nombre ? `Esta persona quiere que la llames ${nombre}.` : "") +
+    (perfil ? ` Esto es lo que ya sabes de ella: ${perfil}` : "")
+  );
+}
 
 module.exports = async (req, res) => {
   if (!(await peticionAutorizada(req, res))) return;
@@ -50,6 +91,8 @@ module.exports = async (req, res) => {
   const cuerpo = req.body || {};
   const mensajes = Array.isArray(cuerpo.mensajes) ? cuerpo.mensajes : [];
   const registros = cuerpo.registros || {};
+  const inicial = cuerpo.modo === "inicial";
+  const instrucciones = inicial ? INSTRUCCIONES_INICIAL : INSTRUCCIONES;
 
   const preguntasHechas = mensajes.filter((mensaje) => mensaje.de === "ia").length;
   const debeCerrar = preguntasHechas >= MAXIMO_PREGUNTAS;
@@ -63,6 +106,7 @@ module.exports = async (req, res) => {
           text:
             "Estos son mis registros de los últimos 14 días:\n\n" +
             describirRegistros(registros) +
+            contexto(cuerpo.nombre, cuerpo.perfil) +
             (mensajes.length
               ? ""
               : "\n\nEmpieza la entrevista con tu primera pregunta.")
@@ -91,7 +135,7 @@ module.exports = async (req, res) => {
   const respuesta = await generarJson(
     res,
     {
-      systemInstruction: { parts: [{ text: INSTRUCCIONES }] },
+      systemInstruction: { parts: [{ text: instrucciones }] },
       contents,
       generationConfig: {
         responseMimeType: "application/json",
@@ -117,7 +161,7 @@ module.exports = async (req, res) => {
       const soloEjercicio = await generarJson(
         res,
         {
-          systemInstruction: { parts: [{ text: INSTRUCCIONES }] },
+          systemInstruction: { parts: [{ text: instrucciones }] },
           contents: [
             ...contents,
             {
@@ -152,7 +196,14 @@ module.exports = async (req, res) => {
     return res.status(200).json({
       tipo: "plan",
       nutricion: respuesta.nutricion,
-      ejercicio
+      ejercicio,
+      // Solo la entrevista de bienvenida trae datos personales; en el resto
+      // vienen vacíos y el navegador no guarda nada.
+      nombre: inicial ? respuesta.nombre : "",
+      alturaCm: inicial ? respuesta.alturaCm : "",
+      pesoObjetivoKg: inicial ? respuesta.pesoObjetivoKg : "",
+      fechaObjetivo: inicial ? respuesta.fechaObjetivo : "",
+      perfil: inicial ? respuesta.perfil : ""
     });
   }
 

@@ -25,12 +25,14 @@ function referenciaDe(uid) {
 // Devuelve { pesoObjetivoKg, alturaCm, fechaObjetivo } o { error }.
 // Los tres campos son opcionales: se puede guardar solo uno.
 export const MAX_NOMBRE = 30;
+export const MAX_PERFIL = 2000;
 
-export function validarAjustes(pesoTexto, alturaTexto, fecha, nombreTexto) {
+export function validarAjustes(pesoTexto, alturaTexto, fecha, nombreTexto, perfilTexto) {
   const ajustes = {
     // Cadena vacía, no null: "no quiero que me llames de ninguna manera" es
     // una respuesta válida y hay que poder volver a ella.
     nombre: String(nombreTexto ?? "").trim().slice(0, MAX_NOMBRE),
+    perfil: String(perfilTexto ?? "").trim().slice(0, MAX_PERFIL),
     pesoObjetivoKg: null,
     alturaCm: null,
     fechaObjetivo: null
@@ -74,13 +76,48 @@ export async function leerAjustes(uid) {
   if (!instantanea.exists()) {
     return {
       nombre: "",
+      perfil: "",
       pesoObjetivoKg: null,
       alturaCm: null,
       fechaObjetivo: null,
       fotoPerfil: null
     };
   }
-  return { nombre: "", fotoPerfil: null, ...instantanea.data() };
+  return { nombre: "", perfil: "", fotoPerfil: null, ...instantanea.data() };
+}
+
+// Lo que la entrevista de bienvenida (spec 016) saca de la conversación. Cada
+// dato pasa por las mismas validaciones que el formulario: la IA se equivoca, y
+// un peso objetivo de 5 kg no puede entrar por la puerta de atrás. Lo que no
+// valga se ignora en silencio y ese ajuste se queda como estaba.
+export function guardarLoAveriguado(uid, datos) {
+  const validados = validarAjustes(
+    datos.pesoObjetivoKg,
+    datos.alturaCm,
+    datos.fechaObjetivo,
+    datos.nombre,
+    datos.perfil
+  );
+
+  const aGuardar = {};
+  if (!validados.error) {
+    if (validados.nombre) aGuardar.nombre = validados.nombre;
+    if (validados.perfil) aGuardar.perfil = validados.perfil;
+    if (validados.pesoObjetivoKg !== null) {
+      aGuardar.pesoObjetivoKg = validados.pesoObjetivoKg;
+    }
+    if (validados.alturaCm !== null) aGuardar.alturaCm = validados.alturaCm;
+    if (validados.fechaObjetivo) aGuardar.fechaObjetivo = validados.fechaObjetivo;
+  } else {
+    // Un solo campo malo no debe tirar los demás: se reintenta sin los
+    // numéricos, que son los que suele inventarse.
+    const soloTexto = validarAjustes("", "", "", datos.nombre, datos.perfil);
+    if (soloTexto.nombre) aGuardar.nombre = soloTexto.nombre;
+    if (soloTexto.perfil) aGuardar.perfil = soloTexto.perfil;
+  }
+
+  if (Object.keys(aGuardar).length === 0) return Promise.resolve();
+  return guardarAjustes(uid, aGuardar);
 }
 
 // La foto va por su lado y no pasa por validarAjustes(): así guardar el peso

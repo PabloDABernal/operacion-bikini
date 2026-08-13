@@ -16,6 +16,7 @@ import { hoyISO } from "./fechas.js";
 import { listarPesajes } from "./pesajes.js";
 import { listarComidas } from "./comidas.js";
 import { listarEjercicios } from "./ejercicios.js";
+import { leerAjustes, guardarLoAveriguado } from "./ajustes.js";
 
 const DIAS_DE_HISTORIAL = 14;
 const MAXIMO_CONSULTAS_DIARIAS = 2;
@@ -123,7 +124,7 @@ function errorConCodigo(codigo, mensaje) {
 }
 
 // Manda el hilo al proxy y devuelve { tipo: "pregunta" | "plan", ... }.
-async function turnoDeIa(mensajes, registros) {
+async function turnoDeIa(mensajes, registros, extra) {
   const idToken = await auth.currentUser.getIdToken();
 
   let respuesta;
@@ -134,7 +135,7 @@ async function turnoDeIa(mensajes, registros) {
         "Content-Type": "application/json",
         Authorization: `Bearer ${idToken}`
       },
-      body: JSON.stringify({ mensajes, registros }),
+      body: JSON.stringify({ mensajes, registros, ...extra }),
       signal: AbortSignal.timeout(ESPERA_MAXIMA_MS)
     });
   } catch {
@@ -155,14 +156,39 @@ async function turnoDeIa(mensajes, registros) {
   return respuesta.json();
 }
 
+// Con la app recién estrenada toca la entrevista de bienvenida, que además de
+// dar un plan rellena los ajustes y guarda el perfil (spec 016).
+export function esPrimeraVez(consultas) {
+  return !consultas.some((consulta) => consulta.estado === "terminada");
+}
+
+// Lo que la IA ya sabe de esta persona, para no volver a preguntarlo.
+async function contextoDelUsuario(uid) {
+  try {
+    const ajustes = await leerAjustes(uid);
+    return { nombre: ajustes.nombre || "", perfil: ajustes.perfil || "" };
+  } catch {
+    // Sin contexto la consulta funciona igual, solo que más genérica.
+    return {};
+  }
+}
+
 // Crea la consulta con la primera pregunta ya dentro.
 export async function empezarConsulta(uid, consultas) {
   if (!quedanConsultasHoy(consultas)) {
     throw errorConCodigo("limite-diario", "Límite diario de consultas alcanzado");
   }
 
-  const registros = await recogerRegistros(uid);
-  const respuesta = await turnoDeIa([], registros);
+  const inicial = esPrimeraVez(consultas);
+  const [registros, contexto] = await Promise.all([
+    recogerRegistros(uid),
+    contextoDelUsuario(uid)
+  ]);
+
+  const respuesta = await turnoDeIa([], registros, {
+    ...contexto,
+    modo: inicial ? "inicial" : "normal"
+  });
 
   if (respuesta.tipo !== "pregunta") {
     throw errorConCodigo("respuesta-ilegible", "La IA no empezó con una pregunta");
@@ -170,6 +196,7 @@ export async function empezarConsulta(uid, consultas) {
 
   await addDoc(consultasDe(uid), {
     estado: "en-curso",
+    modo: inicial ? "inicial" : "normal",
     mensajes: [{ de: "ia", texto: respuesta.pregunta }],
     creadaEn: serverTimestamp(),
     terminadaEn: null
@@ -179,10 +206,16 @@ export async function empezarConsulta(uid, consultas) {
 // Añade la respuesta del usuario y el siguiente turno de la IA. Si la IA
 // devuelve el plan, cierra la consulta y guarda el plan.
 export async function responder(uid, consulta, texto) {
-  const registros = await recogerRegistros(uid);
+  const [registros, contexto] = await Promise.all([
+    recogerRegistros(uid),
+    contextoDelUsuario(uid)
+  ]);
   const mensajes = [...consulta.mensajes, { de: "usuario", texto }];
 
-  const respuesta = await turnoDeIa(mensajes, registros);
+  const respuesta = await turnoDeIa(mensajes, registros, {
+    ...contexto,
+    modo: consulta.modo || "normal"
+  });
   const referencia = doc(db, "usuarios", uid, "consultas", consulta.id);
 
   if (respuesta.tipo === "plan") {
@@ -199,7 +232,13 @@ export async function responder(uid, consulta, texto) {
       creadoEn: serverTimestamp()
     });
 
-    return { termino: true };
+    // La entrevista de bienvenida deja los ajustes rellenos y el perfil
+    // guardado, sin que el usuario tenga que copiarlos a mano.
+    if (consulta.modo === "inicial") {
+      await guardarLoAveriguado(uid, respuesta);
+    }
+
+    return { termino: true, inicial: consulta.modo === "inicial" };
   }
 
   await updateDoc(referencia, {

@@ -71,6 +71,7 @@ import {
   listarConsultas,
   listarPlanes,
   consultaEnCurso,
+  esPrimeraVez,
   quedanConsultasHoy,
   empezarConsulta,
   responder,
@@ -1195,17 +1196,24 @@ function pintarEstadoConsulta() {
     ? null
     : consultasCargadas.find((consulta) => consulta.id === consultaReciénTerminada);
 
+  // Con la app recién estrenada, la primera consulta es la entrevista de
+  // bienvenida y se anuncia como tal (spec 016).
+  const primeraVez = esPrimeraVez(consultasCargadas);
+
   id("form-respuesta").classList.toggle("oculta", !enCurso);
   id("btn-abandonar").classList.toggle("oculta", !enCurso);
   id("btn-empezar-consulta").classList.toggle("oculta", enCurso);
+  id("explicacion-inicial").classList.toggle("oculta", enCurso || !primeraVez);
 
   if (enCurso) {
     id("aviso-consulta").textContent = "";
   } else {
     id("btn-empezar-consulta").disabled = !quedanHoy;
-    id("btn-empezar-consulta").textContent = terminada
-      ? "Empezar otra consulta"
-      : "Empezar consulta";
+    id("btn-empezar-consulta").textContent = primeraVez
+      ? "Iniciar operación bikini"
+      : terminada
+        ? "Empezar otra consulta"
+        : "Empezar consulta";
     id("aviso-consulta").textContent = quedanHoy
       ? terminada
         ? "Consulta terminada. Tu plan es el primero de la lista."
@@ -1279,15 +1287,19 @@ id("form-respuesta").addEventListener("submit", async (evento) => {
   // La respuesta solo se borra si se ha enviado bien: si falla, se reintenta.
   const idDeLaConsulta = consultaAbierta.id;
   let termino = false;
+  let inicial = false;
 
   const fueBien = await conEspera(async () => {
-    ({ termino } = await responder(uidActual, consultaAbierta, texto));
+    ({ termino, inicial } = await responder(uidActual, consultaAbierta, texto));
   });
 
   if (fueBien) {
     campo.value = "";
     if (termino) consultaReciénTerminada = idDeLaConsulta;
     await refrescarConsulta();
+    // La entrevista de bienvenida ha dejado ajustes y perfil guardados: hay
+    // que releerlos para que la cabecera y el formulario los enseñen.
+    if (termino && inicial) await refrescarAjustes();
   }
 });
 
@@ -1444,6 +1456,7 @@ async function refrescarAjustes() {
     pintarNombre(ajustes.nombre);
     refrescarGrafica();
     id("nombre").value = ajustes.nombre || "";
+    id("perfil").value = ajustes.perfil || "";
     id("peso-objetivo").value =
       ajustes.pesoObjetivoKg == null
         ? ""
@@ -1467,7 +1480,8 @@ id("form-ajustes").addEventListener("submit", async (evento) => {
     id("peso-objetivo").value,
     id("altura").value,
     id("fecha-objetivo").value,
-    id("nombre").value
+    id("nombre").value,
+    id("perfil").value
   );
 
   if (resultado.error) {
