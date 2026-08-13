@@ -919,3 +919,30 @@ button:disabled {
   color: var(--tinta-suave);
   font-size: 0.75rem;
 }
+
+/* Consultas especializadas (spec 017) */
+
+#bloque-especializadas {
+  margin-top: var(--e6);
+  padding-top: var(--e4);
+  border-top: 1px solid var(--borde);
+}
+
+#bloque-especializadas h3 {
+  margin: 0 0 var(--e1);
+}
+
+#tipos-especializados,
+#alcances-especializados {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e2);
+}
+
+#alcances-especializados {
+  margin-top: var(--e2);
+}
+
+#alcances-especializados.oculta {
+  display: none;
+}

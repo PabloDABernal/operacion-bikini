@@ -76,6 +76,9 @@ import {
   empezarConsulta,
   responder,
   abandonarConsulta,
+  TIPOS_ESPECIALIZADOS,
+  etiquetaDePlan,
+  pedirPlanEspecializado,
   mensajeDeErrorDeConsulta
 } from "./consulta.js";
 
@@ -1169,7 +1172,8 @@ function pintarPlanes(planes) {
 
     const fecha = document.createElement("p");
     fecha.className = "consejo-fecha";
-    fecha.textContent = formatearFechaYHora(plan.creadoEn);
+    // Los planes de antes de la spec 017 no tienen tipo: son planes completos.
+    fecha.textContent = `${etiquetaDePlan(plan)} · ${formatearFechaYHora(plan.creadoEn)}`;
     tarjeta.appendChild(fecha);
 
     [
@@ -1221,7 +1225,62 @@ function pintarEstadoConsulta() {
       : "Ya has pasado consulta 2 veces hoy.";
   }
 
+  pintarEspecializadas(enCurso || !quedanHoy);
   pintarHilo(consultaAbierta || terminada);
+}
+
+// --- Consultas especializadas (spec 017) ---------------------------------
+
+// Dos pasos: primero qué quieres, y luego para cuándo.
+function pintarEspecializadas(bloqueado) {
+  const tipos = id("tipos-especializados");
+  const alcances = id("alcances-especializados");
+
+  tipos.innerHTML = "";
+  alcances.innerHTML = "";
+  alcances.classList.add("oculta");
+
+  Object.entries(TIPOS_ESPECIALIZADOS).forEach(([tipo, config]) => {
+    const boton = botonDeFila(`Pedir ${config.etiqueta.toLowerCase()}`, () =>
+      pintarAlcances(tipo, config)
+    );
+    boton.className = "atajo";
+    boton.disabled = bloqueado;
+    tipos.appendChild(boton);
+  });
+}
+
+function pintarAlcances(tipo, config) {
+  const alcances = id("alcances-especializados");
+  alcances.innerHTML = "";
+  alcances.classList.remove("oculta");
+
+  config.alcances.forEach(({ valor, etiqueta }) => {
+    const boton = botonDeFila(etiqueta, () => pedirEspecializada(tipo, valor));
+    boton.className = "atajo";
+    alcances.appendChild(boton);
+  });
+
+  const cancelar = botonDeFila("Cancelar", () => pintarEspecializadas(false));
+  cancelar.className = "enlace";
+  alcances.appendChild(cancelar);
+}
+
+async function pedirEspecializada(tipo, alcance) {
+  const error = id("error-especializada");
+  error.textContent = "";
+  id("estado-consulta").textContent = "Pensando…";
+  pintarEspecializadas(true);
+
+  try {
+    await pedirPlanEspecializado(uidActual, consultasCargadas, tipo, alcance);
+    await refrescarConsulta();
+  } catch (fallo) {
+    error.textContent = mensajeDeErrorDeConsulta(fallo.codigo);
+    pintarEspecializadas(false);
+  } finally {
+    id("estado-consulta").textContent = "";
+  }
 }
 
 async function refrescarConsulta() {

@@ -248,6 +248,96 @@ export async function responder(uid, consulta, texto) {
   return { termino: false };
 }
 
+// --- Consultas especializadas (spec 017) ---------------------------------
+
+const URL_PLAN = "/api/plan";
+
+export const TIPOS_ESPECIALIZADOS = {
+  ejercicio: {
+    etiqueta: "Tabla de ejercicio",
+    alcances: [
+      { valor: "hoy", etiqueta: "Para hoy" },
+      { valor: "semana", etiqueta: "Para la semana" }
+    ]
+  },
+  dieta: {
+    etiqueta: "Dieta detallada",
+    alcances: [
+      { valor: "3dias", etiqueta: "3 días" },
+      { valor: "7dias", etiqueta: "7 días" }
+    ]
+  }
+};
+
+export function etiquetaDePlan(plan) {
+  const tipo = TIPOS_ESPECIALIZADOS[plan.tipo];
+  if (!tipo) return "Plan completo";
+
+  const alcance = tipo.alcances.find((a) => a.valor === plan.alcance);
+  return alcance ? `${tipo.etiqueta} · ${alcance.etiqueta}` : tipo.etiqueta;
+}
+
+// Pide algo concreto y lo guarda como un plan más. Sin conversación: una
+// petición, una respuesta.
+export async function pedirPlanEspecializado(uid, consultas, tipo, alcance) {
+  if (!quedanConsultasHoy(consultas)) {
+    throw errorConCodigo("limite-diario", "Límite diario de consultas alcanzado");
+  }
+
+  const [registros, contexto] = await Promise.all([
+    recogerRegistros(uid),
+    contextoDelUsuario(uid)
+  ]);
+
+  const idToken = await auth.currentUser.getIdToken();
+
+  let respuesta;
+  try {
+    respuesta = await fetch(URL_PLAN, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${idToken}`
+      },
+      body: JSON.stringify({ tipo, alcance, registros, ...contexto }),
+      signal: AbortSignal.timeout(ESPERA_MAXIMA_MS)
+    });
+  } catch {
+    throw errorConCodigo("red", "Proxy inalcanzable");
+  }
+
+  if (!respuesta.ok) {
+    let codigo = "red";
+    try {
+      const datos = await respuesta.json();
+      if (datos.error) codigo = datos.error;
+    } catch {
+      // Respuesta sin JSON: nos quedamos con el mensaje genérico.
+    }
+    throw errorConCodigo(codigo, `El proxy respondió ${respuesta.status}`);
+  }
+
+  const plan = await respuesta.json();
+
+  await addDoc(planesDe(uid), {
+    nutricion: plan.nutricion,
+    ejercicio: plan.ejercicio,
+    tipo,
+    alcance,
+    creadoEn: serverTimestamp()
+  });
+
+  // El cupo se apunta DESPUÉS de que la IA haya respondido bien: un fallo suyo
+  // no debe costarte una de las dos consultas del día.
+  await addDoc(consultasDe(uid), {
+    estado: "terminada",
+    modo: "especializada",
+    mensajes: [],
+    creadaEn: serverTimestamp(),
+    terminadaEn: serverTimestamp()
+  });
+}
+
 export function abandonarConsulta(uid, consultaId) {
   return updateDoc(doc(db, "usuarios", uid, "consultas", consultaId), {
     estado: "abandonada",
