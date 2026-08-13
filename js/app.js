@@ -24,7 +24,7 @@ import {
   textoDeCasilla
 } from "./grafica-svg.js";
 
-import { resumenDelDia, loDeSiempre } from "./hoy.js";
+import { loDeSiempre } from "./hoy.js";
 
 import {
   validarPesaje,
@@ -203,6 +203,16 @@ btnSalir.addEventListener("click", () => salir());
 
 // Sin foto se enseña la inicial del email. El email siempre viene de Firebase
 // Auth, pero por si acaso queda un interrogante en vez de un círculo mudo.
+// El email del usuario, para cuando aún no ha dicho cómo quiere que le llamen.
+let emailActual = "";
+
+// La cabecera enseña el nombre si lo hay. Un email largo partido en tres
+// líneas quedaba fatal, y además nadie quiere que su app le llame por su
+// correo.
+function pintarNombre(nombre) {
+  emailUsuario.textContent = nombre || emailActual;
+}
+
 function pintarAvatar(url, email) {
   const avatar = id("btn-perfil");
   avatar.innerHTML = "";
@@ -233,7 +243,7 @@ id("archivo-perfil").addEventListener("change", async (evento) => {
   try {
     const url = await subirFotoDePerfil(archivo);
     await guardarFotoPerfil(uidActual, url);
-    pintarAvatar(url, emailUsuario.textContent);
+    pintarAvatar(url, emailActual);
     estado.textContent = "";
   } catch {
     estado.textContent = "No se ha podido subir la foto. Comprueba tu conexión.";
@@ -490,81 +500,76 @@ function fechaLarga(iso) {
   return FORMATO_FECHA_LARGA.format(new Date(anio, mes - 1, dia, 12));
 }
 
-// Una línea del resumen: etiqueta a la izquierda, dato a la derecha y, si no
-// hay nada apuntado, un botón que lleva a la pestaña donde se apunta.
-function lineaDeResumen(etiqueta, valor, seccion, textoBoton) {
+// Una línea del resumen: la etiqueta, lo último apuntado hoy (si hay algo) y
+// un + que lleva a la pantalla donde se apunta. Sin nada apuntado, solo el +.
+function lineaDeResumen(etiqueta, ultimo, seccion) {
   const fila = document.createElement("li");
-  fila.append(celda(etiqueta, "resumen-etiqueta"), celda(valor ?? "—", "resumen-valor"));
+  fila.append(celda(etiqueta, "resumen-etiqueta"), celda(ultimo ?? "", "resumen-valor"));
 
-  if (valor === null) {
-    fila.appendChild(
-      botonDeFila(textoBoton, () => abrirPestana(seccion))
-    );
-  }
+  const mas = botonDeFila("+", () => abrirPestana(seccion));
+  mas.className = "boton-mas";
+  mas.setAttribute("aria-label", `Apuntar en ${etiqueta}`);
+  fila.appendChild(mas);
 
   return fila;
 }
 
 function pintarResumen(registros) {
-  const { pesoKg, comidas, minutos } = resumenDelDia(registros, hoyISO());
+  const hoy = hoyISO();
   const lista = id("hoy-resumen");
+
+  // Las listas vienen de más reciente a más antigua, así que lo último de hoy
+  // es lo primero que aparece con la fecha de hoy.
+  const ultimoDeHoy = (registros) => registros.find((r) => r.fecha === hoy);
+
+  const pesaje = ultimoDeHoy(registros.pesajes);
+  const comida = ultimoDeHoy(registros.comidas);
+  const ejercicio = ultimoDeHoy(registros.ejercicios);
 
   lista.innerHTML = "";
   lista.append(
     lineaDeResumen(
       "Peso",
-      pesoKg === null ? null : `${pesoKg.toFixed(1).replace(".", ",")} kg`,
-      "peso",
-      "Pesarme"
+      pesaje ? `${pesaje.pesoKg.toFixed(1).replace(".", ",")} kg` : null,
+      "peso"
     ),
-    lineaDeResumen(
-      "Comidas",
-      comidas === 0 ? null : `${comidas} ${comidas === 1 ? "comida" : "comidas"}`,
-      "comidas",
-      "Apuntar comida"
-    ),
+    lineaDeResumen("Comidas", comida ? comida.texto : null, "comidas"),
     lineaDeResumen(
       "Ejercicio",
-      minutos === 0 ? null : `${minutos} min`,
-      "ejercicio",
-      "Apuntar ejercicio"
+      ejercicio ? `${ejercicio.texto} · ${ejercicio.minutos} min` : null,
+      "ejercicio"
     )
   );
 }
 
-function pintarLoDeSiempre(comidas) {
-  const bloque = id("bloque-lo-de-siempre");
-  const contenedor = id("lo-de-siempre");
-  const habituales = loDeSiempre(comidas, hoyISO());
+// --- Calendario de constancia --------------------------------------------
 
-  bloque.classList.toggle("oculta", habituales.length === 0);
+const RANGOS_CALENDARIO = [
+  { etiqueta: "1 sem", semanas: 1 },
+  { etiqueta: "2 sem", semanas: 2 },
+  { etiqueta: "1 mes", semanas: 4 },
+  { etiqueta: "3 meses", semanas: 13 },
+  { etiqueta: "6 meses", semanas: 26 },
+  { etiqueta: "12 meses", semanas: 52 }
+];
+
+const SEMANAS_POR_DEFECTO = 4;
+
+let semanasCalendario = SEMANAS_POR_DEFECTO;
+
+function pintarRangos() {
+  const contenedor = id("rangos-calendario");
   contenedor.innerHTML = "";
 
-  habituales.forEach((habitual) => {
-    const boton = botonDeFila(
-      `${etiquetaDeMomento(habitual.momento)} · ${habitual.texto}`,
-      () => repetirComida(habitual, boton)
-    );
-    boton.className = "boton-repetir";
+  RANGOS_CALENDARIO.forEach(({ etiqueta, semanas }) => {
+    const boton = botonDeFila(etiqueta, () => {
+      semanasCalendario = semanas;
+      refrescarHoy();
+    });
+    boton.className = "rango";
+    boton.classList.toggle("activa", semanas === semanasCalendario);
     contenedor.appendChild(boton);
   });
-}
-
-async function repetirComida(habitual, boton) {
-  const error = id("error-repetir");
-  error.textContent = "";
-  boton.disabled = true;
-
-  try {
-    await guardarComida(uidActual, habitual.texto, habitual.momento, hoyISO());
-    avisarGuardado("guardado-repetir");
-    // Refrescar la lista de comidas repinta "Hoy" a través de alRefrescar,
-    // así que el resumen sube solo.
-    await listaComidas.refrescar();
-  } catch {
-    error.textContent = "No se ha podido guardar. Comprueba tu conexión.";
-    boton.disabled = false;
-  }
 }
 
 function pintarCalendario(registros) {
@@ -572,13 +577,18 @@ function pintarCalendario(registros) {
   const detalle = id("calendario-detalle");
 
   contenedor.innerHTML = "";
+  // Al cambiar de rango, la casilla que se estaba mirando puede haber
+  // desaparecido, así que el detalle vuelve a empezar.
   detalle.textContent = "Toca un día para ver qué apuntaste.";
   contenedor.appendChild(
-    dibujarCalendario(calendarioDeConstancia(registros, hoyISO()), (casilla) => {
-      // Con el ratón basta el <title>; en el móvil no hay hover, así que el
-      // toque escribe el detalle aquí debajo.
-      detalle.textContent = textoDeCasilla(casilla);
-    })
+    dibujarCalendario(
+      calendarioDeConstancia(registros, hoyISO(), semanasCalendario),
+      (casilla) => {
+        // Con el ratón basta el <title>; en el móvil no hay hover, así que el
+        // toque escribe el detalle aquí debajo.
+        detalle.textContent = textoDeCasilla(casilla);
+      }
+    )
   );
 }
 
@@ -591,7 +601,7 @@ function refrescarHoy() {
 
   id("hoy-fecha").textContent = fechaLarga(hoyISO());
   pintarResumen(registros);
-  pintarLoDeSiempre(registros.comidas);
+  pintarRangos();
   pintarCalendario(registros);
 }
 
@@ -1203,8 +1213,10 @@ async function refrescarAjustes() {
   try {
     const ajustes = await leerAjustes(uidActual);
     pesoObjetivoActual = ajustes.pesoObjetivoKg ?? null;
-    pintarAvatar(ajustes.fotoPerfil, emailUsuario.textContent);
+    pintarAvatar(ajustes.fotoPerfil, emailActual);
+    pintarNombre(ajustes.nombre);
     refrescarGrafica();
+    id("nombre").value = ajustes.nombre || "";
     id("peso-objetivo").value =
       ajustes.pesoObjetivoKg == null
         ? ""
@@ -1227,7 +1239,8 @@ id("form-ajustes").addEventListener("submit", async (evento) => {
   const resultado = validarAjustes(
     id("peso-objetivo").value,
     id("altura").value,
-    id("fecha-objetivo").value
+    id("fecha-objetivo").value,
+    id("nombre").value
   );
 
   if (resultado.error) {
@@ -1241,6 +1254,7 @@ id("form-ajustes").addEventListener("submit", async (evento) => {
     await guardarAjustes(uidActual, resultado);
     // La línea de objetivo de la gráfica sale de aquí.
     pesoObjetivoActual = resultado.pesoObjetivoKg ?? null;
+    pintarNombre(resultado.nombre);
     refrescarGrafica();
     aviso.textContent = "Ajustes guardados.";
     setTimeout(() => {
@@ -1424,9 +1438,10 @@ observarSesion(
     }
 
     uidActual = usuario.uid;
-    emailUsuario.textContent = usuario.email;
-    // La inicial mientras llegan los ajustes; si hay foto, la pinta encima
-    // refrescarAjustes() en cuanto la lee.
+    emailActual = usuario.email;
+    // El email y la inicial mientras llegan los ajustes; si hay nombre o foto,
+    // los pinta encima refrescarAjustes() en cuanto los lee.
+    pintarNombre("");
     pintarAvatar(null, usuario.email);
     limpiarFormularios();
     errorLogin.textContent = "";

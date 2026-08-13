@@ -24,8 +24,13 @@ function referenciaDe(uid) {
 
 // Devuelve { pesoObjetivoKg, alturaCm, fechaObjetivo } o { error }.
 // Los tres campos son opcionales: se puede guardar solo uno.
-export function validarAjustes(pesoTexto, alturaTexto, fecha) {
+export const MAX_NOMBRE = 30;
+
+export function validarAjustes(pesoTexto, alturaTexto, fecha, nombreTexto) {
   const ajustes = {
+    // Cadena vacía, no null: "no quiero que me llames de ninguna manera" es
+    // una respuesta válida y hay que poder volver a ella.
+    nombre: String(nombreTexto ?? "").trim().slice(0, MAX_NOMBRE),
     pesoObjetivoKg: null,
     alturaCm: null,
     fechaObjetivo: null
@@ -68,13 +73,14 @@ export async function leerAjustes(uid) {
   const instantanea = await getDoc(referenciaDe(uid));
   if (!instantanea.exists()) {
     return {
+      nombre: "",
       pesoObjetivoKg: null,
       alturaCm: null,
       fechaObjetivo: null,
       fotoPerfil: null
     };
   }
-  return { fotoPerfil: null, ...instantanea.data() };
+  return { nombre: "", fotoPerfil: null, ...instantanea.data() };
 }
 
 // La foto va por su lado y no pasa por validarAjustes(): así guardar el peso

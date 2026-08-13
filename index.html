@@ -48,14 +48,14 @@
 
       <ul id="hoy-resumen" class="resumen"></ul>
 
-      <div id="bloque-lo-de-siempre" class="oculta">
-        <h2>Lo de siempre</h2>
-        <div id="lo-de-siempre"></div>
-        <p id="error-repetir" class="error" role="alert"></p>
-        <p id="guardado-repetir" class="guardado" role="status"></p>
+      <div id="atajos-hoy">
+        <button type="button" class="atajo" data-seccion="consulta">Consulta</button>
+        <button type="button" class="atajo" data-seccion="consejos">Consejos</button>
+        <button type="button" class="atajo" data-seccion="fotos">Fotos</button>
       </div>
 
       <h2>Constancia</h2>
+      <div id="rangos-calendario" class="rangos"></div>
       <div id="calendario" class="bloque-calendario"></div>
       <p id="calendario-detalle" class="comparador-detalle"></p>
     </div>
@@ -212,6 +212,9 @@
     <div class="seccion" data-seccion="ajustes">
       <h2>Mi objetivo</h2>
       <form id="form-ajustes">
+        <label for="nombre">Cómo quieres que te llamen</label>
+        <input type="text" id="nombre" placeholder="Pau" maxlength="30">
+
         <label for="peso-objetivo">Peso objetivo (kg)</label>
         <input type="text" id="peso-objetivo" inputmode="decimal" placeholder="78,5">
 
@@ -230,16 +233,6 @@
       <h2>Sesión</h2>
       <p class="explicacion">Has entrado como <span id="email-ajustes"></span>.</p>
       <button type="button" id="btn-salir">Cerrar sesión</button>
-
-      <!-- PROVISIONAL (spec 011): al quitar el panel "Más", estas tres
-           secciones se quedaron sin puerta. La spec 012 les pone accesos
-           directos en "Hoy" y este bloque desaparece. -->
-      <h2>Más secciones</h2>
-      <div id="atajos-provisionales">
-        <button type="button" class="atajo" data-seccion="consulta">Consulta</button>
-        <button type="button" class="atajo" data-seccion="consejos">Consejos</button>
-        <button type="button" class="atajo" data-seccion="fotos">Fotos</button>
-      </div>
 
       <div class="zona-peligro">
         <h2>Reiniciar datos</h2>

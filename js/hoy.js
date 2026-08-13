@@ -1,29 +1,13 @@
-// Cálculo puro para la pantalla "Hoy": el resumen del día y el ranking de
-// "lo de siempre". Nada de esto toca el DOM.
+// Ranking de comidas habituales ("lo de siempre"). Cálculo puro, sin DOM.
+//
+// Desde la spec 012 el resumen del día sale directamente del primer registro
+// de hoy de cada lista, que ya vienen ordenadas de más reciente a más antigua:
+// para eso no hacía falta una función aquí.
 
 import { sumarDias } from "./fechas.js";
 
 export const DIAS_LO_DE_SIEMPRE = 30;
 export const MAXIMO_LO_DE_SIEMPRE = 5;
-
-// Qué hay apuntado hoy. Devuelve null en peso si no hay ninguno; comidas y
-// minutos son números.
-export function resumenDelDia(registros, hoy) {
-  const deHoy = (lista) => lista.filter((registro) => registro.fecha === hoy);
-
-  // La lista ya viene ordenada de más reciente a más antiguo, así que si hay
-  // varios pesajes hoy el primero es el último apuntado.
-  const pesajes = deHoy(registros.pesajes);
-
-  return {
-    pesoKg: pesajes.length ? pesajes[0].pesoKg : null,
-    comidas: deHoy(registros.comidas).length,
-    minutos: deHoy(registros.ejercicios).reduce(
-      (suma, ejercicio) => suma + ejercicio.minutos,
-      0
-    )
-  };
-}
 
 // Para agrupar, "Lentejas  " y "lentejas" son la misma comida. Para enseñar,
 // se respeta cómo se escribió la última vez.

@@ -90,10 +90,16 @@ header {
   min-width: 0;
 }
 
+/* Una sola línea: un email largo partido en tres quedaba fatal. Si no cabe,
+   puntos suspensivos. */
 #email-usuario {
-  font-size: 0.9rem;
-  color: var(--tinta-suave);
-  overflow-wrap: anywhere;
+  font-size: 0.95rem;
+  color: var(--tinta);
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
 }
 
 #estado-perfil {
@@ -247,18 +253,6 @@ header {
     background: var(--superficie-alta);
     box-shadow: inset 0 -2px 0 var(--acento);
   }
-}
-
-/* Atajos provisionales de Ajustes (spec 011, los retira la 012) */
-
-#atajos-provisionales {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--e2);
-}
-
-.atajo {
-  flex: 1 1 8rem;
 }
 
 /* Formularios y botones -------------------------------------------------- */
@@ -415,26 +409,57 @@ button:disabled {
   font-weight: 700;
 }
 
-/* Cuando no hay nada apuntado, el valor es un guion y manda el botón. */
-.resumen li button {
-  flex: 0 0 auto;
-  padding: var(--e2) var(--e3);
-  font-size: 0.85rem;
-}
-
-#lo-de-siempre {
-  display: flex;
-  flex-direction: column;
-  gap: var(--e2);
-}
-
-.boton-repetir {
-  width: 100%;
-  text-align: left;
-  /* Un texto largo no debe estirar el botón ni partirlo en tres líneas. */
+/* Lo último apuntado hoy. Si el texto es largo, se recorta: la fila no crece
+   y el + no se mueve de sitio. */
+.resumen-valor {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  min-width: 0;
+}
+
+.boton-mas {
+  flex: 0 0 auto;
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 0;
+  font-size: 1.25rem;
+  line-height: 1;
+  font-weight: 700;
+  border-color: var(--acento);
+  color: var(--acento);
+}
+
+#atajos-hoy {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e2);
+  margin-top: var(--e4);
+}
+
+.atajo {
+  flex: 1 1 6rem;
+}
+
+/* Selector de rango del calendario */
+
+.rangos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e1);
+  margin-bottom: var(--e2);
+}
+
+.rango {
+  flex: 1 1 auto;
+  padding: var(--e1) var(--e2);
+  font-size: 0.8rem;
+}
+
+.rango.activa {
+  border-color: var(--acento);
+  color: var(--acento);
+  font-weight: 700;
 }
 
 /* Listas de registros ---------------------------------------------------- */
