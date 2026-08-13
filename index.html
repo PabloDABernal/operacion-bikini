@@ -37,6 +37,24 @@
       <span id="email-usuario"></span>
     </header>
 
+    <!-- Sección: Hoy (spec 010) -->
+    <div class="seccion" data-seccion="hoy">
+      <h2 id="hoy-fecha"></h2>
+
+      <ul id="hoy-resumen" class="resumen"></ul>
+
+      <div id="bloque-lo-de-siempre" class="oculta">
+        <h2>Lo de siempre</h2>
+        <div id="lo-de-siempre"></div>
+        <p id="error-repetir" class="error" role="alert"></p>
+        <p id="guardado-repetir" class="guardado" role="status"></p>
+      </div>
+
+      <h2>Constancia</h2>
+      <div id="calendario" class="bloque-calendario"></div>
+      <p id="calendario-detalle" class="comparador-detalle"></p>
+    </div>
+
     <!-- Sección: Peso (spec 001, solo cambia de sitio) -->
     <div class="seccion" data-seccion="peso">
       <h2>Nuevo pesaje</h2>
@@ -242,6 +260,7 @@
          ocasional, dentro de "Más". -->
     <nav id="nav-inferior" aria-label="Secciones">
       <div class="interior">
+        <button type="button" class="nav-boton" data-seccion="hoy">Hoy</button>
         <button type="button" class="nav-boton" data-seccion="peso">Peso</button>
         <button type="button" class="nav-boton" data-seccion="comidas">Comidas</button>
         <button type="button" class="nav-boton" data-seccion="ejercicio">Ejercicio</button>

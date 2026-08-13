@@ -11,12 +11,20 @@ import {
 
 import { hoyISO, formatearFecha } from "./fechas.js";
 
-// El calendario de constancia se calcula y se dibuja en esos mismos módulos
-// (calendarioDeConstancia, dibujarCalendario, textoDeCasilla), pero todavía no
-// se cuelga de ninguna pantalla: va en la pantalla "Hoy", que es otra spec.
-import { pesosPorDia, mediaMovil, compararSemanas } from "./grafica.js";
+import {
+  pesosPorDia,
+  mediaMovil,
+  compararSemanas,
+  calendarioDeConstancia
+} from "./grafica.js";
 
-import { dibujarGrafica } from "./grafica-svg.js";
+import {
+  dibujarGrafica,
+  dibujarCalendario,
+  textoDeCasilla
+} from "./grafica-svg.js";
+
+import { resumenDelDia, loDeSiempre } from "./hoy.js";
 
 import {
   validarPesaje,
@@ -114,7 +122,7 @@ function id(nombre) {
 
 // --- Pestañas ------------------------------------------------------------
 
-const PESTANA_INICIAL = "peso";
+const PESTANA_INICIAL = "hoy";
 
 // Las secciones que viven dentro del panel "Más" en vez de tener botón propio
 // en la barra inferior.
@@ -483,10 +491,138 @@ function refrescarGrafica() {
   pintarComparador(diarios);
 }
 
+// --- Hoy -----------------------------------------------------------------
+
+const FORMATO_FECHA_LARGA = new Intl.DateTimeFormat("es-ES", {
+  weekday: "long",
+  day: "numeric",
+  month: "long"
+});
+
+function fechaLarga(iso) {
+  const [anio, mes, dia] = iso.split("-").map(Number);
+  return FORMATO_FECHA_LARGA.format(new Date(anio, mes - 1, dia, 12));
+}
+
+// Una línea del resumen: etiqueta a la izquierda, dato a la derecha y, si no
+// hay nada apuntado, un botón que lleva a la pestaña donde se apunta.
+function lineaDeResumen(etiqueta, valor, seccion, textoBoton) {
+  const fila = document.createElement("li");
+  fila.append(celda(etiqueta, "resumen-etiqueta"), celda(valor ?? "—", "resumen-valor"));
+
+  if (valor === null) {
+    fila.appendChild(
+      botonDeFila(textoBoton, () => {
+        cerrarPanel();
+        abrirPestana(seccion);
+      })
+    );
+  }
+
+  return fila;
+}
+
+function pintarResumen(registros) {
+  const { pesoKg, comidas, minutos } = resumenDelDia(registros, hoyISO());
+  const lista = id("hoy-resumen");
+
+  lista.innerHTML = "";
+  lista.append(
+    lineaDeResumen(
+      "Peso",
+      pesoKg === null ? null : `${pesoKg.toFixed(1).replace(".", ",")} kg`,
+      "peso",
+      "Pesarme"
+    ),
+    lineaDeResumen(
+      "Comidas",
+      comidas === 0 ? null : `${comidas} ${comidas === 1 ? "comida" : "comidas"}`,
+      "comidas",
+      "Apuntar comida"
+    ),
+    lineaDeResumen(
+      "Ejercicio",
+      minutos === 0 ? null : `${minutos} min`,
+      "ejercicio",
+      "Apuntar ejercicio"
+    )
+  );
+}
+
+function pintarLoDeSiempre(comidas) {
+  const bloque = id("bloque-lo-de-siempre");
+  const contenedor = id("lo-de-siempre");
+  const habituales = loDeSiempre(comidas, hoyISO());
+
+  bloque.classList.toggle("oculta", habituales.length === 0);
+  contenedor.innerHTML = "";
+
+  habituales.forEach((habitual) => {
+    const boton = botonDeFila(
+      `${etiquetaDeMomento(habitual.momento)} · ${habitual.texto}`,
+      () => repetirComida(habitual, boton)
+    );
+    boton.className = "boton-repetir";
+    contenedor.appendChild(boton);
+  });
+}
+
+async function repetirComida(habitual, boton) {
+  const error = id("error-repetir");
+  error.textContent = "";
+  boton.disabled = true;
+
+  try {
+    await guardarComida(uidActual, habitual.texto, habitual.momento, hoyISO());
+    avisarGuardado("guardado-repetir");
+    // Refrescar la lista de comidas repinta "Hoy" a través de alRefrescar,
+    // así que el resumen sube solo.
+    await listaComidas.refrescar();
+  } catch {
+    error.textContent = "No se ha podido guardar. Comprueba tu conexión.";
+    boton.disabled = false;
+  }
+}
+
+function pintarCalendario(registros) {
+  const contenedor = id("calendario");
+  const detalle = id("calendario-detalle");
+
+  contenedor.innerHTML = "";
+  detalle.textContent = "Toca un día para ver qué apuntaste.";
+  contenedor.appendChild(
+    dibujarCalendario(calendarioDeConstancia(registros, hoyISO()), (casilla) => {
+      // Con el ratón basta el <title>; en el móvil no hay hover, así que el
+      // toque escribe el detalle aquí debajo.
+      detalle.textContent = textoDeCasilla(casilla);
+    })
+  );
+}
+
+function refrescarHoy() {
+  const registros = {
+    pesajes: listaPeso.obtenerRegistros(),
+    comidas: listaComidas.obtenerRegistros(),
+    ejercicios: listaEjercicios.obtenerRegistros()
+  };
+
+  id("hoy-fecha").textContent = fechaLarga(hoyISO());
+  pintarResumen(registros);
+  pintarLoDeSiempre(registros.comidas);
+  pintarCalendario(registros);
+}
+
+// Las tres listas avisan aquí cuando cargan, guardan, editan o borran. Todo
+// sale de lo que ya trajeron: ninguna consulta nueva a Firestore.
+function refrescarPantallas() {
+  refrescarGrafica();
+  refrescarHoy();
+}
+
 // --- Peso ----------------------------------------------------------------
 
 const listaPeso = crearLista({
-  alRefrescar: () => refrescarGrafica(),
+  alRefrescar: () => refrescarPantallas(),
   lista: "lista-pesajes",
   estado: "estado-lista",
   reintentar: "btn-reintentar",
@@ -546,6 +682,7 @@ id("form-pesaje").addEventListener("submit", async (evento) => {
 // --- Comidas -------------------------------------------------------------
 
 const listaComidas = crearLista({
+  alRefrescar: () => refrescarPantallas(),
   lista: "lista-comidas",
   estado: "estado-comidas",
   reintentar: "btn-reintentar-comidas",
@@ -608,6 +745,7 @@ id("form-comida").addEventListener("submit", async (evento) => {
 // --- Ejercicio -----------------------------------------------------------
 
 const listaEjercicios = crearLista({
+  alRefrescar: () => refrescarPantallas(),
   lista: "lista-ejercicios",
   estado: "estado-ejercicios",
   reintentar: "btn-reintentar-ejercicios",

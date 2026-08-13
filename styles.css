@@ -129,9 +129,12 @@ header {
   border: none;
   border-radius: 0;
   color: var(--tinta-suave);
-  font-size: 0.75rem;
+  /* Con cinco botones, en una pantalla de 320 px "Ejercicio" no cabe a 0,75
+     rem: la letra se encoge sola hasta caber, pero nunca se parte en dos
+     líneas ni se abrevia la palabra. */
+  font-size: clamp(0.65rem, 3vw, 0.75rem);
   font-weight: 600;
-  letter-spacing: 0.01em;
+  white-space: nowrap;
   cursor: pointer;
 }
 
@@ -318,6 +321,61 @@ button:disabled {
   font-weight: 600;
   min-height: 1.2rem;
   margin: var(--e2) 0 0;
+}
+
+/* Pantalla "Hoy" (spec 010) ---------------------------------------------- */
+
+#hoy-fecha {
+  /* La escribe Intl y viene en minúscula: "jueves, 13 de agosto". */
+  text-transform: capitalize;
+  margin-top: 0;
+}
+
+.resumen {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.resumen li {
+  display: flex;
+  align-items: center;
+  gap: var(--e3);
+  padding: var(--e3) 0;
+  border-bottom: 1px solid var(--borde);
+}
+
+.resumen-etiqueta {
+  color: var(--tinta-suave);
+  font-size: 0.9rem;
+}
+
+.resumen-valor {
+  margin-left: auto;
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+/* Cuando no hay nada apuntado, el valor es un guion y manda el botón. */
+.resumen li button {
+  flex: 0 0 auto;
+  padding: var(--e2) var(--e3);
+  font-size: 0.85rem;
+}
+
+#lo-de-siempre {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e2);
+}
+
+.boton-repetir {
+  width: 100%;
+  text-align: left;
+  /* Un texto largo no debe estirar el botón ni partirlo en tres líneas. */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* Listas de registros ---------------------------------------------------- */
