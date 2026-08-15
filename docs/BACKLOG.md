@@ -26,3 +26,8 @@ Ideas surgidas durante la implementación, no implementadas. Una línea cada una
 ## Seguridad / operativa
 
 - Los emails autorizados están en texto plano en un repo público. Alternativas si algún día molesta: lista blanca por UID o por hash SHA-256. Decisión consciente del usuario el 2026-08-10.
+
+## De la spec 018 (operaciones)
+
+- Comparar dos operaciones entre sí ("en la primera perdiste más que en la segunda").
+- Reabrir o borrar una operación archivada. Hoy lo archivado no se puede editar ni deshacer.

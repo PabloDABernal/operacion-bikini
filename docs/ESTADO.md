@@ -33,12 +33,13 @@ La **v2 está empezada**: su alcance se decidió el 11 de agosto (ver `docs/PROD
 | 015 | Peso: rango en la gráfica y estadísticas | 🟡 desplegada, sin probar |
 | 016 | "Iniciar operación bikini": entrevista inicial y perfil | 🟡 desplegada, sin probar |
 | 017 | Consultas especializadas de ejercicio y dieta | 🟡 desplegada, sin probar |
+| 018 | Operaciones con principio y fin, e histórico | 🟡 desplegada, sin probar |
 
 ## Qué toca ahora
 
 La v2 se acordó hacerla entera, en este orden (`docs/propuestas/v2-usabilidad-y-gamificacion.md`, apartado 9):
 
-**Las siete specs de la ampliación (011 a 017) están implementadas y desplegadas, pero el usuario aún no las ha probado.** Las pidió todas seguidas para probarlas juntas. Hasta que dé el visto bueno, ninguna es "completada": si algo no le cuadra, se corrige antes de seguir.
+**Las ocho specs de la ampliación (011 a 018) están implementadas y desplegadas, pero el usuario aún no las ha probado.** Las pidió todas seguidas para probarlas juntas. Hasta que dé el visto bueno, ninguna es "completada": si algo no le cuadra, se corrige antes de seguir.
 
 El 13 de agosto el usuario probó la app con un mes de datos sembrados y dio una tanda larga de correcciones. De ahí salieron estas siete specs (alcance completo en `docs/PRODUCTO.md`, apartado "Ampliación de la v2"):
 
