@@ -70,6 +70,7 @@ Decisiones de v2 ya tomadas por el usuario el 11 de agosto:
 - **Reglas de Firestore**: se publican con `npx --yes firebase-tools deploy --only firestore:rules`. Ya no se copian a mano en la consola. Hacerlo SIEMPRE antes de pedirle al usuario que pruebe.
 - **Modelo de IA**: con la clave del proyecto solo responde `gemini-flash-latest`; `gemini-2.5-flash` da 404. Y la API rechaza con 400 tanto `thinkingConfig` como `propertyOrdering`. Está documentado en `api/_ia.js`.
 - **Esquemas de respuesta de Gemini**: todos los campos deben ir como `required`, aunque no apliquen en cada turno (los vacíos, como cadena vacía). Con campos opcionales, el modelo se los salta y llegan planes sin rutina.
+- **Gemini devuelve 503 cuando está saturado**: no es un fallo del proyecto, es Google diciendo que el modelo está sobrecargado. Pasó el 15 de agosto y tumbó a la vez consejo, consulta y planes especializados. Desde entonces `api/_ia.js` reintenta tres veces (2 s, 4 s, 6 s) y, si sigue, la app dice que la IA está saturada en vez de un "no se ha podido" que no explica nada. Antes de buscar un bug propio, comprobar el código que sale en pantalla.
 - **Cuota gratuita de Gemini**: se agota depurando a base de despliegues. Pensar antes de probar en producción.
 - **Todo está en Vercel**: web y funciones, mismo dominio. GitHub Pages se descartó y está desactivado.
 - **La lista blanca de emails vive en tres sitios**: `js/firebase-config.js`, `firestore.rules` y `api/_auth.js`. Al añadir a alguien hay que tocar los tres.

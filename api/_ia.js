@@ -110,6 +110,14 @@ async function llamarAGemini(cuerpo, etiqueta) {
   return ultimaRespuesta;
 }
 
+// Cuántas veces se reintenta cuando Google dice que el modelo está saturado,
+// y cuánto se espera entre intentos (creciendo: 2 s, 4 s, 6 s). Cabe de sobra
+// en los 60 segundos que tienen las funciones.
+const REINTENTOS_SATURACION = 3;
+const ESPERA_BASE_MS = 2000;
+
+const esperar = (ms) => new Promise((seguir) => setTimeout(seguir, ms));
+
 // Llama a Gemini y devuelve el JSON ya parseado, o null con la respuesta ya
 // enviada si algo ha fallado. Centraliza el mapeo de errores para que las dos
 // funciones den exactamente los mismos códigos.
@@ -131,6 +139,30 @@ async function generarJson(res, cuerpo, etiqueta) {
 
   if (respuesta.status === 429) {
     res.status(429).json({ error: "cuota-agotada" });
+    return null;
+  }
+
+  // 503 es Google diciendo que el modelo está sobrecargado. No es un fallo de
+  // la petición: suele bastar con esperar unos segundos. Se reintenta aquí
+  // porque rendirse a la primera obliga al usuario a gastar otra consulta.
+  let intentos = 0;
+  while (respuesta.status === 503 && intentos < REINTENTOS_SATURACION) {
+    intentos += 1;
+    console.error(`Gemini saturado (503), reintento ${intentos} de ${REINTENTOS_SATURACION}.`);
+    await esperar(ESPERA_BASE_MS * intentos);
+
+    try {
+      respuesta = await llamarAGemini(cuerpo, etiqueta);
+    } catch (fallo) {
+      console.error(`No se pudo llamar a Gemini: ${fallo.message}`);
+      res.status(502).json({ error: "gemini-inalcanzable" });
+      return null;
+    }
+  }
+
+  if (respuesta.status === 503) {
+    console.error("Gemini sigue saturado tras los reintentos.");
+    res.status(503).json({ error: "ia-saturada" });
     return null;
   }
 

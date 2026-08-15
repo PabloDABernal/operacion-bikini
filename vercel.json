@@ -6,6 +6,9 @@
     },
     "api/consulta.js": {
       "maxDuration": 60
+    },
+    "api/plan.js": {
+      "maxDuration": 60
     }
   }
 }

@@ -24,6 +24,8 @@ const ESPERA_MAXIMA_MS = 30000;
 const URL_PROXY = "/api/consejo";
 
 const MENSAJES = {
+  "ia-saturada":
+    "La IA está saturada ahora mismo. Espera un minuto y vuelve a intentarlo.",
   "sin-datos": "Apunta al menos un pesaje, una comida o un ejercicio antes de pedir consejo.",
   "limite-diario": "Ya has pedido consejos 5 veces hoy. Vuelve mañana.",
   "cuota-agotada": "La IA ha alcanzado su límite diario gratuito. Prueba mañana.",
@@ -32,11 +34,12 @@ const MENSAJES = {
 
 const MENSAJE_GENERICO = "No se ha podido pedir el consejo. Inténtalo de nuevo.";
 
-// Mientras dure el diagnóstico: si el fallo viene de Gemini, se enseña el
-// código en vez de tragárselo. "No se ha podido" no dice nada a nadie.
+// Un fallo de Gemini que no sea de los conocidos llega con el estado HTTP que
+// devolvió Google: enseñarlo es lo único que distingue "está saturado" de
+// "algo va mal de verdad".
 function mensajeDeFalloDeIa(codigo) {
   if (!codigo || !codigo.startsWith("gemini")) return null;
-  return `La IA ha fallado (${codigo}). Díselo a Claude.`;
+  return `La IA no ha respondido (${codigo}). Vuelve a intentarlo en un momento.`;
 }
 
 export function mensajeDeErrorDeConsejo(codigo) {
