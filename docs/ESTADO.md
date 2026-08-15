@@ -34,6 +34,7 @@ La **v2 está empezada**: su alcance se decidió el 11 de agosto (ver `docs/PROD
 | 016 | "Iniciar operación bikini": entrevista inicial y perfil | 🟡 desplegada, sin probar |
 | 017 | Consultas especializadas de ejercicio y dieta | 🟡 desplegada, sin probar |
 | 018 | Operaciones con principio y fin, e histórico | 🟡 desplegada, sin probar |
+| 019 | Borrar el histórico desde el reinicio de datos | 🟡 desplegada, sin probar |
 
 ## Qué toca ahora
 

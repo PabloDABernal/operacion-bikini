@@ -160,24 +160,30 @@ export async function subirFotoDeHoy(uid, archivo) {
   });
 }
 
+// Solo el archivo de Cloudinary. Aparte porque las fotos archivadas (spec 019)
+// tienen su ficha en otra ruta, pero el mismo publicId.
+export async function borrarDeCloudinary(publicId) {
+  const firma = await pedirFirma({ accion: "borrar", publicId });
+
+  const formulario = new FormData();
+  formulario.append("api_key", firma.apiKey);
+  formulario.append("timestamp", firma.timestamp);
+  formulario.append("public_id", firma.publicId);
+  formulario.append("signature", firma.firma);
+
+  await fetch(`https://api.cloudinary.com/v1_1/${firma.cloudName}/image/destroy`, {
+    method: "POST",
+    body: formulario
+  });
+}
+
 // Primero Firestore y después Cloudinary: si falla lo segundo queda un archivo
 // huérfano gastando algo de cuota, pero nunca una miniatura rota en pantalla.
 export async function borrarFoto(uid, foto) {
   await deleteDoc(doc(db, "usuarios", uid, "fotos", foto.id));
 
   try {
-    const firma = await pedirFirma({ accion: "borrar", publicId: foto.publicId });
-
-    const formulario = new FormData();
-    formulario.append("api_key", firma.apiKey);
-    formulario.append("timestamp", firma.timestamp);
-    formulario.append("public_id", firma.publicId);
-    formulario.append("signature", firma.firma);
-
-    await fetch(`https://api.cloudinary.com/v1_1/${firma.cloudName}/image/destroy`, {
-      method: "POST",
-      body: formulario
-    });
+    await borrarDeCloudinary(foto.publicId);
   } catch (fallo) {
     // La foto ya no se ve, que es lo que le importa al usuario. Queda el
     // archivo suelto en Cloudinary.

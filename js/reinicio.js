@@ -8,12 +8,15 @@
 
 import {
   collection,
+  doc,
+  deleteDoc,
   getDocs,
   writeBatch
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 import { db } from "./firebase-config.js";
-import { borrarFoto } from "./fotos.js";
+import { borrarFoto, borrarDeCloudinary } from "./fotos.js";
+import { COLECCIONES } from "./operaciones.js";
 
 // Un lote de Firestore admite 500 operaciones. Con dos usuarios no se llegará,
 // pero el código no debe romperse si algún día se llega.
@@ -30,12 +33,23 @@ export const TIPOS = [
     etiqueta: "consultas y planes",
     colecciones: ["consultas", "planes"]
   },
-  { clave: "fotos", etiqueta: "fotos", colecciones: ["fotos"] }
+  { clave: "fotos", etiqueta: "fotos", colecciones: ["fotos"] },
+  // El histórico va aparte: no es una colección del día a día, sino las
+  // operaciones archivadas con todo lo que llevan dentro (spec 019).
+  { clave: "operaciones", etiqueta: "operaciones", colecciones: [] }
 ];
 
 async function documentosDe(uid, nombreColeccion) {
   const instantanea = await getDocs(collection(db, "usuarios", uid, nombreColeccion));
   return instantanea.docs;
+}
+
+// La operación en curso NUNCA se borra por esta vía: para cerrarla está
+// "Finalizar operación bikini", y llevársela por delante al marcar una casilla
+// sería una trampa.
+async function operacionesArchivadas(uid) {
+  const documentos = await documentosDe(uid, "operaciones");
+  return documentos.filter((documento) => documento.data().estado === "archivada");
 }
 
 // Cuántos registros hay de cada tipo, para enseñarlo antes de borrar.
@@ -44,6 +58,11 @@ export async function contarTodo(uid) {
 
   await Promise.all(
     TIPOS.map(async (tipo) => {
+      if (tipo.clave === "operaciones") {
+        recuentos[tipo.clave] = (await operacionesArchivadas(uid)).length;
+        return;
+      }
+
       const porColeccion = await Promise.all(
         tipo.colecciones.map(async (nombre) => (await documentosDe(uid, nombre)).length)
       );
@@ -87,6 +106,52 @@ async function borrarFotos(uid) {
   }
 }
 
+// Borra una operación archivada entera: sus siete subcolecciones y luego su
+// documento. Las fotos van primero a Cloudinary, o quedarían archivos gastando
+// cuota que ya no se pueden alcanzar desde ninguna pantalla.
+async function borrarOperacion(uid, operacionId) {
+  for (const nombre of COLECCIONES) {
+    const ruta = collection(
+      db,
+      "usuarios",
+      uid,
+      "operaciones",
+      operacionId,
+      nombre
+    );
+    const documentos = (await getDocs(ruta)).docs;
+
+    if (nombre === "fotos") {
+      for (const documento of documentos) {
+        const foto = documento.data();
+        if (foto.publicId) {
+          // Que Cloudinary falle (por ejemplo, si la imagen ya no está) no
+          // debe impedir borrar la ficha.
+          await borrarDeCloudinary(foto.publicId).catch(() => {});
+        }
+        await deleteDoc(documento.ref);
+      }
+      continue;
+    }
+
+    for (let inicio = 0; inicio < documentos.length; inicio += MAXIMO_POR_LOTE) {
+      const lote = writeBatch(db);
+      documentos
+        .slice(inicio, inicio + MAXIMO_POR_LOTE)
+        .forEach((documento) => lote.delete(documento.ref));
+      await lote.commit();
+    }
+  }
+
+  await deleteDoc(doc(db, "usuarios", uid, "operaciones", operacionId));
+}
+
+async function borrarHistorico(uid) {
+  for (const documento of await operacionesArchivadas(uid)) {
+    await borrarOperacion(uid, documento.id);
+  }
+}
+
 // Borra solo los tipos indicados. Si algo falla, lo ya borrado se queda
 // borrado: se propaga el error para avisar, y repetir la operación sobre lo
 // que quede es inofensivo.
@@ -96,6 +161,11 @@ export async function borrarSeleccion(uid, clavesSeleccionadas) {
 
     if (tipo.clave === "fotos") {
       await borrarFotos(uid);
+      continue;
+    }
+
+    if (tipo.clave === "operaciones") {
+      await borrarHistorico(uid);
       continue;
     }
 

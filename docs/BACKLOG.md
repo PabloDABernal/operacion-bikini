@@ -31,3 +31,4 @@ Ideas surgidas durante la implementación, no implementadas. Una línea cada una
 
 - Comparar dos operaciones entre sí ("en la primera perdiste más que en la segunda").
 - Reabrir o borrar una operación archivada. Hoy lo archivado no se puede editar ni deshacer.
+- Borrar una operación concreta del histórico desde su tarjeta (la spec 019 borra el histórico entero o nada).
