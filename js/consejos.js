@@ -32,8 +32,15 @@ const MENSAJES = {
 
 const MENSAJE_GENERICO = "No se ha podido pedir el consejo. Inténtalo de nuevo.";
 
+// Mientras dure el diagnóstico: si el fallo viene de Gemini, se enseña el
+// código en vez de tragárselo. "No se ha podido" no dice nada a nadie.
+function mensajeDeFalloDeIa(codigo) {
+  if (!codigo || !codigo.startsWith("gemini")) return null;
+  return `La IA ha fallado (${codigo}). Díselo a Claude.`;
+}
+
 export function mensajeDeErrorDeConsejo(codigo) {
-  return MENSAJES[codigo] || MENSAJE_GENERICO;
+  return MENSAJES[codigo] || mensajeDeFalloDeIa(codigo) || MENSAJE_GENERICO;
 }
 
 function coleccionDe(uid) {
@@ -146,6 +153,9 @@ export async function pedirConsejo(uid, consejosActuales) {
     try {
       const datos = await respuesta.json();
       if (datos.error) codigo = datos.error;
+      // Gemini manda además el estado HTTP con el que respondió Google: sin
+      // eso, un fallo suyo es indistinguible de un problema de red.
+      if (datos.estado) codigo = `${datos.error}-${datos.estado}`;
     } catch {
       // Respuesta sin JSON: nos quedamos con el mensaje genérico.
     }
