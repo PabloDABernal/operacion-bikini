@@ -22,11 +22,16 @@ import { listarOperaciones, crearOperacion } from "./operaciones.js";
 const DIAS_DE_HISTORIAL = 14;
 const MAXIMO_CONSULTAS_DIARIAS = 2;
 export const MAXIMO_CARACTERES_RESPUESTA = 1000;
-const ESPERA_MAXIMA_MS = 30000;
+// Justo por debajo de los 60 s que tiene la función en Vercel: así, cuando
+// algo va mal, llega SU mensaje de error en vez de un corte del navegador que
+// no distingue "la IA está saturada" de "no hay internet".
+const ESPERA_MAXIMA_MS = 55000;
 
 const URL_PROXY = "/api/consulta";
 
 const MENSAJES = {
+  tardanza:
+    "La IA está tardando demasiado. Espera un momento y vuelve a intentarlo.",
   "ia-saturada":
     "La IA está saturada ahora mismo. Espera un minuto y vuelve a intentarlo.",
   "limite-diario": "Ya has pasado consulta 2 veces hoy. Vuelve mañana.",
@@ -149,8 +154,13 @@ async function turnoDeIa(mensajes, registros, extra) {
       body: JSON.stringify({ mensajes, registros, ...extra }),
       signal: AbortSignal.timeout(ESPERA_MAXIMA_MS)
     });
-  } catch {
-    throw errorConCodigo("red", "Proxy inalcanzable");
+  } catch (fallo) {
+    // Quedarse sin tiempo y no tener internet no son lo mismo, y el consejo
+    // que hay que darle al usuario tampoco.
+    throw errorConCodigo(
+      fallo.name === "TimeoutError" ? "tardanza" : "red",
+      "Proxy inalcanzable"
+    );
   }
 
   if (!respuesta.ok) {
@@ -323,8 +333,13 @@ export async function pedirPlanEspecializado(uid, consultas, tipo, alcance) {
       body: JSON.stringify({ tipo, alcance, registros, ...contexto }),
       signal: AbortSignal.timeout(ESPERA_MAXIMA_MS)
     });
-  } catch {
-    throw errorConCodigo("red", "Proxy inalcanzable");
+  } catch (fallo) {
+    // Quedarse sin tiempo y no tener internet no son lo mismo, y el consejo
+    // que hay que darle al usuario tampoco.
+    throw errorConCodigo(
+      fallo.name === "TimeoutError" ? "tardanza" : "red",
+      "Proxy inalcanzable"
+    );
   }
 
   if (!respuesta.ok) {

@@ -18,12 +18,17 @@ import { leerAjustes } from "./ajustes.js";
 
 const DIAS_DE_HISTORIAL = 14;
 const MAXIMO_POR_DIA = 5;
-const ESPERA_MAXIMA_MS = 30000;
+// Justo por debajo de los 60 s que tiene la función en Vercel: así, cuando
+// algo va mal, llega SU mensaje de error en vez de un corte del navegador que
+// no distingue "la IA está saturada" de "no hay internet".
+const ESPERA_MAXIMA_MS = 55000;
 
 // La web y la función se sirven desde el mismo dominio, así que basta la ruta.
 const URL_PROXY = "/api/consejo";
 
 const MENSAJES = {
+  tardanza:
+    "La IA está tardando demasiado. Espera un momento y vuelve a intentarlo.",
   "ia-saturada":
     "La IA está saturada ahora mismo. Espera un minuto y vuelve a intentarlo.",
   "sin-datos": "Apunta al menos un pesaje, una comida o un ejercicio antes de pedir consejo.",
@@ -145,9 +150,11 @@ export async function pedirConsejo(uid, consejosActuales) {
       }),
       signal: cancelar
     });
-  } catch {
+  } catch (fallo) {
+    // Quedarse sin tiempo y no tener internet no son lo mismo, y el consejo
+    // que hay que darle al usuario tampoco.
     const error = new Error("Proxy inalcanzable");
-    error.codigo = "red";
+    error.codigo = fallo.name === "TimeoutError" ? "tardanza" : "red";
     throw error;
   }
 

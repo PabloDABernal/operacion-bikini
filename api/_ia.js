@@ -111,9 +111,13 @@ async function llamarAGemini(cuerpo, etiqueta) {
 }
 
 // Cuántas veces se reintenta cuando Google dice que el modelo está saturado,
-// y cuánto se espera entre intentos (creciendo: 2 s, 4 s, 6 s). Cabe de sobra
-// en los 60 segundos que tienen las funciones.
-const REINTENTOS_SATURACION = 3;
+// y cuánto se espera entre intentos (2 s y 4 s).
+//
+// El tope no lo pone el margen de la función (60 s) sino la paciencia del
+// navegador: con tres reintentos, la respuesta llegaba después de que el
+// cliente ya hubiera abortado, y el usuario veía un error de red en vez de
+// enterarse de que la IA estaba saturada.
+const REINTENTOS_SATURACION = 2;
 const ESPERA_BASE_MS = 2000;
 
 const esperar = (ms) => new Promise((seguir) => setTimeout(seguir, ms));
