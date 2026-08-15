@@ -17,6 +17,7 @@ import { listarPesajes } from "./pesajes.js";
 import { listarComidas } from "./comidas.js";
 import { listarEjercicios } from "./ejercicios.js";
 import { leerAjustes, guardarLoAveriguado } from "./ajustes.js";
+import { listarOperaciones, crearOperacion } from "./operaciones.js";
 
 const DIAS_DE_HISTORIAL = 14;
 const MAXIMO_CONSULTAS_DIARIAS = 2;
@@ -156,10 +157,10 @@ async function turnoDeIa(mensajes, registros, extra) {
   return respuesta.json();
 }
 
-// Con la app recién estrenada toca la entrevista de bienvenida, que además de
-// dar un plan rellena los ajustes y guarda el perfil (spec 016).
-export function esPrimeraVez(consultas) {
-  return !consultas.some((consulta) => consulta.estado === "terminada");
+// La entrevista de bienvenida abre cada operación (spec 018): la primera vez
+// pregunta de todo, y a partir de la segunda solo lo que cambia.
+export function modoDeBienvenida(operaciones) {
+  return operaciones.length === 0 ? "inicial" : "reinicio";
 }
 
 // Lo que la IA ya sabe de esta persona, para no volver a preguntarlo.
@@ -179,16 +180,17 @@ export async function empezarConsulta(uid, consultas) {
     throw errorConCodigo("limite-diario", "Límite diario de consultas alcanzado");
   }
 
-  const inicial = esPrimeraVez(consultas);
-  const [registros, contexto] = await Promise.all([
+  const [registros, contexto, operaciones] = await Promise.all([
     recogerRegistros(uid),
-    contextoDelUsuario(uid)
+    contextoDelUsuario(uid),
+    listarOperaciones(uid)
   ]);
 
-  const respuesta = await turnoDeIa([], registros, {
-    ...contexto,
-    modo: inicial ? "inicial" : "normal"
-  });
+  // Sin operación activa, esta consulta es la entrevista que abre una nueva.
+  const abriendo = !operaciones.some((operacion) => operacion.estado === "activa");
+  const modo = abriendo ? modoDeBienvenida(operaciones) : "normal";
+
+  const respuesta = await turnoDeIa([], registros, { ...contexto, modo });
 
   if (respuesta.tipo !== "pregunta") {
     throw errorConCodigo("respuesta-ilegible", "La IA no empezó con una pregunta");
@@ -196,7 +198,7 @@ export async function empezarConsulta(uid, consultas) {
 
   await addDoc(consultasDe(uid), {
     estado: "en-curso",
-    modo: inicial ? "inicial" : "normal",
+    modo,
     mensajes: [{ de: "ia", texto: respuesta.pregunta }],
     creadaEn: serverTimestamp(),
     terminadaEn: null
@@ -233,12 +235,18 @@ export async function responder(uid, consulta, texto) {
     });
 
     // La entrevista de bienvenida deja los ajustes rellenos y el perfil
-    // guardado, sin que el usuario tenga que copiarlos a mano.
-    if (consulta.modo === "inicial") {
+    // guardado, sin que el usuario tenga que copiarlos a mano, y arranca la
+    // operación: hasta aquí no había ninguna, y por eso no se podía apuntar.
+    const bienvenida = consulta.modo === "inicial" || consulta.modo === "reinicio";
+    if (bienvenida) {
       await guardarLoAveriguado(uid, respuesta);
+      const operaciones = await listarOperaciones(uid);
+      if (!operaciones.some((operacion) => operacion.estado === "activa")) {
+        await crearOperacion(uid, operaciones);
+      }
     }
 
-    return { termino: true, inicial: consulta.modo === "inicial" };
+    return { termino: true, inicial: bienvenida };
   }
 
   await updateDoc(referencia, {

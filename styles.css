@@ -946,3 +946,102 @@ button:disabled {
 #alcances-especializados.oculta {
   display: none;
 }
+
+/* Operaciones e histórico (spec 018) */
+
+#btn-iniciar-operacion {
+  width: 100%;
+  background: var(--acento);
+  border-color: var(--acento);
+  color: var(--sobre-acento);
+  font-weight: 700;
+}
+
+.aviso-sin-operacion {
+  color: var(--tinta-suave);
+  margin: var(--e6) 0 var(--e4);
+}
+
+#bloque-finalizar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e2);
+  align-items: flex-start;
+}
+
+#confirmar-finalizar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e2);
+  align-items: flex-start;
+}
+
+#confirmar-finalizar.oculta {
+  display: none;
+}
+
+#estado-operacion:empty {
+  display: none;
+}
+
+#lista-historico .plan h3 {
+  margin-top: 0;
+  color: var(--tinta);
+  font-size: 1rem;
+}
+
+/* El archivo de una operación tapa la app entera: es otra pantalla, no un
+   trozo más de Ajustes. */
+#archivo {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  background: var(--fondo);
+  overflow-y: auto;
+  padding: var(--e4);
+}
+
+#archivo.oculta {
+  display: none;
+}
+
+#archivo-caja {
+  max-width: var(--ancho-columna);
+  margin: 0 auto;
+}
+
+.lista-archivo {
+  list-style: none;
+  padding: 0;
+}
+
+.lista-archivo li {
+  display: flex;
+  gap: var(--e2);
+  padding: var(--e2) 0;
+  border-bottom: 1px solid var(--borde);
+}
+
+.rejilla-archivo {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(6.5rem, 1fr));
+  gap: var(--e2);
+}
+
+.rejilla-archivo figure {
+  margin: 0;
+  text-align: center;
+}
+
+.rejilla-archivo img {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border-radius: var(--radio-s);
+  border: 1px solid var(--borde);
+}
+
+.rejilla-archivo figcaption {
+  font-size: 0.75rem;
+  color: var(--tinta-suave);
+}

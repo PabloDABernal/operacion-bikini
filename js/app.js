@@ -15,7 +15,8 @@ import {
   sumarDias,
   formatearFecha,
   formatearHora,
-  formatearFechaConHora
+  formatearFechaConHora,
+  compararPorFechaYCreacion
 } from "./fechas.js";
 
 import { pesosPorDia, mediaMovil, calendarioDeConstancia } from "./grafica.js";
@@ -71,7 +72,6 @@ import {
   listarConsultas,
   listarPlanes,
   consultaEnCurso,
-  esPrimeraVez,
   quedanConsultasHoy,
   empezarConsulta,
   responder,
@@ -99,6 +99,18 @@ import {
 } from "./ajustes.js";
 
 import { subirFotoDePerfil, recorteRedondo } from "./perfil.js";
+
+import {
+  listarOperaciones,
+  operacionActiva,
+  operacionAMedias,
+  calcularResumen,
+  cerrarOperacion,
+  archivar,
+  leerArchivo,
+  COLECCIONES,
+  NOMBRES
+} from "./operaciones.js";
 
 import {
   TIPOS,
@@ -1200,9 +1212,9 @@ function pintarEstadoConsulta() {
     ? null
     : consultasCargadas.find((consulta) => consulta.id === consultaReciénTerminada);
 
-  // Con la app recién estrenada, la primera consulta es la entrevista de
-  // bienvenida y se anuncia como tal (spec 016).
-  const primeraVez = esPrimeraVez(consultasCargadas);
+  // Sin operación activa, la consulta que toca es la entrevista que abre una
+  // nueva (specs 016 y 018).
+  const primeraVez = !hayOperacion;
 
   id("form-respuesta").classList.toggle("oculta", !enCurso);
   id("btn-abandonar").classList.toggle("oculta", !enCurso);
@@ -1225,7 +1237,8 @@ function pintarEstadoConsulta() {
       : "Ya has pasado consulta 2 veces hoy.";
   }
 
-  pintarEspecializadas(enCurso || !quedanHoy);
+  // Sin operación en marcha solo se puede hacer la entrevista que la abre.
+  pintarEspecializadas(enCurso || !quedanHoy || !hayOperacion);
   pintarHilo(consultaAbierta || terminada);
 }
 
@@ -1358,7 +1371,11 @@ id("form-respuesta").addEventListener("submit", async (evento) => {
     await refrescarConsulta();
     // La entrevista de bienvenida ha dejado ajustes y perfil guardados: hay
     // que releerlos para que la cabecera y el formulario los enseñen.
-    if (termino && inicial) await refrescarAjustes();
+    if (termino && inicial) {
+      await refrescarAjustes();
+      // La entrevista ha creado la operación: hasta ahora no se podía apuntar.
+      await refrescarOperaciones();
+    }
   }
 });
 
@@ -1503,6 +1520,328 @@ function refrescarTodo() {
     refrescarConsulta(),
     refrescarFotos()
   ]);
+}
+
+// --- Operaciones (spec 018) ----------------------------------------------
+
+let operacionesCargadas = [];
+let hayOperacion = false;
+
+// Sin operación activa la app no deja apuntar nada: solo iniciar una. Las
+// pantallas de registro enseñan un aviso en lugar de su contenido.
+function pintarPuerta() {
+  const pendiente = operacionAMedias(operacionesCargadas);
+
+  id("bloque-iniciar").classList.toggle("oculta", hayOperacion);
+  id("bloque-hoy").classList.toggle("oculta", !hayOperacion);
+
+  // Empezar otra operación con la anterior a medio archivar mezclaría los
+  // registros de las dos: los que quedan sin mover se verían como si fueran
+  // de la nueva, y acabarían archivados en la que no toca.
+  id("aviso-archivado-pendiente").classList.toggle("oculta", !pendiente);
+  id("btn-iniciar-operacion").disabled = Boolean(pendiente);
+
+  document.querySelectorAll(".aviso-sin-operacion").forEach((aviso) => {
+    aviso.classList.toggle("oculta", hayOperacion);
+  });
+  document.querySelectorAll(".contenido-operacion").forEach((contenido) => {
+    contenido.classList.toggle("oculta", !hayOperacion);
+  });
+
+  // Finalizar solo tiene sentido con una operación en marcha.
+  id("bloque-finalizar").classList.toggle("oculta", !hayOperacion);
+}
+
+function kg(valor) {
+  return `${valor.toFixed(1).replace(".", ",")} kg`;
+}
+
+function pintarHistorico() {
+  const contenedor = id("lista-historico");
+  const archivadas = operacionesCargadas.filter(
+    (operacion) => operacion.estado === "archivada"
+  );
+
+  contenedor.innerHTML = "";
+  id("estado-historico").textContent = archivadas.length
+    ? ""
+    : "Aún no has cerrado ninguna operación.";
+
+  archivadas.forEach((operacion) => {
+    const tarjeta = document.createElement("article");
+    tarjeta.className = "plan";
+
+    const titulo = document.createElement("h3");
+    titulo.textContent = `Operación ${operacion.numero}`;
+    tarjeta.appendChild(titulo);
+
+    const fechas = document.createElement("p");
+    fechas.className = "consejo-fecha";
+    fechas.textContent = `${formatearFecha(operacion.inicio)} → ${formatearFecha(
+      operacion.fin
+    )}`;
+    tarjeta.appendChild(fechas);
+
+    const resumen = operacion.resumen || {};
+    const linea = document.createElement("p");
+
+    if (resumen.pesoInicial === null || resumen.pesoInicial === undefined) {
+      linea.textContent = "Sin pesajes en esta operación.";
+    } else {
+      const cambio = Math.round((resumen.pesoFinal - resumen.pesoInicial) * 10) / 10;
+      const signo = cambio > 0 ? "+" : "−";
+      linea.textContent =
+        `${signo}${Math.abs(cambio).toFixed(1).replace(".", ",")} kg · ` +
+        `de ${kg(resumen.pesoInicial)} a ${kg(resumen.pesoFinal)}`;
+    }
+    tarjeta.appendChild(linea);
+
+    const dias = document.createElement("p");
+    dias.className = "consejo-fecha";
+    dias.textContent = `${resumen.diasRegistrados || 0} días registrados · ${
+      resumen.registros || 0
+    } registros`;
+    tarjeta.appendChild(dias);
+
+    // Una operación a medio archivar no se puede enseñar entera todavía.
+    if (operacion.archivando && operacion.archivando.length) {
+      const aviso = document.createElement("p");
+      aviso.className = "advertencia";
+      aviso.textContent = "Archivado sin terminar. Reintenta desde arriba.";
+      tarjeta.appendChild(aviso);
+    } else {
+      tarjeta.appendChild(botonDeFila("Ver", () => abrirArchivo(operacion)));
+    }
+
+    contenedor.appendChild(tarjeta);
+  });
+}
+
+// Los registros de una operación archivada, en solo lectura: ni editar ni
+// borrar. Lo movido, movido está.
+async function abrirArchivo(operacion) {
+  const caja = id("archivo");
+  const contenido = id("archivo-contenido");
+  const grafica = id("archivo-grafica");
+
+  id("archivo-titulo").textContent = `Operación ${operacion.numero}`;
+  id("archivo-estado").textContent = "Cargando…";
+  contenido.innerHTML = "";
+  grafica.innerHTML = "";
+  caja.classList.remove("oculta");
+
+  try {
+    const listas = await Promise.all(
+      COLECCIONES.map((nombre) => leerArchivo(uidActual, operacion.id, nombre))
+    );
+    const porNombre = Object.fromEntries(
+      COLECCIONES.map((nombre, i) => [nombre, listas[i]])
+    );
+
+    id("archivo-estado").textContent = "";
+
+    const pesajes = porNombre.pesajes || [];
+    const svg = dibujarGrafica(
+      mediaMovil(pesosPorDia(pesajes)),
+      null,
+      pesajes.length
+    );
+    if (svg) grafica.appendChild(svg);
+
+    const titular = (texto) => {
+      const titulo = document.createElement("h3");
+      titulo.textContent = texto;
+      contenido.appendChild(titulo);
+    };
+
+    ["pesajes", "comidas", "ejercicios"].forEach((nombre) => {
+      const registros = [...(porNombre[nombre] || [])].sort(
+        compararPorFechaYCreacion
+      );
+      if (!registros.length) return;
+
+      titular(NOMBRES[nombre]);
+
+      const lista = document.createElement("ul");
+      lista.className = "lista-archivo";
+
+      registros.forEach((registro) => {
+        const fila = document.createElement("li");
+        const detalle =
+          nombre === "pesajes"
+            ? kg(registro.pesoKg)
+            : nombre === "comidas"
+              ? registro.texto
+              : `${registro.texto} · ${registro.minutos} min`;
+        fila.append(
+          celda(formatearFechaConHora(registro.fecha, registro.hora), "pesaje-fecha"),
+          celda(detalle, "registro-texto")
+        );
+        lista.appendChild(fila);
+      });
+
+      contenido.appendChild(lista);
+    });
+
+    // Las fotos siguen en Cloudinary: al archivar solo se movió su documento,
+    // así que se ven igual desde aquí.
+    const fotos = [...(porNombre.fotos || [])].sort((a, b) =>
+      a.fecha < b.fecha ? 1 : -1
+    );
+    if (fotos.length) {
+      titular("fotos");
+      const rejilla = document.createElement("div");
+      rejilla.className = "rejilla-archivo";
+      fotos.forEach((foto) => {
+        const figura = document.createElement("figure");
+        const imagen = document.createElement("img");
+        imagen.src = miniaturaDe(foto.url);
+        imagen.alt = `Foto del ${formatearFecha(foto.fecha)}`;
+        imagen.loading = "lazy";
+        const pie = document.createElement("figcaption");
+        pie.textContent = formatearFecha(foto.fecha);
+        figura.append(imagen, pie);
+        rejilla.appendChild(figura);
+      });
+      contenido.appendChild(rejilla);
+    }
+
+    // Consejos y planes: el texto tal cual, que es lo que vale de ellos.
+    [
+      ["consejos", "consejos", (documento) => documento.texto],
+      [
+        "planes",
+        "planes",
+        (documento) =>
+          [documento.nutricion, documento.ejercicio].filter(Boolean).join("\n\n")
+      ]
+    ].forEach(([nombre, titulo, sacarTexto]) => {
+      const documentos = porNombre[nombre] || [];
+      if (!documentos.length) return;
+
+      titular(titulo);
+      documentos.forEach((documento) => {
+        const tarjeta = document.createElement("article");
+        tarjeta.className = "consejo";
+        const parrafo = document.createElement("p");
+        parrafo.textContent = sacarTexto(documento) || "(sin texto)";
+        tarjeta.appendChild(parrafo);
+        contenido.appendChild(tarjeta);
+      });
+    });
+
+    // Las consultas no se pintan una a una: son conversaciones largas y lo
+    // que queda de ellas es el plan, que sí está arriba. Se dice cuántas hubo.
+    const consultas = porNombre.consultas || [];
+    if (consultas.length) {
+      const nota = document.createElement("p");
+      nota.className = "explicacion";
+      nota.textContent = `${consultas.length} ${
+        consultas.length === 1 ? "consulta guardada" : "consultas guardadas"
+      } en esta operación.`;
+      contenido.appendChild(nota);
+    }
+  } catch {
+    id("archivo-estado").textContent =
+      "No se ha podido cargar el archivo. Comprueba tu conexión.";
+  }
+}
+
+id("btn-cerrar-archivo").addEventListener("click", () => {
+  id("archivo").classList.add("oculta");
+});
+
+id("btn-iniciar-operacion").addEventListener("click", () => {
+  abrirPestana("consulta");
+});
+
+id("btn-finalizar").addEventListener("click", () => {
+  id("confirmar-finalizar").classList.remove("oculta");
+  id("btn-finalizar").classList.add("oculta");
+});
+
+id("btn-finalizar-no").addEventListener("click", () => {
+  id("confirmar-finalizar").classList.add("oculta");
+  id("btn-finalizar").classList.remove("oculta");
+});
+
+id("btn-finalizar-si").addEventListener("click", async () => {
+  const estado = id("estado-operacion");
+  const error = id("error-operacion");
+  error.textContent = "";
+
+  const operacion = operacionActiva(operacionesCargadas);
+  if (!operacion) return;
+
+  id("btn-finalizar-si").disabled = true;
+  id("btn-finalizar-no").disabled = true;
+
+  try {
+    // El resumen se calcula ANTES de mover nada, mientras los registros
+    // siguen donde estaban.
+    estado.textContent = "Calculando el resumen…";
+    const resumen = await calcularResumen(uidActual);
+
+    await cerrarOperacion(uidActual, operacion.id, resumen);
+    await archivarPendiente(operacion.id);
+  } catch {
+    error.textContent =
+      "No se ha podido archivar del todo. Puedes reintentarlo sin perder nada.";
+  } finally {
+    estado.textContent = "";
+    id("btn-finalizar-si").disabled = false;
+    id("btn-finalizar-no").disabled = false;
+    id("confirmar-finalizar").classList.add("oculta");
+    id("btn-finalizar").classList.remove("oculta");
+    await refrescarOperaciones();
+    await refrescarTodo();
+  }
+});
+
+async function archivarPendiente(operacionId) {
+  await archivar(uidActual, operacionId, (queVa) => {
+    id("estado-operacion").textContent = `Archivando… (${queVa})`;
+  });
+  id("estado-operacion").textContent = "Operación finalizada.";
+  setTimeout(() => {
+    id("estado-operacion").textContent = "";
+  }, 4000);
+}
+
+id("btn-reintentar-archivado").addEventListener("click", async () => {
+  const aMedias = operacionAMedias(operacionesCargadas);
+  if (!aMedias) return;
+
+  id("error-operacion").textContent = "";
+  id("btn-reintentar-archivado").disabled = true;
+
+  try {
+    await archivarPendiente(aMedias.id);
+  } catch {
+    id("error-operacion").textContent =
+      "Sigue sin poder archivarse. Comprueba tu conexión.";
+  } finally {
+    id("btn-reintentar-archivado").disabled = false;
+    await refrescarOperaciones();
+    await refrescarTodo();
+  }
+});
+
+async function refrescarOperaciones() {
+  try {
+    operacionesCargadas = await listarOperaciones(uidActual);
+  } catch {
+    operacionesCargadas = [];
+  }
+
+  hayOperacion = Boolean(operacionActiva(operacionesCargadas));
+  id("btn-reintentar-archivado").classList.toggle(
+    "oculta",
+    !operacionAMedias(operacionesCargadas)
+  );
+
+  pintarPuerta();
+  pintarHistorico();
 }
 
 // --- Ajustes -------------------------------------------------------------
@@ -1754,7 +2093,10 @@ observarSesion(
     mostrar("principal");
 
     id("email-ajustes").textContent = usuario.email;
-    refrescarTodo();
+    // Con await: refrescarTodo() pinta la pestaña Consulta, que necesita saber
+    // si hay operación activa. Sin esperar aquí, se pintaba con el valor de
+    // antes de leerlo.
+    refrescarOperaciones().then(refrescarTodo);
     refrescarAjustes();
     refrescarRecuentos();
   },

@@ -44,6 +44,21 @@
 
     <!-- Sección: Hoy (spec 010) -->
     <div class="seccion" data-seccion="hoy">
+      <!-- Sin operación activa la app no deja apuntar: solo esto (spec 018) -->
+      <div id="bloque-iniciar" class="oculta">
+        <h2>Operación bikini</h2>
+        <p class="explicacion">
+          Empieza con una entrevista: la IA te conocerá, te pondrá un plan y
+          dejará tus ajustes listos. A partir de ahí ya podrás apuntar.
+        </p>
+        <button type="button" id="btn-iniciar-operacion">Iniciar operación bikini</button>
+        <p id="aviso-archivado-pendiente" class="advertencia oculta">
+          Queda archivado a medias de tu operación anterior. Termínalo desde
+          Ajustes antes de empezar otra, o se mezclarían los datos.
+        </p>
+      </div>
+
+      <div id="bloque-hoy" class="oculta">
       <h2 id="hoy-fecha"></h2>
 
       <ul id="hoy-resumen" class="resumen"></ul>
@@ -58,10 +73,15 @@
       <div id="rangos-calendario" class="rangos"></div>
       <div id="calendario" class="bloque-calendario"></div>
       <p id="calendario-detalle" class="comparador-detalle"></p>
+      </div>
     </div>
 
     <!-- Sección: Peso (spec 001, solo cambia de sitio) -->
     <div class="seccion" data-seccion="peso">
+      <p class="aviso-sin-operacion oculta">
+        Primero inicia tu operación bikini desde Hoy.
+      </p>
+      <div class="contenido-operacion">
       <h2>Nuevo pesaje</h2>
       <form id="form-pesaje">
         <label for="peso">Peso (kg)</label>
@@ -99,10 +119,15 @@
       <!-- Estadísticas (spec 015) -->
       <h2>Estadísticas</h2>
       <ul id="estadisticas" class="resumen"></ul>
+      </div>
     </div>
 
     <!-- Sección: Comidas -->
     <div class="seccion" data-seccion="comidas">
+      <p class="aviso-sin-operacion oculta">
+        Primero inicia tu operación bikini desde Hoy.
+      </p>
+      <div class="contenido-operacion">
       <h2>Nueva comida</h2>
       <form id="form-comida">
         <label for="comida-texto">Qué has comido</label>
@@ -140,10 +165,15 @@
       <button type="button" id="btn-reintentar-comidas" class="oculta">Reintentar</button>
       <ul id="lista-comidas"></ul>
       <button type="button" id="btn-desplegar-comidas" class="desplegar oculta"></button>
+      </div>
     </div>
 
     <!-- Sección: Ejercicio -->
     <div class="seccion" data-seccion="ejercicio">
+      <p class="aviso-sin-operacion oculta">
+        Primero inicia tu operación bikini desde Hoy.
+      </p>
+      <div class="contenido-operacion">
       <h2>Nuevo ejercicio</h2>
       <form id="form-ejercicio">
         <label for="ejercicio-texto">Qué has hecho</label>
@@ -177,10 +207,15 @@
       <button type="button" id="btn-reintentar-ejercicios" class="oculta">Reintentar</button>
       <ul id="lista-ejercicios"></ul>
       <button type="button" id="btn-desplegar-ejercicios" class="desplegar oculta"></button>
+      </div>
     </div>
 
     <!-- Sección: Consejos -->
     <div class="seccion" data-seccion="consejos">
+      <p class="aviso-sin-operacion oculta">
+        Primero inicia tu operación bikini desde Hoy.
+      </p>
+      <div class="contenido-operacion">
       <h2>Consejos de la IA</h2>
       <p class="explicacion">
         Analiza tus pesajes, comidas y ejercicio de los últimos 14 días.
@@ -193,6 +228,7 @@
       <p id="estado-consejos"></p>
       <button type="button" id="btn-reintentar-consejos" class="oculta">Reintentar</button>
       <div id="lista-consejos"></div>
+      </div>
     </div>
 
     <!-- Sección: Consulta -->
@@ -244,6 +280,10 @@
 
     <!-- Sección: Fotos -->
     <div class="seccion" data-seccion="fotos">
+      <p class="aviso-sin-operacion oculta">
+        Primero inicia tu operación bikini desde Hoy.
+      </p>
+      <div class="contenido-operacion">
       <h2>Fotos de progreso</h2>
       <p class="explicacion">
         Una foto al día. Lo que la báscula no siempre enseña.
@@ -258,6 +298,7 @@
 
       <p id="estado-fotos"></p>
       <div id="rejilla-fotos"></div>
+      </div>
     </div>
 
     <!-- Sección: Ajustes -->
@@ -290,9 +331,43 @@
       <p class="explicacion">Has entrado como <span id="email-ajustes"></span>.</p>
       <button type="button" id="btn-salir">Cerrar sesión</button>
 
+      <!-- Operaciones (spec 018) -->
+      <h2>Operación bikini</h2>
+      <div id="bloque-finalizar">
+        <p class="explicacion">
+          Al finalizar, todo lo que has apuntado se archiva y podrás empezar de
+          nuevo. Tus ajustes, tu foto y lo que la IA sabe de ti se conservan.
+        </p>
+        <button type="button" id="btn-finalizar">Finalizar operación bikini</button>
+        <div id="confirmar-finalizar" class="oculta">
+          <p class="advertencia">
+            Se archivarán todos tus registros y las pantallas quedarán a cero.
+            No se borra nada: podrás consultarlo en el histórico.
+          </p>
+          <button type="button" id="btn-finalizar-si">Sí, finalizar</button>
+          <button type="button" id="btn-finalizar-no" class="enlace">Cancelar</button>
+        </div>
+      </div>
+
+      <!-- Fuera del bloque de arriba a propósito: ese se oculta en cuanto la
+           operación deja de estar activa, y estos mensajes hacen falta justo
+           entonces, cuando el archivado ha fallado. -->
+      <p id="estado-operacion"></p>
+      <p id="error-operacion" class="error" role="alert"></p>
+      <button type="button" id="btn-reintentar-archivado" class="oculta">
+        Reintentar el archivado
+      </button>
+
+      <h2>Histórico</h2>
+      <p id="estado-historico"></p>
+      <div id="lista-historico"></div>
+
       <div class="zona-peligro">
         <h2>Reiniciar datos</h2>
-        <p class="advertencia">Esto borra tus datos para siempre. No hay vuelta atrás.</p>
+        <p class="advertencia">
+          Esto borra tus datos para siempre. No hay vuelta atrás. No toca el
+          histórico de operaciones ya archivadas.
+        </p>
 
         <div id="casillas-reinicio"></div>
 
@@ -337,6 +412,17 @@
   <section id="pantalla-cargando" class="pantalla">
     <p>Cargando…</p>
   </section>
+
+  <!-- Una operación archivada, en solo lectura (spec 018) -->
+  <div id="archivo" class="oculta">
+    <div id="archivo-caja">
+      <h2 id="archivo-titulo"></h2>
+      <button type="button" id="btn-cerrar-archivo" class="enlace">Volver</button>
+      <p id="archivo-estado"></p>
+      <div id="archivo-grafica" class="bloque-grafica"></div>
+      <div id="archivo-contenido"></div>
+    </div>
+  </div>
 
   <!-- Vista ampliada de una foto -->
   <div id="visor" class="oculta">

@@ -46,6 +46,24 @@ Cuando devuelvas el plan, rellena también estos campos:
 - "fechaObjetivo": en formato AAAA-MM-DD. Vacío si no ha dado plazo.
 - "perfil": un retrato en prosa de esta persona para que otro nutricionista pueda aconsejarla sin volver a entrevistarla: gustos, aversiones, alergias, ejercicio que disfruta, material, limitaciones y horarios. Máximo 200 palabras.`;
 
+// A partir de la segunda operación (spec 018) la IA ya conoce a la persona:
+// no hace falta volver a preguntárselo todo, solo lo que cambia de un ciclo al
+// siguiente.
+const INSTRUCCIONES_REINICIO = `${INSTRUCCIONES}
+
+ESTA PERSONA YA HIZO LA ENTREVISTA ANTES Y EMPIEZA UNA ETAPA NUEVA. Además de lo anterior:
+- NO vuelvas a preguntarle lo que ya sabes de ella (gustos, aversiones, alergias, material, limitaciones): lo tienes en el contexto.
+- Pregunta solo lo que cambia entre una etapa y otra: peso actual, nuevo objetivo, para cuándo, y qué ha cambiado desde la última vez (horarios, lesiones, material, motivación).
+- Sé breve: con cuatro o cinco preguntas deberías tener bastante.
+- Sigue siendo UNA pregunta por turno.
+
+Cuando devuelvas el plan, rellena también estos campos:
+- "nombre": cómo quiere que le llamen (el que ya usabas, salvo que pida otro).
+- "alturaCm": solo el número en centímetros. Vacío si no lo sabes.
+- "pesoObjetivoKg": el NUEVO objetivo, solo el número.
+- "fechaObjetivo": en formato AAAA-MM-DD. Vacío si no ha dado plazo.
+- "perfil": el retrato de siempre, actualizado con lo que te acabe de contar. No pierdas lo que ya sabías.`;
+
 // Todos los campos son obligatorios a propósito: con "ejercicio" opcional,
 // Gemini se lo saltaba y llegaban planes sin rutina. Los que no aplican en
 // cada turno vienen como cadena vacía.
@@ -91,8 +109,15 @@ module.exports = async (req, res) => {
   const cuerpo = req.body || {};
   const mensajes = Array.isArray(cuerpo.mensajes) ? cuerpo.mensajes : [];
   const registros = cuerpo.registros || {};
-  const inicial = cuerpo.modo === "inicial";
-  const instrucciones = inicial ? INSTRUCCIONES_INICIAL : INSTRUCCIONES;
+  // Los dos modos de bienvenida devuelven datos personales; el normal no.
+  const reinicio = cuerpo.modo === "reinicio";
+  const inicial = cuerpo.modo === "inicial" || reinicio;
+
+  const instrucciones = reinicio
+    ? INSTRUCCIONES_REINICIO
+    : inicial
+      ? INSTRUCCIONES_INICIAL
+      : INSTRUCCIONES;
 
   const preguntasHechas = mensajes.filter((mensaje) => mensaje.de === "ia").length;
   const debeCerrar = preguntasHechas >= MAXIMO_PREGUNTAS;
