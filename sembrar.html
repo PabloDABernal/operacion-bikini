@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#12141A">
+  <meta name="robots" content="noindex">
+  <title>Sembrar datos de prueba</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <h1>Datos de prueba</h1>
+
+  <p class="explicacion">
+    Herramienta temporal, no forma parte de la app. Rellena tu cuenta con datos
+    falsos para verla como si llevara meses en uso.
+  </p>
+
+  <p>Sesión abierta como <strong id="quien">…</strong></p>
+
+  <h2>1. Operación en curso</h2>
+  <p class="explicacion">
+    Dos meses de pesajes, comidas y ejercicio hasta hoy, con sus horas, y una
+    operación abierta que empieza el primer día sembrado. Si no tienes peso
+    objetivo, le pone 78 kg para que la gráfica tenga su línea.
+  </p>
+  <button type="button" data-accion="en-curso" disabled>
+    Sembrar dos meses y abrir la operación
+  </button>
+
+  <h2>2. Operación anterior, ya archivada</h2>
+  <p class="explicacion">
+    Otros dos meses, anteriores a los de arriba, escritos directamente en el
+    archivo con su resumen y un plan. Sirve para ver el histórico y su vista de
+    solo lectura sin tener que finalizar nada.
+  </p>
+  <button type="button" data-accion="archivada" disabled>
+    Sembrar una operación archivada
+  </button>
+
+  <p id="estado" class="explicacion"></p>
+
+  <h2>Para deshacerlo</h2>
+  <p class="explicacion">
+    Lo del día a día se borra en <strong>Ajustes → Reiniciar datos</strong>. Las
+    operaciones y su archivo no se borran desde la app: eso hay que hacerlo a
+    mano en la consola de Firebase.
+  </p>
+
+  <p class="explicacion"><a href="/">Volver a la app</a></p>
+
+  <script type="module" src="js/sembrar.js"></script>
+</body>
+</html>
