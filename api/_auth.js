@@ -43,7 +43,7 @@ async function datosDelToken(idToken) {
 // petición ya está contestada; quien llama solo tiene que dejar de trabajar.
 //
 // Devuelve { uid, email } si se puede continuar, o false. Ojo al cambiar esto:
-// api/consejo.js y api/consulta.js lo usan como `if (!(await ...)) return;`.
+// api/consulta.js y api/plan.js lo usan como `if (!(await ...)) return;`.
 async function peticionAutorizada(req, res) {
   if (req.method !== "POST") {
     res.status(405).json({ error: "metodo-no-permitido" });

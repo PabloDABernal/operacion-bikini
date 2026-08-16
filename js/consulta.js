@@ -127,9 +127,14 @@ export function consultaEnCurso(consultas) {
 }
 
 // Las consultas abandonadas también cuentan: si no, se podría reiniciar sin fin.
+//
+// La conversación NO cuenta: es un solo hilo que dura toda la operación y
+// tiene su propio cupo de mensajes (spec 023). Si contara, el primer mensaje
+// del día se comería una de las dos plazas de la entrevista y los planes.
 export function empezadasHoy(consultas) {
   const hoy = hoyISO();
   return consultas.filter((consulta) => {
+    if (consulta.modo === "conversacion") return false;
     if (!consulta.creadaEn) return true;
     const fecha = consulta.creadaEn.toDate();
     const mes = String(fecha.getMonth() + 1).padStart(2, "0");

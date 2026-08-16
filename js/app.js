@@ -62,10 +62,14 @@ import {
 } from "./ejercicios.js";
 
 import {
-  pedirConsejo,
-  listarConsejos,
-  mensajeDeErrorDeConsejo
-} from "./consejos.js";
+  MENSAJES_POR_DIA,
+  MAXIMO_CARACTERES,
+  hiloDeConversacion,
+  quedanMensajesHoy,
+  hiloCompleto,
+  enviarMensaje,
+  consejosAntiguos
+} from "./conversacion.js";
 
 import {
   MAXIMO_CARACTERES_RESPUESTA,
@@ -1072,10 +1076,6 @@ id("form-ejercicio").addEventListener("submit", async (evento) => {
 
 // --- Consejos ------------------------------------------------------------
 
-// No usa crearLista(): los consejos no se borran y cada uno se pinta como
-// una tarjeta con tres apartados, no como una fila.
-let consejosCargados = [];
-
 function formatearFechaYHora(creadoEn) {
   if (!creadoEn) return "";
   const fecha = creadoEn.toDate();
@@ -1086,71 +1086,89 @@ function formatearFechaYHora(creadoEn) {
   );
 }
 
-function pintarConsejos(consejos) {
-  const contenedor = id("lista-consejos");
-  contenedor.innerHTML = "";
-  id("estado-consejos").textContent = consejos.length
-    ? ""
-    : "Aún no has pedido ningún consejo.";
+// --- Conversación con el nutricionista (spec 023) ------------------------
+//
+// "Consejos" ya no es una sección: los de antes se enseñan aquí dentro, como
+// mensajes suyos, y lo nuevo se habla en este hilo.
 
-  consejos.forEach((consejo) => {
-    const tarjeta = document.createElement("article");
-    tarjeta.className = "consejo";
+let hiloAbierto = null;
+let consejosDeAntes = [];
 
+function pintarBurbuja(mensaje) {
+  const burbuja = document.createElement("div");
+  burbuja.className = mensaje.de === "ia" ? "mensaje mensaje-ia" : "mensaje mensaje-usuario";
+
+  if (mensaje.esConsejoAntiguo && mensaje.fecha) {
     const fecha = document.createElement("p");
     fecha.className = "consejo-fecha";
-    fecha.textContent = formatearFechaYHora(consejo.creadoEn);
-    tarjeta.appendChild(fecha);
-
-    [
-      ["Qué veo", consejo.queVeo],
-      ["Qué hacer esta semana", consejo.queHacer],
-      ["Ojo con esto", consejo.ojoCon]
-    ].forEach(([titulo, texto]) => {
-      const encabezado = document.createElement("h3");
-      encabezado.textContent = titulo;
-      const parrafo = document.createElement("p");
-      parrafo.textContent = texto;
-      tarjeta.append(encabezado, parrafo);
-    });
-
-    contenedor.appendChild(tarjeta);
-  });
-}
-
-async function refrescarConsejos() {
-  id("btn-reintentar-consejos").classList.add("oculta");
-  try {
-    consejosCargados = await listarConsejos(uidActual);
-    pintarConsejos(consejosCargados);
-  } catch {
-    consejosCargados = [];
-    id("lista-consejos").innerHTML = "";
-    id("estado-consejos").textContent =
-      "No se han podido cargar tus consejos. Comprueba tu conexión.";
-    id("btn-reintentar-consejos").classList.remove("oculta");
+    fecha.textContent = `Consejo del ${formatearFecha(mensaje.fecha)}`;
+    burbuja.appendChild(fecha);
   }
+
+  const texto = document.createElement("p");
+  texto.textContent = mensaje.texto;
+  burbuja.appendChild(texto);
+
+  return burbuja;
 }
 
-id("btn-reintentar-consejos").addEventListener("click", refrescarConsejos);
+function pintarConversacion() {
+  const contenedor = id("hilo-conversacion");
+  const mensajes = hiloCompleto(hiloAbierto, consejosDeAntes);
 
-id("btn-pedir-consejo").addEventListener("click", async () => {
-  const boton = id("btn-pedir-consejo");
-  const error = id("error-consejo");
-  const estado = id("estado-consejo");
+  contenedor.innerHTML = "";
+  mensajes.forEach((mensaje) => contenedor.appendChild(pintarBurbuja(mensaje)));
+
+  if (!mensajes.length) {
+    const vacio = document.createElement("p");
+    vacio.className = "explicacion";
+    vacio.textContent =
+      "Cuéntale cómo vas y te responderá con lo que vea en tus registros.";
+    contenedor.appendChild(vacio);
+  }
+
+  const quedan = quedanMensajesHoy(hiloAbierto);
+  id("cupo-conversacion").textContent = quedan
+    ? `Te quedan ${quedan} ${quedan === 1 ? "mensaje" : "mensajes"} hoy.`
+    : `Has gastado tus ${MENSAJES_POR_DIA} mensajes de hoy. Vuelve mañana.`;
+
+  id("conversacion-texto").disabled = quedan === 0;
+  id("btn-enviar-conversacion").disabled = quedan === 0;
+
+  // Lo último dicho es lo que interesa ver.
+  contenedor.scrollTop = contenedor.scrollHeight;
+}
+
+id("form-conversacion").addEventListener("submit", async (evento) => {
+  evento.preventDefault();
+
+  const campo = id("conversacion-texto");
+  const error = id("error-conversacion");
+  const estado = id("estado-conversacion");
+  const texto = campo.value.trim();
 
   error.textContent = "";
+  if (!texto) return;
+
+  if (texto.length > MAXIMO_CARACTERES) {
+    error.textContent = `Máximo ${MAXIMO_CARACTERES} caracteres.`;
+    return;
+  }
+
   estado.textContent = "Pensando…";
-  boton.disabled = true;
+  id("btn-enviar-conversacion").disabled = true;
 
   try {
-    await pedirConsejo(uidActual, consejosCargados);
-    await refrescarConsejos();
+    await enviarMensaje(uidActual, hiloAbierto, texto);
+    // El mensaje solo se borra del campo si ha llegado: si falla, se reintenta
+    // sin volver a escribirlo.
+    campo.value = "";
+    await refrescarConsulta();
   } catch (fallo) {
-    error.textContent = mensajeDeErrorDeConsejo(fallo.codigo);
+    error.textContent = mensajeDeErrorDeConsulta(fallo.codigo);
   } finally {
     estado.textContent = "";
-    boton.disabled = false;
+    id("btn-enviar-conversacion").disabled = false;
   }
 });
 
@@ -1227,6 +1245,11 @@ function pintarEstadoConsulta() {
   id("btn-abandonar").classList.toggle("oculta", !enCurso);
   id("btn-empezar-consulta").classList.toggle("oculta", enCurso);
   id("explicacion-inicial").classList.toggle("oculta", enCurso || !primeraVez);
+
+  // Con operación en marcha se charla; sin ella, lo que toca es la entrevista
+  // que la abre. Y mientras la entrevista está a medias, manda ella.
+  id("bloque-entrevista").classList.toggle("oculta", hayOperacion && !enCurso);
+  id("bloque-conversacion").classList.toggle("oculta", !hayOperacion || enCurso);
 
   if (enCurso) {
     id("aviso-consulta").textContent = "";
@@ -1305,14 +1328,22 @@ async function pedirEspecializada(tipo, alcance) {
 
 async function refrescarConsulta() {
   try {
-    const [consultas, planes] = await Promise.all([
+    const [consultas, planes, consejos] = await Promise.all([
       listarConsultas(uidActual),
-      listarPlanes(uidActual)
+      listarPlanes(uidActual),
+      consejosAntiguos(uidActual)
     ]);
     consultasCargadas = consultas;
-    consultaAbierta = consultaEnCurso(consultas);
+    consejosDeAntes = consejos;
+    hiloAbierto = hiloDeConversacion(consultas);
+    // La entrevista de bienvenida es un hilo aparte: la conversación no cuenta
+    // como "consulta en curso", o su formulario saldría por encima.
+    consultaAbierta = consultaEnCurso(
+      consultas.filter((consulta) => consulta.modo !== "conversacion")
+    );
     pintarPlanes(planes);
     pintarEstadoConsulta();
+    pintarConversacion();
   } catch {
     id("error-consulta").textContent =
       "No se ha podido cargar tu consulta. Comprueba tu conexión.";
@@ -1523,7 +1554,6 @@ function refrescarTodo() {
     listaPeso.refrescar(),
     listaComidas.refrescar(),
     listaEjercicios.refrescar(),
-    refrescarConsejos(),
     refrescarConsulta(),
     refrescarFotos()
   ]);
@@ -1849,6 +1879,11 @@ async function refrescarOperaciones() {
 
   pintarPuerta();
   pintarHistorico();
+
+  // La pantalla de Consulta depende de si hay operación: sin esto, al terminar
+  // la entrevista de bienvenida seguía enseñando el botón de empezarla en vez
+  // de abrir la conversación, hasta recargar la página.
+  if (consultasCargadas.length) pintarEstadoConsulta();
 }
 
 // --- Ajustes -------------------------------------------------------------
@@ -2061,8 +2096,8 @@ function limpiarFormularios() {
     "error-pesaje",
     "error-comida",
     "error-ejercicio",
-    "error-consejo",
     "error-consulta",
+    "error-conversacion",
     "error-foto",
     "error-ajustes",
     "aviso-ajustes",
@@ -2071,7 +2106,6 @@ function limpiarFormularios() {
   ].forEach((campo) => {
     id(campo).textContent = "";
   });
-  id("estado-consejo").textContent = "";
   id("estado-consulta").textContent = "";
   id("estado-foto").textContent = "";
   cerrarVisor();

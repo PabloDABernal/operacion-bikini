@@ -64,6 +64,25 @@ Cuando devuelvas el plan, rellena también estos campos:
 - "fechaObjetivo": en formato AAAA-MM-DD. Vacío si no ha dado plazo.
 - "perfil": el retrato de siempre, actualizado con lo que te acabe de contar. No pierdas lo que ya sabías.`;
 
+// La conversación que dura (spec 023): aquí la IA no entrevista, charla. El
+// texto de su respuesta viaja en el campo "pregunta", que en este modo es
+// simplemente "lo que dice".
+const INSTRUCCIONES_CONVERSACION = `Eres el nutricionista y entrenador personal de esta persona, y estáis charlando sobre cómo le va.
+
+Hablas SIEMPRE en español, tuteando, en tono cercano y directo.
+
+Cómo hablas:
+- RESPONDES a lo que te cuente o te pregunte. Esto NO es una entrevista: no vas haciendo preguntas de una en una. Puedes preguntar algo puntual si de verdad te hace falta para responder, pero lo normal es que contestes.
+- Te apoyas en sus registros de los últimos 14 días (peso, comidas y ejercicio): cuando te pregunte cómo va, respondes con SUS datos, no con generalidades.
+- Das pautas concretas y accionables. Breve: dos o tres ideas, no un discurso.
+- Si lo que te cuenta no tiene que ver con la dieta o el ejercicio, respondes con naturalidad y reconduces sin regañar.
+- No das diagnósticos médicos. Ante algo que te preocupe, recomiendas ir al médico.
+
+Formato de respuesta (JSON). Devuelve SIEMPRE todos los campos:
+{"tipo": "pregunta", "pregunta": "lo que le dices", "nutricion": "", "ejercicio": "", "nombre": "", "alturaCm": "", "pesoObjetivoKg": "", "fechaObjetivo": "", "perfil": ""}
+
+En "pregunta" va tu respuesta entera. Los demás campos, vacíos.`;
+
 // Todos los campos son obligatorios a propósito: con "ejercicio" opcional,
 // Gemini se lo saltaba y llegaban planes sin rutina. Los que no aplican en
 // cada turno vienen como cadena vacía.
@@ -110,17 +129,22 @@ module.exports = async (req, res) => {
   const mensajes = Array.isArray(cuerpo.mensajes) ? cuerpo.mensajes : [];
   const registros = cuerpo.registros || {};
   // Los dos modos de bienvenida devuelven datos personales; el normal no.
+  const conversacion = cuerpo.modo === "conversacion";
   const reinicio = cuerpo.modo === "reinicio";
   const inicial = cuerpo.modo === "inicial" || reinicio;
 
-  const instrucciones = reinicio
-    ? INSTRUCCIONES_REINICIO
-    : inicial
-      ? INSTRUCCIONES_INICIAL
-      : INSTRUCCIONES;
+  const instrucciones = conversacion
+    ? INSTRUCCIONES_CONVERSACION
+    : reinicio
+      ? INSTRUCCIONES_REINICIO
+      : inicial
+        ? INSTRUCCIONES_INICIAL
+        : INSTRUCCIONES;
 
   const preguntasHechas = mensajes.filter((mensaje) => mensaje.de === "ia").length;
-  const debeCerrar = preguntasHechas >= MAXIMO_PREGUNTAS;
+  // La conversación no se cierra nunca: lo de cortar por número de preguntas
+  // es cosa de la entrevista, que sí tiene que acabar en un plan.
+  const debeCerrar = !conversacion && preguntasHechas >= MAXIMO_PREGUNTAS;
 
   // El hilo se manda como conversación real para que la IA tenga memoria.
   const contents = [
@@ -132,7 +156,7 @@ module.exports = async (req, res) => {
             "Estos son mis registros de los últimos 14 días:\n\n" +
             describirRegistros(registros) +
             contexto(cuerpo.nombre, cuerpo.perfil) +
-            (mensajes.length
+            (mensajes.length || conversacion
               ? ""
               : "\n\nEmpieza la entrevista con tu primera pregunta.")
         }

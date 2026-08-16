@@ -1,4 +1,4 @@
-// Piezas compartidas por las funciones de IA (api/consejo.js, api/consulta.js).
+// Piezas compartidas por las funciones de IA (api/consulta.js, api/plan.js).
 //
 // La validación de credenciales vive ahora en api/_auth.js, porque la comparte
 // con la función de fotos. Se re-exporta desde aquí para que consejo.js y

@@ -320,7 +320,6 @@ button:disabled {
 #btn-guardar-comida,
 #btn-guardar-ejercicio,
 #btn-guardar-ajustes,
-#btn-pedir-consejo,
 #btn-empezar-consulta,
 #btn-subir-foto {
   background: var(--acento);
@@ -329,7 +328,6 @@ button:disabled {
   font-weight: 700;
 }
 
-#btn-pedir-consejo,
 #btn-empezar-consulta,
 #btn-subir-foto,
 #btn-google {
@@ -689,7 +687,6 @@ button:disabled {
   margin-top: 0;
 }
 
-#estado-consejo,
 #estado-consulta {
   color: var(--tinta-suave);
   min-height: 1.2rem;
@@ -1049,4 +1046,32 @@ button:disabled {
 .rejilla-archivo figcaption {
   font-size: 0.75rem;
   color: var(--tinta-suave);
+}
+
+/* La conversación con el nutricionista (spec 023) */
+
+.hilo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e2);
+  max-height: 60vh;
+  overflow-y: auto;
+  padding: var(--e2) 0;
+}
+
+.hilo .mensaje p {
+  margin: 0;
+}
+
+.hilo .mensaje .consejo-fecha {
+  margin-bottom: var(--e1);
+}
+
+#cupo-conversacion,
+#estado-conversacion {
+  margin: var(--e1) 0 0;
+}
+
+#estado-conversacion:empty {
+  display: none;
 }

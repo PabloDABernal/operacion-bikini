@@ -65,7 +65,6 @@
 
       <div id="atajos-hoy">
         <button type="button" class="atajo" data-seccion="consulta">Consulta</button>
-        <button type="button" class="atajo" data-seccion="consejos">Consejos</button>
         <button type="button" class="atajo" data-seccion="fotos">Fotos</button>
       </div>
 
@@ -210,52 +209,23 @@
       </div>
     </div>
 
-    <!-- Sección: Consejos -->
-    <div class="seccion" data-seccion="consejos">
-      <p class="aviso-sin-operacion oculta">
-        Primero inicia tu operación bikini desde Hoy.
-      </p>
-      <div class="contenido-operacion">
-      <h2>Consejos de la IA</h2>
-      <p class="explicacion">
-        Analiza tus pesajes, comidas y ejercicio de los últimos 14 días.
-      </p>
-
-      <button type="button" id="btn-pedir-consejo">Pedir consejo</button>
-      <p id="estado-consejo"></p>
-      <p id="error-consejo" class="error" role="alert"></p>
-
-      <p id="estado-consejos"></p>
-      <button type="button" id="btn-reintentar-consejos" class="oculta">Reintentar</button>
-      <div id="lista-consejos"></div>
-      </div>
-    </div>
-
-    <!-- Sección: Consulta -->
+    <!-- Sección: Consulta (spec 023: una sola conversación) -->
     <div class="seccion" data-seccion="consulta">
       <h2>Pasar consulta</h2>
-      <p class="explicacion">
-        La IA te entrevista como haría un nutricionista y, cuando tiene datos
-        suficientes, te genera un plan de nutrición y de ejercicio.
-      </p>
 
-      <button type="button" id="btn-empezar-consulta">Empezar consulta</button>
-      <p id="explicacion-inicial" class="explicacion oculta">
-        Es la entrevista de bienvenida: te preguntará cómo quieres que te llame,
-        tus medidas y tus gustos, y dejará tus ajustes rellenos para que la IA
-        te conozca a partir de ahora.
-      </p>
-      <p id="aviso-consulta" class="explicacion"></p>
-
-      <!-- Consultas especializadas (spec 017) -->
-      <div id="bloque-especializadas">
-        <h3>O pide algo concreto</h3>
+      <!-- Sin operación en marcha, aquí se arranca la de bienvenida -->
+      <div id="bloque-entrevista">
         <p class="explicacion">
-          Sin entrevista. Gasta una de tus dos consultas del día.
+          La IA te entrevista como haría un nutricionista y, cuando tiene datos
+          suficientes, te genera un plan de nutrición y de ejercicio.
         </p>
-        <div id="tipos-especializados"></div>
-        <div id="alcances-especializados" class="oculta"></div>
-        <p id="error-especializada" class="error" role="alert"></p>
+        <button type="button" id="btn-empezar-consulta">Empezar consulta</button>
+        <p id="explicacion-inicial" class="explicacion oculta">
+          Es la entrevista de bienvenida: te preguntará cómo quieres que te llame,
+          tus medidas y tus gustos, y dejará tus ajustes rellenos para que la IA
+          te conozca a partir de ahora.
+        </p>
+        <p id="aviso-consulta" class="explicacion"></p>
       </div>
 
       <div id="hilo-consulta"></div>
@@ -272,6 +242,34 @@
       <button type="button" id="btn-abandonar" class="enlace oculta">
         Abandonar consulta
       </button>
+
+      <!-- La conversación que dura -->
+      <div id="bloque-conversacion" class="oculta">
+        <div id="hilo-conversacion" class="hilo"></div>
+
+        <form id="form-conversacion">
+          <label for="conversacion-texto">Cuéntale cómo vas</label>
+          <textarea id="conversacion-texto" rows="3"
+            placeholder="esta semana he picado más de la cuenta"></textarea>
+          <button type="submit" id="btn-enviar-conversacion">Enviar</button>
+        </form>
+
+        <p id="cupo-conversacion" class="explicacion"></p>
+        <p id="estado-conversacion"></p>
+        <p id="error-conversacion" class="error" role="alert"></p>
+      </div>
+
+      <!-- Consultas especializadas (spec 017). La spec 024 se las lleva a
+           Comidas y a Ejercicio, que es donde tienen sentido. -->
+      <div id="bloque-especializadas">
+        <h3>O pide algo concreto</h3>
+        <p class="explicacion">
+          Sin entrevista. Gasta una de tus dos consultas del día.
+        </p>
+        <div id="tipos-especializados"></div>
+        <div id="alcances-especializados" class="oculta"></div>
+        <p id="error-especializada" class="error" role="alert"></p>
+      </div>
 
       <h2>Mis planes</h2>
       <p id="estado-planes"></p>
