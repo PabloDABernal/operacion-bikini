@@ -188,11 +188,15 @@
       <!-- La semana de menús (spec 028) -->
       <h2>Mi dieta</h2>
       <p id="estado-dieta" class="explicacion"></p>
+
+      <!-- Montar la semana a mano no gasta cupo de IA: con el recetario basta.
+           Va arriba porque cuando no hay dieta es la acción que toca. -->
+      <button type="button" id="btn-semana-blanco">Empezar una semana en blanco</button>
+
       <div id="semana-dieta"></div>
       <p id="aviso-dieta" class="explicacion"></p>
       <p id="error-semana" class="error" role="alert"></p>
       <p id="guardado-dieta" class="guardado" role="status"></p>
-      <button type="button" id="btn-semana-blanco">Semana en blanco</button>
 
       <!-- Pedir un plan, en su sección (spec 024) -->
       <h2>Hacer dieta</h2>

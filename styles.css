@@ -1286,3 +1286,12 @@ button:disabled {
 #aviso-dieta:empty {
   display: none;
 }
+
+/* Cuando una acción es LA acción de la pantalla, se ve como tal. */
+.accion-principal {
+  width: 100%;
+  background: var(--acento);
+  border-color: var(--acento);
+  color: var(--sobre-acento);
+  font-weight: 700;
+}

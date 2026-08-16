@@ -1075,9 +1075,17 @@ function pintarDieta() {
 
   contenedor.innerHTML = "";
 
+  // Sin dieta, la acción que toca es empezarla; con dieta, ese botón sustituye
+  // lo que ya tienes y no debe competir con la semana.
+  const boton = id("btn-semana-blanco");
+  boton.classList.toggle("accion-principal", !dietaActiva);
+  boton.textContent = dietaActiva
+    ? "Vaciar y empezar de nuevo"
+    : "Empezar una semana en blanco";
+
   if (!dietaActiva) {
     estado.textContent =
-      "Aún no tienes dieta. Pídesela a la IA aquí debajo, o empieza una semana en blanco y móntala tú.";
+      "Aún no tienes dieta. Puedes montarla tú eligiendo de tus recetas —esto no gasta ninguna petición a la IA— o pedírsela a la IA aquí debajo.";
     return;
   }
 
@@ -1758,7 +1766,9 @@ function pintarEspecializadas() {
     id(`form-plan-${tipo}`).classList.add("oculta");
     id(`cupo-${tipo}`).textContent = quedan
       ? `Te ${quedan === 1 ? "queda" : "quedan"} ${quedan} de hoy.`
-      : `Has pedido tus ${PLANES_POR_DIA} de hoy. Vuelve mañana.`;
+      : tipo === "dieta"
+        ? `Has pedido tus ${PLANES_POR_DIA} de hoy. Puedes montar la semana a mano ahí arriba, que eso no gasta nada.`
+        : `Has pedido tus ${PLANES_POR_DIA} de hoy. Vuelve mañana.`;
   });
 }
 
