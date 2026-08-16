@@ -38,3 +38,4 @@ Ideas surgidas durante la implementación, no implementadas. Una línea cada una
 - Lista de la compra a partir de las recetas de una semana (spec 026).
 - Escalar los ingredientes de una receta al cambiar las raciones (spec 026).
 - Tocar un mes del mapa de calor para verlo como calendario (spec 025).
+- Recordar las últimas instrucciones al pedir una dieta o una tabla, para no reescribirlas (spec 027).

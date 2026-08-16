@@ -96,6 +96,8 @@ import {
   TIPOS_ESPECIALIZADOS,
   etiquetaDePlan,
   pedirPlanEspecializado,
+  quedanPlanesHoy,
+  PLANES_POR_DIA,
   mensajeDeErrorDeConsulta
 } from "./consulta.js";
 
@@ -1367,6 +1369,7 @@ id("form-conversacion").addEventListener("submit", async (evento) => {
 // --- Consulta ------------------------------------------------------------
 
 let consultasCargadas = [];
+let planesCargados = [];
 let consultaAbierta = null;
 
 // Id de la consulta que se acaba de terminar en esta sesión. Sirve para el
@@ -1459,72 +1462,71 @@ function pintarEstadoConsulta() {
       : "Ya has pasado consulta 2 veces hoy.";
   }
 
-  // Sin operación en marcha solo se puede hacer la entrevista que la abre.
-  pintarEspecializadas(enCurso || !quedanHoy || !hayOperacion);
   pintarHilo(consultaAbierta || terminada);
 }
 
-// --- Consultas especializadas (spec 017) ---------------------------------
-
-// Desde la spec 024 cada plan vive en su sección: la dieta en Comidas y la
-// tabla en Ejercicio. Son dos pasos: primero lo pides, y luego eliges para
-// cuándo.
-function pintarEspecializadas(bloqueado) {
+// --- Dietas y tablas de ejercicio (specs 024 y 027) ----------------------
+//
+// Cada plan vive en su sección: la dieta en Comidas y la tabla en Ejercicio.
+// Son siempre la semana entera, con un campo para pedir lo que haga falta y
+// su propio cupo diario.
+function pintarEspecializadas() {
   Object.keys(TIPOS_ESPECIALIZADOS).forEach((tipo) => {
     const contenedor = id(`pedir-${tipo}`);
-    const alcances = id(`alcances-${tipo}`);
     const config = TIPOS_ESPECIALIZADOS[tipo];
+    const quedan = quedanPlanesHoy(planesCargados, tipo);
 
     contenedor.innerHTML = "";
-    alcances.innerHTML = "";
-    alcances.classList.add("oculta");
+    contenedor.classList.remove("oculta");
 
-    const boton = botonDeFila(`Pedir ${config.etiqueta.toLowerCase()}`, () =>
-      pintarAlcances(tipo)
-    );
+    const boton = botonDeFila(`Pedir ${config.etiqueta.toLowerCase()}`, () => {
+      id(`form-${tipo}`).classList.remove("oculta");
+      contenedor.classList.add("oculta");
+      id(`instrucciones-${tipo}`).focus();
+    });
     boton.className = "atajo";
-    boton.disabled = bloqueado;
+    boton.disabled = quedan === 0 || !hayOperacion;
     contenedor.appendChild(boton);
+
+    id(`form-${tipo}`).classList.add("oculta");
+    id(`cupo-${tipo}`).textContent = quedan
+      ? `Te ${quedan === 1 ? "queda" : "quedan"} ${quedan} de hoy.`
+      : `Has pedido tus ${PLANES_POR_DIA} de hoy. Vuelve mañana.`;
   });
 }
 
-function pintarAlcances(tipo) {
-  const alcances = id(`alcances-${tipo}`);
-  const config = TIPOS_ESPECIALIZADOS[tipo];
+Object.keys(TIPOS_ESPECIALIZADOS).forEach((tipo) => {
+  id(`btn-cancelar-${tipo}`).addEventListener("click", () => pintarEspecializadas());
 
-  alcances.innerHTML = "";
-  alcances.classList.remove("oculta");
+  id(`form-${tipo}`).addEventListener("submit", async (evento) => {
+    evento.preventDefault();
 
-  config.alcances.forEach(({ valor, etiqueta }) => {
-    const boton = botonDeFila(etiqueta, () => pedirEspecializada(tipo, valor));
-    boton.className = "atajo";
-    alcances.appendChild(boton);
+    const error = id(`error-${tipo}`);
+    const estado = id(`estado-${tipo}`);
+    error.textContent = "";
+    estado.textContent = "Pensando…";
+    id(`btn-pedir-${tipo}`).disabled = true;
+
+    try {
+      await pedirPlanEspecializado(
+        uidActual,
+        planesCargados,
+        tipo,
+        id(`instrucciones-${tipo}`).value
+      );
+      id(`instrucciones-${tipo}`).value = "";
+      await refrescarConsulta();
+      // El plan aparece en Consulta, que es donde viven todos.
+      abrirPestana("consulta");
+    } catch (fallo) {
+      error.textContent = mensajeDeErrorDeConsulta(fallo.codigo);
+    } finally {
+      estado.textContent = "";
+      id(`btn-pedir-${tipo}`).disabled = false;
+      pintarEspecializadas();
+    }
   });
-
-  const cancelar = botonDeFila("Cancelar", () => pintarEspecializadas(false));
-  cancelar.className = "enlace";
-  alcances.appendChild(cancelar);
-}
-
-async function pedirEspecializada(tipo, alcance) {
-  const error = id(`error-${tipo}`);
-  const estado = id(`error-${tipo}`);
-
-  error.textContent = "";
-  estado.textContent = "Pensando…";
-  pintarEspecializadas(true);
-
-  try {
-    await pedirPlanEspecializado(uidActual, consultasCargadas, tipo, alcance);
-    estado.textContent = "";
-    await refrescarConsulta();
-    // El plan aparece en Consulta, que es donde viven todos.
-    abrirPestana("consulta");
-  } catch (fallo) {
-    error.textContent = mensajeDeErrorDeConsulta(fallo.codigo);
-    pintarEspecializadas(false);
-  }
-}
+});
 
 async function refrescarConsulta() {
   try {
@@ -1541,9 +1543,11 @@ async function refrescarConsulta() {
     consultaAbierta = consultaEnCurso(
       consultas.filter((consulta) => consulta.modo !== "conversacion")
     );
+    planesCargados = planes;
     pintarPlanes(planes);
     pintarEstadoConsulta();
     pintarConversacion();
+    pintarEspecializadas();
   } catch {
     id("error-consulta").textContent =
       "No se ha podido cargar tu consulta. Comprueba tu conexión.";

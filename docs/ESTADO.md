@@ -78,10 +78,11 @@ El usuario probó las specs 011-020 con dos meses de datos, las dio por buenas y
 | 024 | Consulta en la barra, Ajustes en el avatar, y cada plan en su sección | Coloca cada cosa en su sitio |
 | 025 | Calendario de constancia legible (calendario en rangos cortos, meses en los largos) | Se coló aquí: el usuario lo vio y no pasaba |
 | 026 | Recetas: colección propia | Las dietas se apoyan en ellas |
-| 027 | Dietas: semana de menús, generada por IA o montada a mano, con "me lo he comido" | Lo más grande de la tanda |
-| 028 | Tablas de ejercicio guardadas | Hermana de las dietas |
-| 029 | Detalle nutricional automático por IA | Pendiente de la v2 original |
-| 030 | Gamificación: puntos, rachas y emblemas | Pendiente de la v2 original |
+| 027 | Dietas y tablas: semana completa, con instrucciones y cupo propio | El usuario lo pidió al ver que gastaban las consultas de la entrevista |
+| 028 | Dietas: semana de menús, generada por IA o montada a mano, con "me lo he comido" | Lo más grande de la tanda |
+| 029 | Tablas de ejercicio guardadas | Hermana de las dietas |
+| 030 | Detalle nutricional automático por IA | Pendiente de la v2 original |
+| 031 | Gamificación: puntos, rachas y emblemas | Pendiente de la v2 original |
 
 Decisiones ya tomadas por el usuario para esta tanda:
 

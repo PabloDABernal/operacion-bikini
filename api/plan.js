@@ -1,9 +1,14 @@
-// Proxy hacia Gemini para las consultas especializadas (spec 017).
+// Proxy hacia Gemini para las dietas y las tablas de ejercicio (specs 017 y
+// 027).
 //
 // A diferencia de api/consulta.js, aquí no hay conversación: se pide una cosa
-// concreta y se devuelve en una sola vuelta.
+// concreta y se devuelve en una sola vuelta. Siempre la semana entera, de
+// lunes a domingo, y respetando lo que el usuario haya pedido a mano.
 
 const { peticionAutorizada, describirRegistros, generarJson } = require("./_ia");
+
+// Lo que el usuario escriba en "¿algo que deba tener en cuenta?".
+const MAXIMO_INSTRUCCIONES = 500;
 
 const COMUN = `Eres un nutricionista y entrenador personal que atiende a una persona concreta.
 
@@ -14,31 +19,23 @@ No inventes datos que no te hayan dado: si algo no lo sabes, da la pauta de form
 const INSTRUCCIONES = {
   ejercicio: `${COMUN}
 
-Te piden una TABLA DE EJERCICIO. Devuélvela en el campo "ejercicio" y deja "nutricion" vacío.
+Te piden una TABLA DE EJERCICIO para la semana. Devuélvela en el campo "ejercicio" y deja "nutricion" vacío.
 
-- Si te piden la tabla PARA HOY, devuelve SOLO la sesión de hoy: un único entrenamiento, sin repartir nada por días de la semana y sin mencionar otros días.
-- Si te la piden PARA LA SEMANA, entonces sí: una línea por día, empezando cada línea con el día.
+- SIEMPRE los siete días, de lunes a domingo, una línea por día que empieza por el nombre del día.
 - En cada ejercicio, series y repeticiones, o duración e intensidad.
 - Respeta el material del que dispone y sus limitaciones. Si no sabes qué material tiene, propón cosas que se puedan hacer en casa sin nada.
-- En la tabla de la semana, marca los días de descanso como descanso, que también son parte del plan. En la de hoy no menciones descansos de otros días.
+- Marca los días de descanso como descanso, que también son parte del plan.
 - Máximo 250 palabras.`,
 
   dieta: `${COMUN}
 
-Te piden una DIETA DETALLADA. Devuélvela en el campo "nutricion" y deja "ejercicio" vacío.
+Te piden una DIETA para la semana. Devuélvela en el campo "nutricion" y deja "ejercicio" vacío.
 
-- Organizada por días, y dentro de cada día por comidas: desayuno, comida, merienda y cena.
+- SIEMPRE los siete días, de lunes a domingo, y dentro de cada día: desayuno, comida, merienda y cena.
 - Raciones aproximadas y caseras ("un plato hondo", "un puñado"), NUNCA calorías exactas ni gramos al detalle: sería precisión fingida.
 - Respeta sus gustos, aversiones, alergias e intolerancias. Si no las sabes, evita los alergenos más habituales y dilo.
 - Comida normal y de supermercado español, nada exótico ni caro.
-- Máximo 300 palabras.`
-};
-
-const ALCANCES = {
-  hoy: "solo para hoy, una única sesión",
-  semana: "para los próximos siete días",
-  "3dias": "para los próximos tres días",
-  "7dias": "para los próximos siete días"
+- Máximo 350 palabras.`
 };
 
 // Los dos campos son obligatorios aunque solo se rellene uno: con campos
@@ -61,18 +58,32 @@ function contexto(nombre, perfil) {
   );
 }
 
+// Lo que pide el usuario a mano manda sobre lo que la IA propondría por su
+// cuenta: si le dice que el jueves sale a comer, el jueves va libre.
+function loQuePide(instrucciones) {
+  const texto = String(instrucciones || "").trim().slice(0, MAXIMO_INSTRUCCIONES);
+  if (!texto) return "";
+
+  return (
+    "\n\nAdemás, te pido expresamente lo siguiente y tienes que respetarlo:\n" +
+    texto +
+    "\n\nSi algo de lo que te pido no es razonable, hazlo igualmente pero dilo " +
+    "en una línea al final, en vez de ignorarlo sin avisar."
+  );
+}
+
 module.exports = async (req, res) => {
   if (!(await peticionAutorizada(req, res))) return;
 
   const cuerpo = req.body || {};
   const tipo = cuerpo.tipo;
-  const alcance = cuerpo.alcance;
 
-  if (!INSTRUCCIONES[tipo] || !ALCANCES[alcance]) {
+  if (!INSTRUCCIONES[tipo]) {
     return res.status(400).json({ error: "peticion-invalida" });
   }
 
-  const queEs = tipo === "ejercicio" ? "una tabla de ejercicio" : "una dieta detallada";
+  const queEs =
+    tipo === "ejercicio" ? "una tabla de ejercicio" : "una dieta detallada";
 
   const respuesta = await generarJson(
     res,
@@ -84,10 +95,11 @@ module.exports = async (req, res) => {
           parts: [
             {
               text:
-                `Quiero ${queEs} ${ALCANCES[alcance]}.\n\n` +
+                `Quiero ${queEs} para la semana, de lunes a domingo.\n\n` +
                 "Estos son mis registros de los últimos 14 días:\n\n" +
                 describirRegistros(cuerpo.registros || {}) +
-                contexto(cuerpo.nombre, cuerpo.perfil)
+                contexto(cuerpo.nombre, cuerpo.perfil) +
+                loQuePide(cuerpo.instrucciones)
             }
           ]
         }
@@ -97,7 +109,7 @@ module.exports = async (req, res) => {
         responseSchema: ESQUEMA
       }
     },
-    `Plan especializado (${tipo}, ${alcance})`
+    `Plan (${tipo})`
   );
 
   // generarJson ya ha respondido si algo falló.
@@ -108,7 +120,7 @@ module.exports = async (req, res) => {
   const contenido = tipo === "ejercicio" ? respuesta.ejercicio : respuesta.nutricion;
 
   if (!contenido) {
-    console.error(`Plan especializado sin contenido en el campo de ${tipo}.`);
+    console.error(`Plan sin contenido en el campo de ${tipo}.`);
     return res.status(502).json({ error: "respuesta-ilegible" });
   }
 

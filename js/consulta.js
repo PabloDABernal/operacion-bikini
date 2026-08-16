@@ -30,6 +30,8 @@ const ESPERA_MAXIMA_MS = 55000;
 const URL_PROXY = "/api/consulta";
 
 const MENSAJES = {
+  "limite-planes":
+    "Ya has pedido tus 2 de hoy. Vuelve mañana.",
   tardanza:
     "La IA está tardando demasiado. Espera un momento y vuelve a intentarlo.",
   "ia-saturada":
@@ -299,40 +301,54 @@ export async function responder(uid, consulta, texto) {
   return { termino: false };
 }
 
-// --- Consultas especializadas (spec 017) ---------------------------------
+// --- Dietas y tablas de ejercicio (specs 017 y 027) ----------------------
+//
+// Siempre la semana entera, de lunes a domingo, y con lo que el usuario quiera
+// pedir a mano. Cada tipo tiene su propio cupo diario: que una dieta gastara
+// una de las consultas de la entrevista no tenía ningún sentido.
 
 const URL_PLAN = "/api/plan";
 
+export const PLANES_POR_DIA = 2;
+export const MAXIMO_INSTRUCCIONES = 500;
+
 export const TIPOS_ESPECIALIZADOS = {
-  ejercicio: {
-    etiqueta: "Tabla de ejercicio",
-    alcances: [
-      { valor: "hoy", etiqueta: "Para hoy" },
-      { valor: "semana", etiqueta: "Para la semana" }
-    ]
-  },
-  dieta: {
-    etiqueta: "Dieta detallada",
-    alcances: [
-      { valor: "3dias", etiqueta: "3 días" },
-      { valor: "7dias", etiqueta: "7 días" }
-    ]
-  }
+  dieta: { etiqueta: "Dieta detallada", plural: "dietas" },
+  ejercicio: { etiqueta: "Tabla de ejercicio", plural: "tablas" }
 };
 
 export function etiquetaDePlan(plan) {
   const tipo = TIPOS_ESPECIALIZADOS[plan.tipo];
   if (!tipo) return "Plan completo";
 
-  const alcance = tipo.alcances.find((a) => a.valor === plan.alcance);
-  return alcance ? `${tipo.etiqueta} · ${alcance.etiqueta}` : tipo.etiqueta;
+  // Los planes de antes de la spec 027 llevan alcance ("3 días", "para hoy");
+  // los nuevos son siempre la semana, así que no hace falta decirlo.
+  return plan.alcance ? `${tipo.etiqueta} · ${plan.alcance}` : tipo.etiqueta;
 }
 
-// Pide algo concreto y lo guarda como un plan más. Sin conversación: una
+// El cupo se cuenta sobre los planes guardados, no sobre las consultas: es el
+// dato que dice la verdad, porque un plan que falló no llegó a guardarse.
+export function pedidosHoy(planes, tipo) {
+  const hoy = hoyISO();
+  return planes.filter((plan) => {
+    if (plan.tipo !== tipo) return false;
+    if (!plan.creadoEn || !plan.creadoEn.toDate) return false;
+    const fecha = plan.creadoEn.toDate();
+    const mes = String(fecha.getMonth() + 1).padStart(2, "0");
+    const dia = String(fecha.getDate()).padStart(2, "0");
+    return `${fecha.getFullYear()}-${mes}-${dia}` === hoy;
+  }).length;
+}
+
+export function quedanPlanesHoy(planes, tipo) {
+  return Math.max(0, PLANES_POR_DIA - pedidosHoy(planes, tipo));
+}
+
+// Pide la semana y la guarda como un plan más. Sin conversación: una
 // petición, una respuesta.
-export async function pedirPlanEspecializado(uid, consultas, tipo, alcance) {
-  if (!quedanConsultasHoy(consultas)) {
-    throw errorConCodigo("limite-diario", "Límite diario de consultas alcanzado");
+export async function pedirPlanEspecializado(uid, planes, tipo, instrucciones) {
+  if (quedanPlanesHoy(planes, tipo) === 0) {
+    throw errorConCodigo("limite-planes", "Límite diario de planes alcanzado");
   }
 
   const [registros, contexto] = await Promise.all([
@@ -341,6 +357,7 @@ export async function pedirPlanEspecializado(uid, consultas, tipo, alcance) {
   ]);
 
   const idToken = await auth.currentUser.getIdToken();
+  const pedido = String(instrucciones || "").trim().slice(0, MAXIMO_INSTRUCCIONES);
 
   let respuesta;
   try {
@@ -350,7 +367,7 @@ export async function pedirPlanEspecializado(uid, consultas, tipo, alcance) {
         "Content-Type": "application/json",
         Authorization: `Bearer ${idToken}`
       },
-      body: JSON.stringify({ tipo, alcance, registros, ...contexto }),
+      body: JSON.stringify({ tipo, instrucciones: pedido, registros, ...contexto }),
       signal: AbortSignal.timeout(ESPERA_MAXIMA_MS)
     });
   } catch (fallo) {
@@ -370,9 +387,7 @@ export async function pedirPlanEspecializado(uid, consultas, tipo, alcance) {
       // Gemini manda además el estado HTTP con el que respondió Google: sin
       // eso, un fallo suyo es indistinguible de un problema de red.
       if (datos.estado) codigo = `${datos.error}-${datos.estado}`;
-      // Por qué la reserva no salvó la petición (spec 020). Sin esto, "la IA
-      // está saturada" no distingue que falte la clave de Groq de que Groq
-      // también haya fallado.
+      // Por qué la reserva no salvó la petición (spec 020).
       if (datos.reserva && datos.reserva !== "no-hacia-falta") {
         codigo = `${codigo} · reserva: ${datos.reserva}`;
       }
@@ -384,22 +399,14 @@ export async function pedirPlanEspecializado(uid, consultas, tipo, alcance) {
 
   const plan = await respuesta.json();
 
+  // Solo se guarda si la IA ha respondido bien, así que un fallo suyo no gasta
+  // cupo: el cupo se cuenta sobre los planes que existen.
   await addDoc(planesDe(uid), {
     nutricion: plan.nutricion,
     ejercicio: plan.ejercicio,
     tipo,
-    alcance,
+    instrucciones: pedido,
     creadoEn: serverTimestamp()
-  });
-
-  // El cupo se apunta DESPUÉS de que la IA haya respondido bien: un fallo suyo
-  // no debe costarte una de las dos consultas del día.
-  await addDoc(consultasDe(uid), {
-    estado: "terminada",
-    modo: "especializada",
-    mensajes: [],
-    creadaEn: serverTimestamp(),
-    terminadaEn: serverTimestamp()
   });
 }
 

@@ -1143,17 +1143,27 @@ button:disabled {
 }
 
 #pedir-dieta,
-#pedir-ejercicio,
-#alcances-dieta,
-#alcances-ejercicio {
+#pedir-ejercicio {
   display: flex;
   flex-wrap: wrap;
   gap: var(--e2);
 }
 
-#alcances-dieta,
-#alcances-ejercicio {
-  margin-top: var(--e2);
+#pedir-dieta.oculta,
+#pedir-ejercicio.oculta {
+  display: none;
+}
+
+#cupo-dieta,
+#cupo-ejercicio,
+#estado-dieta,
+#estado-ejercicio {
+  margin: var(--e1) 0 0;
+}
+
+#estado-dieta:empty,
+#estado-ejercicio:empty {
+  display: none;
 }
 
 /* Recetario (spec 026) */
