@@ -344,6 +344,19 @@ export function quedanPlanesHoy(planes, tipo) {
   return Math.max(0, PLANES_POR_DIA - pedidosHoy(planes, tipo));
 }
 
+// La dieta estructurada (spec 028) se guarda por su cuenta, pero el cupo se
+// cuenta sobre los planes: deja aquí su marca para que cuente igual.
+export function guardarMarcaDePlan(uid, tipo, instrucciones) {
+  return addDoc(planesDe(uid), {
+    nutricion: "",
+    ejercicio: "",
+    tipo,
+    instrucciones: instrucciones || "",
+    esDietaSemanal: true,
+    creadoEn: serverTimestamp()
+  });
+}
+
 // Pide la semana y la guarda como un plan más. Sin conversación: una
 // petición, una respuesta.
 export async function pedirPlanEspecializado(uid, planes, tipo, instrucciones) {

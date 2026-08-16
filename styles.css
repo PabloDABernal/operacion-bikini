@@ -1222,3 +1222,67 @@ button:disabled {
   padding: var(--e2) var(--e3);
   font-size: 0.85rem;
 }
+
+/* La semana de la dieta (spec 028) */
+
+#semana-dieta {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e3);
+}
+
+.dia-dieta {
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  background: var(--superficie);
+  padding: var(--e3);
+}
+
+.dia-dieta h3 {
+  margin: 0 0 var(--e2);
+  font-size: 0.95rem;
+  color: var(--acento);
+  text-transform: capitalize;
+}
+
+.comida-dieta {
+  display: flex;
+  align-items: center;
+  gap: var(--e2);
+  padding: var(--e2) 0;
+  border-top: 1px solid var(--borde);
+}
+
+.comida-dieta:first-of-type {
+  border-top: none;
+}
+
+.comida-dieta .resumen-etiqueta {
+  flex: 0 0 5rem;
+}
+
+.comida-dieta button {
+  flex: 0 0 auto;
+  padding: var(--e1) var(--e2);
+  font-size: 0.8rem;
+}
+
+.comida-dieta.fila-edicion {
+  flex-wrap: wrap;
+}
+
+.comida-dieta.fila-edicion input,
+.comida-dieta.fila-edicion select {
+  margin: 0;
+  flex: 1 1 8rem;
+  min-width: 0;
+}
+
+.boton-comido {
+  border-color: var(--apoyo);
+  color: var(--apoyo);
+}
+
+#aviso-dieta:empty {
+  display: none;
+}

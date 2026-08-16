@@ -61,6 +61,12 @@ service cloud.firestore {
       allow read, write: if autorizado() && request.auth.uid == uid;
     }
 
+    // Dietas: la semana de menús (spec 028). Como las recetas, viven fuera de
+    // las operaciones: una dieta que funcionó sigue sirviendo en la siguiente.
+    match /usuarios/{uid}/dietas/{dietaId} {
+      allow read, write: if autorizado() && request.auth.uid == uid;
+    }
+
     // Operaciones: cada ciclo con principio y fin (spec 018).
     match /usuarios/{uid}/operaciones/{operacionId} {
       allow read, write: if autorizado() && request.auth.uid == uid;

@@ -26,22 +26,29 @@ La **v2 está empezada**: su alcance se decidió el 11 de agosto (ver `docs/PROD
 | 008 | Gráfica de peso con media móvil y objetivo, y comparador semanal | ✅ completada |
 | 009 | Rediseño "nocturna deportiva" y navegación inferior | ✅ completada |
 | 010 | Pantalla "Hoy" | ✅ completada |
-| 011 | Navegación por dispositivo y foto de perfil | 🟡 desplegada, sin probar |
-| 012 | "Hoy" afinada: resumen con +, atajos y calendario por rango | 🟡 desplegada, sin probar |
-| 013 | Listas cortas con filtro por día y comidas frecuentes | 🟡 desplegada, sin probar |
-| 014 | Hora opcional en los registros | 🟡 desplegada, sin probar |
-| 015 | Peso: rango en la gráfica y estadísticas | 🟡 desplegada, sin probar |
-| 016 | "Iniciar operación bikini": entrevista inicial y perfil | 🟡 desplegada, sin probar |
-| 017 | Consultas especializadas de ejercicio y dieta | 🟡 desplegada, sin probar |
-| 018 | Operaciones con principio y fin, e histórico | 🟡 desplegada, sin probar |
-| 019 | Borrar el histórico desde el reinicio de datos | 🟡 desplegada, sin probar |
-| 020 | Groq como proveedor de IA de reserva | 🟡 desplegada, sin probar |
+| 011 | Navegación por dispositivo y foto de perfil | ✅ completada |
+| 012 | "Hoy" afinada: resumen con +, atajos y calendario por rango | ✅ completada |
+| 013 | Listas cortas con filtro por día y comidas frecuentes | ✅ completada |
+| 014 | Hora opcional en los registros | ✅ completada |
+| 015 | Peso: rango en la gráfica y estadísticas | ✅ completada |
+| 016 | "Iniciar operación bikini": entrevista inicial y perfil | ✅ completada |
+| 017 | Consultas especializadas de ejercicio y dieta | ✅ completada |
+| 018 | Operaciones con principio y fin, e histórico | ✅ completada |
+| 019 | Borrar el histórico desde el reinicio de datos | ✅ completada |
+| 020 | Groq como proveedor de IA de reserva | ✅ completada |
+| 021 | Calendario de constancia a tamaño fijo | ✅ completada |
+| 022 | Paleta violeta nocturna | ✅ completada |
+| 023 | Una sola conversación: fuera "Consejos" | ✅ completada |
+| 024 | Consulta en la barra, Ajustes en el avatar, cada plan en su sección | ✅ completada |
+| 025 | Calendario de constancia legible | ✅ completada |
+| 026 | Recetario propio | ✅ completada |
+| 027 | Dietas y tablas de lunes a domingo, a medida y con cupo propio | ✅ completada |
 
 ## Qué toca ahora
 
 La v2 se acordó hacerla entera, en este orden (`docs/propuestas/v2-usabilidad-y-gamificacion.md`, apartado 9):
 
-**Las ocho specs de la ampliación (011 a 018) están implementadas y desplegadas, pero el usuario aún no las ha probado.** Las pidió todas seguidas para probarlas juntas. Hasta que dé el visto bueno, ninguna es "completada": si algo no le cuadra, se corrige antes de seguir.
+**Las specs 011 a 027 están probadas y dadas por buenas por el usuario** (16 de agosto). Tiene más cambios que pedir, pero prefiere juntarlos y decirlos de una vez, así que no están anotados todavía.
 
 El 13 de agosto el usuario probó la app con un mes de datos sembrados y dio una tanda larga de correcciones. De ahí salieron estas siete specs (alcance completo en `docs/PRODUCTO.md`, apartado "Ampliación de la v2"):
 

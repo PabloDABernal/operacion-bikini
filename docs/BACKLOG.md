@@ -39,3 +39,5 @@ Ideas surgidas durante la implementación, no implementadas. Una línea cada una
 - Escalar los ingredientes de una receta al cambiar las raciones (spec 026).
 - Tocar un mes del mapa de calor para verlo como calendario (spec 025).
 - Recordar las últimas instrucciones al pedir una dieta o una tabla, para no reescribirlas (spec 027).
+- Guardar varias dietas y poder recuperar una anterior (spec 028: solo hay una activa).
+- Lista de la compra de la semana a partir de la dieta (spec 028).

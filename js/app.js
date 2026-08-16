@@ -45,6 +45,19 @@ import {
 } from "./pesajes.js";
 
 import {
+  DIAS,
+  MOMENTOS_DIETA,
+  semanaEnBlanco,
+  leerDietaActiva,
+  guardarDieta,
+  actualizarDieta,
+  borrarDieta,
+  guardarRecetasPropuestas,
+  semanaDesdeLaIa,
+  pedirDietaALaIa
+} from "./dietas.js";
+
+import {
   validarReceta,
   guardarReceta,
   actualizarReceta,
@@ -96,6 +109,7 @@ import {
   TIPOS_ESPECIALIZADOS,
   etiquetaDePlan,
   pedirPlanEspecializado,
+  guardarMarcaDePlan,
   quedanPlanesHoy,
   PLANES_POR_DIA,
   mensajeDeErrorDeConsulta
@@ -1047,6 +1061,254 @@ id("form-receta").addEventListener("submit", async (evento) => {
   }
 });
 
+// --- La dieta de la semana (spec 028) ------------------------------------
+//
+// La dieta es el plan; las comidas apuntadas son el diario. Que hayas comido
+// el lunes lo que ponía el jueves es asunto tuyo: aquí no se marca nada.
+
+let dietaActiva = null;
+let celdaEditando = null;
+
+function pintarDieta() {
+  const contenedor = id("semana-dieta");
+  const estado = id("estado-dieta");
+
+  contenedor.innerHTML = "";
+
+  if (!dietaActiva) {
+    estado.textContent =
+      "Aún no tienes dieta. Pídesela a la IA aquí debajo, o empieza una semana en blanco y móntala tú.";
+    return;
+  }
+
+  estado.textContent = "";
+
+  dietaActiva.dias.forEach((dia, indiceDia) => {
+    const bloque = document.createElement("section");
+    bloque.className = "dia-dieta";
+
+    const titulo = document.createElement("h3");
+    titulo.textContent = dia.dia;
+    bloque.appendChild(titulo);
+
+    dia.comidas.forEach((comida, indiceComida) => {
+      bloque.appendChild(
+        celdaEditando === `${indiceDia}-${indiceComida}`
+          ? filaEnEdicion(indiceDia, indiceComida, comida)
+          : filaDeComida(indiceDia, indiceComida, comida)
+      );
+    });
+
+    contenedor.appendChild(bloque);
+  });
+}
+
+function filaDeComida(indiceDia, indiceComida, comida) {
+  const fila = document.createElement("div");
+  fila.className = "comida-dieta";
+
+  fila.append(
+    celda(etiquetaDeMomento(comida.momento), "resumen-etiqueta"),
+    celda(comida.texto || "—", "registro-texto")
+  );
+
+  if (comida.texto) {
+    const apuntar = botonDeFila("Me lo he comido", () =>
+      apuntarDeLaDieta(comida)
+    );
+    apuntar.className = "boton-comido";
+    fila.appendChild(apuntar);
+  }
+
+  const editar = botonDeFila(comida.texto ? "Editar" : "+", () => {
+    celdaEditando = `${indiceDia}-${indiceComida}`;
+    pintarDieta();
+  });
+  fila.appendChild(editar);
+
+  return fila;
+}
+
+function filaEnEdicion(indiceDia, indiceComida, comida) {
+  const fila = document.createElement("div");
+  fila.className = "comida-dieta fila-edicion";
+
+  const texto = campoTexto(comida.texto, "edicion-texto");
+
+  // El desplegable rellena el texto con el nombre de la receta y la deja
+  // enlazada: escribirlo a mano y que coincida letra por letra sería absurdo.
+  const recetas = campoDesplegable(
+    [
+      { valor: "", etiqueta: "o usa una receta tuya…" },
+      ...recetasCargadas.map((receta) => ({
+        valor: receta.id,
+        etiqueta: receta.nombre
+      }))
+    ],
+    comida.recetaId || "",
+    "edicion-momento"
+  );
+
+  recetas.addEventListener("change", () => {
+    const receta = recetasCargadas.find((otra) => otra.id === recetas.value);
+    if (receta) texto.value = receta.nombre;
+  });
+
+  fila.append(
+    celda(etiquetaDeMomento(comida.momento), "resumen-etiqueta"),
+    texto,
+    recetas,
+    botonDeFila("Guardar", () =>
+      guardarCelda(indiceDia, indiceComida, texto.value, recetas.value)
+    ),
+    botonDeFila("Cancelar", () => {
+      celdaEditando = null;
+      pintarDieta();
+    })
+  );
+
+  return fila;
+}
+
+async function guardarCelda(indiceDia, indiceComida, texto, recetaId) {
+  const error = id("error-semana");
+  error.textContent = "";
+
+  // Se copia la semana entera y se cambia la celda: así, si falla el guardado,
+  // lo que hay en pantalla sigue siendo lo que hay en la base de datos.
+  const dias = dietaActiva.dias.map((dia, i) => ({
+    ...dia,
+    comidas: dia.comidas.map((comida, j) =>
+      i === indiceDia && j === indiceComida
+        ? { ...comida, texto: texto.trim(), recetaId: recetaId || "" }
+        : comida
+    )
+  }));
+
+  try {
+    await actualizarDieta(uidActual, dietaActiva.id, dias);
+    dietaActiva = { ...dietaActiva, dias };
+    celdaEditando = null;
+    pintarDieta();
+  } catch {
+    error.textContent = "No se ha podido guardar. Comprueba tu conexión.";
+  }
+}
+
+async function apuntarDeLaDieta(comida) {
+  const error = id("error-semana");
+  error.textContent = "";
+
+  try {
+    await guardarComida(uidActual, comida.texto, comida.momento, hoyISO(), "");
+    avisarGuardado("guardado-dieta");
+    await listaComidas.refrescar();
+  } catch {
+    error.textContent = "No se ha podido apuntar. Comprueba tu conexión.";
+  }
+}
+
+id("btn-semana-blanco").addEventListener("click", async () => {
+  if (dietaActiva && !confirm("Ya tienes una dieta. ¿La sustituyo por una en blanco?")) {
+    return;
+  }
+
+  const error = id("error-semana");
+  error.textContent = "";
+
+  try {
+    const anterior = dietaActiva;
+    await guardarDieta(uidActual, semanaEnBlanco(), "");
+    if (anterior) await borrarDieta(uidActual, anterior.id);
+    await refrescarDieta();
+  } catch {
+    error.textContent = "No se ha podido crear la semana. Comprueba tu conexión.";
+  }
+});
+
+// Pide la semana a la IA, guarda las recetas que proponga y sustituye la
+// dieta que hubiera. El cupo es el mismo que el de los planes: 2 al día.
+async function generarDieta(instrucciones) {
+  if (quedanPlanesHoy(planesCargados, "dieta") === 0) {
+    throw Object.assign(new Error("Sin cupo"), { codigo: "limite-planes" });
+  }
+
+  if (dietaActiva && !confirm("Ya tienes una dieta. ¿La sustituyo?")) return;
+
+  const [registros, ajustes] = await Promise.all([
+    registrosRecientes(),
+    leerAjustes(uidActual).catch(() => ({}))
+  ]);
+
+  const respuesta = await pedirDietaALaIa(uidActual, instrucciones, registros, {
+    nombre: ajustes.nombre || "",
+    perfil: ajustes.perfil || ""
+  });
+
+  // Primero las recetas: la semana las enlaza por nombre, así que tienen que
+  // existir antes.
+  const porNombre = await guardarRecetasPropuestas(
+    uidActual,
+    respuesta.recetas,
+    recetasCargadas
+  );
+  await refrescarRecetas();
+
+  // Primero la nueva y luego se borra la vieja: al revés queda un instante
+  // sin ninguna dieta, y si algo falla en medio te quedas sin nada.
+  const anterior = dietaActiva;
+  await guardarDieta(
+    uidActual,
+    semanaDesdeLaIa(respuesta.dias, porNombre),
+    instrucciones
+  );
+  if (anterior) await borrarDieta(uidActual, anterior.id);
+
+  // El cupo se cuenta sobre los planes, así que la dieta deja su marca ahí.
+  await guardarMarcaDePlan(uidActual, "dieta", instrucciones);
+
+  await refrescarDieta();
+  await refrescarConsulta();
+  id("aviso-dieta").textContent = respuesta.aviso || "";
+}
+
+// Los registros de los últimos 14 días, que es lo que mira la IA.
+async function registrosRecientes() {
+  const desde = sumarDias(hoyISO(), -13);
+  const recientes = (lista) => lista.filter((registro) => registro.fecha >= desde);
+
+  return {
+    pesajes: recientes(listaPeso.obtenerRegistros()).map(({ fecha, pesoKg }) => ({
+      fecha,
+      pesoKg
+    })),
+    comidas: recientes(listaComidas.obtenerRegistros()).map(
+      ({ fecha, momento, texto }) => ({ fecha, momento, texto })
+    ),
+    ejercicios: recientes(listaEjercicios.obtenerRegistros()).map(
+      ({ fecha, texto, minutos, intensidad }) => ({
+        fecha,
+        texto,
+        minutos,
+        intensidad
+      })
+    )
+  };
+}
+
+async function refrescarDieta() {
+  try {
+    dietaActiva = await leerDietaActiva(uidActual);
+  } catch {
+    dietaActiva = null;
+    id("estado-dieta").textContent =
+      "No se ha podido cargar tu dieta. Comprueba tu conexión.";
+    return;
+  }
+  celdaEditando = null;
+  pintarDieta();
+}
+
 // --- Comidas -------------------------------------------------------------
 
 // "Lo de siempre": las comidas que más repites, para apuntarlas de un toque.
@@ -1391,7 +1653,12 @@ function pintarHilo(consulta) {
   });
 }
 
-function pintarPlanes(planes) {
+function pintarPlanes(todos) {
+  // Las dietas semanales dejan aquí una marca para gastar cupo, pero su
+  // contenido vive en la semana de Comidas: pintarlas aquí serían tarjetas
+  // vacías (spec 028).
+  const planes = todos.filter((plan) => !plan.esDietaSemanal);
+
   const contenedor = id("lista-planes");
   contenedor.innerHTML = "";
   id("estado-planes").textContent = planes.length
@@ -1501,6 +1768,9 @@ function pintarUltimoPlan(tipo) {
   const contenedor = id(`ultimo-${tipo}`);
   contenedor.innerHTML = "";
 
+  // La dieta se lee en su semana, no aquí: este bloque es solo para la tabla.
+  if (tipo === "dieta") return;
+
   const plan = planesCargados.find((otro) => otro.tipo === tipo);
   if (!plan) return;
 
@@ -1532,17 +1802,23 @@ Object.keys(TIPOS_ESPECIALIZADOS).forEach((tipo) => {
     id(`btn-pedir-${tipo}`).disabled = true;
 
     try {
-      await pedirPlanEspecializado(
-        uidActual,
-        planesCargados,
-        tipo,
-        id(`instrucciones-${tipo}`).value
-      );
+      // La dieta ya no llega como texto: viene la semana estructurada y sus
+      // recetas, para poder editarla y apuntar con un toque (spec 028).
+      if (tipo === "dieta") {
+        await generarDieta(id(`instrucciones-${tipo}`).value);
+      } else {
+        await pedirPlanEspecializado(
+          uidActual,
+          planesCargados,
+          tipo,
+          id(`instrucciones-${tipo}`).value
+        );
+        await refrescarConsulta();
+        // Sin saltar de pantalla: te ha traído lo que pediste, no te manda a
+        // otro sitio. El plan se lee desde aquí.
+        pintarUltimoPlan(tipo);
+      }
       id(`instrucciones-${tipo}`).value = "";
-      await refrescarConsulta();
-      // Sin saltar de pantalla: te ha traído lo que pediste, no te manda a
-      // otro sitio. El plan se lee desde aquí.
-      pintarUltimoPlan(tipo);
     } catch (fallo) {
       error.textContent = mensajeDeErrorDeConsulta(fallo.codigo);
     } finally {
@@ -1785,7 +2061,8 @@ function refrescarTodo() {
     listaEjercicios.refrescar(),
     refrescarConsulta(),
     refrescarFotos(),
-    refrescarRecetas()
+    refrescarRecetas(),
+    refrescarDieta()
   ]);
 }
 
