@@ -141,14 +141,13 @@ async function generarJson(res, cuerpo, etiqueta) {
     return null;
   }
 
-  if (respuesta.status === 429) {
-    res.status(429).json({ error: "cuota-agotada" });
-    return null;
-  }
-
   // 503 es Google diciendo que el modelo está sobrecargado. No es un fallo de
   // la petición: suele bastar con esperar unos segundos. Se reintenta aquí
   // porque rendirse a la primera obliga al usuario a gastar otra consulta.
+  //
+  // El reintento va ANTES de mirar los códigos: si no, se juzgaba la primera
+  // respuesta y no la última, y un 503 que al reintentar devolvía 429 acababa
+  // en el saco de "error desconocido" en vez de decir que la cuota se agotó.
   let intentos = 0;
   while (respuesta.status === 503 && intentos < REINTENTOS_SATURACION) {
     intentos += 1;
@@ -162,6 +161,11 @@ async function generarJson(res, cuerpo, etiqueta) {
       res.status(502).json({ error: "gemini-inalcanzable" });
       return null;
     }
+  }
+
+  if (respuesta.status === 429) {
+    res.status(429).json({ error: "cuota-agotada" });
+    return null;
   }
 
   if (respuesta.status === 503) {

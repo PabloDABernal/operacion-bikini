@@ -16,10 +16,11 @@ const INSTRUCCIONES = {
 
 Te piden una TABLA DE EJERCICIO. Devuélvela en el campo "ejercicio" y deja "nutricion" vacío.
 
-- Una línea por día, empezando cada línea con el día.
+- Si te piden la tabla PARA HOY, devuelve SOLO la sesión de hoy: un único entrenamiento, sin repartir nada por días de la semana y sin mencionar otros días.
+- Si te la piden PARA LA SEMANA, entonces sí: una línea por día, empezando cada línea con el día.
 - En cada ejercicio, series y repeticiones, o duración e intensidad.
 - Respeta el material del que dispone y sus limitaciones. Si no sabes qué material tiene, propón cosas que se puedan hacer en casa sin nada.
-- Marca los días de descanso como descanso, que también son parte del plan.
+- En la tabla de la semana, marca los días de descanso como descanso, que también son parte del plan. En la de hoy no menciones descansos de otros días.
 - Máximo 250 palabras.`,
 
   dieta: `${COMUN}
@@ -34,7 +35,7 @@ Te piden una DIETA DETALLADA. Devuélvela en el campo "nutricion" y deja "ejerci
 };
 
 const ALCANCES = {
-  hoy: "para hoy",
+  hoy: "solo para hoy, una única sesión",
   semana: "para los próximos siete días",
   "3dias": "para los próximos tres días",
   "7dias": "para los próximos siete días"
