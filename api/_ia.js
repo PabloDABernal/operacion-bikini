@@ -282,10 +282,21 @@ async function generarJson(res, cuerpo, etiqueta) {
             // resuelve el 401 de un vistazo: una clave truncada o de otro
             // sitio se ve enseguida. El contenido no sale nunca de aquí.
             const clave = claveDeGroq();
-            reserva = `http-401 · clave de ${clave.length} car. que empieza por "${clave.slice(0, 4)}"`;
+            // Todas las claves de Groq miden 56 y empiezan por "gsk_", así que
+            // la forma no distingue una clave de otra. La huella sí: son los
+            // primeros caracteres de su SHA-256, que se pueden calcular
+            // también en el equipo del usuario y comparar. No permite
+            // reconstruir la clave.
+            const huella = require("crypto")
+              .createHash("sha256")
+              .update(clave)
+              .digest("hex")
+              .slice(0, 8);
+
+            reserva = `http-401 · clave de ${clave.length} car., huella ${huella}`;
             console.error(
-              `La clave de Groq mide ${clave.length} caracteres y empieza por ` +
-                `"${clave.slice(0, 4)}". Las suyas empiezan por "gsk_".`
+              `La clave de Groq mide ${clave.length} caracteres, empieza por ` +
+                `"${clave.slice(0, 4)}" y su huella SHA-256 empieza por ${huella}.`
             );
           }
         }
