@@ -35,6 +35,7 @@ La **v2 está empezada**: su alcance se decidió el 11 de agosto (ver `docs/PROD
 | 017 | Consultas especializadas de ejercicio y dieta | 🟡 desplegada, sin probar |
 | 018 | Operaciones con principio y fin, e histórico | 🟡 desplegada, sin probar |
 | 019 | Borrar el histórico desde el reinicio de datos | 🟡 desplegada, sin probar |
+| 020 | Groq como proveedor de IA de reserva | 🟡 desplegada, sin probar |
 
 ## Qué toca ahora
 
@@ -71,6 +72,7 @@ Decisiones de v2 ya tomadas por el usuario el 11 de agosto:
 - **Reglas de Firestore**: se publican con `npx --yes firebase-tools deploy --only firestore:rules`. Ya no se copian a mano en la consola. Hacerlo SIEMPRE antes de pedirle al usuario que pruebe.
 - **Modelo de IA**: con la clave del proyecto solo responde `gemini-flash-latest`; `gemini-2.5-flash` da 404. Y la API rechaza con 400 tanto `thinkingConfig` como `propertyOrdering`. Está documentado en `api/_ia.js`.
 - **Esquemas de respuesta de Gemini**: todos los campos deben ir como `required`, aunque no apliquen en cada turno (los vacíos, como cadena vacía). Con campos opcionales, el modelo se los salta y llegan planes sin rutina.
+- **Variables de entorno en Vercel**: `GEMINI_API_KEY`, `GROQ_API_KEY` (reserva de IA, spec 020) y las tres de Cloudinary. Sin la de Groq la app funciona, pero se queda sin red de seguridad cuando Gemini falla.
 - **Gemini devuelve 503 cuando está saturado**: no es un fallo del proyecto, es Google diciendo que el modelo está sobrecargado. Pasó el 15 de agosto y tumbó a la vez consejo, consulta y planes especializados. Desde entonces `api/_ia.js` reintenta tres veces (2 s, 4 s, 6 s) y, si sigue, la app dice que la IA está saturada en vez de un "no se ha podido" que no explica nada. Antes de buscar un bug propio, comprobar el código que sale en pantalla.
 - **Cuota gratuita de Gemini**: se agota depurando a base de despliegues. Pensar antes de probar en producción.
 - **Todo está en Vercel**: web y funciones, mismo dominio. GitHub Pages se descartó y está desactivado.

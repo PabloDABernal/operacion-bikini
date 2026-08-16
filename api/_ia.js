@@ -110,17 +110,109 @@ async function llamarAGemini(cuerpo, etiqueta) {
   return ultimaRespuesta;
 }
 
-// Cuántas veces se reintenta cuando Google dice que el modelo está saturado,
-// y cuánto se espera entre intentos (2 s y 4 s).
+// --- Proveedor de reserva: Groq (spec 020) -------------------------------
 //
-// El tope no lo pone el margen de la función (60 s) sino la paciencia del
-// navegador: con tres reintentos, la respuesta llegaba después de que el
-// cliente ya hubiera abortado, y el usuario veía un error de red en vez de
-// enterarse de que la IA estaba saturada.
-const REINTENTOS_SATURACION = 2;
-const ESPERA_BASE_MS = 2000;
+// Cuando Google dice que está saturado o sin cuota, se le pregunta a otro. Es
+// otra empresa, con otra infraestructura y otra cuota gratuita, así que un mal
+// día suyo no tiene por qué ser un mal día nuestro.
+//
+// Gemini sigue siendo el primero: es el que mejor respeta el esquema JSON, y
+// aquí eso importa (en la spec 004 llegaban planes sin rutina de ejercicio).
 
-const esperar = (ms) => new Promise((seguir) => setTimeout(seguir, ms));
+// Como con Gemini: los nombres de los modelos abiertos cambian a menudo y no
+// todas las claves tienen los mismos. Se usa el primero que conteste.
+const MODELOS_GROQ = [
+  "llama-3.3-70b-versatile",
+  "llama-3.1-8b-instant",
+  "openai/gpt-oss-120b"
+];
+
+// Groq no acepta un esquema de respuesta, así que el formato se le pide por
+// escrito. Con "json_object" a secas devuelve JSON válido pero con las claves
+// que le apetezcan.
+function describirEsquema(esquema) {
+  if (!esquema || !esquema.properties) return "";
+
+  const claves = esquema.required || Object.keys(esquema.properties);
+  const detalles = claves.map((clave) => {
+    const propiedad = esquema.properties[clave] || {};
+    return propiedad.enum ? `"${clave}" (uno de: ${propiedad.enum.join(", ")})` : `"${clave}"`;
+  });
+
+  return (
+    "\n\nResponde SOLO con un objeto JSON, sin texto alrededor y sin markdown. " +
+    `Tiene que llevar estas claves, TODAS obligatorias y de tipo texto: ${detalles.join(", ")}. ` +
+    "Las que no apliquen, déjalas como cadena vacía."
+  );
+}
+
+// La app habla en formato Gemini; Groq usa el de OpenAI. La traducción vive
+// aquí y solo aquí, para no tocar consejo.js, consulta.js ni plan.js.
+function aFormatoGroq(cuerpo, modelo) {
+  const sistema =
+    (cuerpo.systemInstruction && cuerpo.systemInstruction.parts
+      ? cuerpo.systemInstruction.parts.map((parte) => parte.text).join("\n")
+      : "") + describirEsquema(cuerpo.generationConfig && cuerpo.generationConfig.responseSchema);
+
+  const mensajes = (cuerpo.contents || []).map((entrada) => ({
+    role: entrada.role === "model" ? "assistant" : "user",
+    content: (entrada.parts || []).map((parte) => parte.text).join("\n")
+  }));
+
+  return {
+    model: modelo,
+    messages: sistema ? [{ role: "system", content: sistema }, ...mensajes] : mensajes,
+    response_format: { type: "json_object" },
+    max_tokens: 4096
+  };
+}
+
+async function llamarAGroq(cuerpo, etiqueta) {
+  let ultimaRespuesta;
+
+  for (const modelo of MODELOS_GROQ) {
+    ultimaRespuesta = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${process.env.GROQ_API_KEY}`
+      },
+      body: JSON.stringify(aFormatoGroq(cuerpo, modelo))
+    });
+
+    // 404 y 400 con "model" suelen significar que ese nombre no existe para
+    // esta clave; el resto ya no es un problema de nombre.
+    if (ultimaRespuesta.status !== 404) {
+      if (ultimaRespuesta.ok) console.log(`${etiqueta} generado con Groq (${modelo}).`);
+      return ultimaRespuesta;
+    }
+
+    console.error(`El modelo ${modelo} no existe en Groq para esta clave, probando el siguiente.`);
+  }
+
+  return ultimaRespuesta;
+}
+
+// Saca el JSON de la respuesta de Groq y lo completa: los modelos abiertos se
+// saltan campos, y el resto del código da por hecho que están todos.
+function jsonDeGroq(datos, esquema) {
+  const mensaje = datos.choices && datos.choices[0] && datos.choices[0].message;
+  if (!mensaje || typeof mensaje.content !== "string") return null;
+
+  let objeto;
+  try {
+    objeto = JSON.parse(mensaje.content);
+  } catch {
+    return null;
+  }
+
+  const claves = (esquema && esquema.required) || [];
+  claves.forEach((clave) => {
+    if (typeof objeto[clave] !== "string") objeto[clave] = "";
+  });
+
+  return objeto;
+}
 
 // Llama a Gemini y devuelve el JSON ya parseado, o null con la respuesta ya
 // enviada si algo ha fallado. Centraliza el mapeo de errores para que las dos
@@ -141,26 +233,33 @@ async function generarJson(res, cuerpo, etiqueta) {
     return null;
   }
 
-  // 503 es Google diciendo que el modelo está sobrecargado. No es un fallo de
-  // la petición: suele bastar con esperar unos segundos. Se reintenta aquí
-  // porque rendirse a la primera obliga al usuario a gastar otra consulta.
-  //
-  // El reintento va ANTES de mirar los códigos: si no, se juzgaba la primera
-  // respuesta y no la última, y un 503 que al reintentar devolvía 429 acababa
-  // en el saco de "error desconocido" en vez de decir que la cuota se agotó.
-  let intentos = 0;
-  while (respuesta.status === 503 && intentos < REINTENTOS_SATURACION) {
-    intentos += 1;
-    console.error(`Gemini saturado (503), reintento ${intentos} de ${REINTENTOS_SATURACION}.`);
-    await esperar(ESPERA_BASE_MS * intentos);
+  // Si Google está saturado, sin cuota o roto, se le pregunta a Groq. Un 400
+  // NO salta de proveedor: significa que la petición está mal formada, y
+  // mandársela a otro solo escondería el fallo.
+  const mereceReserva =
+    respuesta.status === 429 || respuesta.status === 503 || respuesta.status >= 500;
+
+  if (mereceReserva && process.env.GROQ_API_KEY) {
+    console.error(`Gemini respondió ${respuesta.status}: se prueba con Groq.`);
+
+    const esquema = cuerpo.generationConfig && cuerpo.generationConfig.responseSchema;
 
     try {
-      respuesta = await llamarAGemini(cuerpo, etiqueta);
+      const deGroq = await llamarAGroq(cuerpo, etiqueta);
+
+      if (deGroq && deGroq.ok) {
+        const objeto = jsonDeGroq(await deGroq.json(), esquema);
+        if (objeto) return objeto;
+        console.error("Groq devolvió algo que no es el JSON esperado.");
+      } else if (deGroq) {
+        const detalle = await deGroq.text().catch(() => "(sin cuerpo)");
+        console.error(`Groq respondió ${deGroq.status}: ${detalle.slice(0, 300)}`);
+      }
     } catch (fallo) {
-      console.error(`No se pudo llamar a Gemini: ${fallo.message}`);
-      res.status(502).json({ error: "gemini-inalcanzable" });
-      return null;
+      console.error(`No se pudo llamar a Groq: ${fallo.message}`);
     }
+    // Si Groq tampoco puede, se sigue abajo y gana el error de Gemini, que es
+    // el que mejor explica qué pasa (cuota agotada o saturación).
   }
 
   if (respuesta.status === 429) {
@@ -169,7 +268,7 @@ async function generarJson(res, cuerpo, etiqueta) {
   }
 
   if (respuesta.status === 503) {
-    console.error("Gemini sigue saturado tras los reintentos.");
+    console.error("Gemini saturado y sin reserva disponible.");
     res.status(503).json({ error: "ia-saturada" });
     return null;
   }
