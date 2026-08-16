@@ -278,7 +278,11 @@ async function generarJson(res, cuerpo, etiqueta) {
           // Un 401 casi siempre es la clave mal pegada. Se registra su forma,
           // nunca su contenido, para poder descartarlo sin verla.
           if (deGroq.status === 401) {
+            // La forma de la clave (cuánto mide y su prefijo) no es secreta y
+            // resuelve el 401 de un vistazo: una clave truncada o de otro
+            // sitio se ve enseguida. El contenido no sale nunca de aquí.
             const clave = claveDeGroq();
+            reserva = `http-401 · clave de ${clave.length} car. que empieza por "${clave.slice(0, 4)}"`;
             console.error(
               `La clave de Groq mide ${clave.length} caracteres y empieza por ` +
                 `"${clave.slice(0, 4)}". Las suyas empiezan por "gsk_".`
