@@ -72,6 +72,13 @@ Decisiones de v2 ya tomadas por el usuario el 11 de agosto:
 - **Reglas de Firestore**: se publican con `npx --yes firebase-tools deploy --only firestore:rules`. Ya no se copian a mano en la consola. Hacerlo SIEMPRE antes de pedirle al usuario que pruebe.
 - **Modelo de IA**: con la clave del proyecto solo responde `gemini-flash-latest`; `gemini-2.5-flash` da 404. Y la API rechaza con 400 tanto `thinkingConfig` como `propertyOrdering`. Está documentado en `api/_ia.js`.
 - **Esquemas de respuesta de Gemini**: todos los campos deben ir como `required`, aunque no apliquen en cada turno (los vacíos, como cadena vacía). Con campos opcionales, el modelo se los salta y llegan planes sin rutina.
+- **La reserva de Groq (spec 020) todavía no ha llegado a funcionar**: cuando Gemini se satura y se pasa a Groq, este responde **401** desde Vercel. Diagnóstico del 16 de agosto, con esto YA DESCARTADO:
+  - La clave de Vercel es la correcta: su huella SHA-256 coincide con la clave buena, carácter por carácter.
+  - Esa clave funciona: la misma petición (mismo modelo, mismo cuerpo, mismo encabezado) devuelve 200 desde fuera de Vercel.
+  - El código que corre es el bueno: manda la clave limpia, a la URL correcta, con `Authorization: Bearer`.
+  - Los tres modelos de `MODELOS_GROQ` existen y admiten JSON (comprobado contra `/openai/v1/models`).
+  
+  **Lo único que queda por mirar** es la línea `Groq respondió 401: {...}` en los logs de Vercel: ese mensaje es de Groq y dice el motivo real. Sin él no se puede avanzar. Mientras tanto la app funciona con Gemini y, si Groq falla, se comporta igual que antes de la spec 020.
 - **Variables de entorno en Vercel**: `GEMINI_API_KEY`, `GROQ_API_KEY` (reserva de IA, spec 020) y las tres de Cloudinary. Sin la de Groq la app funciona, pero se queda sin red de seguridad cuando Gemini falla.
 - **Gemini devuelve 503 cuando está saturado**: no es un fallo del proyecto, es Google diciendo que el modelo está sobrecargado. Pasó el 15 de agosto y tumbó a la vez consejo, consulta y planes especializados. Desde entonces `api/_ia.js` reintenta tres veces (2 s, 4 s, 6 s) y, si sigue, la app dice que la IA está saturada en vez de un "no se ha podido" que no explica nada. Antes de buscar un bug propio, comprobar el código que sale en pantalla.
 - **Cuota gratuita de Gemini**: se agota depurando a base de despliegues. Pensar antes de probar en producción.
