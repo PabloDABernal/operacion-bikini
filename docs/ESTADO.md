@@ -66,6 +66,29 @@ Decisiones de v2 ya tomadas por el usuario el 11 de agosto:
 - Calorías **en rango** y además grupos de alimentos.
 - Gamificación con **puntos, rachas y emblemas** (los tres).
 
+## La v3, decidida el 16 de agosto de 2026
+
+El usuario probó las specs 011-020 con dos meses de datos, las dio por buenas y pidió otra tanda. Quiere **probarlo todo junto** al final, así que ninguna se da por completada hasta entonces. Alcance en `docs/PRODUCTO.md`, apartado "Qué hará (v3)".
+
+| Spec | Qué es | Por qué en este orden |
+|---|---|---|
+| 021 | Calendario de constancia a tamaño fijo | Bug visible: con "1 semana" los cuadraditos salen enormes |
+| 022 | Paleta violeta nocturna | Cambio de tokens, no toca estructura |
+| 023 | Un solo interlocutor: fuera "Consejos", todo a "Pasar consulta" | Simplifica antes de repartir lo demás |
+| 024 | "Hoy" con cuatro acciones y las especializadas en su sección | Coloca cada cosa en su sitio |
+| 025 | Recetas: colección propia | Las dietas se apoyan en ellas |
+| 026 | Dietas: semana de menús, generada por IA o montada a mano, con "me lo he comido" | Lo más grande de la tanda |
+| 027 | Tablas de ejercicio guardadas | Hermana de las dietas |
+| 028 | Detalle nutricional automático por IA | Pendiente de la v2 original |
+| 029 | Gamificación: puntos, rachas y emblemas | Pendiente de la v2 original |
+
+Decisiones ya tomadas por el usuario para esta tanda:
+
+- Paleta **violeta nocturna** (fondo violeta oscuro, acento violeta, cian de apoyo).
+- Las dietas se pueden **generar con IA y montar a mano**, las dos cosas desde el principio.
+- Una receta guarda **nombre, raciones, ingredientes y preparación**. Sin datos nutricionales de momento.
+- En la dieta de hoy, **un toque apunta la comida**.
+
 ## Cosas que hay que saber antes de tocar nada
 
 - **Cómo se prueba**: el usuario prueba SIEMPRE en producción (https://operacion-bikini.vercel.app). Para que pueda probar algo hay que hacer commit y `git push`: Vercel despliega solo desde `main`. Nada de servidores locales.

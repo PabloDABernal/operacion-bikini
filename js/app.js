@@ -739,6 +739,13 @@ function pintarCalendario(registros) {
   // Al cambiar de rango, la casilla que se estaba mirando puede haber
   // desaparecido, así que el detalle vuelve a empezar.
   detalle.textContent = "Toca un día para ver qué apuntaste.";
+
+  // El SVG ocupaba el 100% del ancho, así que con una sola columna ("1 sem")
+  // los cuadraditos se estiraban hasta ocupar media pantalla. Se le da su
+  // tamaño real —12 px por columna, que es lo que mide el dibujo— y el 100%
+  // pasa a ser el límite, no el tamaño.
+  contenedor.style.width = `${semanasCalendario * 12}px`;
+
   contenedor.appendChild(
     dibujarCalendario(
       calendarioDeConstancia(registros, hoyISO(), semanasCalendario),

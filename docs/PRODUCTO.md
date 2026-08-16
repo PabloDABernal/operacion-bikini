@@ -47,6 +47,19 @@ Sale de probar la app con un mes de datos de verdad. Ordenado como se va a const
 - **Operaciones con principio y fin**: la app funciona por ciclos. Una **operación bikini** empieza con la entrevista y se cierra cuando el usuario quiere, desde Ajustes. Mientras no hay una operación en marcha, la app solo deja iniciarla: no se puede apuntar nada. Al cerrarla, todo lo apuntado se archiva y queda consultable en un **histórico**, con su resumen (fechas, peso inicial y final, kilos y días registrados) y sus registros en solo lectura. Los ajustes, la foto y lo que la IA sabe del usuario se conservan de una operación a la siguiente. El histórico se puede borrar entero desde el reinicio de datos, como cualquier otro tipo.
 - **Consultas especializadas**: se puede gastar una consulta del día en pedir algo concreto — una tabla de ejercicios para hoy o para la semana, o una dieta detallada para los próximos días — en vez de la entrevista general.
 
+## Qué hará (v3, decidida el 16 de agosto de 2026)
+
+Sale de usar la app con dos meses de datos. Cambia la estructura, no solo el aspecto:
+
+- **Paleta violeta nocturna**: se mantiene el fondo oscuro, pero con base violeta y acento violeta en lugar del coral.
+- **Un solo interlocutor**: "Consejos" desaparece como sección aparte. Todo pasa por **"Pasar consulta"**, una conversación con tu nutricionista/entrenador en la que hablas de cómo va la dieta y te va dando pautas. Los consejos son lo que sale de esa conversación, no un botón que escupe texto.
+- **Cada cosa en su sitio**: pedir una dieta vive en **Comidas** y pedir una tabla de ejercicio vive en **Ejercicio**. Dejan de ser un tipo raro de consulta.
+- **"Hoy" con cuatro acciones**: Pasar consulta · Hacer dieta · Tabla de ejercicios · Foto del día.
+- **Recetas**: colección propia. Cada receta tiene nombre, para cuántas personas, ingredientes y preparación. Se guardan las que propone la IA y se pueden escribir a mano, editar y borrar.
+- **Dietas**: una dieta es una semana de menús (días × comidas). La IA puede generarla entera con sus recetas, y también se puede montar a mano colocando recetas propias. En la dieta de hoy, cada comida tiene un botón para decir **"me lo he comido"**, que la apunta sin escribir nada.
+- **Tablas de ejercicio**: lo mismo para entrenar. Se guardan, se ven por días y se marca lo hecho.
+- **Detalle nutricional automático** y **gamificación** (puntos, rachas y emblemas): lo que quedaba pendiente de la v2.
+
 ## Qué explícitamente NO hace
 
 - No sustituye a un profesional médico real: siempre debe recordar (disclaimer) que ante dudas o falta de resultados hay que consultar a un médico.
@@ -67,6 +80,9 @@ Sale de probar la app con un mes de datos de verdad. Ordenado como se va a const
 - **Plan**: resultado de una consulta (nutrición + ejercicio) asociado a un usuario.
 - **Racha**: días seguidos apuntando algo. Admite un día de gracia por semana, para que un despiste no la rompa.
 - **Punto**: unidad que se gana al registrar. Premia la conducta, no los kilos.
+- **Receta**: nombre, raciones, ingredientes y preparación. Se puede cocinar leyéndola y la IA puede reutilizarla.
+- **Dieta**: una semana de menús, día a día y comida a comida, hecha de recetas.
+- **Tabla de ejercicio**: una semana de entrenamientos, día a día, con sus series y duraciones.
 - **Emblema**: reconocimiento por un hito de constancia (primera semana, primer mes, retomar tras un parón).
 
 ## Roadmap por fases

@@ -3,19 +3,22 @@
    solo aquí — ni en el HTML ni en el JS hay hexadecimales sueltos. */
 
 :root {
-  /* Paleta elegida por el usuario el 2026-08-11. Los cuatro primeros son los
-     de la propuesta; el resto se deriva de ellos. */
-  --fondo: #12141a;
-  --superficie: #1b1e26;
-  --superficie-alta: #232733;
-  --borde: #2f3441;
-  --tinta: #e8eaf0;
-  --tinta-suave: #9aa1b4;
-  --acento: #ff4d6d;
-  --apoyo: #4cc9f0;
-  /* Texto sobre el coral: casi negro, porque blanco sobre coral no se lee. */
-  --sobre-acento: #12141a;
-  /* El #c62828 de antes era ilegible sobre fondo oscuro. */
+  /* Paleta "violeta nocturna", elegida por el usuario el 2026-08-16 (spec
+     022). Sigue siendo oscura siempre; lo que cambia es que la base y el
+     acento pasan del azulado y el coral al violeta. */
+  --fondo: #16131f;
+  --superficie: #201b2e;
+  --superficie-alta: #2a2440;
+  --borde: #3a3252;
+  --tinta: #ece8f5;
+  --tinta-suave: #a79fc0;
+  --acento: #a855f7;
+  --apoyo: #22d3ee;
+  /* Sobre el coral hacía falta texto casi negro; sobre este violeta se lee
+     mejor en blanco roto. */
+  --sobre-acento: #f7f3ff;
+  /* Rojo claro a propósito: si el error tirara a morado como el acento, la
+     zona de peligro dejaría de gritar. */
   --error: #ff8a95;
 
   --e1: 0.25rem;
@@ -609,8 +612,10 @@ button:disabled {
 
    Son 12 columnas de cuadraditos: a pantalla completa se estiraría hasta
    quedar ridículo, así que se le pone tope. */
+/* El ancho lo pone el JS, según cuántas columnas toquen. Aquí solo el tope:
+   con 52 semanas no cabe en un móvil, y entonces sí se encoge. */
 .bloque-calendario {
-  max-width: 320px;
+  max-width: 100%;
   margin-top: var(--e2);
 }
 

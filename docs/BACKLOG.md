@@ -34,3 +34,4 @@ Ideas surgidas durante la implementación, no implementadas. Una línea cada una
 - Borrar una operación concreta del histórico desde su tarjeta (la spec 019 borra el histórico entero o nada).
 - Elegir el proveedor de IA desde Ajustes, para poder probar Groq a propósito (la spec 020 solo lo usa como reserva automática).
 - Un tercer proveedor de IA si Gemini y Groq se quedan cortos.
+- Etiquetas de mes encima del calendario de constancia cuando el rango es largo (spec 021).
