@@ -35,11 +35,9 @@
   <section id="pantalla-principal" class="pantalla oculta">
     <header>
       <div class="identidad">
-        <button type="button" id="btn-perfil" class="avatar" aria-label="Cambiar foto de perfil"></button>
-        <input type="file" id="archivo-perfil" accept="image/*" class="oculta">
+        <button type="button" id="btn-perfil" class="avatar" aria-label="Ir a Ajustes"></button>
         <span id="email-usuario"></span>
       </div>
-      <p id="estado-perfil" class="explicacion" role="status"></p>
     </header>
 
     <!-- Sección: Hoy (spec 010) -->
@@ -64,8 +62,10 @@
       <ul id="hoy-resumen" class="resumen"></ul>
 
       <div id="atajos-hoy">
-        <button type="button" class="atajo" data-seccion="consulta">Consulta</button>
-        <button type="button" class="atajo" data-seccion="fotos">Fotos</button>
+        <button type="button" class="atajo" data-seccion="consulta">Pasar consulta</button>
+        <button type="button" class="atajo" data-seccion="comidas">Hacer dieta</button>
+        <button type="button" class="atajo" data-seccion="ejercicio">Tabla de ejercicios</button>
+        <button type="button" class="atajo" data-seccion="fotos">Foto del día</button>
       </div>
 
       <h2>Constancia</h2>
@@ -154,6 +154,16 @@
         <p id="guardado-repetir" class="guardado" role="status"></p>
       </div>
 
+      <!-- Pedir un plan, en su sección (spec 024) -->
+      <h2>Hacer dieta</h2>
+      <p class="explicacion">
+        Se la pide a la IA con tus datos y tus gustos. Gasta una de tus dos
+        consultas del día.
+      </p>
+      <div id="pedir-dieta"></div>
+      <div id="alcances-dieta" class="oculta"></div>
+      <p id="error-dieta" class="error" role="alert"></p>
+
       <h2>Mis comidas</h2>
       <div class="filtro-dia">
         <label for="filtro-comidas">Ver un día</label>
@@ -195,6 +205,16 @@
 
       <p id="error-ejercicio" class="error" role="alert"></p>
       <p id="guardado-ejercicio" class="guardado" role="status"></p>
+
+      <!-- Pedir un plan, en su sección (spec 024) -->
+      <h2>Tabla de ejercicios</h2>
+      <p class="explicacion">
+        Se la pide a la IA con tus datos y tus gustos. Gasta una de tus dos
+        consultas del día.
+      </p>
+      <div id="pedir-ejercicio"></div>
+      <div id="alcances-ejercicio" class="oculta"></div>
+      <p id="error-ejercicio" class="error" role="alert"></p>
 
       <h2>Mis ejercicios</h2>
       <div class="filtro-dia">
@@ -259,18 +279,6 @@
         <p id="error-conversacion" class="error" role="alert"></p>
       </div>
 
-      <!-- Consultas especializadas (spec 017). La spec 024 se las lleva a
-           Comidas y a Ejercicio, que es donde tienen sentido. -->
-      <div id="bloque-especializadas">
-        <h3>O pide algo concreto</h3>
-        <p class="explicacion">
-          Sin entrevista. Gasta una de tus dos consultas del día.
-        </p>
-        <div id="tipos-especializados"></div>
-        <div id="alcances-especializados" class="oculta"></div>
-        <p id="error-especializada" class="error" role="alert"></p>
-      </div>
-
       <h2>Mis planes</h2>
       <p id="estado-planes"></p>
       <div id="lista-planes"></div>
@@ -301,6 +309,14 @@
 
     <!-- Sección: Ajustes -->
     <div class="seccion" data-seccion="ajustes">
+      <h2>Foto de perfil</h2>
+      <div class="bloque-foto-perfil">
+        <span id="avatar-ajustes" class="avatar"></span>
+        <button type="button" id="btn-cambiar-foto">Subir foto de perfil</button>
+        <input type="file" id="archivo-perfil" accept="image/*" class="oculta">
+      </div>
+      <p id="estado-perfil" class="explicacion" role="status"></p>
+
       <h2>Mi objetivo</h2>
       <form id="form-ajustes">
         <label for="nombre">Cómo quieres que te llamen</label>
@@ -401,7 +417,7 @@
         <button type="button" class="nav-boton" data-seccion="peso">Peso</button>
         <button type="button" class="nav-boton" data-seccion="comidas">Comidas</button>
         <button type="button" class="nav-boton" data-seccion="ejercicio">Ejercicio</button>
-        <button type="button" class="nav-boton" data-seccion="ajustes">Ajustes</button>
+        <button type="button" class="nav-boton" data-seccion="consulta">Consulta</button>
       </div>
     </nav>
   </section>

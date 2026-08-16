@@ -29,6 +29,11 @@ import {
   textoDeCasilla
 } from "./grafica-svg.js";
 
+import {
+  dibujarCalendarioMes,
+  MAXIMO_SEMANAS_CALENDARIO
+} from "./calendario.js";
+
 import { loDeSiempre } from "./hoy.js";
 
 import {
@@ -238,31 +243,35 @@ function pintarNombre(nombre) {
 }
 
 function pintarAvatar(url, email) {
-  const avatar = id("btn-perfil");
-  avatar.innerHTML = "";
+  [id("btn-perfil"), id("avatar-ajustes")].forEach((avatar) => {
+    avatar.innerHTML = "";
 
-  if (url) {
-    const imagen = document.createElement("img");
-    imagen.src = recorteRedondo(url);
-    imagen.alt = "";
-    avatar.appendChild(imagen);
-    return;
-  }
+    if (url) {
+      const imagen = document.createElement("img");
+      imagen.src = recorteRedondo(url);
+      imagen.alt = "";
+      avatar.appendChild(imagen);
+      return;
+    }
 
-  avatar.textContent = (email || "?").charAt(0).toUpperCase();
+    avatar.textContent = (email || "?").charAt(0).toUpperCase();
+  });
 }
 
-id("btn-perfil").addEventListener("click", () => id("archivo-perfil").click());
+// El avatar es la puerta de Ajustes desde la spec 024: la barra se quedó con
+// cinco botones para que cupiera Consulta.
+id("btn-perfil").addEventListener("click", () => abrirPestana("ajustes"));
+id("btn-cambiar-foto").addEventListener("click", () => id("archivo-perfil").click());
 
 id("archivo-perfil").addEventListener("change", async (evento) => {
   const archivo = evento.target.files[0];
   if (!archivo) return;
 
   const estado = id("estado-perfil");
-  const avatar = id("btn-perfil");
+  const boton = id("btn-cambiar-foto");
 
   estado.textContent = "Subiendo…";
-  avatar.disabled = true;
+  boton.disabled = true;
 
   try {
     const url = await subirFotoDePerfil(archivo);
@@ -272,7 +281,7 @@ id("archivo-perfil").addEventListener("change", async (evento) => {
   } catch {
     estado.textContent = "No se ha podido subir la foto. Comprueba tu conexión.";
   } finally {
-    avatar.disabled = false;
+    boton.disabled = false;
     // Sin esto, elegir el mismo archivo dos veces seguidas no dispara nada.
     evento.target.value = "";
   }
@@ -744,22 +753,24 @@ function pintarCalendario(registros) {
   // desaparecido, así que el detalle vuelve a empezar.
   detalle.textContent = "Toca un día para ver qué apuntaste.";
 
-  // El SVG ocupaba el 100% del ancho, así que con una sola columna ("1 sem")
-  // los cuadraditos se estiraban hasta ocupar media pantalla. Se le da su
-  // tamaño real —12 px por columna, que es lo que mide el dibujo— y el 100%
-  // pasa a ser el límite, no el tamaño.
-  contenedor.style.width = `${semanasCalendario * 12}px`;
+  const casillas = calendarioDeConstancia(registros, hoyISO(), semanasCalendario);
+  const alTocar = (casilla) => {
+    // Con el ratón basta el <title>; en el móvil no hay hover, así que el
+    // toque escribe el detalle aquí debajo.
+    detalle.textContent = textoDeCasilla(casilla);
+  };
 
-  contenedor.appendChild(
-    dibujarCalendario(
-      calendarioDeConstancia(registros, hoyISO(), semanasCalendario),
-      (casilla) => {
-        // Con el ratón basta el <title>; en el móvil no hay hover, así que el
-        // toque escribe el detalle aquí debajo.
-        detalle.textContent = textoDeCasilla(casilla);
-      }
-    )
-  );
+  // Cada rango pide una forma distinta: un mapa de calor de dos columnas no
+  // comunica nada, y un calendario de 52 semanas no cabe en ninguna pantalla.
+  if (semanasCalendario <= MAXIMO_SEMANAS_CALENDARIO) {
+    contenedor.style.width = "";
+    contenedor.appendChild(dibujarCalendarioMes(casillas, hoyISO(), alTocar));
+  } else {
+    // El SVG ocupa el 100% del ancho: se le da su tamaño real (12 px por
+    // columna) y ese 100% pasa a ser el límite, no el tamaño.
+    contenedor.style.width = `${semanasCalendario * 12}px`;
+    contenedor.appendChild(dibujarCalendario(casillas, alTocar));
+  }
 }
 
 function refrescarHoy() {
@@ -1274,27 +1285,32 @@ function pintarEstadoConsulta() {
 
 // --- Consultas especializadas (spec 017) ---------------------------------
 
-// Dos pasos: primero qué quieres, y luego para cuándo.
+// Desde la spec 024 cada plan vive en su sección: la dieta en Comidas y la
+// tabla en Ejercicio. Son dos pasos: primero lo pides, y luego eliges para
+// cuándo.
 function pintarEspecializadas(bloqueado) {
-  const tipos = id("tipos-especializados");
-  const alcances = id("alcances-especializados");
+  Object.keys(TIPOS_ESPECIALIZADOS).forEach((tipo) => {
+    const contenedor = id(`pedir-${tipo}`);
+    const alcances = id(`alcances-${tipo}`);
+    const config = TIPOS_ESPECIALIZADOS[tipo];
 
-  tipos.innerHTML = "";
-  alcances.innerHTML = "";
-  alcances.classList.add("oculta");
+    contenedor.innerHTML = "";
+    alcances.innerHTML = "";
+    alcances.classList.add("oculta");
 
-  Object.entries(TIPOS_ESPECIALIZADOS).forEach(([tipo, config]) => {
     const boton = botonDeFila(`Pedir ${config.etiqueta.toLowerCase()}`, () =>
-      pintarAlcances(tipo, config)
+      pintarAlcances(tipo)
     );
     boton.className = "atajo";
     boton.disabled = bloqueado;
-    tipos.appendChild(boton);
+    contenedor.appendChild(boton);
   });
 }
 
-function pintarAlcances(tipo, config) {
-  const alcances = id("alcances-especializados");
+function pintarAlcances(tipo) {
+  const alcances = id(`alcances-${tipo}`);
+  const config = TIPOS_ESPECIALIZADOS[tipo];
+
   alcances.innerHTML = "";
   alcances.classList.remove("oculta");
 
@@ -1310,19 +1326,22 @@ function pintarAlcances(tipo, config) {
 }
 
 async function pedirEspecializada(tipo, alcance) {
-  const error = id("error-especializada");
+  const error = id(`error-${tipo}`);
+  const estado = id(`error-${tipo}`);
+
   error.textContent = "";
-  id("estado-consulta").textContent = "Pensando…";
+  estado.textContent = "Pensando…";
   pintarEspecializadas(true);
 
   try {
     await pedirPlanEspecializado(uidActual, consultasCargadas, tipo, alcance);
+    estado.textContent = "";
     await refrescarConsulta();
+    // El plan aparece en Consulta, que es donde viven todos.
+    abrirPestana("consulta");
   } catch (fallo) {
     error.textContent = mensajeDeErrorDeConsulta(fallo.codigo);
     pintarEspecializadas(false);
-  } finally {
-    id("estado-consulta").textContent = "";
   }
 }
 

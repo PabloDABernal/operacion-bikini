@@ -201,22 +201,60 @@ export function textoDeCasilla(casilla) {
   return `${fecha} — ${casilla.tipos.map((tipo) => NOMBRE_DE_TIPO[tipo]).join(", ")}`;
 }
 
+const MESES = [
+  "ene",
+  "feb",
+  "mar",
+  "abr",
+  "may",
+  "jun",
+  "jul",
+  "ago",
+  "sep",
+  "oct",
+  "nov",
+  "dic"
+];
+
+// Alto que se reserva encima para los nombres de los meses.
+const ALTO_MESES = 12;
+
 // `casillas` viene de calendarioDeConstancia(), en orden cronológico y en
 // bloques de 7 que empiezan en lunes: cada bloque es una columna.
 export function dibujarCalendario(casillas, alTocar) {
   const columnas = Math.ceil(casillas.length / 7);
 
   const svg = elemento("svg", {
-    viewBox: `0 0 ${columnas * PASO - HUECO} ${7 * PASO - HUECO}`,
+    viewBox: `0 0 ${columnas * PASO - HUECO} ${7 * PASO - HUECO + ALTO_MESES}`,
     class: "calendario-constancia",
     role: "img",
     "aria-label": "Días en los que has apuntado algo"
   });
 
+  // Un nombre de mes encima de la primera columna que lo estrena: sin esto,
+  // un año de cuadraditos no dice de cuándo es cada trozo.
+  let mesAnterior = "";
+  for (let columna = 0; columna < columnas; columna += 1) {
+    const primera = casillas[columna * 7];
+    if (!primera) break;
+
+    const mes = primera.fecha.slice(5, 7);
+    if (mes === mesAnterior) continue;
+    mesAnterior = mes;
+
+    svg.appendChild(
+      texto(MESES[Number(mes) - 1], {
+        x: columna * PASO,
+        y: ALTO_MESES - 4,
+        class: "grafica-eje"
+      })
+    );
+  }
+
   casillas.forEach((casilla, indice) => {
     const rect = elemento("rect", {
       x: Math.floor(indice / 7) * PASO,
-      y: (indice % 7) * PASO,
+      y: (indice % 7) * PASO + ALTO_MESES,
       width: LADO,
       height: LADO,
       rx: "2",

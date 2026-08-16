@@ -105,11 +105,6 @@ header {
   min-width: 0;
 }
 
-#estado-perfil {
-  margin: 0;
-  flex-basis: 100%;
-}
-
 #estado-perfil:empty {
   display: none;
 }
@@ -610,11 +605,65 @@ button:disabled {
 
    Son 12 columnas de cuadraditos: a pantalla completa se estiraría hasta
    quedar ridículo, así que se le pone tope. */
-/* El ancho lo pone el JS, según cuántas columnas toquen. Aquí solo el tope:
-   con 52 semanas no cabe en un móvil, y entonces sí se encoge. */
+/* En rangos largos el ancho lo pone el JS, según cuántas columnas toquen; en
+   los cortos manda la rejilla del calendario. */
 .bloque-calendario {
   max-width: 100%;
   margin-top: var(--e2);
+}
+
+/* Calendario de verdad para los rangos cortos (spec 025) */
+
+.calendario-mes {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: var(--e1);
+}
+
+.dia-cabecera {
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--tinta-suave);
+  padding-bottom: var(--e1);
+}
+
+.calendario-mes .dia {
+  /* Cuadradas y repartiéndose el ancho: en un móvil salen de unos 40 px. */
+  aspect-ratio: 1 / 1;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  border: 1px solid transparent;
+  border-radius: var(--radio-s);
+  background: var(--superficie-alta);
+  color: var(--tinta-suave);
+}
+
+.calendario-mes .dia.nivel-1 {
+  background: color-mix(in srgb, var(--acento) 30%, var(--superficie-alta));
+  color: var(--tinta);
+}
+
+.calendario-mes .dia.nivel-2 {
+  background: color-mix(in srgb, var(--acento) 60%, var(--superficie-alta));
+  color: var(--tinta);
+}
+
+.calendario-mes .dia.nivel-3 {
+  background: var(--acento);
+  color: var(--sobre-acento);
+}
+
+.calendario-mes .dia.es-hoy {
+  border-color: var(--apoyo);
+  font-weight: 700;
+}
+
+/* Los días que aún no han llegado están, pero no cuentan. */
+.calendario-mes .dia.futuro {
+  opacity: 0.35;
 }
 
 .casilla {
@@ -1074,4 +1123,35 @@ button:disabled {
 
 #estado-conversacion:empty {
   display: none;
+}
+
+/* Foto de perfil, ahora en Ajustes (spec 024) */
+
+.bloque-foto-perfil {
+  display: flex;
+  align-items: center;
+  gap: var(--e3);
+  flex-wrap: wrap;
+}
+
+/* En Ajustes el avatar solo se enseña: no es un botón. */
+#avatar-ajustes {
+  width: 3.5rem;
+  height: 3.5rem;
+  font-size: 1.4rem;
+  cursor: default;
+}
+
+#pedir-dieta,
+#pedir-ejercicio,
+#alcances-dieta,
+#alcances-ejercicio {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e2);
+}
+
+#alcances-dieta,
+#alcances-ejercicio {
+  margin-top: var(--e2);
 }
