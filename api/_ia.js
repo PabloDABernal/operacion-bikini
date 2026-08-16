@@ -239,37 +239,49 @@ async function generarJson(res, cuerpo, etiqueta) {
   const mereceReserva =
     respuesta.status === 429 || respuesta.status === 503 || respuesta.status >= 500;
 
-  if (mereceReserva && process.env.GROQ_API_KEY) {
-    console.error(`Gemini respondió ${respuesta.status}: se prueba con Groq.`);
+  // Por qué la reserva no salvó la petición. Va al navegador junto al error
+  // para no tener que bucear en los logs: sin esto, "la IA está saturada" no
+  // distingue "falta la clave de Groq" de "Groq también ha fallado".
+  let reserva = "no-hacia-falta";
 
-    const esquema = cuerpo.generationConfig && cuerpo.generationConfig.responseSchema;
+  if (mereceReserva) {
+    if (!process.env.GROQ_API_KEY) {
+      reserva = "sin-clave";
+      console.error("Gemini falló y no hay GROQ_API_KEY: no hay reserva posible.");
+    } else {
+      console.error(`Gemini respondió ${respuesta.status}: se prueba con Groq.`);
+      const esquema = cuerpo.generationConfig && cuerpo.generationConfig.responseSchema;
 
-    try {
-      const deGroq = await llamarAGroq(cuerpo, etiqueta);
+      try {
+        const deGroq = await llamarAGroq(cuerpo, etiqueta);
 
-      if (deGroq && deGroq.ok) {
-        const objeto = jsonDeGroq(await deGroq.json(), esquema);
-        if (objeto) return objeto;
-        console.error("Groq devolvió algo que no es el JSON esperado.");
-      } else if (deGroq) {
-        const detalle = await deGroq.text().catch(() => "(sin cuerpo)");
-        console.error(`Groq respondió ${deGroq.status}: ${detalle.slice(0, 300)}`);
+        if (deGroq && deGroq.ok) {
+          const objeto = jsonDeGroq(await deGroq.json(), esquema);
+          if (objeto) return objeto;
+          reserva = "json-ilegible";
+          console.error("Groq devolvió algo que no es el JSON esperado.");
+        } else if (deGroq) {
+          reserva = `http-${deGroq.status}`;
+          const detalle = await deGroq.text().catch(() => "(sin cuerpo)");
+          console.error(`Groq respondió ${deGroq.status}: ${detalle.slice(0, 300)}`);
+        }
+      } catch (fallo) {
+        reserva = "inalcanzable";
+        console.error(`No se pudo llamar a Groq: ${fallo.message}`);
       }
-    } catch (fallo) {
-      console.error(`No se pudo llamar a Groq: ${fallo.message}`);
     }
     // Si Groq tampoco puede, se sigue abajo y gana el error de Gemini, que es
     // el que mejor explica qué pasa (cuota agotada o saturación).
   }
 
   if (respuesta.status === 429) {
-    res.status(429).json({ error: "cuota-agotada" });
+    res.status(429).json({ error: "cuota-agotada", reserva });
     return null;
   }
 
   if (respuesta.status === 503) {
     console.error("Gemini saturado y sin reserva disponible.");
-    res.status(503).json({ error: "ia-saturada" });
+    res.status(503).json({ error: "ia-saturada", reserva });
     return null;
   }
 

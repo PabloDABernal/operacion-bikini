@@ -44,13 +44,22 @@ const MENSAJE_GENERICO = "No se ha podido continuar la consulta. Inténtalo de n
 // Un fallo de Gemini que no sea de los conocidos llega con el estado HTTP que
 // devolvió Google: enseñarlo es lo único que distingue "está saturado" de
 // "algo va mal de verdad".
+// El código puede traer pegado el motivo de que la reserva no funcionara.
+function mensajeConReserva(codigo) {
+  if (!codigo) return null;
+  const [base, motivo] = codigo.split(" · reserva: ");
+  const mensaje = MENSAJES[base];
+  if (!mensaje) return null;
+  return motivo ? `${mensaje} (reserva: ${motivo})` : mensaje;
+}
+
 function mensajeDeFalloDeIa(codigo) {
   if (!codigo || !codigo.startsWith("gemini")) return null;
   return `La IA no ha respondido (${codigo}). Vuelve a intentarlo en un momento.`;
 }
 
 export function mensajeDeErrorDeConsulta(codigo) {
-  return MENSAJES[codigo] || mensajeDeFalloDeIa(codigo) || MENSAJE_GENERICO;
+  return mensajeConReserva(codigo) || mensajeDeFalloDeIa(codigo) || MENSAJE_GENERICO;
 }
 
 function consultasDe(uid) {
@@ -171,6 +180,12 @@ async function turnoDeIa(mensajes, registros, extra) {
       // Gemini manda además el estado HTTP con el que respondió Google: sin
       // eso, un fallo suyo es indistinguible de un problema de red.
       if (datos.estado) codigo = `${datos.error}-${datos.estado}`;
+      // Por qué la reserva no salvó la petición (spec 020). Sin esto, "la IA
+      // está saturada" no distingue que falte la clave de Groq de que Groq
+      // también haya fallado.
+      if (datos.reserva && datos.reserva !== "no-hacia-falta") {
+        codigo = `${codigo} · reserva: ${datos.reserva}`;
+      }
     } catch {
       // Respuesta sin JSON: nos quedamos con el mensaje genérico.
     }
@@ -350,6 +365,12 @@ export async function pedirPlanEspecializado(uid, consultas, tipo, alcance) {
       // Gemini manda además el estado HTTP con el que respondió Google: sin
       // eso, un fallo suyo es indistinguible de un problema de red.
       if (datos.estado) codigo = `${datos.error}-${datos.estado}`;
+      // Por qué la reserva no salvó la petición (spec 020). Sin esto, "la IA
+      // está saturada" no distingue que falte la clave de Groq de que Groq
+      // también haya fallado.
+      if (datos.reserva && datos.reserva !== "no-hacia-falta") {
+        codigo = `${codigo} · reserva: ${datos.reserva}`;
+      }
     } catch {
       // Respuesta sin JSON: nos quedamos con el mensaje genérico.
     }
