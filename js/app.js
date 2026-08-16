@@ -45,6 +45,14 @@ import {
 } from "./pesajes.js";
 
 import {
+  validarReceta,
+  guardarReceta,
+  actualizarReceta,
+  listarRecetas,
+  borrarReceta
+} from "./recetas.js";
+
+import {
   MOMENTOS,
   MOMENTO_POR_DEFECTO,
   etiquetaDeMomento,
@@ -864,6 +872,179 @@ id("form-pesaje").addEventListener("submit", async (evento) => {
   }
 });
 
+// --- Recetas (spec 026) --------------------------------------------------
+//
+// No usa crearLista(): una receta se pliega y se despliega, y no tiene fecha
+// por la que filtrar.
+
+const RECETAS_SIN_DESPLEGAR = 3;
+
+let recetasCargadas = [];
+let recetaAbierta = null;
+let recetaEditando = null;
+let recetasDesplegadas = false;
+
+function pintarRecetas() {
+  const contenedor = id("lista-recetas");
+  const boton = id("btn-desplegar-recetas");
+
+  contenedor.innerHTML = "";
+  id("estado-recetas").textContent = recetasCargadas.length
+    ? ""
+    : "Aún no tienes recetas. Guarda las que cocinas a menudo y podrás montar dietas con ellas.";
+
+  const visibles = recetasDesplegadas
+    ? recetasCargadas
+    : recetasCargadas.slice(0, RECETAS_SIN_DESPLEGAR);
+
+  visibles.forEach((receta) => contenedor.appendChild(tarjetaDeReceta(receta)));
+
+  const hayEscondidas = visibles.length < recetasCargadas.length;
+  boton.classList.toggle("oculta", !hayEscondidas && !recetasDesplegadas);
+  boton.textContent = recetasDesplegadas
+    ? "Ver menos"
+    : `Ver todas (${recetasCargadas.length})`;
+}
+
+function tarjetaDeReceta(receta) {
+  const tarjeta = document.createElement("article");
+  tarjeta.className = "receta";
+
+  const cabecera = botonDeFila("", () => {
+    // Tocar la tarjeta la abre; volver a tocarla la cierra.
+    recetaAbierta = recetaAbierta === receta.id ? null : receta.id;
+    pintarRecetas();
+  });
+  cabecera.className = "receta-cabecera";
+  cabecera.append(
+    celda(receta.nombre, "receta-nombre"),
+    celda(`para ${receta.raciones}`, "registro-detalle")
+  );
+  tarjeta.appendChild(cabecera);
+
+  if (recetaAbierta !== receta.id) return tarjeta;
+
+  const ingredientes = document.createElement("ul");
+  ingredientes.className = "receta-ingredientes";
+  (receta.ingredientes || []).forEach((ingrediente) => {
+    const linea = document.createElement("li");
+    linea.textContent = ingrediente;
+    ingredientes.appendChild(linea);
+  });
+  tarjeta.appendChild(ingredientes);
+
+  if (receta.preparacion) {
+    const preparacion = document.createElement("p");
+    preparacion.className = "receta-preparacion";
+    preparacion.textContent = receta.preparacion;
+    tarjeta.appendChild(preparacion);
+  }
+
+  const acciones = document.createElement("div");
+  acciones.className = "receta-acciones";
+  acciones.append(
+    botonDeFila("Editar", () => editarReceta(receta)),
+    botonDeFila("Borrar", () => borrarLaReceta(receta))
+  );
+  tarjeta.appendChild(acciones);
+
+  return tarjeta;
+}
+
+function abrirFormularioDeReceta(receta) {
+  recetaEditando = receta ? receta.id : null;
+
+  id("receta-nombre").value = receta ? receta.nombre : "";
+  id("receta-raciones").value = receta ? receta.raciones : "";
+  id("receta-ingredientes").value = receta ? (receta.ingredientes || []).join("\n") : "";
+  id("receta-preparacion").value = receta ? receta.preparacion || "" : "";
+
+  id("error-receta").textContent = "";
+  id("form-receta").classList.remove("oculta");
+  id("btn-nueva-receta").classList.add("oculta");
+  id("receta-nombre").focus();
+}
+
+function cerrarFormularioDeReceta() {
+  recetaEditando = null;
+  id("form-receta").classList.add("oculta");
+  id("btn-nueva-receta").classList.remove("oculta");
+  id("error-receta").textContent = "";
+}
+
+function editarReceta(receta) {
+  abrirFormularioDeReceta(receta);
+  id("form-receta").scrollIntoView({ block: "center" });
+}
+
+async function borrarLaReceta(receta) {
+  if (!confirm(`¿Borrar la receta "${receta.nombre}"?`)) return;
+
+  try {
+    await borrarReceta(uidActual, receta.id);
+    if (recetaAbierta === receta.id) recetaAbierta = null;
+    await refrescarRecetas();
+  } catch {
+    id("error-receta").textContent = "No se ha podido borrar. Comprueba tu conexión.";
+  }
+}
+
+async function refrescarRecetas() {
+  try {
+    recetasCargadas = await listarRecetas(uidActual);
+  } catch {
+    recetasCargadas = [];
+    id("estado-recetas").textContent =
+      "No se han podido cargar tus recetas. Comprueba tu conexión.";
+    return;
+  }
+  pintarRecetas();
+}
+
+id("btn-nueva-receta").addEventListener("click", () => abrirFormularioDeReceta(null));
+id("btn-cancelar-receta").addEventListener("click", cerrarFormularioDeReceta);
+
+id("btn-desplegar-recetas").addEventListener("click", () => {
+  recetasDesplegadas = !recetasDesplegadas;
+  pintarRecetas();
+});
+
+id("form-receta").addEventListener("submit", async (evento) => {
+  evento.preventDefault();
+  const error = id("error-receta");
+  error.textContent = "";
+
+  const resultado = validarReceta(
+    id("receta-nombre").value,
+    id("receta-raciones").value,
+    id("receta-ingredientes").value,
+    id("receta-preparacion").value
+  );
+
+  if (resultado.error) {
+    error.textContent = resultado.error;
+    return;
+  }
+
+  const boton = id("btn-guardar-receta");
+  boton.disabled = true;
+
+  try {
+    if (recetaEditando) {
+      await actualizarReceta(uidActual, recetaEditando, resultado);
+    } else {
+      await guardarReceta(uidActual, resultado);
+    }
+    avisarGuardado("guardado-receta");
+    cerrarFormularioDeReceta();
+    await refrescarRecetas();
+  } catch {
+    error.textContent = "No se ha podido guardar. Comprueba tu conexión.";
+  } finally {
+    boton.disabled = false;
+  }
+});
+
 // --- Comidas -------------------------------------------------------------
 
 // "Lo de siempre": las comidas que más repites, para apuntarlas de un toque.
@@ -1574,7 +1755,8 @@ function refrescarTodo() {
     listaComidas.refrescar(),
     listaEjercicios.refrescar(),
     refrescarConsulta(),
-    refrescarFotos()
+    refrescarFotos(),
+    refrescarRecetas()
   ]);
 }
 

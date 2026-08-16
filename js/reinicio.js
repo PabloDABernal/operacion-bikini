@@ -34,6 +34,9 @@ export const TIPOS = [
     colecciones: ["consultas", "planes"]
   },
   { clave: "fotos", etiqueta: "fotos", colecciones: ["fotos"] },
+  // Las recetas no se archivan con la operación (spec 026), así que esta
+  // casilla es la única forma de borrarlas.
+  { clave: "recetas", etiqueta: "recetas", colecciones: ["recetas"] },
   // El histórico va aparte: no es una colección del día a día, sino las
   // operaciones archivadas con todo lo que llevan dentro (spec 019).
   { clave: "operaciones", etiqueta: "operaciones", colecciones: [] }

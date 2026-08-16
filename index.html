@@ -154,6 +154,37 @@
         <p id="guardado-repetir" class="guardado" role="status"></p>
       </div>
 
+      <!-- Recetario (spec 026) -->
+      <h2>Mis recetas</h2>
+      <p id="estado-recetas" class="explicacion"></p>
+
+      <button type="button" id="btn-nueva-receta">Nueva receta</button>
+
+      <form id="form-receta" class="oculta">
+        <label for="receta-nombre">Nombre</label>
+        <input type="text" id="receta-nombre" maxlength="80" placeholder="lentejas con verduras">
+
+        <label for="receta-raciones">Para cuántas personas</label>
+        <input type="text" id="receta-raciones" inputmode="numeric" placeholder="2">
+
+        <label for="receta-ingredientes">Ingredientes (uno por línea)</label>
+        <textarea id="receta-ingredientes" rows="5"
+          placeholder="200 g de lentejas&#10;1 cebolla&#10;2 zanahorias"></textarea>
+
+        <label for="receta-preparacion">Preparación</label>
+        <textarea id="receta-preparacion" rows="4"
+          placeholder="Sofríe la cebolla y la zanahoria…"></textarea>
+
+        <button type="submit" id="btn-guardar-receta">Guardar receta</button>
+        <button type="button" id="btn-cancelar-receta" class="enlace">Cancelar</button>
+      </form>
+
+      <p id="error-receta" class="error" role="alert"></p>
+      <p id="guardado-receta" class="guardado" role="status"></p>
+
+      <div id="lista-recetas"></div>
+      <button type="button" id="btn-desplegar-recetas" class="desplegar oculta"></button>
+
       <!-- Pedir un plan, en su sección (spec 024) -->
       <h2>Hacer dieta</h2>
       <p class="explicacion">

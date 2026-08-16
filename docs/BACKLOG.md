@@ -35,3 +35,6 @@ Ideas surgidas durante la implementación, no implementadas. Una línea cada una
 - Elegir el proveedor de IA desde Ajustes, para poder probar Groq a propósito (la spec 020 solo lo usa como reserva automática).
 - Un tercer proveedor de IA si Gemini y Groq se quedan cortos.
 - Etiquetas de mes encima del calendario de constancia cuando el rango es largo (spec 021).
+- Lista de la compra a partir de las recetas de una semana (spec 026).
+- Escalar los ingredientes de una receta al cambiar las raciones (spec 026).
+- Tocar un mes del mapa de calor para verlo como calendario (spec 025).

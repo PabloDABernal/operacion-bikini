@@ -75,12 +75,13 @@ El usuario probó las specs 011-020 con dos meses de datos, las dio por buenas y
 | 021 | Calendario de constancia a tamaño fijo | Bug visible: con "1 semana" los cuadraditos salen enormes |
 | 022 | Paleta violeta nocturna | Cambio de tokens, no toca estructura |
 | 023 | Un solo interlocutor: fuera "Consejos", todo a "Pasar consulta" | Simplifica antes de repartir lo demás |
-| 024 | "Hoy" con cuatro acciones y las especializadas en su sección | Coloca cada cosa en su sitio |
-| 025 | Recetas: colección propia | Las dietas se apoyan en ellas |
-| 026 | Dietas: semana de menús, generada por IA o montada a mano, con "me lo he comido" | Lo más grande de la tanda |
-| 027 | Tablas de ejercicio guardadas | Hermana de las dietas |
-| 028 | Detalle nutricional automático por IA | Pendiente de la v2 original |
-| 029 | Gamificación: puntos, rachas y emblemas | Pendiente de la v2 original |
+| 024 | Consulta en la barra, Ajustes en el avatar, y cada plan en su sección | Coloca cada cosa en su sitio |
+| 025 | Calendario de constancia legible (calendario en rangos cortos, meses en los largos) | Se coló aquí: el usuario lo vio y no pasaba |
+| 026 | Recetas: colección propia | Las dietas se apoyan en ellas |
+| 027 | Dietas: semana de menús, generada por IA o montada a mano, con "me lo he comido" | Lo más grande de la tanda |
+| 028 | Tablas de ejercicio guardadas | Hermana de las dietas |
+| 029 | Detalle nutricional automático por IA | Pendiente de la v2 original |
+| 030 | Gamificación: puntos, rachas y emblemas | Pendiente de la v2 original |
 
 Decisiones ya tomadas por el usuario para esta tanda:
 

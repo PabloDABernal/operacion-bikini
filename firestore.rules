@@ -54,6 +54,13 @@ service cloud.firestore {
       allow read, write: if autorizado() && request.auth.uid == uid;
     }
 
+    // Recetario del usuario (spec 026). Vive fuera de las operaciones a
+    // propósito: una receta es conocimiento acumulado, no el diario de una
+    // etapa, así que no se archiva al cerrar una operación.
+    match /usuarios/{uid}/recetas/{recetaId} {
+      allow read, write: if autorizado() && request.auth.uid == uid;
+    }
+
     // Operaciones: cada ciclo con principio y fin (spec 018).
     match /usuarios/{uid}/operaciones/{operacionId} {
       allow read, write: if autorizado() && request.auth.uid == uid;
