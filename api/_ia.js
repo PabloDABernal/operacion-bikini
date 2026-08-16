@@ -167,15 +167,25 @@ function aFormatoGroq(cuerpo, modelo) {
   };
 }
 
+// Copiar y pegar una clave en el panel de Vercel se lleva a veces un espacio,
+// un salto de línea o las comillas. Groq responde 401 y parece que la clave
+// esté mal cuando solo está sucia.
+function claveDeGroq() {
+  return String(process.env.GROQ_API_KEY || "")
+    .trim()
+    .replace(/^["']|["']$/g, "");
+}
+
 async function llamarAGroq(cuerpo, etiqueta) {
   let ultimaRespuesta;
+  const clave = claveDeGroq();
 
   for (const modelo of MODELOS_GROQ) {
     ultimaRespuesta = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.GROQ_API_KEY}`
+        Authorization: `Bearer ${clave}`
       },
       body: JSON.stringify(aFormatoGroq(cuerpo, modelo))
     });
@@ -264,6 +274,16 @@ async function generarJson(res, cuerpo, etiqueta) {
           reserva = `http-${deGroq.status}`;
           const detalle = await deGroq.text().catch(() => "(sin cuerpo)");
           console.error(`Groq respondió ${deGroq.status}: ${detalle.slice(0, 300)}`);
+
+          // Un 401 casi siempre es la clave mal pegada. Se registra su forma,
+          // nunca su contenido, para poder descartarlo sin verla.
+          if (deGroq.status === 401) {
+            const clave = claveDeGroq();
+            console.error(
+              `La clave de Groq mide ${clave.length} caracteres y empieza por ` +
+                `"${clave.slice(0, 4)}". Las suyas empiezan por "gsk_".`
+            );
+          }
         }
       } catch (fallo) {
         reserva = "inalcanzable";
