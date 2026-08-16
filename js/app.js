@@ -1480,7 +1480,7 @@ function pintarEspecializadas() {
     contenedor.classList.remove("oculta");
 
     const boton = botonDeFila(`Pedir ${config.etiqueta.toLowerCase()}`, () => {
-      id(`form-${tipo}`).classList.remove("oculta");
+      id(`form-plan-${tipo}`).classList.remove("oculta");
       contenedor.classList.add("oculta");
       id(`instrucciones-${tipo}`).focus();
     });
@@ -1488,7 +1488,7 @@ function pintarEspecializadas() {
     boton.disabled = quedan === 0 || !hayOperacion;
     contenedor.appendChild(boton);
 
-    id(`form-${tipo}`).classList.add("oculta");
+    id(`form-plan-${tipo}`).classList.add("oculta");
     id(`cupo-${tipo}`).textContent = quedan
       ? `Te ${quedan === 1 ? "queda" : "quedan"} ${quedan} de hoy.`
       : `Has pedido tus ${PLANES_POR_DIA} de hoy. Vuelve mañana.`;
@@ -1522,11 +1522,11 @@ function pintarUltimoPlan(tipo) {
 Object.keys(TIPOS_ESPECIALIZADOS).forEach((tipo) => {
   id(`btn-cancelar-${tipo}`).addEventListener("click", () => pintarEspecializadas());
 
-  id(`form-${tipo}`).addEventListener("submit", async (evento) => {
+  id(`form-plan-${tipo}`).addEventListener("submit", async (evento) => {
     evento.preventDefault();
 
-    const error = id(`error-${tipo}`);
-    const estado = id(`estado-${tipo}`);
+    const error = id(`error-plan-${tipo}`);
+    const estado = id(`estado-plan-${tipo}`);
     error.textContent = "";
     estado.textContent = "Pensando…";
     id(`btn-pedir-${tipo}`).disabled = true;

@@ -1156,13 +1156,13 @@ button:disabled {
 
 #cupo-dieta,
 #cupo-ejercicio,
-#estado-dieta,
-#estado-ejercicio {
+#estado-plan-dieta,
+#estado-plan-ejercicio {
   margin: var(--e1) 0 0;
 }
 
-#estado-dieta:empty,
-#estado-ejercicio:empty {
+#estado-plan-dieta:empty,
+#estado-plan-ejercicio:empty {
   display: none;
 }
 
