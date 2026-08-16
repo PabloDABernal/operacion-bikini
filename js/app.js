@@ -1495,6 +1495,30 @@ function pintarEspecializadas() {
   });
 }
 
+// Lo último pedido, aquí mismo. Antes esto te mandaba a Consulta, que es
+// donde viven los planes, y saltar de pantalla al pedir algo desconcierta.
+function pintarUltimoPlan(tipo) {
+  const contenedor = id(`ultimo-${tipo}`);
+  contenedor.innerHTML = "";
+
+  const plan = planesCargados.find((otro) => otro.tipo === tipo);
+  if (!plan) return;
+
+  const tarjeta = document.createElement("article");
+  tarjeta.className = "plan";
+
+  const titulo = document.createElement("p");
+  titulo.className = "consejo-fecha";
+  titulo.textContent = `${etiquetaDePlan(plan)} · ${formatearFechaYHora(plan.creadoEn)}`;
+  tarjeta.appendChild(titulo);
+
+  const texto = document.createElement("p");
+  texto.textContent = tipo === "dieta" ? plan.nutricion : plan.ejercicio;
+  tarjeta.appendChild(texto);
+
+  contenedor.appendChild(tarjeta);
+}
+
 Object.keys(TIPOS_ESPECIALIZADOS).forEach((tipo) => {
   id(`btn-cancelar-${tipo}`).addEventListener("click", () => pintarEspecializadas());
 
@@ -1516,8 +1540,9 @@ Object.keys(TIPOS_ESPECIALIZADOS).forEach((tipo) => {
       );
       id(`instrucciones-${tipo}`).value = "";
       await refrescarConsulta();
-      // El plan aparece en Consulta, que es donde viven todos.
-      abrirPestana("consulta");
+      // Sin saltar de pantalla: te ha traído lo que pediste, no te manda a
+      // otro sitio. El plan se lee desde aquí.
+      pintarUltimoPlan(tipo);
     } catch (fallo) {
       error.textContent = mensajeDeErrorDeConsulta(fallo.codigo);
     } finally {
