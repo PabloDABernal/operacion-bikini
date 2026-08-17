@@ -193,4 +193,51 @@ La colección del catálogo se llama `ejerciciosCatalogo` y **no** `ejercicios`,
 
 ## ✅ Para probar a mano
 
-Pendiente: lo rellena el agente `qa-manual` antes de la prueba.
+En https://operacion-bikini.vercel.app, con la operación en marcha. **Los pasos 16 y 17 borran datos de verdad: van al final a propósito.**
+
+### El catálogo (criterios 1, 2, 3)
+
+1. **Ejercicio** → bloque **Mis ejercicios** → **Nuevo ejercicio**. Nombre `Sentadillas búlgaras`, cómo se hace lo que quieras, material `un banco`. Guardar. Aparece la tarjeta con el nombre y, a la derecha, `un banco`.
+2. Otro más, sin material: `Flexiones`. La tarjeta debe decir **`sin material`**, no un hueco.
+3. Tocas `Sentadillas búlgaras`: se despliega y se ve cómo se hace, con **Editar** y **Borrar**. Vuelves a tocarla: se pliega.
+4. **Editar** en `Flexiones`, cambias el material, guardas. La tarjeta lo refleja. **Borrar** en `Flexiones`: sale `¿Borrar el ejercicio "Flexiones"?`. Aceptas y desaparece.
+
+### La semana a mano (criterios 4, 8, 9, 12)
+
+5. Bloque **Mi tabla**: dice que aún no tienes tabla. Pulsas **Empezar una semana en blanco**. Salen los siete días, de lunes a domingo, cada uno con un `—` y un `+`. **Ningún día debe decir "descanso"**.
+6. `+` en el lunes. Escribes título `Piernas`, minutos `45`, intensidad `media`, y en la caja de ejercicios `Sentadillas búlgaras 3x15`. Guardas.
+7. El lunes enseña `Piernas`, `45 min · Media`, la lista con esa línea, y los botones **Lo he hecho** y **Editar**.
+8. **Editar** en el lunes: el desplegable **"o usa un ejercicio tuyo…"** está ahí. Eliges `Sentadillas búlgaras` y se **añade una línea nueva**, sin borrar la que ya había. Guardas: ahora hay dos líneas.
+
+### Lo que valida (casos límite)
+
+9. **Editar** el lunes, pones minutos `700`, guardas: sale `Los minutos deben estar entre 1 y 600.` y la fila **sigue abierta con lo escrito**. Corriges a `50` y guarda bien.
+10. **Editar** el lunes, **borras el título** y guardas: el lunes vuelve a ser un hueco con `+`.
+
+### Pedírsela a la IA (criterios 5, 6, 13) — y el paso que importa
+
+11. Arriba, **Pedir tabla de ejercicio**. Escribes `el sábado juego al pádel, no me pongas nada`. **Pedir**. Sale `Pensando…` unos segundos.
+12. **Este es el paso que hay que mirar con lupa.** Cuando llegue, comprueba que **al menos un día tiene DOS O MÁS líneas de ejercicio** debajo del título. Si los días salen con título y minutos pero **sin líneas**, o con la lista pegada en una sola línea llena de comillas y corchetes, es el fallo de las listas anidadas: hay que mirar `describirEsquema()` de `api/_ia.js` y `listaDeEjercicios()` de `api/tabla.js`. Comprueba también que el sábado respetó lo que pediste.
+13. Los ejercicios que ha usado aparecen ahora en **Mis ejercicios**, con su explicación y su material. Si ya tenías uno con ese nombre, **no debe estar repetido**.
+14. Si ya tenías tabla, antes de sustituirla te ha preguntado `Ya tienes una tabla. ¿La sustituyo?`.
+
+### "Lo he hecho" (criterios 10, 11)
+
+15. **Lo he hecho** en un día con sesión. Sale `Guardado`. Bajas a **Mis entrenamientos apuntados**: está el registro con el título de la sesión, sus minutos y su intensidad, con fecha de hoy y **sin hora**. En **Hoy**, el resumen lo recoge. Púlsalo dos veces: se apunta dos veces, y es lo esperado.
+
+### Regresiones (esta spec tocó código compartido)
+
+16. **Cupos separados**: bajo el botón de tabla debe decir cuántas te quedan hoy. Pide una dieta en **Comidas** y vuelve: **el contador de tablas no debe haber bajado**, y al revés.
+17. **Nada de tarjetas vacías**: en **Consulta → Mis planes** no puede aparecer ninguna tarjeta sin texto. Ni de las dietas de días pasados ni de las tablas de hoy. Este es el punto que rompería el renombrado de la marca.
+18. **La dieta sigue igual**: en **Comidas**, la semana de menús se ve, se edita y "me lo he comido" sigue apuntando.
+19. **Catálogo vacío**: borra todos los ejercicios de **Mis ejercicios** y edita un día de la tabla. El desplegable **no debe aparecer**; se escribe a mano y guarda igual.
+20. **Ejercicio enlazado borrado**: con un ejercicio del catálogo que esté en la tabla, bórralo. La línea de la tabla **conserva su texto** y no se rompe nada.
+
+### Lo destructivo, al final
+
+21. **Ajustes → Reiniciar datos**. Hay dos casillas parecidas: **`Ejercicios (N)`** (el diario) y **`Catálogo de ejercicios y tabla (N)`** (lo nuevo). Marca **solo la primera**, pulsa borrar, escribe `BORRAR` y confirma. Después: **Mis entrenamientos apuntados** vacío, pero **Mis ejercicios** y **Mi tabla intactos**.
+22. Ahora la segunda casilla, igual. Después: **Mis ejercicios** vacío y **Mi tabla** dice que no tienes tabla.
+
+### Una cosa a decidir mientras pruebas
+
+En el paso 6 escribiste `Sentadillas búlgaras 3x15` a mano y esa línea **se enlazó sola** con el ejercicio del catálogo, porque empieza por su nombre. Eso no estaba en la spec: se añadió al implementar. Si te estorba, se quita y el enlace queda solo en el desplegable.
