@@ -216,9 +216,14 @@ function jsonDeGroq(datos, esquema) {
     return null;
   }
 
-  const claves = (esquema && esquema.required) || [];
-  claves.forEach((clave) => {
-    if (typeof objeto[clave] !== "string") objeto[clave] = "";
+  // Solo se rellenan los campos de TEXTO que falten. Antes se forzaba a cadena
+  // vacía cualquier campo obligatorio que no fuera un string, y eso destrozaba
+  // las respuestas con listas dentro: la dieta de la spec 028 llegaba entera y
+  // se quedaba en nada.
+  const propiedades = (esquema && esquema.properties) || {};
+  ((esquema && esquema.required) || []).forEach((clave) => {
+    const tipo = propiedades[clave] && propiedades[clave].type;
+    if (tipo === "STRING" && typeof objeto[clave] !== "string") objeto[clave] = "";
   });
 
   return objeto;

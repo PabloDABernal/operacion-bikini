@@ -30,6 +30,8 @@ const ESPERA_MAXIMA_MS = 55000;
 const URL_PROXY = "/api/consulta";
 
 const MENSAJES = {
+  "dieta-vacia":
+    "La IA ha respondido, pero la semana venía vacía. Vuelve a intentarlo.",
   "limite-planes":
     "Ya has pedido tus 2 de hoy. Vuelve mañana.",
   tardanza:

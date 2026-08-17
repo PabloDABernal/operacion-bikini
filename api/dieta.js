@@ -98,7 +98,17 @@ function loQuePide(instrucciones) {
 function semanaCompleta(dias) {
   const porNombre = new Map();
 
-  (Array.isArray(dias) ? dias : []).forEach((dia) => {
+  // Algún modelo devuelve la lista como texto JSON en vez de como lista.
+  let lista = dias;
+  if (typeof lista === "string") {
+    try {
+      lista = JSON.parse(lista);
+    } catch {
+      lista = [];
+    }
+  }
+
+  (Array.isArray(lista) ? lista : []).forEach((dia) => {
     const nombre = String(dia.dia || "").trim().toLowerCase();
     porNombre.set(nombre, dia);
   });
@@ -157,8 +167,12 @@ module.exports = async (req, res) => {
     (dia) => dia.desayuno || dia.comida || dia.merienda || dia.cena
   );
   if (!algoDentro) {
-    console.error("La dieta llegó vacía.");
-    return res.status(502).json({ error: "respuesta-ilegible" });
+    // Con el detalle en los logs: sin él, "no ha sabido responder" no dice si
+    // la IA contestó otra cosa o si se perdió por el camino.
+    console.error(
+      `La dieta llegó vacía. Respuesta: ${JSON.stringify(respuesta).slice(0, 400)}`
+    );
+    return res.status(502).json({ error: "dieta-vacia" });
   }
 
   return res.status(200).json({
