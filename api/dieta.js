@@ -93,13 +93,25 @@ function loQuePide(instrucciones) {
   );
 }
 
-// La IA a veces devuelve seis días, o los nombra raro. La semana siempre tiene
-// siete: los que falten se completan en blanco y se ordenan de lunes a domingo.
-function semanaCompleta(dias) {
-  const porNombre = new Map();
+// La IA a veces devuelve seis días, o los nombra a su manera ("Lunes 17",
+// "Miercoles" sin tilde, "Day 1"). Casar por nombre era frágil: bastaba una
+// tilde para que no cuadrara ninguno y la semana saliera entera en blanco.
+//
+// Se usa el ORDEN, que es lo que ningún modelo se salta: el primero es lunes.
+// El nombre solo se mira para reordenar cuando TODOS son reconocibles.
+function normalizar(texto) {
+  return String(texto || "")
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "");
+}
 
-  // Algún modelo devuelve la lista como texto JSON en vez de como lista.
+function semanaCompleta(dias) {
+  // Algún modelo devuelve la lista como texto JSON en vez de como lista, y
+  // algún otro como un objeto con los días de clave.
   let lista = dias;
+
   if (typeof lista === "string") {
     try {
       lista = JSON.parse(lista);
@@ -108,13 +120,24 @@ function semanaCompleta(dias) {
     }
   }
 
-  (Array.isArray(lista) ? lista : []).forEach((dia) => {
-    const nombre = String(dia.dia || "").trim().toLowerCase();
-    porNombre.set(nombre, dia);
+  if (lista && !Array.isArray(lista) && typeof lista === "object") {
+    lista = Object.entries(lista).map(([dia, resto]) => ({ dia, ...resto }));
+  }
+
+  if (!Array.isArray(lista)) lista = [];
+
+  // Si todos los nombres son reconocibles, mandan ellos; si no, manda el orden.
+  const normalizados = DIAS.map(normalizar);
+  const porNombre = new Map();
+  lista.forEach((dia) => {
+    const nombre = normalizar(dia && dia.dia);
+    if (normalizados.includes(nombre)) porNombre.set(nombre, dia);
   });
 
-  return DIAS.map((nombre) => {
-    const dia = porNombre.get(nombre) || {};
+  const porNombreVale = porNombre.size === DIAS.length;
+
+  return DIAS.map((nombre, indice) => {
+    const dia = (porNombreVale ? porNombre.get(normalizar(nombre)) : lista[indice]) || {};
     return {
       dia: nombre,
       desayuno: String(dia.desayuno || ""),
