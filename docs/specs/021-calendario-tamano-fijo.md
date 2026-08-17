@@ -1,6 +1,6 @@
 # 021 — El calendario de constancia, a tamaño fijo
 
-- **Estado:** revisada
+- **Estado:** completada (validada por el usuario el 2026-08-17)
 - **Fecha:** 2026-08-16
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (v2)", pantalla "Hoy" con su calendario de constancia. No cambia el producto: corrige cómo se ve.
 

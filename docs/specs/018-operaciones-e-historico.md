@@ -1,6 +1,6 @@
 # 018 — Operaciones con principio y fin, e histórico
 
-- **Estado:** revisada. Se avisó al usuario de que son ~600 líneas y se le propuso partirla en 018 (operaciones) y 019 (histórico); decidió el 2026-08-15 hacerla entera de una. También se le avisó de que, al mover los documentos de verdad, lo archivado no se podrá editar nunca más.
+- **Estado:** completada (validada por el usuario el 2026-08-17). Se avisó al usuario de que son ~600 líneas y se le propuso partirla en 018 (operaciones) y 019 (histórico); decidió el 2026-08-15 hacerla entera de una. También se le avisó de que, al mover los documentos de verdad, lo archivado no se podrá editar nunca más.
 - **Fecha:** 2026-08-14
 - **Referencia en PRODUCTO.md:** apartado "Ampliación de la v2" — pendiente de añadir el concepto de operación (ver apartado 8).
 

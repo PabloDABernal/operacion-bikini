@@ -1,6 +1,6 @@
 # 024 — Consulta en la barra, Ajustes en el avatar, y cada cosa en su sección
 
-- **Estado:** revisada
+- **Estado:** completada (validada por el usuario el 2026-08-17)
 - **Fecha:** 2026-08-16
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (v3)", puntos "Cada cosa en su sitio" y «"Hoy" con cuatro acciones».
 

@@ -2,7 +2,7 @@
 
 Documento para retomar el trabajo en frío. Se actualiza al terminar cada spec.
 
-**Última actualización:** 12 de agosto de 2026 (spec 007 terminada)
+**Última actualización:** 17 de agosto de 2026 (spec 028 terminada y validada)
 
 ## Dónde estamos
 
@@ -10,7 +10,15 @@ Documento para retomar el trabajo en frío. Se actualiza al terminar cada spec.
 
 **https://operacion-bikini.vercel.app**
 
-La **v2 está empezada**: su alcance se decidió el 11 de agosto (ver `docs/PRODUCTO.md`, apartado "Qué hará (v2)"). Ya están terminadas la spec 006 (ajustes y reinicio) y la 007 (editar registros).
+**Las specs 001 a 028 están todas implementadas, desplegadas y validadas por el usuario.** La app se usa a diario.
+
+La v2 se amplió dos veces sobre la marcha, según el usuario iba probando:
+
+- **v2 original** (11 de agosto): ajustes, gráfica, "Hoy", rediseño, detalle nutricional y gamificación.
+- **Ampliación** (13 de agosto, specs 011-020): salió de usar la app con dos meses de datos sembrados.
+- **v3** (16 de agosto, specs 021-028): salió de usarla otra vez, ya con todo lo anterior encima.
+
+**Quedan tres specs**, las de más abajo: 029, 030 y 031.
 
 ## Specs
 
@@ -43,83 +51,45 @@ La **v2 está empezada**: su alcance se decidió el 11 de agosto (ver `docs/PROD
 | 025 | Calendario de constancia legible | ✅ completada |
 | 026 | Recetario propio | ✅ completada |
 | 027 | Dietas y tablas de lunes a domingo, a medida y con cupo propio | ✅ completada |
+| 028 | Dietas: la semana de menús, guardada y editable | ✅ completada |
 
 ## Qué toca ahora
 
-La v2 se acordó hacerla entera, en este orden (`docs/propuestas/v2-usabilidad-y-gamificacion.md`, apartado 9):
+Quedan **tres specs** para cerrar todo lo hablado. Alcance completo en `docs/PRODUCTO.md`.
 
-**Las specs 011 a 027 están probadas y dadas por buenas por el usuario** (16 de agosto). Tiene más cambios que pedir, pero prefiere juntarlos y decirlos de una vez, así que no están anotados todavía.
-
-El 13 de agosto el usuario probó la app con un mes de datos sembrados y dio una tanda larga de correcciones. De ahí salieron estas siete specs (alcance completo en `docs/PRODUCTO.md`, apartado "Ampliación de la v2"):
-
-| Spec | Qué es |
-|---|---|
-| 011 | Navegación por dispositivo (barra abajo en móvil, arriba en escritorio), "Más" pasa a ser Ajustes, y foto de perfil junto al usuario |
-| 012 | "Hoy" afinada: botón **+** por línea del resumen, accesos directos a Consulta/Consejos/Fotos, fuera "lo de siempre", calendario con rango elegible (por defecto 1 mes) |
-| 013 | Listas cortas en Peso, Comidas y Ejercicio (últimos registros, desplegar o buscar por día) y comidas frecuentes en la pantalla de Comidas |
-| 014 | Hora opcional en pesajes, comidas y ejercicios, propuesta al apuntar y editable |
-| 015 | Peso: gráfica con rango elegible, orden gráfica → pesajes → estadísticas, y sección de estadísticas |
-| 016 | "Iniciar operación bikini": onboarding conversacional que rellena los ajustes y guarda un perfil que la IA usa después |
-| 017 | Consultas especializadas: tabla de ejercicio o dieta detallada, gastando una consulta del día |
-
-Después de esas siete, sigue pendiente lo que ya estaba decidido de la v2: **detalle nutricional por IA** (grupos de alimentos y calorías en rango, una llamada al día) y **gamificación** (puntos, rachas con día de gracia y emblemas).
-
-Ya hechas de la v2: ajustes y reinicio (006), editar registros (007), gráfica de peso (008), rediseño nocturno (009) y pantalla "Hoy" (010).
-
-Decisiones de v2 ya tomadas por el usuario el 11 de agosto:
-
-- Dirección visual: **nocturna deportiva**.
-- **Sin** objetivo compartido entre los dos usuarios: nada de comparar ni clasificar.
-- Calorías **en rango** y además grupos de alimentos.
-- Gamificación con **puntos, rachas y emblemas** (los tres).
-
-## La v3, decidida el 16 de agosto de 2026
-
-El usuario probó las specs 011-020 con dos meses de datos, las dio por buenas y pidió otra tanda. Quiere **probarlo todo junto** al final, así que ninguna se da por completada hasta entonces. Alcance en `docs/PRODUCTO.md`, apartado "Qué hará (v3)".
-
-| Spec | Qué es | Por qué en este orden |
+| Spec | Qué es | Notas para empezar |
 |---|---|---|
-| 021 | Calendario de constancia a tamaño fijo | Bug visible: con "1 semana" los cuadraditos salen enormes |
-| 022 | Paleta violeta nocturna | Cambio de tokens, no toca estructura |
-| 023 | Un solo interlocutor: fuera "Consejos", todo a "Pasar consulta" | Simplifica antes de repartir lo demás |
-| 024 | Consulta en la barra, Ajustes en el avatar, y cada plan en su sección | Coloca cada cosa en su sitio |
-| 025 | Calendario de constancia legible (calendario en rangos cortos, meses en los largos) | Se coló aquí: el usuario lo vio y no pasaba |
-| 026 | Recetas: colección propia | Las dietas se apoyan en ellas |
-| 027 | Dietas y tablas: semana completa, con instrucciones y cupo propio | El usuario lo pidió al ver que gastaban las consultas de la entrevista |
-| 028 | Dietas: semana de menús, generada por IA o montada a mano, con "me lo he comido" | Lo más grande de la tanda |
-| 029 | Tablas de ejercicio guardadas | Hermana de las dietas |
-| 030 | Detalle nutricional automático por IA | Pendiente de la v2 original |
-| 031 | Gamificación: puntos, rachas y emblemas | Pendiente de la v2 original |
+| 029 | **Tablas de ejercicio guardadas**: la semana de entrenamientos, como las dietas | Copia la estructura de la spec 028 (`js/dietas.js`, `api/dieta.js`, el bloque de "Mi dieta" en `js/app.js`). Ya está endurecida contra las manías de la IA: aprovéchala en vez de rehacerla |
+| 030 | **Detalle nutricional automático**: una llamada al día convierte lo apuntado en grupos de alimentos y calorías en rango | Pendiente desde la v2 original. `PRODUCTO.md` prohíbe las calorías exactas: solo rangos |
+| 031 | **Gamificación**: puntos, rachas con día de gracia y emblemas | Pendiente desde la v2 original. Se premia la conducta, nunca los kilos |
 
-Decisiones ya tomadas por el usuario para esta tanda:
+Además, el usuario dijo el 16 de agosto que quiere **rehacer las pantallas de forma más lógica** cuando esto esté cerrado. No hay nada decidido todavía: hay que preguntarle antes de tocar nada.
 
-- Paleta **violeta nocturna** (fondo violeta oscuro, acento violeta, cian de apoyo).
-- Las dietas se pueden **generar con IA y montar a mano**, las dos cosas desde el principio.
-- Una receta guarda **nombre, raciones, ingredientes y preparación**. Sin datos nutricionales de momento.
-- En la dieta de hoy, **un toque apunta la comida**.
+## Deuda conocida
+
+- **`sembrar.html` y `js/sembrar.js` siguen en el repo.** Son la herramienta temporal para rellenar datos de prueba. Hay que borrarlos cuando dejen de hacer falta.
+- **La reserva de Groq daba 401 el 16 de agosto** y quedó sin explicar (ver más abajo). El 17 la dieta salió adelante, así que o se arregló sola o respondió Gemini. **Sin confirmar.**
+- Las ideas sueltas siguen en `docs/BACKLOG.md`.
 
 ## Cosas que hay que saber antes de tocar nada
 
 - **Cómo se prueba**: el usuario prueba SIEMPRE en producción (https://operacion-bikini.vercel.app). Para que pueda probar algo hay que hacer commit y `git push`: Vercel despliega solo desde `main`. Nada de servidores locales.
 - **Reglas de Firestore**: se publican con `npx --yes firebase-tools deploy --only firestore:rules`. Ya no se copian a mano en la consola. Hacerlo SIEMPRE antes de pedirle al usuario que pruebe.
 - **Modelo de IA**: con la clave del proyecto solo responde `gemini-flash-latest`; `gemini-2.5-flash` da 404. Y la API rechaza con 400 tanto `thinkingConfig` como `propertyOrdering`. Está documentado en `api/_ia.js`.
+- **A Groq hay que describirle la forma de la respuesta, no solo las claves** (spec 028, 17 de agosto): Groq no acepta esquemas, así que `api/_ia.js` se los describe por escrito. Esa descripción decía que todas las claves eran "de tipo texto", lo cual era cierto para la conversación pero mentira para la dieta, que lleva listas dentro: Groq devolvía los días como texto plano y la semana llegaba vacía. Costó cuatro intentos porque los tres primeros arreglaron síntomas (la coerción de tipos, los nombres de los días, las mayúsculas) sin mirar qué se le estaba pidiendo. **Si una respuesta con listas llega vacía, lo primero es mirar `describirEsquema()`.**
+- **No fiarse de la forma de lo que devuelve la IA** (specs 004, 028): nombres de día con fecha pegada, sin tildes, en inglés, claves en mayúscula, listas como texto JSON. `api/dieta.js` los normaliza todos y empareja los días **por orden**, no por nombre. Cualquier spec nueva que pida estructuras a la IA debería copiar ese apaño en vez de confiar.
 - **Esquemas de respuesta de Gemini**: todos los campos deben ir como `required`, aunque no apliquen en cada turno (los vacíos, como cadena vacía). Con campos opcionales, el modelo se los salta y llegan planes sin rutina.
-- **La reserva de Groq (spec 020) todavía no ha llegado a funcionar**: cuando Gemini se satura y se pasa a Groq, este responde **401** desde Vercel. Diagnóstico del 16 de agosto, con esto YA DESCARTADO:
-  - La clave de Vercel es la correcta: su huella SHA-256 coincide con la clave buena, carácter por carácter.
-  - Esa clave funciona: la misma petición (mismo modelo, mismo cuerpo, mismo encabezado) devuelve 200 desde fuera de Vercel.
-  - El código que corre es el bueno: manda la clave limpia, a la URL correcta, con `Authorization: Bearer`.
-  - Los tres modelos de `MODELOS_GROQ` existen y admiten JSON (comprobado contra `/openai/v1/models`).
-  
-  **Lo único que queda por mirar** es la línea `Groq respondió 401: {...}` en los logs de Vercel: ese mensaje es de Groq y dice el motivo real. Sin él no se puede avanzar. Mientras tanto la app funciona con Gemini y, si Groq falla, se comporta igual que antes de la spec 020.
+- **La reserva de Groq dio 401 el 16 de agosto y nunca se explicó del todo.** Quedó descartado: la clave de Vercel es la correcta (huella SHA-256 comprobada contra la buena), esa clave devuelve 200 desde fuera de Vercel con la misma petición, el código manda bien el encabezado, y los tres modelos de `MODELOS_GROQ` existen. El 17 la dieta salió adelante, así que o se arregló solo o quien respondió fue Gemini: **sin confirmar**. Si vuelve a fallar, lo único que falta por mirar es la línea `Groq respondió 401: {...}` en los logs de Vercel, que trae el motivo que da Groq. El mensaje de pantalla ya dice por qué falló la reserva (`sin-clave`, `http-NNN`, `json-ilegible`, `inalcanzable`).
 - **Variables de entorno en Vercel**: `GEMINI_API_KEY`, `GROQ_API_KEY` (reserva de IA, spec 020) y las tres de Cloudinary. Sin la de Groq la app funciona, pero se queda sin red de seguridad cuando Gemini falla.
-- **Gemini devuelve 503 cuando está saturado**: no es un fallo del proyecto, es Google diciendo que el modelo está sobrecargado. Pasó el 15 de agosto y tumbó a la vez consejo, consulta y planes especializados. Desde entonces `api/_ia.js` reintenta tres veces (2 s, 4 s, 6 s) y, si sigue, la app dice que la IA está saturada en vez de un "no se ha podido" que no explica nada. Antes de buscar un bug propio, comprobar el código que sale en pantalla.
+- **Gemini devuelve 503 cuando está saturado**: no es un fallo del proyecto, es Google diciendo que el modelo está sobrecargado. Pasó el 15 de agosto y tumbó a la vez consejo, consulta y planes. La respuesta fue la spec 020: cuando Gemini responde 429, 503 o 5xx, la misma petición se manda a Groq. Los reintentos que hubo un día se quitaron: preguntarle otra vez a quien acaba de decir que está saturado aporta menos que preguntarle a otro. Antes de buscar un bug propio, mirar el código que sale en pantalla.
 - **Cuota gratuita de Gemini**: se agota depurando a base de despliegues. Pensar antes de probar en producción.
 - **Todo está en Vercel**: web y funciones, mismo dominio. GitHub Pages se descartó y está desactivado.
 - **La lista blanca de emails vive en tres sitios**: `js/firebase-config.js`, `firestore.rules` y `api/_auth.js`. Al añadir a alguien hay que tocar los tres.
-- **Los cupos diarios** (5 consejos, 2 consultas) se cuentan sobre los documentos guardados, así que borrar datos los reinicia. Es conocido y aceptado.
+- **Los cupos diarios**, tras las specs 023 y 027: **20 mensajes** de conversación, **2 consultas** (la entrevista que abre una operación), **2 dietas** y **2 tablas**. Los de la IA se cuentan sobre los documentos guardados —planes o mensajes del hilo—, así que borrar datos los reinicia. Es conocido y aceptado.
 
 ## Pendiente de decidir por el usuario
 
-- `PRODUCTO.md` llama "collage de evolución" a lo que es una cuadrícula de miniaturas. O se cambia la palabra, o se hace el collage de verdad en v2.
+- `PRODUCTO.md` llama "collage de evolución" a lo que es una cuadrícula de miniaturas. O se cambia la palabra, o se hace el collage de verdad.
+- **Rehacer las pantallas de forma más lógica**: el usuario lo pidió el 16 de agosto, sin concretar. Preguntarle qué tiene en mente antes de tocar nada.
 
 El resto de ideas sueltas, en `docs/BACKLOG.md`.

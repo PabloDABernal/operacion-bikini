@@ -1,6 +1,6 @@
 # 020 — Proveedor de IA de reserva (Groq)
 
-- **Estado:** revisada
+- **Estado:** completada (validada por el usuario el 2026-08-17)
 - **Fecha:** 2026-08-16
 - **Referencia en PRODUCTO.md / ARQUITECTURA.md:** ambos dicen hoy que la IA es Google Gemini. Se amplían para reflejar que hay un segundo proveedor de reserva (apartado 8).
 

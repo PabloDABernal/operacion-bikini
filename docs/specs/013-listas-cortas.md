@@ -1,6 +1,6 @@
 # 013 — Listas cortas y comidas frecuentes en Comidas
 
-- **Estado:** revisada
+- **Estado:** completada (validada por el usuario el 2026-08-17)
 - **Fecha:** 2026-08-13
 - **Referencia en PRODUCTO.md:** apartado "Ampliación de la v2", puntos "Listas cortas" y "Comidas frecuentes en su sitio".
 

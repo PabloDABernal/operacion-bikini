@@ -1,6 +1,6 @@
 # 011 — Navegación por dispositivo y foto de perfil
 
-- **Estado:** revisada
+- **Estado:** completada (validada por el usuario el 2026-08-17)
 - **Fecha:** 2026-08-13
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (ampliación de la v2, decidida el 13 de agosto de 2026)", puntos "Navegación por dispositivo" y "Perfil con foto".
 

@@ -1,6 +1,6 @@
 # 019 — Borrar el histórico de operaciones
 
-- **Estado:** revisada
+- **Estado:** completada (validada por el usuario el 2026-08-17)
 - **Fecha:** 2026-08-15
 - **Referencia en PRODUCTO.md:** apartado "Ampliación de la v2", punto "Operaciones con principio y fin" — se amplía para decir que el histórico también se puede borrar (ver apartado 8).
 

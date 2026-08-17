@@ -1,6 +1,6 @@
 # 025 — Un calendario de constancia que se entienda
 
-- **Estado:** revisada
+- **Estado:** completada (validada por el usuario el 2026-08-17)
 - **Fecha:** 2026-08-16
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (v2)", calendario de constancia de la pantalla "Hoy".
 

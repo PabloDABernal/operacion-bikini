@@ -1,6 +1,6 @@
 # 023 — Un solo interlocutor: fuera "Consejos", todo a "Pasar consulta"
 
-- **Estado:** revisada
+- **Estado:** completada (validada por el usuario el 2026-08-17)
 - **Fecha:** 2026-08-16
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (v3)", punto "Un solo interlocutor".
 

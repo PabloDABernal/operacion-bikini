@@ -1,6 +1,6 @@
 # 027 — Dietas y tablas: semana completa, con instrucciones y cupo propio
 
-- **Estado:** revisada
+- **Estado:** completada (validada por el usuario el 2026-08-17)
 - **Fecha:** 2026-08-16
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (v3)", punto "Cada cosa en su sitio". Corrige lo que la spec 017 dejó a medias.
 

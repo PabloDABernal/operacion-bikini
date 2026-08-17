@@ -1,6 +1,6 @@
 # 012 — "Hoy" afinada: resumen con +, accesos directos y calendario con rango
 
-- **Estado:** revisada
+- **Estado:** completada (validada por el usuario el 2026-08-17)
 - **Fecha:** 2026-08-13
 - **Referencia en PRODUCTO.md:** apartado "Ampliación de la v2", puntos «"Hoy" como centro de la app», «Calendario de constancia con rango elegible» y «Nombre de pila».
 

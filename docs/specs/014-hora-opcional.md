@@ -1,6 +1,6 @@
 # 014 — Hora opcional en los registros
 
-- **Estado:** revisada
+- **Estado:** completada (validada por el usuario el 2026-08-17)
 - **Fecha:** 2026-08-13
 - **Referencia en PRODUCTO.md:** apartado "Ampliación de la v2", punto "Hora opcional en los registros".
 
