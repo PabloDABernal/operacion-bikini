@@ -2,7 +2,7 @@
 
 Documento para retomar el trabajo en frío. Se actualiza al terminar cada spec.
 
-**Última actualización:** 17 de agosto de 2026 (spec 028 terminada y validada)
+**Última actualización:** 17 de agosto de 2026 (spec 029 terminada y validada)
 
 ## Dónde estamos
 
@@ -10,7 +10,7 @@ Documento para retomar el trabajo en frío. Se actualiza al terminar cada spec.
 
 **https://operacion-bikini.vercel.app**
 
-**Las specs 001 a 028 están todas implementadas, desplegadas y validadas por el usuario.** La app se usa a diario.
+**Las specs 001 a 029 están todas implementadas, desplegadas y validadas por el usuario.** La app se usa a diario.
 
 La v2 se amplió dos veces sobre la marcha, según el usuario iba probando:
 
@@ -18,7 +18,7 @@ La v2 se amplió dos veces sobre la marcha, según el usuario iba probando:
 - **Ampliación** (13 de agosto, specs 011-020): salió de usar la app con dos meses de datos sembrados.
 - **v3** (16 de agosto, specs 021-028): salió de usarla otra vez, ya con todo lo anterior encima.
 
-**Quedan tres specs**, las de más abajo: 029, 030 y 031.
+**Quedan dos specs**, las de más abajo: 030 y 031.
 
 ## Specs
 
@@ -52,14 +52,14 @@ La v2 se amplió dos veces sobre la marcha, según el usuario iba probando:
 | 026 | Recetario propio | ✅ completada |
 | 027 | Dietas y tablas de lunes a domingo, a medida y con cupo propio | ✅ completada |
 | 028 | Dietas: la semana de menús, guardada y editable | ✅ completada |
+| 029 | Ejercicios y tablas: la semana de entrenamientos, guardada y editable | ✅ completada |
 
 ## Qué toca ahora
 
-Quedan **tres specs** para cerrar todo lo hablado. Alcance completo en `docs/PRODUCTO.md`.
+Quedan **dos specs** para cerrar todo lo hablado. Alcance completo en `docs/PRODUCTO.md`.
 
 | Spec | Qué es | Notas para empezar |
 |---|---|---|
-| 029 | **Tablas de ejercicio guardadas**: la semana de entrenamientos, como las dietas | Copia la estructura de la spec 028 (`js/dietas.js`, `api/dieta.js`, el bloque de "Mi dieta" en `js/app.js`). Ya está endurecida contra las manías de la IA: aprovéchala en vez de rehacerla |
 | 030 | **Detalle nutricional automático**: una llamada al día convierte lo apuntado en grupos de alimentos y calorías en rango | Pendiente desde la v2 original. `PRODUCTO.md` prohíbe las calorías exactas: solo rangos |
 | 031 | **Gamificación**: puntos, rachas con día de gracia y emblemas | Pendiente desde la v2 original. Se premia la conducta, nunca los kilos |
 
@@ -67,6 +67,7 @@ Además, el usuario dijo el 16 de agosto que quiere **rehacer las pantallas de f
 
 ## Deuda conocida
 
+- **`pedirPlanEspecializado()` (`js/consulta.js`) y `api/plan.js` se quedaron sin usar en la spec 029**: los dos planes que llegaban como texto —la dieta y la tabla— ya son semanas estructuradas. No se borraron: arrastrar una función serverless entera no era decisión de la spec. Está en `docs/BACKLOG.md`.
 - **`sembrar.html` y `js/sembrar.js` siguen en el repo.** Son la herramienta temporal para rellenar datos de prueba. Hay que borrarlos cuando dejen de hacer falta.
 - **La reserva de Groq daba 401 el 16 de agosto** y quedó sin explicar (ver más abajo). El 17 la dieta salió adelante, así que o se arregló sola o respondió Gemini. **Sin confirmar.**
 - Las ideas sueltas siguen en `docs/BACKLOG.md`.
@@ -77,6 +78,8 @@ Además, el usuario dijo el 16 de agosto que quiere **rehacer las pantallas de f
 - **Reglas de Firestore**: se publican con `npx --yes firebase-tools deploy --only firestore:rules`. Ya no se copian a mano en la consola. Hacerlo SIEMPRE antes de pedirle al usuario que pruebe.
 - **Modelo de IA**: con la clave del proyecto solo responde `gemini-flash-latest`; `gemini-2.5-flash` da 404. Y la API rechaza con 400 tanto `thinkingConfig` como `propertyOrdering`. Está documentado en `api/_ia.js`.
 - **A Groq hay que describirle la forma de la respuesta, no solo las claves** (spec 028, 17 de agosto): Groq no acepta esquemas, así que `api/_ia.js` se los describe por escrito. Esa descripción decía que todas las claves eran "de tipo texto", lo cual era cierto para la conversación pero mentira para la dieta, que lleva listas dentro: Groq devolvía los días como texto plano y la semana llegaba vacía. Costó cuatro intentos porque los tres primeros arreglaron síntomas (la coerción de tipos, los nombres de los días, las mayúsculas) sin mirar qué se le estaba pidiendo. **Si una respuesta con listas llega vacía, lo primero es mirar `describirEsquema()`.**
+- **Las listas dentro de listas ya están probadas** (spec 029): `api/tabla.js` pide días que llevan dentro su lista de ejercicios, y es el único esquema del proyecto con ese anidamiento. `describirEsquema()` de `api/_ia.js` lo describe sin tocarlo, porque es recursivo desde la 028. Si hace falta otro nivel más, ese es el sitio.
+- **Las colecciones del plan y del diario se llaman parecido y no lo son**: `ejerciciosCatalogo` es lo que sabes hacer y `ejercicios` es lo que has hecho. Lo mismo con `tablas`/`ejercicios` y `dietas`/`comidas`. En `js/reinicio.js` van en casillas separadas y la etiqueta de la nueva evita a propósito la palabra suelta "ejercicios": equivocarse ahí borra el diario.
 - **No fiarse de la forma de lo que devuelve la IA** (specs 004, 028): nombres de día con fecha pegada, sin tildes, en inglés, claves en mayúscula, listas como texto JSON. `api/dieta.js` los normaliza todos y empareja los días **por orden**, no por nombre. Cualquier spec nueva que pida estructuras a la IA debería copiar ese apaño en vez de confiar.
 - **Esquemas de respuesta de Gemini**: todos los campos deben ir como `required`, aunque no apliquen en cada turno (los vacíos, como cadena vacía). Con campos opcionales, el modelo se los salta y llegan planes sin rutina.
 - **La reserva de Groq dio 401 el 16 de agosto y nunca se explicó del todo.** Quedó descartado: la clave de Vercel es la correcta (huella SHA-256 comprobada contra la buena), esa clave devuelve 200 desde fuera de Vercel con la misma petición, el código manda bien el encabezado, y los tres modelos de `MODELOS_GROQ` existen. El 17 la dieta salió adelante, así que o se arregló solo o quien respondió fue Gemini: **sin confirmar**. Si vuelve a fallar, lo único que falta por mirar es la línea `Groq respondió 401: {...}` en los logs de Vercel, que trae el motivo que da Groq. El mensaje de pantalla ya dice por qué falló la reserva (`sin-clave`, `http-NNN`, `json-ilegible`, `inalcanzable`).

@@ -1,6 +1,6 @@
 # 029 — Ejercicios y tablas: la semana de entrenamientos, guardada y editable
 
-- **Estado:** revisada (agente `revisor-specs`, 2026-08-17; los dos bloqueantes que encontró están resueltos)
+- **Estado:** completada (validada por el usuario el 2026-08-17)
 - **Fecha:** 2026-08-17
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (v3)", puntos "Ejercicios" y "Tablas de ejercicio" (ampliados el 2026-08-17 antes de escribir esta spec).
 
@@ -183,7 +183,7 @@ La colección del catálogo se llama `ejerciciosCatalogo` y **no** `ejercicios`,
 - **La marca de cupo se generaliza a `esPlanSemanal`** → decisión del usuario el 2026-08-17. Dos flags con el mismo significado (`esDietaSemanal` + `esTablaSemanal`) obligarían a mirar los dos para siempre. Los documentos viejos no se migran: el filtro reconoce ambos nombres.
 - **La casilla de reinicio se llama "catálogo de ejercicios y tabla"** → decisión del usuario el 2026-08-17. No comparte la palabra suelta "ejercicios" con la casilla del diario, y equivocarse ahí borra datos.
 - **Los minutos se validan a 1–600 al editar a mano** → mismos límites que `validarEjercicio`. Si no, "Lo he hecho" mandaría minutos inválidos a un registro que sí valida.
-- **Una línea escrita a mano se enlaza sola si empieza por el nombre de un ejercicio del catálogo** → añadido durante la implementación, no estaba en la spec. Escribir "Sentadillas 4x12" y tener que abrir además el desplegable para enlazarlo sería trabajo doble. **Pendiente de que el usuario lo confirme al probar**: si molesta, se quita `enlazarConElCatalogo()` y el enlace queda solo en el desplegable.
+- **Una línea escrita a mano se enlaza sola si empieza por el nombre de un ejercicio del catálogo** → añadido durante la implementación, no estaba en la spec. Escribir "Sentadillas 4x12" y tener que abrir además el desplegable para enlazarlo sería trabajo doble. **Confirmado por el usuario al validar la spec el 2026-08-17**: se queda.
 
 ## 9. Fuera de spec: ideas apuntadas
 
