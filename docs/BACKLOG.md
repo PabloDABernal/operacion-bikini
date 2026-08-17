@@ -41,3 +41,7 @@ Ideas surgidas durante la implementación, no implementadas. Una línea cada una
 - Recordar las últimas instrucciones al pedir una dieta o una tabla, para no reescribirlas (spec 027).
 - Guardar varias dietas y poder recuperar una anterior (spec 028: solo hay una activa).
 - Lista de la compra de la semana a partir de la dieta (spec 028).
+- Guardar varias tablas de ejercicio y poder recuperar una anterior (spec 029: solo hay una activa).
+- Registrar los pesos levantados y ver la progresión de cargas (spec 029).
+- Marcar ejercicios sueltos dentro de una sesión, en vez de la sesión entera (spec 029).
+- `pedirPlanEspecializado()` (`js/consulta.js`) y `api/plan.js` se quedaron sin usar en la spec 029: los dos planes que quedaban en texto —la dieta y la tabla— pasaron a semana estructurada. Borrarlos cuando se confirme que ningún plan antiguo los necesita.

@@ -1283,8 +1283,36 @@ button:disabled {
   color: var(--apoyo);
 }
 
-#aviso-dieta:empty {
+#aviso-dieta:empty,
+#aviso-tabla:empty {
   display: none;
+}
+
+/* La tabla de ejercicio (spec 029) ---------------------------------------
+   Reutiliza la rejilla de la dieta: un día es un bloque y su sesión una fila.
+   Lo que cambia es que la sesión lleva debajo su lista de ejercicios, y que
+   al editarla hay un textarea, que la dieta no tenía. */
+
+.dia-dieta .receta-ingredientes {
+  margin-top: var(--e2);
+}
+
+/* Sin ejercicios sueltos, la lista vacía dejaba un hueco bajo la sesión. */
+.dia-dieta .receta-ingredientes:empty {
+  display: none;
+}
+
+.comida-dieta.fila-edicion textarea {
+  margin: 0;
+  flex: 1 1 100%;
+  min-width: 0;
+}
+
+/* Los minutos son dos dígitos: darles el mismo ancho que al título dejaba la
+   fila desequilibrada. */
+.comida-dieta.fila-edicion .edicion-minutos {
+  flex: 0 0 5rem;
+  width: 5rem;
 }
 
 /* Cuando una acción es LA acción de la pantalla, se ve como tal. */

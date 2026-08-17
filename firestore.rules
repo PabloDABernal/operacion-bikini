@@ -67,6 +67,19 @@ service cloud.firestore {
       allow read, write: if autorizado() && request.auth.uid == uid;
     }
 
+    // Catálogo de ejercicios (spec 029). OJO: no es la colección "ejercicios",
+    // que son los registros de actividad hecha. Esto es el plan; aquello, el
+    // diario. Vive fuera de las operaciones, como el recetario.
+    match /usuarios/{uid}/ejerciciosCatalogo/{ejercicioId} {
+      allow read, write: if autorizado() && request.auth.uid == uid;
+    }
+
+    // Tablas: la semana de entrenamientos (spec 029). Como las dietas, viven
+    // fuera de las operaciones: una tabla que funcionó sigue sirviendo.
+    match /usuarios/{uid}/tablas/{tablaId} {
+      allow read, write: if autorizado() && request.auth.uid == uid;
+    }
+
     // Operaciones: cada ciclo con principio y fin (spec 018).
     match /usuarios/{uid}/operaciones/{operacionId} {
       allow read, write: if autorizado() && request.auth.uid == uid;

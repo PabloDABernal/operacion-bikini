@@ -9,6 +9,9 @@
     },
     "api/dieta.js": {
       "maxDuration": 60
+    },
+    "api/tabla.js": {
+      "maxDuration": 60
     }
   }
 }

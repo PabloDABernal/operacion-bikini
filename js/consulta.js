@@ -346,15 +346,19 @@ export function quedanPlanesHoy(planes, tipo) {
   return Math.max(0, PLANES_POR_DIA - pedidosHoy(planes, tipo));
 }
 
-// La dieta estructurada (spec 028) se guarda por su cuenta, pero el cupo se
-// cuenta sobre los planes: deja aquí su marca para que cuente igual.
+// La dieta (spec 028) y la tabla (spec 029) se guardan por su cuenta, pero el
+// cupo se cuenta sobre los planes: dejan aquí su marca para que cuente igual.
+//
+// El campo se llamaba esDietaSemanal hasta la spec 029, cuando la tabla pasó a
+// dejar la misma marca. Las marcas ya guardadas conservan el nombre viejo y
+// pintarPlanes() reconoce los dos: migrarlas no aportaba nada.
 export function guardarMarcaDePlan(uid, tipo, instrucciones) {
   return addDoc(planesDe(uid), {
     nutricion: "",
     ejercicio: "",
     tipo,
     instrucciones: instrucciones || "",
-    esDietaSemanal: true,
+    esPlanSemanal: true,
     creadoEn: serverTimestamp()
   });
 }

@@ -57,7 +57,8 @@ Sale de usar la app con dos meses de datos. Cambia la estructura, no solo el asp
 - **"Hoy" con cuatro acciones**: Pasar consulta · Hacer dieta · Tabla de ejercicios · Foto del día.
 - **Recetas**: colección propia. Cada receta tiene nombre, para cuántas personas, ingredientes y preparación. Se guardan las que propone la IA y se pueden escribir a mano, editar y borrar.
 - **Dietas**: una dieta es una semana de menús (días × comidas). La IA puede generarla entera con sus recetas, y también se puede montar a mano colocando recetas propias. En la dieta de hoy, cada comida tiene un botón para decir **"me lo he comido"**, que la apunta sin escribir nada.
-- **Tablas de ejercicio**: lo mismo para entrenar. Se guardan, se ven por días y se marca lo hecho.
+- **Ejercicios**: catálogo propio. Cada ejercicio tiene nombre, cómo se hace y qué material necesita. Se guardan los que propone la IA y se pueden escribir a mano, editar y borrar.
+- **Tablas de ejercicio**: una tabla es una semana de entrenamientos (días × sesión). La IA puede generarla entera con sus ejercicios, y también se puede montar a mano colocando ejercicios propios. En la tabla de hoy, la sesión tiene un botón para decir **"lo he hecho"**, que la apunta como un solo ejercicio sin escribir nada.
 - **Detalle nutricional automático** y **gamificación** (puntos, rachas y emblemas): lo que quedaba pendiente de la v2.
 
 ## Qué explícitamente NO hace
@@ -83,6 +84,7 @@ Sale de usar la app con dos meses de datos. Cambia la estructura, no solo el asp
 - **Receta**: nombre, raciones, ingredientes y preparación. Se puede cocinar leyéndola y la IA puede reutilizarla.
 - **Dieta**: una semana de menús, día a día y comida a comida, hecha de recetas.
 - **Tabla de ejercicio**: una semana de entrenamientos, día a día, con sus series y duraciones.
+- **Ejercicio del catálogo**: nombre, cómo se hace y material. Distinto de un *ejercicio* apuntado, que es un registro de actividad hecha.
 - **Emblema**: reconocimiento por un hito de constancia (primera semana, primer mes, retomar tras un parón).
 
 ## Roadmap por fases

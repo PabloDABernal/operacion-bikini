@@ -41,6 +41,14 @@ export const TIPOS = [
     etiqueta: "recetas y dietas",
     colecciones: ["recetas", "dietas"]
   },
+  // Lo mismo para entrenar (spec 029). La etiqueta evita a propósito la
+  // palabra suelta "ejercicios", que es la casilla de arriba y borra el
+  // diario: equivocarse aquí borra datos.
+  {
+    clave: "catalogoEjercicios",
+    etiqueta: "catálogo de ejercicios y tabla",
+    colecciones: ["ejerciciosCatalogo", "tablas"]
+  },
   // El histórico va aparte: no es una colección del día a día, sino las
   // operaciones archivadas con todo lo que llevan dentro (spec 019).
   { clave: "operaciones", etiqueta: "operaciones", colecciones: [] }

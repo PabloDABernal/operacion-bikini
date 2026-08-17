@@ -260,6 +260,46 @@
       <p id="error-ejercicio" class="error" role="alert"></p>
       <p id="guardado-ejercicio" class="guardado" role="status"></p>
 
+      <!-- Catálogo de ejercicios (spec 029) -->
+      <h2>Mis ejercicios</h2>
+      <p id="estado-catalogo" class="explicacion"></p>
+
+      <button type="button" id="btn-nuevo-ejercicio-catalogo">Nuevo ejercicio</button>
+
+      <form id="form-ejercicio-catalogo" class="oculta">
+        <label for="catalogo-nombre">Nombre</label>
+        <input type="text" id="catalogo-nombre" maxlength="80" placeholder="sentadillas búlgaras">
+
+        <label for="catalogo-como">Cómo se hace</label>
+        <textarea id="catalogo-como" rows="4"
+          placeholder="De pie, con un pie apoyado atrás en un banco. Bajas hasta que el muslo quede paralelo al suelo."></textarea>
+
+        <label for="catalogo-material">Material</label>
+        <input type="text" id="catalogo-material" maxlength="200" placeholder="un banco o una silla">
+
+        <button type="submit" id="btn-guardar-ejercicio-catalogo">Guardar ejercicio</button>
+        <button type="button" id="btn-cancelar-ejercicio-catalogo" class="enlace">Cancelar</button>
+      </form>
+
+      <p id="error-catalogo" class="error" role="alert"></p>
+      <p id="guardado-catalogo" class="guardado" role="status"></p>
+
+      <div id="lista-catalogo"></div>
+      <button type="button" id="btn-desplegar-catalogo" class="desplegar oculta"></button>
+
+      <!-- La semana de entrenamientos (spec 029) -->
+      <h2>Mi tabla</h2>
+      <p id="estado-tabla" class="explicacion"></p>
+
+      <!-- Montarla a mano no gasta cupo de IA: con el catálogo basta. Va
+           arriba porque cuando no hay tabla es la acción que toca. -->
+      <button type="button" id="btn-semana-blanco-tabla">Empezar una semana en blanco</button>
+
+      <div id="semana-tabla"></div>
+      <p id="aviso-tabla" class="explicacion"></p>
+      <p id="error-semana-tabla" class="error" role="alert"></p>
+      <p id="guardado-tabla" class="guardado" role="status"></p>
+
       <!-- Pedir un plan, en su sección (spec 024) -->
       <h2>Tabla de ejercicios</h2>
       <p class="explicacion">
@@ -279,9 +319,9 @@
       <p id="cupo-ejercicio" class="explicacion"></p>
       <p id="estado-plan-ejercicio" class="explicacion"></p>
       <p id="error-plan-ejercicio" class="error" role="alert"></p>
-      <div id="ultimo-ejercicio"></div>
-
-      <h2>Mis ejercicios</h2>
+      <!-- "Mis ejercicios" pasó a ser el catálogo (spec 029), así que el
+           diario se llama por lo que es: lo que has entrenado. -->
+      <h2>Mis entrenamientos apuntados</h2>
       <div class="filtro-dia">
         <label for="filtro-ejercicios">Ver un día</label>
         <input type="date" id="filtro-ejercicios">

@@ -58,6 +58,27 @@ import {
 } from "./dietas.js";
 
 import {
+  validarEjercicioCatalogo,
+  guardarEjercicioCatalogo,
+  actualizarEjercicioCatalogo,
+  listarEjerciciosCatalogo,
+  borrarEjercicioCatalogo
+} from "./ejercicios-catalogo.js";
+
+// Con alias: la dieta ya ocupa esos nombres y son funciones distintas.
+import {
+  semanaEnBlanco as semanaEnBlancoTabla,
+  validarSesion,
+  leerTablaActiva,
+  guardarTabla,
+  actualizarTabla,
+  borrarTabla,
+  guardarEjerciciosPropuestos,
+  semanaDesdeLaIa as semanaDesdeLaIaTabla,
+  pedirTablaALaIa
+} from "./tablas.js";
+
+import {
   validarReceta,
   guardarReceta,
   actualizarReceta,
@@ -108,7 +129,6 @@ import {
   abandonarConsulta,
   TIPOS_ESPECIALIZADOS,
   etiquetaDePlan,
-  pedirPlanEspecializado,
   guardarMarcaDePlan,
   quedanPlanesHoy,
   PLANES_POR_DIA,
@@ -1317,6 +1337,499 @@ async function refrescarDieta() {
   pintarDieta();
 }
 
+// --- Catálogo de ejercicios (spec 029) -----------------------------------
+//
+// Hermano del recetario: lo que sabes hacer, no lo que has hecho. El diario
+// de entrenamientos es otra cosa y vive en listaEjercicios.
+
+const CATALOGO_SIN_DESPLEGAR = 3;
+
+let catalogoCargado = [];
+let ejercicioAbierto = null;
+let ejercicioEditando = null;
+let catalogoDesplegado = false;
+
+function pintarCatalogo() {
+  const contenedor = id("lista-catalogo");
+  const boton = id("btn-desplegar-catalogo");
+
+  contenedor.innerHTML = "";
+  id("estado-catalogo").textContent = catalogoCargado.length
+    ? ""
+    : "Aún no tienes ejercicios guardados. Apunta los que haces a menudo y podrás montar tablas con ellos.";
+
+  const visibles = catalogoDesplegado
+    ? catalogoCargado
+    : catalogoCargado.slice(0, CATALOGO_SIN_DESPLEGAR);
+
+  visibles.forEach((ejercicio) =>
+    contenedor.appendChild(tarjetaDeEjercicio(ejercicio))
+  );
+
+  const hayEscondidos = visibles.length < catalogoCargado.length;
+  boton.classList.toggle("oculta", !hayEscondidos && !catalogoDesplegado);
+  boton.textContent = catalogoDesplegado
+    ? "Ver menos"
+    : `Ver todos (${catalogoCargado.length})`;
+}
+
+function tarjetaDeEjercicio(ejercicio) {
+  const tarjeta = document.createElement("article");
+  tarjeta.className = "receta";
+
+  const cabecera = botonDeFila("", () => {
+    // Tocar la tarjeta la abre; volver a tocarla la cierra.
+    ejercicioAbierto = ejercicioAbierto === ejercicio.id ? null : ejercicio.id;
+    pintarCatalogo();
+  });
+  cabecera.className = "receta-cabecera";
+  cabecera.append(
+    celda(ejercicio.nombre, "receta-nombre"),
+    celda(ejercicio.material || "sin material", "registro-detalle")
+  );
+  tarjeta.appendChild(cabecera);
+
+  if (ejercicioAbierto !== ejercicio.id) return tarjeta;
+
+  if (ejercicio.comoSeHace) {
+    const como = document.createElement("p");
+    como.className = "receta-preparacion";
+    como.textContent = ejercicio.comoSeHace;
+    tarjeta.appendChild(como);
+  }
+
+  const acciones = document.createElement("div");
+  acciones.className = "receta-acciones";
+  acciones.append(
+    botonDeFila("Editar", () => editarEjercicioCatalogo(ejercicio)),
+    botonDeFila("Borrar", () => borrarLoDelCatalogo(ejercicio))
+  );
+  tarjeta.appendChild(acciones);
+
+  return tarjeta;
+}
+
+function abrirFormularioDeEjercicio(ejercicio) {
+  ejercicioEditando = ejercicio ? ejercicio.id : null;
+
+  id("catalogo-nombre").value = ejercicio ? ejercicio.nombre : "";
+  id("catalogo-como").value = ejercicio ? ejercicio.comoSeHace || "" : "";
+  id("catalogo-material").value = ejercicio ? ejercicio.material || "" : "";
+
+  id("error-catalogo").textContent = "";
+  id("form-ejercicio-catalogo").classList.remove("oculta");
+  id("btn-nuevo-ejercicio-catalogo").classList.add("oculta");
+  id("catalogo-nombre").focus();
+}
+
+function cerrarFormularioDeEjercicio() {
+  ejercicioEditando = null;
+  id("form-ejercicio-catalogo").classList.add("oculta");
+  id("btn-nuevo-ejercicio-catalogo").classList.remove("oculta");
+  id("error-catalogo").textContent = "";
+}
+
+function editarEjercicioCatalogo(ejercicio) {
+  abrirFormularioDeEjercicio(ejercicio);
+  id("form-ejercicio-catalogo").scrollIntoView({ block: "center" });
+}
+
+async function borrarLoDelCatalogo(ejercicio) {
+  if (!confirm(`¿Borrar el ejercicio "${ejercicio.nombre}"?`)) return;
+
+  try {
+    await borrarEjercicioCatalogo(uidActual, ejercicio.id);
+    if (ejercicioAbierto === ejercicio.id) ejercicioAbierto = null;
+    await refrescarCatalogo();
+    // La tabla conserva el texto de la línea y se queda sin enlace: no se
+    // toca nada, pero el desplegable de edición ya no lo ofrece.
+    pintarTabla();
+  } catch {
+    id("error-catalogo").textContent = "No se ha podido borrar. Comprueba tu conexión.";
+  }
+}
+
+async function refrescarCatalogo() {
+  try {
+    catalogoCargado = await listarEjerciciosCatalogo(uidActual);
+  } catch {
+    catalogoCargado = [];
+    id("estado-catalogo").textContent =
+      "No se han podido cargar tus ejercicios. Comprueba tu conexión.";
+    return;
+  }
+  pintarCatalogo();
+}
+
+id("btn-nuevo-ejercicio-catalogo").addEventListener("click", () =>
+  abrirFormularioDeEjercicio(null)
+);
+id("btn-cancelar-ejercicio-catalogo").addEventListener(
+  "click",
+  cerrarFormularioDeEjercicio
+);
+
+id("btn-desplegar-catalogo").addEventListener("click", () => {
+  catalogoDesplegado = !catalogoDesplegado;
+  pintarCatalogo();
+});
+
+id("form-ejercicio-catalogo").addEventListener("submit", async (evento) => {
+  evento.preventDefault();
+  const error = id("error-catalogo");
+  error.textContent = "";
+
+  const resultado = validarEjercicioCatalogo(
+    id("catalogo-nombre").value,
+    id("catalogo-como").value,
+    id("catalogo-material").value
+  );
+
+  if (resultado.error) {
+    error.textContent = resultado.error;
+    return;
+  }
+
+  const boton = id("btn-guardar-ejercicio-catalogo");
+  boton.disabled = true;
+
+  try {
+    if (ejercicioEditando) {
+      await actualizarEjercicioCatalogo(uidActual, ejercicioEditando, resultado);
+    } else {
+      await guardarEjercicioCatalogo(uidActual, resultado);
+    }
+    avisarGuardado("guardado-catalogo");
+    cerrarFormularioDeEjercicio();
+    await refrescarCatalogo();
+  } catch {
+    error.textContent = "No se ha podido guardar. Comprueba tu conexión.";
+  } finally {
+    boton.disabled = false;
+  }
+});
+
+// --- La tabla de la semana (spec 029) ------------------------------------
+//
+// La tabla es el plan; los entrenamientos apuntados son el diario. Igual que
+// con la dieta, aquí no se marca nada: "Lo he hecho" apunta y punto.
+//
+// A diferencia de la dieta, un día puede no tener sesión. Eso es descanso.
+
+let tablaActiva = null;
+let diaEditando = null;
+
+function pintarTabla() {
+  const contenedor = id("semana-tabla");
+  const estado = id("estado-tabla");
+
+  contenedor.innerHTML = "";
+
+  const boton = id("btn-semana-blanco-tabla");
+  boton.classList.toggle("accion-principal", !tablaActiva);
+  boton.textContent = tablaActiva
+    ? "Vaciar y empezar de nuevo"
+    : "Empezar una semana en blanco";
+
+  if (!tablaActiva) {
+    estado.textContent =
+      "Aún no tienes tabla. Puedes montarla tú con tus ejercicios —esto no gasta ninguna petición a la IA— o pedírsela a la IA aquí debajo.";
+    return;
+  }
+
+  estado.textContent = "";
+
+  tablaActiva.dias.forEach((dia, indiceDia) => {
+    const bloque = document.createElement("section");
+    bloque.className = "dia-dieta";
+
+    const titulo = document.createElement("h3");
+    titulo.textContent = dia.dia;
+    bloque.appendChild(titulo);
+
+    bloque.appendChild(
+      diaEditando === indiceDia
+        ? sesionEnEdicion(indiceDia, dia.sesion)
+        : filaDeSesion(indiceDia, dia.sesion)
+    );
+
+    contenedor.appendChild(bloque);
+  });
+}
+
+function filaDeSesion(indiceDia, sesion) {
+  const fila = document.createElement("div");
+  fila.className = "comida-dieta";
+
+  // Sin sesión es descanso: solo el hueco y el +, como una comida vacía. Sin
+  // etiquetarlo: el día ya está en el encabezado y un hueco vacío ya dice que
+  // se descansa.
+  if (!sesion || !sesion.titulo) {
+    fila.append(
+      celda("—", "registro-texto"),
+      botonDeFila("+", () => {
+        diaEditando = indiceDia;
+        pintarTabla();
+      })
+    );
+    return fila;
+  }
+
+  fila.append(
+    celda(sesion.titulo, "registro-texto"),
+    celda(
+      `${sesion.minutos} min · ${etiquetaDeIntensidad(sesion.intensidad)}`,
+      "registro-detalle"
+    )
+  );
+
+  const hecho = botonDeFila("Lo he hecho", () => apuntarDeLaTabla(sesion));
+  hecho.className = "boton-comido";
+  fila.appendChild(hecho);
+
+  fila.appendChild(
+    botonDeFila("Editar", () => {
+      diaEditando = indiceDia;
+      pintarTabla();
+    })
+  );
+
+  const lista = document.createElement("ul");
+  lista.className = "receta-ingredientes";
+  (sesion.ejercicios || []).forEach((ejercicio) => {
+    const linea = document.createElement("li");
+    linea.textContent = ejercicio.texto;
+    lista.appendChild(linea);
+  });
+
+  // La lista va fuera de la fila para que no compita con los botones.
+  const envoltorio = document.createElement("div");
+  envoltorio.append(fila, lista);
+  return envoltorio;
+}
+
+function sesionEnEdicion(indiceDia, sesion) {
+  const fila = document.createElement("div");
+  fila.className = "comida-dieta fila-edicion";
+
+  const actual = sesion || { titulo: "", minutos: "", intensidad: INTENSIDAD_POR_DEFECTO, ejercicios: [] };
+
+  const titulo = campoTexto(actual.titulo || "", "edicion-texto");
+  const minutos = campoTexto(actual.minutos || "", "edicion-minutos", "numeric");
+
+  const intensidad = campoDesplegable(
+    INTENSIDADES.map(({ valor, etiqueta }) => ({ valor, etiqueta })),
+    actual.intensidad || INTENSIDAD_POR_DEFECTO,
+    "edicion-momento"
+  );
+
+  // Un ejercicio por línea, como los ingredientes de una receta.
+  const ejercicios = campoArea(
+    (actual.ejercicios || []).map((ejercicio) => ejercicio.texto).join("\n"),
+    "edicion-texto"
+  );
+
+  fila.append(titulo, minutos, intensidad, ejercicios);
+
+  // Sin catálogo no hay desplegable: un select con una sola opción que no
+  // hace nada es ruido. Se escribe a mano y ya.
+  if (catalogoCargado.length) {
+    // Añade el nombre como línea nueva en vez de sustituir lo escrito: una
+    // sesión son varios ejercicios, no uno.
+    const delCatalogo = campoDesplegable(
+      [
+        { valor: "", etiqueta: "o usa un ejercicio tuyo…" },
+        ...catalogoCargado.map((ejercicio) => ({
+          valor: ejercicio.id,
+          etiqueta: ejercicio.nombre
+        }))
+      ],
+      "",
+      "edicion-momento"
+    );
+
+    delCatalogo.addEventListener("change", () => {
+      const ejercicio = catalogoCargado.find((otro) => otro.id === delCatalogo.value);
+      if (!ejercicio) return;
+
+      const escrito = ejercicios.value.trim();
+      ejercicios.value = escrito ? `${escrito}\n${ejercicio.nombre}` : ejercicio.nombre;
+      // Se vuelve a dejar en el hueco para poder añadir otro seguido.
+      delCatalogo.value = "";
+    });
+
+    fila.appendChild(delCatalogo);
+  }
+
+  fila.append(
+    botonDeFila("Guardar", () =>
+      guardarSesion(indiceDia, titulo.value, minutos.value, intensidad.value, ejercicios.value)
+    ),
+    botonDeFila("Cancelar", () => {
+      diaEditando = null;
+      pintarTabla();
+    })
+  );
+
+  return fila;
+}
+
+async function guardarSesion(indiceDia, titulo, minutos, intensidad, ejercicios) {
+  const error = id("error-semana-tabla");
+  error.textContent = "";
+
+  const resultado = validarSesion(titulo, minutos, intensidad, ejercicios);
+  if (resultado.error) {
+    error.textContent = resultado.error;
+    return;
+  }
+
+  // Vaciar el título borra la sesión: el día vuelve a ser descanso.
+  const sesion = resultado.vacia
+    ? null
+    : {
+        titulo: resultado.titulo,
+        minutos: resultado.minutos,
+        intensidad: resultado.intensidad,
+        ejercicios: enlazarConElCatalogo(resultado.ejercicios)
+      };
+
+  // Se copia la semana entera y se cambia el día: así, si falla el guardado,
+  // lo que hay en pantalla sigue siendo lo que hay en la base de datos.
+  const dias = tablaActiva.dias.map((dia, i) =>
+    i === indiceDia ? { ...dia, sesion } : dia
+  );
+
+  try {
+    await actualizarTabla(uidActual, tablaActiva.id, dias);
+    tablaActiva = { ...tablaActiva, dias };
+    diaEditando = null;
+    pintarTabla();
+  } catch {
+    error.textContent = "No se ha podido guardar. Comprueba tu conexión.";
+  }
+}
+
+// Al escribir a mano, la línea se enlaza sola si empieza por el nombre de un
+// ejercicio del catálogo. Así "Sentadillas 4x12" queda enlazada sin elegir
+// nada en el desplegable.
+function enlazarConElCatalogo(ejercicios) {
+  const normalizar = (texto) =>
+    String(texto || "").trim().toLowerCase().replace(/\s+/g, " ");
+
+  return ejercicios.map((ejercicio) => {
+    if (ejercicio.ejercicioId) return ejercicio;
+
+    const encontrado = catalogoCargado.find((otro) =>
+      normalizar(ejercicio.texto).startsWith(normalizar(otro.nombre))
+    );
+
+    return { ...ejercicio, ejercicioId: encontrado ? encontrado.id : "" };
+  });
+}
+
+// Apunta la sesión entera como UN registro: un registro por ejercicio sería
+// un follón, y a veces la sesión es simplemente andar una hora.
+//
+// Sin hora, igual que "me lo he comido": el botón se pulsa cuando uno se
+// acuerda, no cuando entrena.
+async function apuntarDeLaTabla(sesion) {
+  const error = id("error-semana-tabla");
+  error.textContent = "";
+
+  try {
+    await guardarEjercicio(
+      uidActual,
+      sesion.titulo,
+      sesion.minutos,
+      sesion.intensidad,
+      hoyISO(),
+      ""
+    );
+    avisarGuardado("guardado-tabla");
+    await listaEjercicios.refrescar();
+  } catch {
+    error.textContent = "No se ha podido apuntar. Comprueba tu conexión.";
+  }
+}
+
+id("btn-semana-blanco-tabla").addEventListener("click", async () => {
+  if (tablaActiva && !confirm("Ya tienes una tabla. ¿La sustituyo por una en blanco?")) {
+    return;
+  }
+
+  const error = id("error-semana-tabla");
+  error.textContent = "";
+
+  try {
+    const anterior = tablaActiva;
+    await guardarTabla(uidActual, semanaEnBlancoTabla(), "");
+    if (anterior) await borrarTabla(uidActual, anterior.id);
+    await refrescarTabla();
+  } catch {
+    error.textContent = "No se ha podido crear la semana. Comprueba tu conexión.";
+  }
+});
+
+// Pide la semana a la IA, guarda los ejercicios que proponga y sustituye la
+// tabla que hubiera. El cupo es el mismo que el de los planes: 2 al día.
+async function generarTabla(instrucciones) {
+  if (quedanPlanesHoy(planesCargados, "ejercicio") === 0) {
+    throw Object.assign(new Error("Sin cupo"), { codigo: "limite-planes" });
+  }
+
+  if (tablaActiva && !confirm("Ya tienes una tabla. ¿La sustituyo?")) return;
+
+  const [registros, ajustes] = await Promise.all([
+    registrosRecientes(),
+    leerAjustes(uidActual).catch(() => ({}))
+  ]);
+
+  const respuesta = await pedirTablaALaIa(uidActual, instrucciones, registros, {
+    nombre: ajustes.nombre || "",
+    perfil: ajustes.perfil || ""
+  });
+
+  // Primero los ejercicios: la semana los enlaza por nombre, así que tienen
+  // que existir antes.
+  const porNombre = await guardarEjerciciosPropuestos(
+    uidActual,
+    respuesta.ejercicios,
+    catalogoCargado
+  );
+  await refrescarCatalogo();
+
+  // Primero la nueva y luego se borra la vieja: al revés queda un instante
+  // sin ninguna tabla, y si algo falla en medio te quedas sin nada.
+  const anterior = tablaActiva;
+  await guardarTabla(
+    uidActual,
+    semanaDesdeLaIaTabla(respuesta.dias, porNombre),
+    instrucciones
+  );
+  if (anterior) await borrarTabla(uidActual, anterior.id);
+
+  // El cupo se cuenta sobre los planes, así que la tabla deja su marca ahí.
+  await guardarMarcaDePlan(uidActual, "ejercicio", instrucciones);
+
+  await refrescarTabla();
+  await refrescarConsulta();
+  id("aviso-tabla").textContent = respuesta.aviso || "";
+}
+
+async function refrescarTabla() {
+  try {
+    tablaActiva = await leerTablaActiva(uidActual);
+  } catch {
+    tablaActiva = null;
+    id("estado-tabla").textContent =
+      "No se ha podido cargar tu tabla. Comprueba tu conexión.";
+    return;
+  }
+  diaEditando = null;
+  pintarTabla();
+}
+
 // --- Comidas -------------------------------------------------------------
 
 // "Lo de siempre": las comidas que más repites, para apuntarlas de un toque.
@@ -1662,10 +2175,13 @@ function pintarHilo(consulta) {
 }
 
 function pintarPlanes(todos) {
-  // Las dietas semanales dejan aquí una marca para gastar cupo, pero su
-  // contenido vive en la semana de Comidas: pintarlas aquí serían tarjetas
-  // vacías (spec 028).
-  const planes = todos.filter((plan) => !plan.esDietaSemanal);
+  // Las dietas y las tablas semanales dejan aquí una marca para gastar cupo,
+  // pero su contenido vive en su propia semana: pintarlas aquí serían tarjetas
+  // vacías (specs 028 y 029).
+  //
+  // Se miran los dos nombres: las marcas anteriores a la spec 029 llevan
+  // esDietaSemanal y volverían a salir si solo se mirara el nuevo.
+  const planes = todos.filter((plan) => !plan.esPlanSemanal && !plan.esDietaSemanal);
 
   const contenedor = id("lista-planes");
   contenedor.innerHTML = "";
@@ -1772,32 +2288,9 @@ function pintarEspecializadas() {
   });
 }
 
-// Lo último pedido, aquí mismo. Antes esto te mandaba a Consulta, que es
-// donde viven los planes, y saltar de pantalla al pedir algo desconcierta.
-function pintarUltimoPlan(tipo) {
-  const contenedor = id(`ultimo-${tipo}`);
-  contenedor.innerHTML = "";
-
-  // La dieta se lee en su semana, no aquí: este bloque es solo para la tabla.
-  if (tipo === "dieta") return;
-
-  const plan = planesCargados.find((otro) => otro.tipo === tipo);
-  if (!plan) return;
-
-  const tarjeta = document.createElement("article");
-  tarjeta.className = "plan";
-
-  const titulo = document.createElement("p");
-  titulo.className = "consejo-fecha";
-  titulo.textContent = `${etiquetaDePlan(plan)} · ${formatearFechaYHora(plan.creadoEn)}`;
-  tarjeta.appendChild(titulo);
-
-  const texto = document.createElement("p");
-  texto.textContent = tipo === "dieta" ? plan.nutricion : plan.ejercicio;
-  tarjeta.appendChild(texto);
-
-  contenedor.appendChild(tarjeta);
-}
+// pintarUltimoPlan() se fue con la spec 029: era el hueco donde se leía la
+// tabla cuando llegaba como texto. Ahora la dieta se lee en su semana y la
+// tabla en la suya, así que los dos tipos tienen dónde caerse muertos.
 
 Object.keys(TIPOS_ESPECIALIZADOS).forEach((tipo) => {
   id(`btn-cancelar-${tipo}`).addEventListener("click", () => pintarEspecializadas());
@@ -1812,21 +2305,13 @@ Object.keys(TIPOS_ESPECIALIZADOS).forEach((tipo) => {
     id(`btn-pedir-${tipo}`).disabled = true;
 
     try {
-      // La dieta ya no llega como texto: viene la semana estructurada y sus
-      // recetas, para poder editarla y apuntar con un toque (spec 028).
+      // Ni la dieta ni la tabla llegan ya como texto: viene la semana
+      // estructurada con sus recetas o sus ejercicios, para poder editarlas y
+      // apuntar con un toque (specs 028 y 029).
       if (tipo === "dieta") {
         await generarDieta(id(`instrucciones-${tipo}`).value);
-      } else {
-        await pedirPlanEspecializado(
-          uidActual,
-          planesCargados,
-          tipo,
-          id(`instrucciones-${tipo}`).value
-        );
-        await refrescarConsulta();
-        // Sin saltar de pantalla: te ha traído lo que pediste, no te manda a
-        // otro sitio. El plan se lee desde aquí.
-        pintarUltimoPlan(tipo);
+      } else if (tipo === "ejercicio") {
+        await generarTabla(id(`instrucciones-${tipo}`).value);
       }
       id(`instrucciones-${tipo}`).value = "";
     } catch (fallo) {
@@ -2072,7 +2557,9 @@ function refrescarTodo() {
     refrescarConsulta(),
     refrescarFotos(),
     refrescarRecetas(),
-    refrescarDieta()
+    refrescarDieta(),
+    refrescarCatalogo(),
+    refrescarTabla()
   ]);
 }
 
