@@ -138,12 +138,20 @@ function semanaCompleta(dias) {
 
   return DIAS.map((nombre, indice) => {
     const dia = (porNombreVale ? porNombre.get(normalizar(nombre)) : lista[indice]) || {};
+
+    // Las claves, también sin fiarse: un modelo sin esquema puede devolver
+    // "Desayuno" o "DESAYUNO", y buscar solo "desayuno" dejaría el día vacío.
+    const campos = {};
+    Object.entries(dia).forEach(([clave, valor]) => {
+      campos[normalizar(clave)] = valor;
+    });
+
     return {
       dia: nombre,
-      desayuno: String(dia.desayuno || ""),
-      comida: String(dia.comida || ""),
-      merienda: String(dia.merienda || ""),
-      cena: String(dia.cena || "")
+      desayuno: String(campos.desayuno || ""),
+      comida: String(campos.comida || ""),
+      merienda: String(campos.merienda || ""),
+      cena: String(campos.cena || "")
     };
   });
 }

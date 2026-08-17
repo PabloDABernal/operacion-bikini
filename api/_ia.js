@@ -130,19 +130,42 @@ const MODELOS_GROQ = [
 // Groq no acepta un esquema de respuesta, así que el formato se le pide por
 // escrito. Con "json_object" a secas devuelve JSON válido pero con las claves
 // que le apetezcan.
+// Groq no acepta un esquema de respuesta, así que el formato se le describe
+// por escrito. Antes esta descripción decía que TODAS las claves eran "de tipo
+// texto", lo cual era mentira en cuanto una llevaba una lista dentro: la dieta
+// de la spec 028 tiene siete días y sus recetas, y Groq los devolvía como
+// texto plano, así que la semana llegaba vacía.
+//
+// Ahora se le dibuja la forma real, recursivamente.
+function formaDe(propiedad) {
+  if (!propiedad) return '"texto"';
+
+  if (propiedad.type === "ARRAY") {
+    return `[ ${formaDe(propiedad.items)} ]`;
+  }
+
+  if (propiedad.type === "OBJECT") {
+    const claves = propiedad.required || Object.keys(propiedad.properties || {});
+    const dentro = claves
+      .map((clave) => `"${clave}": ${formaDe((propiedad.properties || {})[clave])}`)
+      .join(", ");
+    return `{ ${dentro} }`;
+  }
+
+  if (propiedad.enum) return `"uno de: ${propiedad.enum.join(" | ")}"`;
+
+  return '"texto"';
+}
+
 function describirEsquema(esquema) {
   if (!esquema || !esquema.properties) return "";
 
-  const claves = esquema.required || Object.keys(esquema.properties);
-  const detalles = claves.map((clave) => {
-    const propiedad = esquema.properties[clave] || {};
-    return propiedad.enum ? `"${clave}" (uno de: ${propiedad.enum.join(", ")})` : `"${clave}"`;
-  });
-
   return (
-    "\n\nResponde SOLO con un objeto JSON, sin texto alrededor y sin markdown. " +
-    `Tiene que llevar estas claves, TODAS obligatorias y de tipo texto: ${detalles.join(", ")}. ` +
-    "Las que no apliquen, déjalas como cadena vacía."
+    "\n\nResponde SOLO con un objeto JSON, sin texto alrededor y sin markdown, " +
+    `con EXACTAMENTE esta forma:\n${formaDe(esquema)}\n` +
+    "Todas las claves son obligatorias y tienen que llamarse así, en minúscula. " +
+    "Respeta los tipos: donde hay una lista va una lista, no un texto. " +
+    "Los textos que no apliquen, déjalos como cadena vacía."
   );
 }
 
