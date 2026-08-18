@@ -156,4 +156,39 @@ En `usuarios/{uid}/analisis`, **dentro** de la operación en curso: a diferencia
 
 ## ✅ Para probar a mano
 
-Pendiente: se rellena antes de la prueba.
+En https://operacion-bikini.vercel.app, con la operación en marcha. **El paso 13 borra datos: va al último a propósito.** Ojo: solo hay **2 análisis al día**, así que los pasos 3 y 7 gastan el cupo entero. Si te quedas sin, el resto se prueba mañana.
+
+### Sin nada apuntado (criterio 2)
+
+1. Si hoy no has apuntado ninguna comida, en **Hoy** el bloque **Qué has comido hoy** dice `Apunta lo que comas y podré decirte qué llevas.` y el botón está **deshabilitado**.
+
+### El primer análisis (criterios 1, 3, 4, 5, 6, 7)
+
+2. Apunta dos o tres comidas de hoy en **Comidas**. Vuelve a **Hoy**: el bloque ya explica qué hace y el botón **Analizar lo que llevo hoy** está disponible, con `Te quedan 2 de hoy.`
+3. Pulsa el botón. Sale `Pensando…` y en unos segundos el resultado.
+4. Comprueba que salen **los seis grupos**, en este orden: verdura y fruta, proteína, cereales y féculas, lácteos, grasas, ultraprocesados y dulces. **Los seis tienen que estar**, aunque alguno diga `nada` con la barra vacía.
+5. Las calorías salen como **horquilla**, redondeadas a la centena: `Entre 1.600 y 1.900 kcal aproximadamente`. **Si ves un número exacto de calorías en cualquier parte, es un fallo grave**: es lo que `PRODUCTO.md` prohíbe.
+6. Debajo, el comentario de una o dos frases, la hora (`Analizado a las …`) y el aviso de que es una estimación de una IA.
+7. El botón queda **deshabilitado** y dice `Ya has analizado el día de hoy.`, con `Te queda 1 de hoy.`
+
+### Que se quede viejo (criterio 8)
+
+8. Ve a **Comidas** y apunta una comida más. Vuelve a **Hoy**: aparece `Has apuntado algo después de este análisis.` y el botón pasa a decir **Volver a analizar**, habilitado.
+9. Púlsalo. El análisis se **sustituye** (no se añade otro), la hora cambia y el aviso de viejo desaparece.
+10. Ahora el cupo está gastado: el botón dice `Has analizado tu día 2 veces. Vuelve mañana.` y está deshabilitado. **Apunta otra comida más**: el aviso de "has apuntado algo después" **debe volver a verse**, aunque el botón siga bloqueado. Ese aviso es la explicación de por qué el dato no cuadra.
+
+### Al día siguiente (criterio 10)
+
+11. Mañana, el bloque debe estar **vacío otra vez**, con el botón disponible y `Te quedan 2 de hoy.` El análisis de ayer no se arrastra ni se puede consultar (criterio 11).
+
+### Regresiones
+
+12. **Archivar una operación**: si cierras una operación desde Ajustes, el mensaje de progreso debe decir `Archivando… (análisis nutricionales)` en algún momento, **no** `(analisis)`. Y el histórico debe quedar consultable como siempre.
+
+### Lo destructivo, al final
+
+13. **Ajustes → Reiniciar datos**: hay una casilla nueva **`Análisis nutricionales (N)`** con su recuento. Márcala sola, escribe `BORRAR` y confirma. Después, en **Hoy**, el bloque vuelve a estar vacío y el botón disponible — pero **el cupo se reinicia también**, porque el cupo vive dentro del documento que acabas de borrar. Es conocido y aceptado: pasa lo mismo con el resto de cupos del proyecto.
+
+### Lo que hay que mirar con lupa
+
+El punto 5. Todo lo demás son horquillas de las de siempre, pero si la IA devuelve algo raro —un número solo, el mínimo mayor que el máximo, 12.000 kcal— la normalización de `horquilla()` en `api/analisis.js` tiene que dejarlo en una horquilla redondeada y dentro de 500–6.000. No hay forma de forzarlo desde la app: solo se ve si algún día sale un número feo.
