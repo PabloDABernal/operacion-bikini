@@ -35,7 +35,8 @@ export const COLECCIONES = [
   "consejos",
   "consultas",
   "planes",
-  "fotos"
+  "fotos",
+  "analisis"
 ];
 
 export const NOMBRES = {
@@ -45,7 +46,8 @@ export const NOMBRES = {
   consejos: "consejos",
   consultas: "consultas",
   planes: "planes",
-  fotos: "fotos"
+  fotos: "fotos",
+  analisis: "análisis nutricionales"
 };
 
 function operacionesDe(uid) {

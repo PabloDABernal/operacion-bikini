@@ -12,6 +12,9 @@
     },
     "api/tabla.js": {
       "maxDuration": 60
+    },
+    "api/analisis.js": {
+      "maxDuration": 60
     }
   }
 }

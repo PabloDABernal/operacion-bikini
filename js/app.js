@@ -58,6 +58,17 @@ import {
 } from "./dietas.js";
 
 import {
+  GRUPOS,
+  MEDIDAS,
+  ANALISIS_POR_DIA,
+  leerAnalisisDe,
+  quedanAnalisisHoy,
+  estaViejo,
+  guardarAnalisis,
+  pedirAnalisisALaIa
+} from "./analisis.js";
+
+import {
   validarEjercicioCatalogo,
   guardarEjercicioCatalogo,
   actualizarEjercicioCatalogo,
@@ -829,6 +840,170 @@ function refrescarHoy() {
   pintarRangos();
   pintarCalendario(registros);
   pintarLoDeSiempre(registros.comidas);
+  pintarAnalisis(registros.comidas);
+}
+
+// --- Detalle nutricional del día (spec 030) -------------------------------
+//
+// La IA lee las comidas que ya apuntaste y las reparte en seis grupos con una
+// horquilla de calorías. Nunca un número exacto: PRODUCTO.md lo prohíbe.
+
+let analisisDeHoy = null;
+
+function comidasDeHoy(comidas) {
+  const hoy = hoyISO();
+  return comidas.filter((comida) => comida.fecha === hoy);
+}
+
+function pintarAnalisis(comidas) {
+  const deHoy = comidasDeHoy(comidas);
+  const boton = id("btn-analizar");
+  const quedan = quedanAnalisisHoy(analisisDeHoy);
+  const viejo = estaViejo(analisisDeHoy, deHoy.length);
+
+  pintarDetalleDelDia();
+
+  // Sin comidas no hay nada que repartir, y gastar una llamada para que la IA
+  // diga que no has comido nada sería tonto.
+  if (!deHoy.length) {
+    boton.disabled = true;
+    boton.textContent = "Analizar lo que llevo hoy";
+    id("estado-analisis").textContent =
+      "Apunta lo que comas y podré decirte qué llevas.";
+    id("cupo-analisis").textContent = "";
+    id("viejo-analisis").textContent = "";
+    return;
+  }
+
+  id("estado-analisis").textContent = analisisDeHoy
+    ? ""
+    : "Lee lo que has apuntado y lo reparte en grupos de alimentos, con las calorías aproximadas.";
+
+  // El aviso de desactualizado se ve aunque no quede cupo: es la explicación
+  // de por qué el dato no cuadra con lo que has apuntado.
+  id("viejo-analisis").textContent = viejo
+    ? "Has apuntado algo después de este análisis."
+    : "";
+
+  boton.textContent = viejo ? "Volver a analizar" : "Analizar lo que llevo hoy";
+
+  // Con el análisis al día no hay nada que pedir, aunque quede cupo.
+  const nadaQuePedir = Boolean(analisisDeHoy) && !viejo;
+  boton.disabled = quedan === 0 || nadaQuePedir;
+
+  id("cupo-analisis").textContent = quedan
+    ? nadaQuePedir
+      ? "Ya has analizado el día de hoy."
+      : `Te ${quedan === 1 ? "queda" : "quedan"} ${quedan} de hoy.`
+    : `Has analizado tu día ${ANALISIS_POR_DIA} veces. Vuelve mañana.`;
+}
+
+function pintarDetalleDelDia() {
+  const contenedor = id("detalle-analisis");
+  contenedor.innerHTML = "";
+  if (!analisisDeHoy) return;
+
+  // Los seis grupos van siempre, aunque sean "nada": un día sin verdura se ve
+  // mejor si la fila está y está vacía.
+  GRUPOS.forEach((grupo, indice) => {
+    const guardado = (analisisDeHoy.grupos || [])[indice] || {};
+    const medida = MEDIDAS.includes(guardado.medida) ? guardado.medida : "nada";
+    const escalon = MEDIDAS.indexOf(medida);
+
+    const fila = document.createElement("div");
+    fila.className = "grupo-analisis";
+
+    const barra = document.createElement("div");
+    barra.className = "grupo-barra";
+    const relleno = document.createElement("span");
+    relleno.style.width = `${(escalon / (MEDIDAS.length - 1)) * 100}%`;
+    barra.appendChild(relleno);
+
+    fila.append(
+      celda(grupo, "grupo-nombre"),
+      barra,
+      celda(medida, "grupo-medida")
+    );
+    contenedor.appendChild(fila);
+  });
+
+  const calorias = document.createElement("p");
+  calorias.className = "calorias-analisis";
+  calorias.textContent = `Entre ${analisisDeHoy.caloriasMin.toLocaleString("es-ES")} y ${analisisDeHoy.caloriasMax.toLocaleString("es-ES")} kcal aproximadamente`;
+  contenedor.appendChild(calorias);
+
+  if (analisisDeHoy.comentario) {
+    const comentario = document.createElement("p");
+    comentario.className = "comentario-analisis";
+    comentario.textContent = analisisDeHoy.comentario;
+    contenedor.appendChild(comentario);
+  }
+
+  const hora = document.createElement("p");
+  hora.className = "aviso-analisis";
+  const cuando = analisisDeHoy.editadoEn || analisisDeHoy.creadoEn;
+  hora.textContent =
+    (cuando ? `Analizado a las ${horaDe(cuando)}. ` : "") +
+    "Es una estimación de una IA a partir de lo que has escrito, no una medición.";
+  contenedor.appendChild(hora);
+}
+
+// La marca de tiempo de Firestore llega como Timestamp, y recién guardada
+// puede llegar todavía sin resolver: entonces no se enseña la hora.
+function horaDe(marca) {
+  if (!marca || !marca.toDate) return "";
+  return marca.toDate().toLocaleTimeString("es-ES", {
+    hour: "2-digit",
+    minute: "2-digit"
+  });
+}
+
+id("btn-analizar").addEventListener("click", async () => {
+  const error = id("error-analisis");
+  const estado = id("estado-analisis");
+  const boton = id("btn-analizar");
+  const deHoy = comidasDeHoy(listaComidas.obtenerRegistros());
+
+  if (!deHoy.length) return;
+
+  error.textContent = "";
+  estado.textContent = "Pensando…";
+  boton.disabled = true;
+
+  try {
+    const respuesta = await pedirAnalisisALaIa(
+      uidActual,
+      deHoy.map(({ momento, texto }) => ({ momento, texto }))
+    );
+
+    await guardarAnalisis(
+      uidActual,
+      hoyISO(),
+      respuesta,
+      deHoy.length,
+      analisisDeHoy ? analisisDeHoy.veces : 0
+    );
+    await refrescarAnalisis();
+  } catch (fallo) {
+    error.textContent = mensajeDeErrorDeConsulta(fallo.codigo);
+    // Si falló, refrescarAnalisis no llegó a repintar: hay que devolverle al
+    // botón su estado. Cuando va bien, ya lo ha hecho él.
+    refrescarHoy();
+  } finally {
+    estado.textContent = "";
+  }
+});
+
+async function refrescarAnalisis() {
+  try {
+    analisisDeHoy = await leerAnalisisDe(uidActual, hoyISO());
+  } catch {
+    analisisDeHoy = null;
+    id("error-analisis").textContent =
+      "No se ha podido cargar el análisis de hoy. Comprueba tu conexión.";
+    return;
+  }
+  refrescarHoy();
 }
 
 // Las tres listas avisan aquí cuando cargan, guardan, editan o borran. Todo
@@ -2559,7 +2734,8 @@ function refrescarTodo() {
     refrescarRecetas(),
     refrescarDieta(),
     refrescarCatalogo(),
-    refrescarTabla()
+    refrescarTabla(),
+    refrescarAnalisis()
   ]);
 }
 

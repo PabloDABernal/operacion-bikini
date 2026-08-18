@@ -1315,6 +1315,68 @@ button:disabled {
   width: 5rem;
 }
 
+/* Detalle nutricional (spec 030) -----------------------------------------
+   Seis filas fijas: nombre del grupo, barra de cuatro escalones y la palabra.
+   La barra es proporcional a esos escalones, no a una cantidad: aquí no hay
+   gramos que medir. */
+
+.grupo-analisis {
+  display: flex;
+  align-items: center;
+  gap: var(--e2);
+  padding: var(--e1) 0;
+}
+
+.grupo-analisis .grupo-nombre {
+  flex: 0 0 9rem;
+  font-size: 0.9rem;
+}
+
+.grupo-barra {
+  flex: 1;
+  height: 0.5rem;
+  border-radius: var(--radio);
+  background: var(--borde);
+  overflow: hidden;
+}
+
+.grupo-barra span {
+  display: block;
+  height: 100%;
+  background: var(--acento);
+}
+
+/* Un grupo a cero no pinta barra, pero la fila se queda: un día sin verdura
+   se ve mejor con el hueco vacío que sin la fila. */
+.grupo-analisis .grupo-medida {
+  flex: 0 0 4.5rem;
+  text-align: right;
+  color: var(--tinta-suave);
+  font-size: 0.85rem;
+}
+
+.calorias-analisis {
+  margin: var(--e3) 0 0;
+  font-size: 1.05rem;
+}
+
+.comentario-analisis {
+  margin: var(--e2) 0 0;
+  white-space: pre-wrap;
+}
+
+.aviso-analisis {
+  color: var(--tinta-suave);
+  font-size: 0.85rem;
+  margin: var(--e2) 0 0;
+}
+
+#viejo-analisis:empty,
+#cupo-analisis:empty,
+#estado-analisis:empty {
+  display: none;
+}
+
 /* Cuando una acción es LA acción de la pantalla, se ve como tal. */
 .accion-principal {
   width: 100%;

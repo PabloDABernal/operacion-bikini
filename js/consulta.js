@@ -32,6 +32,11 @@ const URL_PROXY = "/api/consulta";
 const MENSAJES = {
   "dieta-vacia":
     "La IA ha respondido, pero la semana venía vacía. Vuelve a intentarlo.",
+  "tabla-vacia":
+    "La IA ha respondido, pero la semana venía vacía. Vuelve a intentarlo.",
+  "analisis-ilegible":
+    "La IA ha respondido, pero sin unas calorías que se puedan leer. Vuelve a intentarlo.",
+  "sin-comidas": "No has apuntado nada hoy todavía.",
   "limite-planes":
     "Ya has pedido tus 2 de hoy. Vuelve mañana.",
   tardanza:

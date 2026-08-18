@@ -34,6 +34,11 @@ export const TIPOS = [
     colecciones: ["consultas", "planes"]
   },
   { clave: "fotos", etiqueta: "fotos", colecciones: ["fotos"] },
+  {
+    clave: "analisis",
+    etiqueta: "análisis nutricionales",
+    colecciones: ["analisis"]
+  },
   // Las recetas no se archivan con la operación (spec 026), así que esta
   // casilla es la única forma de borrarlas.
   {
@@ -121,7 +126,7 @@ async function borrarFotos(uid) {
   }
 }
 
-// Borra una operación archivada entera: sus siete subcolecciones y luego su
+// Borra una operación archivada entera: todas sus subcolecciones y luego su
 // documento. Las fotos van primero a Cloudinary, o quedarían archivos gastando
 // cuota que ya no se pueden alcanzar desde ninguna pantalla.
 async function borrarOperacion(uid, operacionId) {

@@ -80,6 +80,13 @@ service cloud.firestore {
       allow read, write: if autorizado() && request.auth.uid == uid;
     }
 
+    // Detalle nutricional del día (spec 030). El id del documento es la fecha,
+    // así que hay uno por día. A diferencia del recetario y del catálogo, esto
+    // es diario: se archiva con la operación.
+    match /usuarios/{uid}/analisis/{fecha} {
+      allow read, write: if autorizado() && request.auth.uid == uid;
+    }
+
     // Operaciones: cada ciclo con principio y fin (spec 018).
     match /usuarios/{uid}/operaciones/{operacionId} {
       allow read, write: if autorizado() && request.auth.uid == uid;
