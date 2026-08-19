@@ -46,4 +46,3 @@ Ideas surgidas durante la implementación, no implementadas. Una línea cada una
 - Marcar ejercicios sueltos dentro de una sesión, en vez de la sesión entera (spec 029).
 - Ver la evolución de los grupos de alimentos a lo largo de la semana (spec 030: solo el día de hoy, sin histórico).
 - Que el análisis nutricional del día alimente el contexto de la conversación con la IA (spec 030).
-- `pedirPlanEspecializado()` (`js/consulta.js`) y `api/plan.js` se quedaron sin usar en la spec 029: los dos planes que quedaban en texto —la dieta y la tabla— pasaron a semana estructurada. Borrarlos cuando se confirme que ningún plan antiguo los necesita.

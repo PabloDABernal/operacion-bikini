@@ -1,8 +1,8 @@
 // Proxy hacia Gemini para la dieta de la semana (spec 028).
 //
-// A diferencia de api/plan.js, que devuelve un texto para leer, aquí la semana
-// viene estructurada: siete días con sus cuatro comidas, más las recetas de
-// los platos principales. Sin eso no se podría editar ni apuntar con un toque.
+// La semana viene estructurada: siete días con sus cuatro comidas, más las
+// recetas de los platos principales. Sin eso no se podría editar ni apuntar
+// con un toque.
 
 const { peticionAutorizada, describirRegistros, generarJson } = require("./_ia");
 

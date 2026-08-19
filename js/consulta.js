@@ -314,10 +314,7 @@ export async function responder(uid, consulta, texto) {
 // pedir a mano. Cada tipo tiene su propio cupo diario: que una dieta gastara
 // una de las consultas de la entrevista no tenía ningún sentido.
 
-const URL_PLAN = "/api/plan";
-
 export const PLANES_POR_DIA = 2;
-export const MAXIMO_INSTRUCCIONES = 500;
 
 export const TIPOS_ESPECIALIZADOS = {
   dieta: { etiqueta: "Dieta detallada", plural: "dietas" },
@@ -364,72 +361,6 @@ export function guardarMarcaDePlan(uid, tipo, instrucciones) {
     tipo,
     instrucciones: instrucciones || "",
     esPlanSemanal: true,
-    creadoEn: serverTimestamp()
-  });
-}
-
-// Pide la semana y la guarda como un plan más. Sin conversación: una
-// petición, una respuesta.
-export async function pedirPlanEspecializado(uid, planes, tipo, instrucciones) {
-  if (quedanPlanesHoy(planes, tipo) === 0) {
-    throw errorConCodigo("limite-planes", "Límite diario de planes alcanzado");
-  }
-
-  const [registros, contexto] = await Promise.all([
-    recogerRegistros(uid),
-    contextoDelUsuario(uid)
-  ]);
-
-  const idToken = await auth.currentUser.getIdToken();
-  const pedido = String(instrucciones || "").trim().slice(0, MAXIMO_INSTRUCCIONES);
-
-  let respuesta;
-  try {
-    respuesta = await fetch(URL_PLAN, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${idToken}`
-      },
-      body: JSON.stringify({ tipo, instrucciones: pedido, registros, ...contexto }),
-      signal: AbortSignal.timeout(ESPERA_MAXIMA_MS)
-    });
-  } catch (fallo) {
-    // Quedarse sin tiempo y no tener internet no son lo mismo, y el consejo
-    // que hay que darle al usuario tampoco.
-    throw errorConCodigo(
-      fallo.name === "TimeoutError" ? "tardanza" : "red",
-      "Proxy inalcanzable"
-    );
-  }
-
-  if (!respuesta.ok) {
-    let codigo = "red";
-    try {
-      const datos = await respuesta.json();
-      if (datos.error) codigo = datos.error;
-      // Gemini manda además el estado HTTP con el que respondió Google: sin
-      // eso, un fallo suyo es indistinguible de un problema de red.
-      if (datos.estado) codigo = `${datos.error}-${datos.estado}`;
-      // Por qué la reserva no salvó la petición (spec 020).
-      if (datos.reserva && datos.reserva !== "no-hacia-falta") {
-        codigo = `${codigo} · reserva: ${datos.reserva}`;
-      }
-    } catch {
-      // Respuesta sin JSON: nos quedamos con el mensaje genérico.
-    }
-    throw errorConCodigo(codigo, `El proxy respondió ${respuesta.status}`);
-  }
-
-  const plan = await respuesta.json();
-
-  // Solo se guarda si la IA ha respondido bien, así que un fallo suyo no gasta
-  // cupo: el cupo se cuenta sobre los planes que existen.
-  await addDoc(planesDe(uid), {
-    nutricion: plan.nutricion,
-    ejercicio: plan.ejercicio,
-    tipo,
-    instrucciones: pedido,
     creadoEn: serverTimestamp()
   });
 }

@@ -4,9 +4,6 @@
     "api/consulta.js": {
       "maxDuration": 60
     },
-    "api/plan.js": {
-      "maxDuration": 60
-    },
     "api/dieta.js": {
       "maxDuration": 60
     },
