@@ -2,7 +2,7 @@
 
 Documento para retomar el trabajo en frío. Se actualiza al terminar cada spec.
 
-**Última actualización:** 17 de agosto de 2026 (spec 029 terminada y validada)
+**Última actualización:** 19 de agosto de 2026 (spec 030 terminada y validada)
 
 ## Dónde estamos
 
@@ -10,7 +10,7 @@ Documento para retomar el trabajo en frío. Se actualiza al terminar cada spec.
 
 **https://operacion-bikini.vercel.app**
 
-**Las specs 001 a 029 están todas implementadas, desplegadas y validadas por el usuario.** La app se usa a diario.
+**Las specs 001 a 030 están todas implementadas, desplegadas y validadas por el usuario.** La app se usa a diario.
 
 La v2 se amplió dos veces sobre la marcha, según el usuario iba probando:
 
@@ -18,7 +18,7 @@ La v2 se amplió dos veces sobre la marcha, según el usuario iba probando:
 - **Ampliación** (13 de agosto, specs 011-020): salió de usar la app con dos meses de datos sembrados.
 - **v3** (16 de agosto, specs 021-028): salió de usarla otra vez, ya con todo lo anterior encima.
 
-**Quedan dos specs**, las de más abajo: 030 y 031.
+**Queda una spec**, la 031, más abajo.
 
 ## Specs
 
@@ -53,20 +53,21 @@ La v2 se amplió dos veces sobre la marcha, según el usuario iba probando:
 | 027 | Dietas y tablas de lunes a domingo, a medida y con cupo propio | ✅ completada |
 | 028 | Dietas: la semana de menús, guardada y editable | ✅ completada |
 | 029 | Ejercicios y tablas: la semana de entrenamientos, guardada y editable | ✅ completada |
+| 030 | Detalle nutricional automático: grupos de alimentos y calorías en rango | ✅ completada |
 
 ## Qué toca ahora
 
-Quedan **dos specs** para cerrar todo lo hablado. Alcance completo en `docs/PRODUCTO.md`.
+Queda **una spec** para cerrar todo lo hablado. Alcance completo en `docs/PRODUCTO.md`.
 
 | Spec | Qué es | Notas para empezar |
 |---|---|---|
-| 030 | **Detalle nutricional automático**: una llamada al día convierte lo apuntado en grupos de alimentos y calorías en rango | Pendiente desde la v2 original. `PRODUCTO.md` prohíbe las calorías exactas: solo rangos |
 | 031 | **Gamificación**: puntos, rachas con día de gracia y emblemas | Pendiente desde la v2 original. Se premia la conducta, nunca los kilos |
 
 Además, el usuario dijo el 16 de agosto que quiere **rehacer las pantallas de forma más lógica** cuando esto esté cerrado. No hay nada decidido todavía: hay que preguntarle antes de tocar nada.
 
 ## Deuda conocida
 
+- **Fix del 19 de agosto**: los recuentos de "Ajustes → Reiniciar datos" solo se leían una vez, al iniciar sesión, y salían desactualizados hasta recargar la página entera. Se refrescan también al abrir Ajustes, y hay un botón manual (`btn-actualizar-recuentos`) para forzarlo. Detectado al probar la spec 030.
 - **`pedirPlanEspecializado()` (`js/consulta.js`) y `api/plan.js` se quedaron sin usar en la spec 029**: los dos planes que llegaban como texto —la dieta y la tabla— ya son semanas estructuradas. No se borraron: arrastrar una función serverless entera no era decisión de la spec. Está en `docs/BACKLOG.md`.
 - **`sembrar.html` y `js/sembrar.js` siguen en el repo.** Son la herramienta temporal para rellenar datos de prueba. Hay que borrarlos cuando dejen de hacer falta.
 - **La reserva de Groq daba 401 el 16 de agosto** y quedó sin explicar (ver más abajo). El 17 la dieta salió adelante, así que o se arregló sola o respondió Gemini. **Sin confirmar.**
