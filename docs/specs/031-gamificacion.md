@@ -1,6 +1,6 @@
 # 031 — Gamificación: puntos, racha y emblemas
 
-- **Estado:** en implementación (agente `revisor-codigo`, 2026-08-19: cumple con observaciones; el falso positivo del emblema "Primera consulta" ya está corregido). Pendiente de que el usuario la pruebe.
+- **Estado:** ✅ completada (probada por el usuario en producción el 2026-08-19)
 - **Fecha:** 2026-08-19
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (v2)", punto "Gamificación individual", y "Conceptos clave del dominio" (Racha, Punto, Emblema). Confirmado también en "Qué explícitamente NO hace": sin ranking ni objetivos compartidos entre usuarios.
 
