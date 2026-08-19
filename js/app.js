@@ -183,6 +183,8 @@ import {
   borrarSeleccion
 } from "./reinicio.js";
 
+import { calcularGamificacion } from "./gamificacion.js";
+
 const pantallas = {
   cargando: document.getElementById("pantalla-cargando"),
   login: document.getElementById("pantalla-login"),
@@ -847,6 +849,54 @@ function refrescarHoy() {
   pintarCalendario(registros);
   pintarLoDeSiempre(registros.comidas);
   pintarAnalisis(registros.comidas);
+  pintarGamificacion(registros);
+}
+
+// --- Puntos, racha y emblemas (spec 031) ----------------------------------
+
+function pintarGamificacion(registros) {
+  const operacion = operacionActiva(operacionesCargadas);
+  if (!operacion) return;
+
+  const { puntos, racha, graciaDisponible, emblemas } = calcularGamificacion({
+    pesajes: registros.pesajes,
+    comidas: registros.comidas,
+    ejercicios: registros.ejercicios,
+    fotos: fotosCargadas,
+    consultas: consultasCargadas,
+    inicio: operacion.inicio,
+    hoy: hoyISO()
+  });
+
+  const lista = id("gamificacion-resumen");
+  lista.innerHTML = "";
+  lista.appendChild(lineaDeEstadistica("Puntos", String(puntos)));
+  lista.appendChild(
+    lineaDeEstadistica("Racha", `${racha} ${racha === 1 ? "día" : "días"}`)
+  );
+
+  id("gamificacion-gracia").textContent = graciaDisponible
+    ? "Todavía tienes el día de gracia de esta semana."
+    : "Ya has gastado el día de gracia de esta semana.";
+
+  const contenedorEmblemas = id("gamificacion-emblemas");
+  contenedorEmblemas.innerHTML = "";
+  emblemas.forEach((emblema) => {
+    const fila = document.createElement("div");
+    fila.className = "emblema";
+    fila.classList.toggle("conseguido", emblema.conseguido);
+
+    const nombre = document.createElement("span");
+    nombre.className = "emblema-nombre";
+    nombre.textContent = emblema.etiqueta;
+
+    const condicion = document.createElement("span");
+    condicion.className = "emblema-condicion";
+    condicion.textContent = emblema.condicion;
+
+    fila.append(nombre, condicion);
+    contenedorEmblemas.appendChild(fila);
+  });
 }
 
 // --- Detalle nutricional del día (spec 030) -------------------------------
@@ -2525,6 +2575,10 @@ async function refrescarConsulta() {
     pintarEstadoConsulta();
     pintarConversacion();
     pintarEspecializadas();
+    // El emblema "Primera consulta" depende de consultasCargadas: en el login
+    // esta función corre en paralelo con la carga de "Hoy", así que hay que
+    // repintar el bloque de gamificación cuando esta llegue.
+    refrescarHoy();
   } catch {
     id("error-consulta").textContent =
       "No se ha podido cargar tu consulta. Comprueba tu conexión.";
@@ -2646,6 +2700,10 @@ async function refrescarFotos() {
   try {
     fotosCargadas = await listarFotos(uidActual);
     pintarFotos(fotosCargadas);
+    // El emblema "Centenario" cuenta las fotos: mismo motivo que en
+    // refrescarConsulta(), repinta el bloque de gamificación con el dato ya
+    // actualizado.
+    refrescarHoy();
   } catch {
     id("estado-fotos").textContent =
       "No se han podido cargar tus fotos. Comprueba tu conexión.";

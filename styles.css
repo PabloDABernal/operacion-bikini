@@ -1377,6 +1377,34 @@ button:disabled {
   display: none;
 }
 
+/* Puntos, racha y emblemas (spec 031) -------------------------------------
+   Un emblema no conseguido se ve apagado en vez de desaparecer: forma parte
+   de la lista igual que un grupo del detalle nutricional a "nada". */
+
+.emblema {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--e2);
+  padding: var(--e2) 0;
+  border-bottom: 1px solid var(--borde);
+  opacity: 0.45;
+}
+
+.emblema.conseguido {
+  opacity: 1;
+}
+
+.emblema-nombre {
+  font-weight: 700;
+}
+
+.emblema-condicion {
+  color: var(--tinta-suave);
+  font-size: 0.85rem;
+  text-align: right;
+}
+
 /* Cuando una acción es LA acción de la pantalla, se ve como tal. */
 .accion-principal {
   width: 100%;
