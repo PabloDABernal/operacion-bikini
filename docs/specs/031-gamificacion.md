@@ -1,6 +1,6 @@
 # 031 — Gamificación: puntos, racha y emblemas
 
-- **Estado:** borrador
+- **Estado:** revisada (agente `revisor-specs`, 2026-08-19; sin bloqueantes, 4 mejoras aplicadas)
 - **Fecha:** 2026-08-19
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (v2)", punto "Gamificación individual", y "Conceptos clave del dominio" (Racha, Punto, Emblema). Confirmado también en "Qué explícitamente NO hace": sin ranking ni objetivos compartidos entre usuarios.
 
@@ -16,7 +16,7 @@ En "Hoy", cada usuario ve sus puntos por conducta, su racha de días seguidos ap
 4. Una semana natural (lunes a domingo) en la que apuntaste algo los 7 días suma +10 puntos extra ("semana completa"), y desbloquea el emblema **Semana redonda**.
 5. La racha cuenta días consecutivos con algo apuntado. Si falta un día, la racha **no se rompe** si es el primer día sin apuntar de esa semana natural; si falta un segundo día en la misma semana, la racha se corta ahí.
 6. El bloque dice si el día de gracia de esta semana **ya está gastado** o sigue disponible.
-7. Los emblemas conseguidos se ven marcados; los que faltan, no (o se ven apagados, a decidir en el diseño).
+7. Los emblemas conseguidos se ven marcados; los que faltan se ven apagados, con su condición para desbloquearlo.
 8. Cerrar la operación desde Ajustes archiva los registros como siempre; al abrir una operación nueva, el bloque **empieza de cero**: 0 puntos, racha 0, sin emblemas.
 9. Sin operación en marcha, el bloque no se ve, como el resto de "Hoy".
 10. Editar la fecha de un registro pasado (spec 007) recalcula puntos, racha y emblemas con la fecha corregida, sin arrastrar el valor viejo.
@@ -88,6 +88,10 @@ Se calculan mirando todos los días de la operación hasta hoy, no solo la racha
 | Semana redonda | se consiguió al menos una vez el bonus de "semana completa" (7 días con registro en una semana natural) | No |
 | Vuelta al ruedo | tras 5 o más días seguidos sin ningún registro, se volvió a apuntar algo | **Sí**, una vez por cada parón de 5+ días que termina |
 
+Los emblemas de racha no son excluyentes: superar los 30 días desbloquea también el de 7 si todavía no estaba (se comprueban por separado, cada uno con su propio umbral).
+
+Un emblema **no conseguido** muestra igualmente su nombre y su condición para desbloquearlo (por ejemplo: "Mes de hierro — llega a una racha de 30 días"), no queda opaco sin explicación. Un emblema conseguido se ve marcado.
+
 ### Dónde vive
 
 En **Hoy**, en un bloque nuevo debajo del calendario de constancia. Igual que el resto de bloques de "Hoy", solo se ve con una operación en marcha.
@@ -112,7 +116,7 @@ Al cerrar una operación, sus registros se archivan como siempre (spec 018) y el
 
 | Archivo | Cambio |
 |---|---|
-| `js/gamificacion.js` | **nuevo**: calcula puntos, racha, día de gracia y emblemas a partir de los registros de la operación |
+| `js/gamificacion.js` | **nuevo**: calcula puntos, racha, día de gracia y emblemas a partir de los registros de la operación. Importa `listarFotos()` de `js/fotos.js` para el emblema Centenario: `refrescarHoy()` en `js/app.js` hoy no carga fotos, así que esto añade una lectura de Firestore que hoy no existe al pintar "Hoy" |
 | `js/app.js` | el bloque nuevo en "Hoy", llamando a `js/gamificacion.js` |
 | `index.html` | el bloque y su estructura |
 | `styles.css` | estilos del bloque: puntos, racha, lista de emblemas |
