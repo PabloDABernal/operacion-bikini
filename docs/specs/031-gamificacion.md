@@ -147,4 +147,36 @@ Sin cambios en `firestore.rules`, `js/operaciones.js`, `js/reinicio.js` ni `verc
 
 ## ✅ Para probar a mano
 
-(El agente `qa-manual` lo afina antes de la prueba, con los pasos concretos y las fechas de ejemplo.)
+En https://operacion-bikini.vercel.app, con la operación en marcha. **Aviso importante:** los emblemas "Mes de hierro" (racha de 30 días) y "Centenario" (100 registros) piden mucho uso real y no se pueden forzar en una sola sesión: se prueban con el tiempo, no hoy. Este guion cubre lo que sí es verificable ahora mismo: el bloque en pantalla, los puntos básicos, la racha, el día de gracia, los emblemas alcanzables y la corrección de "Primera consulta".
+
+### Bloque visible en "Hoy" (criterios 1, 9)
+
+1. Entra en **Hoy**. Con la operación en marcha, debajo del calendario de constancia hay un bloque nuevo **"Puntos y racha"**, con puntos, racha y la lista de emblemas.
+
+### Puntos básicos (criterios 2, 3)
+
+2. Anota el número de puntos que ves ahora. Ve a **Peso** y apunta tu peso de hoy (si ya lo hiciste hoy, sáltalo). Vuelve a **Hoy**: los puntos suben +1, sin recargar la página.
+3. Ve a **Comidas** y apunta una comida. Vuelve a **Hoy**: +1 más. Apunta una segunda comida: +1 otra vez. Apunta una tercera: +1 una última vez. Apunta una **cuarta** comida de hoy: los puntos **no deben subir más** por comida — el tope es 3 al día.
+4. Ve a **Ejercicio** y apunta un ejercicio de hoy. Vuelve a **Hoy**: +2. Si hoy ya tienes peso, comida y ejercicio los tres, debería haber sumado también el bonus de **"día completo" (+3)**: comprueba que el total de puntos de hoy cuadra con peso (+1) + comidas (+1 hasta 3) + ejercicio (+2 cada uno) + día completo (+3 si aplica).
+
+### Racha y día de gracia (criterio 5, 6)
+
+5. Mira la **racha** del bloque: si apuntaste algo hoy, debe ser al menos 1. Mira también el aviso del **día de gracia** ("disponible" o "gastado" según si ya faltó algún día esta semana natural, lunes a domingo).
+
+### Emblemas (criterios 4, 7)
+
+6. En la lista de emblemas deben verse los **seis**: Primera semana, Mes de hierro, Centenario, Primera consulta, Semana redonda y Vuelta al ruedo.
+7. Los que no hayas conseguido se ven apagados, pero **con su condición escrita** (por ejemplo, "Semana redonda — Apunta algo los 7 días de una semana"): ninguno debe quedar en blanco o sin explicación.
+8. **Comprueba en concreto que "Primera consulta" NO sale marcado** si acabas de iniciar la operación, aunque hayas hecho la entrevista de bienvenida al arrancarla. Es el fallo que corrigió el `revisor-codigo`: esa entrevista ya no cuenta como consulta. Si en algún momento pides una consulta normal desde la app, ese emblema sí debería marcarse entonces.
+
+### Editar una fecha pasada (criterio 10)
+
+9. Edita la fecha de un registro antiguo (peso, comida o ejercicio) a otro día distinto. Guarda y vuelve a **Hoy**: los puntos y la racha deben recalcularse solos con la fecha nueva, sin quedarse con el valor de antes.
+
+### Regresión
+
+10. El calendario de constancia, justo encima del bloque nuevo, debe seguir pintando los días como siempre. El resto de "Hoy" (resumen del día, atajos, detalle nutricional) debe seguir funcionando igual que antes de esta spec.
+
+### Lo destructivo, al final
+
+11. **Ajustes → Reiniciar datos**: marca solo pesajes, comidas o ejercicios (uno de los tres) y confirma con `BORRAR`. Vuelve a **Hoy**: los puntos y la racha deben bajar en consecuencia, y algún emblema que estuviera marcado puede dejar de estarlo si ya no hay historial que lo sostenga. Es el comportamiento esperado: todo es derivado, no hay snapshot.
