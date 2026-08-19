@@ -315,7 +315,13 @@ function pintarAvatar(url, email) {
 
 // El avatar es la puerta de Ajustes desde la spec 024: la barra se quedó con
 // cinco botones para que cupiera Consulta.
-id("btn-perfil").addEventListener("click", () => abrirPestana("ajustes"));
+// Los recuentos de "Reiniciar datos" solo se leían una vez, al iniciar
+// sesión: si apuntabas algo después, salían desactualizados hasta recargar
+// la página entera. Se refrescan también al abrir Ajustes.
+id("btn-perfil").addEventListener("click", () => {
+  abrirPestana("ajustes");
+  refrescarRecuentos();
+});
 id("btn-cambiar-foto").addEventListener("click", () => id("archivo-perfil").click());
 
 id("archivo-perfil").addEventListener("change", async (evento) => {
@@ -3188,6 +3194,8 @@ async function refrescarRecuentos() {
       "No se han podido contar tus datos. Comprueba tu conexión.";
   }
 }
+
+id("btn-actualizar-recuentos").addEventListener("click", refrescarRecuentos);
 
 // Paso 1: enseñar exactamente qué se va a borrar, con números.
 id("btn-borrar-seleccion").addEventListener("click", () => {
