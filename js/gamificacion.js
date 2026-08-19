@@ -185,7 +185,13 @@ export function calcularGamificacion({
     vueltasAlRuedo,
     semanasCompletas,
     totalRegistros: pesajes.length + comidas.length + ejercicios.length + fotos.length,
-    huboConsulta: consultas.length > 0
+    // La entrevista que abre o reabre la operación (modo "inicial"/"reinicio")
+    // se guarda en "consultas" antes de crear la operación, así que sin este
+    // filtro el emblema saldría conseguido desde el primer segundo: no es una
+    // consulta que el usuario haya pedido durante la operación en marcha.
+    huboConsulta: consultas.some(
+      (consulta) => consulta.modo !== "inicial" && consulta.modo !== "reinicio"
+    )
   };
 
   return {

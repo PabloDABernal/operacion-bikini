@@ -1,6 +1,6 @@
 # 031 — Gamificación: puntos, racha y emblemas
 
-- **Estado:** revisada (agente `revisor-specs`, 2026-08-19; sin bloqueantes, 4 mejoras aplicadas)
+- **Estado:** en implementación (agente `revisor-codigo`, 2026-08-19: cumple con observaciones; el falso positivo del emblema "Primera consulta" ya está corregido). Pendiente de que el usuario la pruebe.
 - **Fecha:** 2026-08-19
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (v2)", punto "Gamificación individual", y "Conceptos clave del dominio" (Racha, Punto, Emblema). Confirmado también en "Qué explícitamente NO hace": sin ranking ni objetivos compartidos entre usuarios.
 
@@ -84,11 +84,13 @@ Se calculan mirando todos los días de la operación hasta hoy, no solo la racha
 | Primera semana | la racha alcanzó alguna vez 7 días, en cualquier momento de la operación | No |
 | Mes de hierro | la racha alcanzó alguna vez 30 días | No |
 | Centenario | la suma de pesajes + comidas + ejercicios + fotos de la operación llegó a 100 | No |
-| Primera consulta | se completó al menos una consulta (documento en `consultas`) durante la operación | No |
+| Primera consulta | se completó al menos una consulta normal (documento en `consultas` con modo distinto de `inicial`/`reinicio`) durante la operación | No |
 | Semana redonda | se consiguió al menos una vez el bonus de "semana completa" (7 días con registro en una semana natural) | No |
 | Vuelta al ruedo | tras 5 o más días seguidos sin ningún registro, se volvió a apuntar algo | **Sí**, una vez por cada parón de 5+ días que termina |
 
 Los emblemas de racha no son excluyentes: superar los 30 días desbloquea también el de 7 si todavía no estaba (se comprueban por separado, cada uno con su propio umbral).
+
+**Por qué "Primera consulta" excluye `inicial`/`reinicio`**: la entrevista que abre o reabre una operación se guarda en `consultas` con uno de esos dos modos, y se guarda **antes** de crear la operación (`js/consulta.js`, `responder()`). Sin excluirla, el emblema saldría conseguido desde el primer segundo de cualquier operación nueva, contradiciendo el caso límite "operación recién iniciada: sin emblemas". Detectado por el agente `revisor-codigo` el 2026-08-19.
 
 Un emblema **no conseguido** muestra igualmente su nombre y su condición para desbloquearlo (por ejemplo: "Mes de hierro — llega a una racha de 30 días"), no queda opaco sin explicación. Un emblema conseguido se ve marcado.
 
@@ -116,8 +118,8 @@ Al cerrar una operación, sus registros se archivan como siempre (spec 018) y el
 
 | Archivo | Cambio |
 |---|---|
-| `js/gamificacion.js` | **nuevo**: calcula puntos, racha, día de gracia y emblemas a partir de los registros de la operación. Importa `listarFotos()` de `js/fotos.js` para el emblema Centenario: `refrescarHoy()` en `js/app.js` hoy no carga fotos, así que esto añade una lectura de Firestore que hoy no existe al pintar "Hoy" |
-| `js/app.js` | el bloque nuevo en "Hoy", llamando a `js/gamificacion.js` |
+| `js/gamificacion.js` | **nuevo**: calcula puntos, racha, día de gracia y emblemas a partir de arrays ya cargados en memoria (pesajes, comidas, ejercicios, fotos, consultas). No lee ni escribe Firestore él mismo: mejor que la idea original de importar `listarFotos()`, `js/app.js` le pasa `fotosCargadas`/`consultasCargadas`, que ya se cargaban para las pestañas de Fotos y Consulta |
+| `js/app.js` | el bloque nuevo en "Hoy"; `refrescarConsulta()` y `refrescarFotos()` llaman a `refrescarHoy()` al terminar, para repintar el bloque cuando esos datos llegan (se cargan en paralelo con los registros del día en el login) |
 | `index.html` | el bloque y su estructura |
 | `styles.css` | estilos del bloque: puntos, racha, lista de emblemas |
 
