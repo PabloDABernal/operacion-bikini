@@ -195,6 +195,9 @@ async function turnoDeIa(mensajes, registros, extra) {
       // Gemini manda además el estado HTTP con el que respondió Google: sin
       // eso, un fallo suyo es indistinguible de un problema de red.
       if (datos.estado) codigo = `${datos.error}-${datos.estado}`;
+      // Con dos proveedores elegibles (spec 032), un "cuota-agotada" ya no
+      // dice por sí solo si fue Gemini o Groq.
+      if (datos.proveedor) codigo = `${codigo} (${datos.proveedor})`;
       // Por qué la reserva no salvó la petición (spec 020). Sin esto, "la IA
       // está saturada" no distingue que falte la clave de Groq de que Groq
       // también haya fallado.

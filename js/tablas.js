@@ -224,6 +224,9 @@ export async function pedirTablaALaIa(uid, instrucciones, registros, contexto) {
       const datos = await respuesta.json();
       if (datos.error) codigo = datos.error;
       if (datos.estado) codigo = `${datos.error}-${datos.estado}`;
+      // Con dos proveedores elegibles (spec 032), un "cuota-agotada" ya no
+      // dice por sí solo si fue Gemini o Groq.
+      if (datos.proveedor) codigo = `${codigo} (${datos.proveedor})`;
       if (datos.reserva && datos.reserva !== "no-hacia-falta") {
         codigo = `${codigo} · reserva: ${datos.reserva}`;
       }

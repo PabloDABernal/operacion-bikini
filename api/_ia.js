@@ -418,29 +418,34 @@ function comoReserva(resultado) {
 // campo `reserva` cuenta aparte qué le ha pasado al segundo, si se llegó a
 // intentar.
 function responderFalloFinal(res, primero, reserva) {
+  // `proveedor` va en todas las respuestas: sin él, un "cuota-agotada" no dice
+  // si fue Gemini o Groq quien la agotó, y con dos proveedores elegibles eso
+  // ya no se puede dar por hecho como antes de esta spec.
+  const proveedor = primero.proveedor;
+
   if (primero.estado === 429) {
-    res.status(429).json({ error: "cuota-agotada", reserva });
+    res.status(429).json({ error: "cuota-agotada", proveedor, reserva });
     return;
   }
 
   if (primero.estado === 503) {
-    console.error(`${primero.proveedor} saturado y sin reserva disponible.`);
-    res.status(503).json({ error: "ia-saturada", reserva });
+    console.error(`${proveedor} saturado y sin reserva disponible.`);
+    res.status(503).json({ error: "ia-saturada", proveedor, reserva });
     return;
   }
 
   if (primero.motivo === "respuesta-ilegible" || primero.motivo === "json-ilegible") {
-    res.status(502).json({ error: "respuesta-ilegible", reserva });
+    res.status(502).json({ error: "respuesta-ilegible", proveedor, reserva });
     return;
   }
 
   if (primero.motivo === "inalcanzable") {
-    res.status(502).json({ error: "ia-inalcanzable", reserva });
+    res.status(502).json({ error: "ia-inalcanzable", proveedor, reserva });
     return;
   }
 
   // sin-clave, o un HTTP que no sea 429/503/5xx (400, 401, 403, 404...).
-  res.status(502).json({ error: "ia-error", estado: primero.estado, reserva });
+  res.status(502).json({ error: "ia-error", proveedor, estado: primero.estado, reserva });
 }
 
 // Llama al proveedor elegido y, si hace falta, a su reserva; devuelve el JSON
