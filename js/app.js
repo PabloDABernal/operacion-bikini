@@ -248,6 +248,49 @@ function avisarGuardado(elementoId) {
   }, 3000);
 }
 
+// WeakMap y no un campo en el propio botón: pintarDieta() rehace las filas
+// enteras y tira los botones viejos, que así se recogen solos.
+const temporizadoresDeBoton = new WeakMap();
+
+// Hermano de avisarGuardado() para los botones de la semana (spec 034).
+//
+// Apuntar desde la dieta o desde la tabla se hace pulsando un botón que puede
+// estar en el primer día de siete: el párrafo de "Guardado" queda entonces a
+// varias pantallas de scroll y no se ve nunca. La respuesta va aquí en el
+// propio botón, el único sitio donde se sabe seguro que el usuario mira,
+// porque acaba de tocar ahí.
+//
+// El párrafo NO se sustituye, se suma: lleva role="status" y es lo único que
+// oye un lector de pantalla.
+function responderEnBoton(boton, hayQueCelebrar) {
+  if (!boton) return;
+
+  // Solo la primera vez: si se vuelve a pulsar en mitad de un aviso, el texto
+  // de partida ya no es el original y se quedaría congelado en "✓ Guardado".
+  if (boton.dataset.textoOriginal === undefined) {
+    boton.dataset.textoOriginal = boton.textContent;
+  }
+
+  clearTimeout(temporizadoresDeBoton.get(boton));
+
+  boton.textContent = hayQueCelebrar ? "✓ Guardado" : "✗ No se ha guardado";
+  boton.classList.remove("boton-confirmado", "boton-fallido");
+  boton.classList.add(hayQueCelebrar ? "boton-confirmado" : "boton-fallido");
+  boton.disabled = true;
+
+  // Los mismos 3 segundos que avisarGuardado(): que dos avisos de la misma app
+  // duren distinto no tiene ninguna justificación.
+  temporizadoresDeBoton.set(
+    boton,
+    setTimeout(() => {
+      boton.textContent = boton.dataset.textoOriginal;
+      boton.classList.remove("boton-confirmado", "boton-fallido");
+      boton.disabled = false;
+      temporizadoresDeBoton.delete(boton);
+    }, 3000)
+  );
+}
+
 // --- Login ---------------------------------------------------------------
 
 formLogin.addEventListener("submit", async (evento) => {
@@ -1385,7 +1428,7 @@ function filaDeComida(indiceDia, indiceComida, comida) {
 
   if (comida.texto) {
     const apuntar = botonDeFila("Me lo he comido", () =>
-      apuntarDeLaDieta(comida)
+      apuntarDeLaDieta(comida, apuntar)
     );
     apuntar.className = "boton-comido";
     fila.appendChild(apuntar);
@@ -1466,16 +1509,18 @@ async function guardarCelda(indiceDia, indiceComida, texto, recetaId) {
   }
 }
 
-async function apuntarDeLaDieta(comida) {
+async function apuntarDeLaDieta(comida, boton) {
   const error = id("error-semana");
   error.textContent = "";
 
   try {
     await guardarComida(uidActual, comida.texto, comida.momento, hoyISO(), "");
     avisarGuardado("guardado-dieta");
+    responderEnBoton(boton, true);
     await listaComidas.refrescar();
   } catch {
     error.textContent = "No se ha podido apuntar. Comprueba tu conexión.";
+    responderEnBoton(boton, false);
   }
 }
 
@@ -1827,7 +1872,7 @@ function filaDeSesion(indiceDia, sesion) {
     )
   );
 
-  const hecho = botonDeFila("Lo he hecho", () => apuntarDeLaTabla(sesion));
+  const hecho = botonDeFila("Lo he hecho", () => apuntarDeLaTabla(sesion, hecho));
   hecho.className = "boton-comido";
   fila.appendChild(hecho);
 
@@ -1977,7 +2022,7 @@ function enlazarConElCatalogo(ejercicios) {
 //
 // Sin hora, igual que "me lo he comido": el botón se pulsa cuando uno se
 // acuerda, no cuando entrena.
-async function apuntarDeLaTabla(sesion) {
+async function apuntarDeLaTabla(sesion, boton) {
   const error = id("error-semana-tabla");
   error.textContent = "";
 
@@ -1991,9 +2036,11 @@ async function apuntarDeLaTabla(sesion) {
       ""
     );
     avisarGuardado("guardado-tabla");
+    responderEnBoton(boton, true);
     await listaEjercicios.refrescar();
   } catch {
     error.textContent = "No se ha podido apuntar. Comprueba tu conexión.";
+    responderEnBoton(boton, false);
   }
 }
 

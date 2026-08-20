@@ -1284,6 +1284,28 @@ button:disabled {
   color: var(--apoyo);
 }
 
+/* La respuesta al apuntar desde la semana, en el propio botón (spec 034).
+   Relleno y no solo borde como .boton-comido: el cambio tiene que verse de
+   reojo, sin buscarlo. */
+.boton-confirmado {
+  background: var(--apoyo);
+  border-color: var(--apoyo);
+  color: var(--fondo);
+}
+
+.boton-fallido {
+  background: none;
+  border-color: var(--error);
+  color: var(--error);
+}
+
+/* Los dos avisos deshabilitan el botón mientras duran, y button:disabled lo
+   apaga al 45%: justo lo contrario de lo que se busca aquí. */
+.boton-confirmado:disabled,
+.boton-fallido:disabled {
+  opacity: 1;
+}
+
 #aviso-dieta:empty,
 #aviso-tabla:empty {
   display: none;
