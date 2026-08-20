@@ -575,6 +575,7 @@ button:disabled {
 
 .grafica-punto {
   fill: var(--borde);
+  cursor: pointer;
 }
 
 .grafica-objetivo {

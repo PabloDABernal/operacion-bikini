@@ -52,7 +52,7 @@ function etiquetaDeFecha(iso, conAnio) {
 // (una línea plana), aunque `diarios` tenga un solo elemento.
 //
 // Devuelve null si no hay suficientes datos para decir nada.
-export function dibujarGrafica(diarios, pesoObjetivo, totalPesajes) {
+export function dibujarGrafica(diarios, pesoObjetivo, totalPesajes, alTocar = () => {}) {
   if (diarios.length === 0 || totalPesajes < 2) return null;
 
   const primera = diarios[0].fecha;
@@ -123,16 +123,24 @@ export function dibujarGrafica(diarios, pesoObjetivo, totalPesajes) {
     );
   }
 
-  // Pesajes reales: se ven, pero no mandan.
+  // Pesajes reales: se ven, pero no mandan. Cada uno se puede tocar para ver
+  // su fecha y su peso exactos, igual que las casillas del calendario de
+  // constancia (spec 033).
   diarios.forEach((dia) => {
-    svg.appendChild(
-      elemento("circle", {
-        cx: x(dia.fecha),
-        cy: y(dia.peso),
-        r: "2",
-        class: "grafica-punto"
-      })
-    );
+    const punto = elemento("circle", {
+      cx: x(dia.fecha),
+      cy: y(dia.peso),
+      r: "2",
+      class: "grafica-punto"
+    });
+
+    const detalle = `${formatearFecha(dia.fecha)}: ${kg(dia.peso)}`;
+    const titulo = elemento("title", {});
+    titulo.textContent = detalle;
+    punto.appendChild(titulo);
+    punto.addEventListener("click", () => alTocar(detalle));
+
+    svg.appendChild(punto);
   });
 
   // Media móvil: la línea que dice la verdad. Con todos los pesajes en un solo

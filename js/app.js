@@ -699,14 +699,21 @@ function refrescarGrafica() {
 
   const contenedor = id("grafica-peso");
   const vacia = id("grafica-vacia");
+  const detalle = id("grafica-peso-detalle");
   contenedor.innerHTML = "";
+  // Al cambiar de rango, el punto que se estaba mirando puede haber
+  // desaparecido, así que el detalle vuelve a empezar.
+  detalle.textContent = "";
 
   pintarRangosGrafica();
 
-  const svg = dibujarGrafica(diarios, pesoObjetivoActual, diarios.length);
+  const svg = dibujarGrafica(diarios, pesoObjetivoActual, diarios.length, (texto) => {
+    detalle.textContent = texto;
+  });
   if (svg) {
     contenedor.appendChild(svg);
     vacia.textContent = "";
+    detalle.textContent = "Toca un punto para ver su fecha y su peso.";
   } else {
     vacia.textContent = "Apunta algún pesaje más para ver la evolución.";
   }
