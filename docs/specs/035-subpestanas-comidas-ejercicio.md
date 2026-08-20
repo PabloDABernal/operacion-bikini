@@ -1,6 +1,6 @@
 # 035 — Sub-pestañas en Comidas y Ejercicio, y nombres que dejan de pisarse
 
-- **Estado:** revisada (`revisor-specs`: CUMPLE CON REPAROS el 2026-08-20; los dos reparos, corregidos)
+- **Estado:** en implementación (código en `main`, `revisor-specs` y `revisor-codigo` con veredicto CUMPLE el 2026-08-20). Pendiente de que el usuario la pruebe.
 - **Fecha:** 2026-08-20
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (v4, decidida el 20 de agosto de 2026)", puntos **"Sub-pestañas dentro de las secciones grandes"** y **"Nombres que no se pisan"**.
 
@@ -204,4 +204,137 @@ Ya anotadas en `docs/BACKLOG.md` el 2026-08-20:
 
 ## ✅ Para probar a mano
 
-Lo rellena el agente `qa-manual` antes de la prueba.
+En https://operacion-bikini.vercel.app, con una operación en marcha. Lo que más
+riesgo tiene aquí no es lo nuevo: es que algo que ya funcionaba haya dejado de
+hacerlo por estar ahora dentro de una sub-pestaña. Por eso hay tantas
+regresiones.
+
+**Preparación:** ten a mano una semana de dieta y una de tabla con días
+rellenos, alguna receta, algún ejercicio en el catálogo, y varias comidas y
+entrenamientos ya apuntados.
+
+### Las sub-pestañas de Comidas
+
+1. Barra inferior → **Comidas**. Arriba del contenido hay una fila de tres
+   botones: **Apuntar · Mi dieta · Recetas**. "Apuntar" está activa, y se nota
+   **por el color y además por una línea**, no solo por el color.
+2. En "Apuntar" ves el formulario "Nueva comida", "Lo de siempre" y
+   "Lo que llevo apuntado". **No** ves el recetario ni la semana.
+3. Toca **"Mi dieta"** → aparece la semana y, debajo, "Pedírsela a la IA".
+   Desaparece todo lo demás.
+4. Toca **"Recetas"** → solo el recetario.
+5. Vuelve a **"Apuntar"**. Cada vez que cambias de sub-pestaña **la pantalla
+   sube al principio**, no te deja a mitad de la lista anterior.
+
+### Las de Ejercicio
+
+6. Barra inferior → **Ejercicio**. Tres botones: **Apuntar · Mi tabla ·
+   Catálogo**, con "Apuntar" activa.
+7. "Apuntar" enseña el formulario "Nuevo ejercicio" y "Lo que llevo apuntado".
+8. **"Mi tabla"** enseña la semana y "Pedírsela a la IA".
+9. **"Catálogo"** enseña solo el catálogo.
+
+### Que siempre se vuelve a Apuntar
+
+10. Estando en **Comidas → Recetas**, vete a **Peso** y vuelve a **Comidas** →
+    debe abrirse en **"Apuntar"**, no en "Recetas".
+11. Lo mismo en Ejercicio: déjalo en "Catálogo", sal y vuelve → "Apuntar".
+12. Recarga la página entera (F5) estando en Comidas → al volver, "Apuntar".
+
+### Los atajos de Hoy
+
+13. **Hoy** → toca el atajo **"Hacer dieta"** → se abre Comidas **con "Mi
+    dieta" activa**, no con "Apuntar".
+14. **Hoy** → atajo **"Tabla de ejercicios"** → Ejercicio con **"Mi tabla"**
+    activa.
+15. En el resumen de **Hoy**, los botones **`+`** llevan a la sección que toca
+    **abierta en "Apuntar"**, que es lo que un `+` debe hacer.
+
+### Los cinco nombres nuevos
+
+16. **Ejercicio → Catálogo**: el título dice **"Ejercicios que me sé"** (antes
+    "Mis ejercicios").
+17. **Ejercicio → Apuntar**: la lista se llama **"Lo que llevo apuntado"**
+    (antes "Mis entrenamientos apuntados").
+18. **Ejercicio → Mi tabla**: el bloque de pedir a la IA dice **"Pedírsela a la
+    IA"** (antes "Tabla de ejercicios", que se pisaba con "Mi tabla").
+19. **Comidas → Apuntar**: la lista dice **"Lo que llevo apuntado"** (antes
+    "Mis comidas").
+20. **Comidas → Mi dieta**: el bloque de pedir dice **"Pedírsela a la IA"**
+    (antes "Hacer dieta").
+21. Los atajos de **Hoy** siguen llamándose "Hacer dieta" y "Tabla de
+    ejercicios": **eso no cambia**, solo cambió a dónde llevan.
+
+### Regresiones: apuntar
+
+22. **Comidas → Apuntar**: guarda una comida nueva → sale "Guardado" y aparece
+    en "Lo que llevo apuntado".
+23. Toca algo de **"Lo de siempre"** → se apunta y aparece en la lista.
+24. **Ejercicio → Apuntar**: guarda un ejercicio nuevo → aparece en su lista.
+
+### Regresiones: recetario y catálogo
+
+25. **Comidas → Recetas** → **"Nueva receta"**: se despliega el formulario y
+    **la pantalla se desplaza hasta él**. Rellénala y guárdala → aparece en la
+    lista.
+26. Edita esa receta y bórrala. Si hay muchas, el botón de **desplegar** la
+    lista larga sigue funcionando.
+27. **Ejercicio → Catálogo** → **"Nuevo ejercicio"**: lo mismo, incluido que la
+    pantalla se desplace al formulario. Crear, editar, borrar y desplegar.
+
+### Regresiones: las semanas
+
+28. **Comidas → Mi dieta**: toca **"Editar"** en una celda → se edita **en la
+    propia fila** (no se abre ninguna ventana). Cambia el texto y guarda.
+29. Pulsa **"Vaciar y empezar de nuevo"** → la semana queda con sus `+`.
+    Vuelve a montarla a mano.
+30. **"Pedírsela a la IA"** → escribe una instrucción y pulsa "Pedir" → llega
+    la semana. El aviso del cupo que queda sigue saliendo.
+31. **Comidas → Mi dieta**: pulsa **"Me lo he comido"** en el primer día → el
+    botón dice **"✓ Guardado"** sin hacer scroll (spec 034). Vete a "Apuntar" y
+    comprueba que la comida está en "Lo que llevo apuntado".
+32. **Ejercicio → Mi tabla**: lo mismo con **"Lo he hecho"**, incluido vaciar,
+    editar un día y pedirla a la IA.
+
+### Regresiones: filtros y listas largas
+
+33. **Comidas → Apuntar**: usa **"Ver un día"** para filtrar por una fecha → la
+    lista se reduce. **"Quitar filtro"** la devuelve entera.
+34. Lo mismo en **Ejercicio → Apuntar**.
+35. En las dos, si la lista es larga, el botón de **desplegar** sigue
+    respondiendo.
+
+### Sin operación en marcha
+
+36. En **Ajustes** (toca tu avatar arriba) → **"Finalizar operación bikini"**, o
+    pruébalo si ya te toca cerrarla. Con la operación cerrada, entra en
+    **Comidas** → debe verse solo "Primero inicia tu operación bikini desde
+    Hoy". **No debe quedar una fila de sub-pestañas huérfana** flotando encima
+    del aviso. Lo mismo en Ejercicio.
+
+    *(Si no quieres cerrar tu operación de verdad, sáltate este paso y dilo: se
+    puede comprobar de otra forma.)*
+
+### Pantalla estrecha
+
+37. En el ordenador, F12 → modo responsive → **320 px** de ancho. En Comidas y
+    en Ejercicio los tres botones **caben en una sola línea**: la letra se
+    encoge, pero no se parte en dos líneas ni se abrevia "Catálogo".
+
+### Que no se ha roto nada fuera
+
+38. La barra inferior sigue teniendo los mismos cinco destinos: **Hoy · Peso ·
+    Comidas · Ejercicio · Consulta**. Ni uno más ni uno menos.
+39. **Peso**, **Consulta** y **Ajustes** siguen sin sub-pestañas y funcionando
+    igual que ayer.
+40. En **Peso**, guarda un pesaje → el aviso "Guardado" sale en su párrafo de
+    siempre, debajo del formulario.
+
+### Un detalle que es correcto aunque parezca raro
+
+41. Pulsa "Me lo he comido" y cambia de sub-pestaña antes de los 3 segundos.
+    Al volver, el botón puede seguir diciendo "✓ Guardado" durante el resto de
+    esos 3 segundos: el temporizador no se para al cambiar de pestaña. **Es lo
+    esperado**, no un fallo.
+
+Si todo pasa, la spec queda **completada**.
