@@ -1,6 +1,6 @@
 # 032 — Elegir el proveedor de IA desde Ajustes
 
-- **Estado:** revisada (agente `revisor-specs`, dos pasadas el 2026-08-19: la primera encontró que el parseo de respuesta no era simétrico entre proveedores, la segunda encontró una contradicción sobre `mereceReserva` que destapó un bug preexistente de la spec 020. Las dos, corregidas.)
+- **Estado:** en implementación (código en `main`, `revisor-codigo` con veredicto CUMPLE el 2026-08-19). Pendiente de que el usuario la pruebe.
 - **Fecha:** 2026-08-19
 - **Referencia en PRODUCTO.md:** "Qué explícitamente NO hace", la línea sobre no entrenar modelos propios (usa Gemini y Groq como reserva). Necesita actualizarse — ver sección 10.
 
@@ -132,4 +132,48 @@ Pasaría a:
 
 ## ✅ Para probar a mano
 
-(El agente `qa-manual` lo afina antes de la prueba, con los pasos concretos.)
+En https://operacion-bikini.vercel.app, con la operación en marcha.
+
+### Desplegable visible en Ajustes (criterio 1)
+
+1. Entra en **Ajustes**. Baja hasta la sección **"Proveedor de IA"**, debajo de "Mi objetivo". Debería haber un desplegable **"Cuál se prueba primero"** con dos opciones: **"Automático (recomendado)"** y **"Probar Groq primero"**.
+
+### Guardado inmediato (criterio 2)
+
+2. Abre el desplegable. Cambia de "Automático (recomendado)" a "Probar Groq primero". Debería ver un aviso breve **"Guardado"** que aparece y desaparece solo, sin pulsar ningún botón más.
+3. Vuelve a cambiar a "Automático (recomendado)". Debería ver otra vez el aviso "Guardado" inmediato.
+
+### Persistencia al recargar (criterio 5)
+
+4. Asegúrate de que tienes elegido "Probar Groq primero". Recarga la página (F5 o Cmd+R). Después de que cargue, entra otra vez en **Ajustes → Proveedor de IA**: el desplegable debe seguir mostrando "Probar Groq primero" — la opción se ha guardado en tu perfil, no solo en el navegador.
+
+### Las cuatro funciones de IA siguen funcionando con las dos opciones (criterios 3, 4)
+
+**Con "Automático (recomendado)":**
+
+5. En Ajustes, elige "Automático (recomendado)". Ve a **Consulta** y envía un mensaje corto (o inicia una consulta si no la tienes en marcha). Debería llegar la respuesta sin errores.
+6. Ve a **Comidas → Hacer dieta**. Pide una dieta (con o sin instrucciones). Debería llegar el plan con los **7 días de la semana completos**, cada uno con sus comidas — no vacío ni incompleto.
+7. Ve a **Ejercicio → Tabla de ejercicios**. Pide una tabla. Debería llegar con los **7 días de la semana completos**, cada uno con su rutina.
+8. Ve a **Hoy → Analizar lo que llevo hoy** (si te queda cupo). Debería llegar el análisis sin errores.
+
+**Con "Probar Groq primero":**
+
+9. En Ajustes, cambia a "Probar Groq primero" (verás "Guardado"). Repite los pasos 5-8: mensaje en Consulta, dieta, tabla, análisis. Las cuatro deben responder igual de bien. **Lo importante es que los datos llegan completos**: la dieta y la tabla con los 7 días, no vacías — es justo el bug que tuvo Groq con la dieta en la spec 028, y esta spec toca ese mismo camino de código.
+
+### Cambiar la opción a media conversación (caso límite)
+
+10. En una **consulta en marcha**, envía un mensaje. Sin cerrar la consulta, ve a Ajustes y cambia el proveedor. Vuelve a Consulta y envía otro mensaje. Ambos deberían llegar sin problemas.
+
+### Regresión: los dos formularios de Ajustes no se pisan (criterio 2)
+
+11. En **Ajustes**, cambia algo en **"Mi objetivo"** (nombre, peso objetivo o altura) y guarda con su botón "Guardar". Entra otra vez en **Ajustes → Proveedor de IA** y comprueba que tu opción elegida **no ha cambiado**: se guardan por separado.
+
+### Lo que no se puede forzar hoy en producción
+
+Estos casos no tienen pasos porque no hay forma de provocarlos desde la app; ya se comprobaron con una simulación de `fetch` durante la implementación, con resultado correcto en los seis escenarios probados (éxito directo, caída por 503 en los dos sentidos, un 400 que no cae, y quién gana el error cuando fallan los dos proveedores):
+
+- Gemini o Groq inalcanzables por red, o su clave sin configurar en Vercel.
+- Una respuesta que no se pueda interpretar.
+- Un 400 que no debe saltar de proveedor en ningún sentido.
+
+Si algún día uno de estos pasa de verdad en producción, el mensaje en pantalla y los logs de Vercel (`console.error`) deberían bastar para diagnosticarlo sin sorpresas.
