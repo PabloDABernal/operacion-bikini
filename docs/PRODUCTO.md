@@ -61,6 +61,45 @@ Sale de usar la app con dos meses de datos. Cambia la estructura, no solo el asp
 - **Tablas de ejercicio**: una tabla es una semana de entrenamientos (días × sesión). La IA puede generarla entera con sus ejercicios, y también se puede montar a mano colocando ejercicios propios. En la tabla de hoy, la sesión tiene un botón para decir **"lo he hecho"**, que la apunta como un solo ejercicio sin escribir nada.
 - **Detalle nutricional automático** y **gamificación** (puntos, rachas y emblemas): lo que quedaba pendiente de la v2.
 
+## Qué hará (v4, decidida el 20 de agosto de 2026)
+
+Sale de volver a usar la app con todo lo anterior encima, y de una auditoría de
+usabilidad sobre el código. No añade funciones: **coloca mejor las que ya hay**.
+El diagnóstico fue que Comidas y Ejercicio se habían convertido en páginas de
+cinco y seis bloques que solo se recorren con scroll ciego, y que en un monitor
+la app es una columna estrecha con dos desiertos a los lados.
+
+- **Sub-pestañas dentro de las secciones grandes**: Comidas y Ejercicio dejan de
+  ser una sola página larga. Cada una se parte en pestañas propias (apuntar, el
+  catálogo/recetario, la semana), a un toque. La barra inferior sigue teniendo
+  los mismos cinco destinos: lo que cambia es lo que hay dentro de dos de ellos.
+- **Nombres que no se pisan**: dentro de una misma sección no puede haber cuatro
+  títulos que suenen igual. Hoy en Ejercicio conviven "Mis ejercicios" (el
+  catálogo), "Mi tabla" (la semana), "Tabla de ejercicios" (pedírsela a la IA) y
+  "Mis entrenamientos apuntados" (el diario). Cada cosa pasa a llamarse por lo
+  que es.
+- **Vista de escritorio en varias columnas**: en pantalla ancha la app deja de
+  ser un móvil estirado. La columna se ensancha y los bloques de una sección se
+  reparten en varias columnas, de modo que lo que en el móvil son sub-pestañas
+  en el escritorio se ve a la vez. Es la misma app y el mismo código: cambia la
+  colocación, no las funciones.
+- **La confirmación aparece donde está el dedo**: al apuntar algo desde la
+  semana ("me lo he comido", "lo he hecho"), el aviso de guardado sale pegado al
+  botón que se ha pulsado, no al final de la página. Hasta ahora se guardaba
+  bien pero el aviso caía fuera de la pantalla, y parecía que no había pasado
+  nada.
+- **Fotos deja de estar escondida**: hoy solo se llega desde el atajo de Hoy.
+  Pasa a tener su sitio en la navegación.
+- **Menos fricción al apuntar**: los campos de fecha y hora dejan de estar
+  siempre a la vista en los formularios, porque casi siempre son "ahora". Se
+  despliegan cuando hacen falta. Y los botones pequeños de tipo enlace
+  (Cancelar, Quitar filtro, Volver) crecen lo suficiente para acertarles con el
+  dedo.
+
+Lo que **no** cambia: la semana de dieta y la de tabla siguen sin guardar estado
+—no marcan qué has cumplido y qué no—, tal y como se decidió al diseñarlas. Aquí
+solo se arregla el aviso de guardado.
+
 ## Qué explícitamente NO hace
 
 - No sustituye a un profesional médico real: siempre debe recordar (disclaimer) que ante dudas o falta de resultados hay que consultar a un médico.
@@ -91,4 +130,6 @@ Sale de usar la app con dos meses de datos. Cambia la estructura, no solo el asp
 
 - **v1 (beta, deadline 31 de agosto)**: todo el alcance descrito arriba (registro completo + consejos + consulta + fotos), priorizando que funcione sobre que esté pulido visualmente. **Terminada y probada el 11 de agosto de 2026** (specs 001 a 005), 20 días antes del plazo.
 - **v2 (en curso desde el 11 de agosto de 2026, sin fecha límite)**: lo descrito en "Qué hará (v2)". El criterio con el que se eligió: la v2 no se pierde por falta de funciones, se pierde si dejamos de usar la app; así que primero va lo que quita fricción y lo que se disfruta a diario. Razonamiento completo en `docs/propuestas/v2-usabilidad-y-gamificacion.md`.
+- **v3 (16 de agosto de 2026)**: lo descrito en "Qué hará (v3)". Terminada y probada.
+- **v4 (desde el 20 de agosto de 2026, sin fecha límite)**: lo descrito en "Qué hará (v4)". No añade funciones: reordena lo que ya hay para que se encuentre, y estrena la vista de escritorio. Sale de una auditoría de usabilidad hecha sobre el código el 20 de agosto.
 - **Descartado para v2**: notificaciones push (mucho trabajo y acaban silenciadas), integración con básculas o pulseras, y comparativa de fotos lado a lado, que se pospone.

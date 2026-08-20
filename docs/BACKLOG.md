@@ -44,3 +44,10 @@ Ideas surgidas durante la implementación, no implementadas. Una línea cada una
 - Marcar ejercicios sueltos dentro de una sesión, en vez de la sesión entera (spec 029).
 - Ver la evolución de los grupos de alimentos a lo largo de la semana (spec 030: solo el día de hoy, sin histórico).
 - Que el análisis nutricional del día alimente el contexto de la conversación con la IA (spec 030).
+
+## De la auditoría de usabilidad (20 de agosto de 2026, v4)
+
+- Reordenar Ajustes: son siete bloques en una sola columna, mezclando lo de todos los días (perfil, objetivo) con la zona de peligro. La v4 no lo toca.
+- Sub-pestañas también en Ajustes, si las de Comidas y Ejercicio funcionan bien.
+- El aviso de guardado dura 3 segundos fijos y desaparece solo; valorar si algún caso pide que se quede hasta que lo cierres.
+- Que la semana de dieta y de tabla marquen qué has cumplido hoy. Descartado a propósito en la v4 para no contradecir la spec 028; si algún día se quiere, hay que cambiar PRODUCTO.md primero.
