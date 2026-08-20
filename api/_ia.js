@@ -214,14 +214,21 @@ async function llamarAGroq(cuerpo, etiqueta) {
       body: JSON.stringify(aFormatoGroq(cuerpo, modelo))
     });
 
-    // 404 y 400 con "model" suelen significar que ese nombre no existe para
-    // esta clave; el resto ya no es un problema de nombre.
-    if (ultimaRespuesta.status !== 404) {
+    // 404 significa que ese nombre no existe para esta clave. 429 significa
+    // que ESE modelo se quedó sin cuota, no que Groq entero la haya agotado:
+    // cada modelo tiene la suya, y el grande (el primero de la lista) suele
+    // ser el más tacaño en la capa gratuita. En los dos casos merece la pena
+    // probar el siguiente antes de rendirse.
+    if (ultimaRespuesta.status !== 404 && ultimaRespuesta.status !== 429) {
       if (ultimaRespuesta.ok) console.log(`${etiqueta} generado con Groq (${modelo}).`);
       return ultimaRespuesta;
     }
 
-    console.error(`El modelo ${modelo} no existe en Groq para esta clave, probando el siguiente.`);
+    console.error(
+      ultimaRespuesta.status === 429
+        ? `El modelo ${modelo} de Groq se quedó sin cuota, probando el siguiente.`
+        : `El modelo ${modelo} no existe en Groq para esta clave, probando el siguiente.`
+    );
   }
 
   return ultimaRespuesta;
