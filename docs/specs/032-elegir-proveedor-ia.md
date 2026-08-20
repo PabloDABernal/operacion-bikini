@@ -1,6 +1,6 @@
 # 032 — Elegir el proveedor de IA desde Ajustes
 
-- **Estado:** borrador
+- **Estado:** revisada (agente `revisor-specs`, 2026-08-19; encontró un bloqueante real de diseño — el parseo de respuesta no era simétrico entre proveedores — corregido en las secciones 4, 6, 7 y 8)
 - **Fecha:** 2026-08-19
 - **Referencia en PRODUCTO.md:** "Qué explícitamente NO hace", la línea sobre no entrenar modelos propios (usa Gemini y Groq como reserva). Necesita actualizarse — ver sección 10.
 
@@ -13,7 +13,7 @@ Desde Ajustes, cada usuario puede elegir que sus peticiones a la IA prueben prim
 1. En **Ajustes**, hay un desplegable nuevo **"Proveedor de IA"** con dos opciones: **"Automático (recomendado)"** y **"Probar Groq primero"**.
 2. Cambiar la opción la guarda al momento (sin botón "Guardar" aparte, y sin tocar el resto del formulario de Ajustes).
 3. Con **"Automático"** (el valor por defecto, igual que hoy): las cuatro funciones de IA —Pasar consulta, dieta, tabla de ejercicio y análisis nutricional— prueban Gemini primero y caen a Groq solo si Gemini responde 429, 503 o 5xx. Ningún cambio de comportamiento respecto a hoy.
-4. Con **"Probar Groq primero"**: esas mismas cuatro funciones prueban Groq primero, y caen a Gemini si Groq falla (network, no-ok, o JSON ilegible).
+4. Con **"Probar Groq primero"**: esas mismas cuatro funciones prueban Groq primero, y caen a Gemini con las mismas condiciones que hoy usa la caída de Gemini a Groq: solo si Groq responde 429, 503 o 5xx, si no se puede alcanzar, o si su respuesta no se puede interpretar. Un 400 no salta de proveedor, igual que hoy.
 5. Recargar la página o volver a entrar mantiene la opción elegida: se guarda en el documento del usuario, no en el navegador.
 6. Si Groq no tiene clave configurada (`GROQ_API_KEY` ausente en Vercel) y el usuario tiene elegido "Probar Groq primero", la petición cae a Gemini directamente, con el mismo aviso de "sin clave" que ya existe hoy para la reserva automática.
 
@@ -24,7 +24,7 @@ Desde Ajustes, cada usuario puede elegir que sus peticiones a la IA prueben prim
 - El desplegable en Ajustes, con guardado inmediato al cambiar.
 - El campo nuevo en el documento de ajustes del usuario.
 - Pasar ese valor a las cuatro funciones de IA (`api/consulta.js`, `api/dieta.js`, `api/tabla.js`, `api/analisis.js`) a través de sus llamadas desde `js/conversacion.js`, `js/consulta.js`, `js/dietas.js`, `js/tablas.js` y `js/analisis.js`.
-- En `api/_ia.js`, la función que ahora mismo siempre prueba Gemini primero pasa a poder invertir el orden cuando se lo pidan, manteniendo la misma lógica de caída al otro proveedor que ya existe (mismos códigos de estado que disparan la reserva).
+- En `api/_ia.js`, reestructurar `generarJson()` para que pueda intentar los proveedores en cualquier orden. **Esto no es un simple intercambio de qué función se llama primero**: hoy la interpretación de una respuesta *correcta* solo sabe leer el formato de Gemini (`candidates[0].content.parts[0].text`); la de Groq solo se interpreta dentro del camino de reserva, con `jsonDeGroq()` (formato `choices[0].message.content`). Para invertir el orden de verdad, cada proveedor necesita su propia función de "intentar y devolver un resultado interpretado" — ver diseño en la sección 4.
 - Actualizar `docs/PRODUCTO.md` con el texto de la sección 10.
 
 ### NO entra (explícitamente fuera)
@@ -49,9 +49,15 @@ Al cambiar el valor, se guarda inmediatamente (sin esperar a que el usuario puls
 
 ### Qué pasa en el servidor
 
-Las cuatro funciones (`api/consulta.js`, `api/dieta.js`, `api/tabla.js`, `api/analisis.js`) ya llaman todas a `generarJson()` en `api/_ia.js`. Esta pasa a aceptar un parámetro `proveedor` (`"automatico"` por defecto, o `"groq-primero"`), leído del cuerpo de la petición.
+Las cuatro funciones (`api/consulta.js`, `api/dieta.js`, `api/tabla.js`, `api/analisis.js`) ya llaman todas a `generarJson(res, cuerpo, etiqueta)`. Esta pasa a aceptar un cuarto parámetro `proveedor` (`"automatico"` por defecto, o `"groq-primero"`), leído del cuerpo de la petición. Cualquier valor que no sea uno de esos dos se trata como `"automatico"` (casilla de seguridad: no hay forma de que llegue otra cosa desde el desplegable, pero el servidor no confía en lo que mande el navegador).
 
-Con `"groq-primero"`, el orden de intento se invierte (Groq primero, Gemini como reserva), pero la lógica de cuándo caer al otro proveedor es la misma que hoy: solo ante fallos de verdad (red, HTTP que no sea 2xx, JSON no interpretable), nunca ante un 400, que sigue significando "la petición está mal formada" y no "prueba con el otro".
+**El contrato externo de `generarJson()` no cambia**: sigue devolviendo el JSON ya parseado, o `null` tras haber respondido ella misma el error. Lo que cambia es su interior, para que Gemini y Groq sean intercambiables:
+
+1. Se extraen dos funciones nuevas, `intentarGemini(cuerpo, etiqueta)` e `intentarGroq(cuerpo, etiqueta)`, cada una responsable de **llamar a su proveedor e interpretar su propio formato de respuesta** (Gemini: `candidates[0].content.parts[0].text`; Groq: `jsonDeGroq()`, que ya existe). Cada una devuelve siempre la misma forma: `{ ok: true, json }` si todo fue bien, o `{ ok: false, mereceReserva, motivo, estado }` si no — nunca escriben en `res` directamente, para que la decisión de qué responder al navegador quede en un solo sitio.
+2. `mereceReserva` es `true` exactamente en los mismos casos que hoy dispara la reserva de Gemini→Groq (429, 503, ≥500, falta de clave, o inalcanzable), aplicado ahora simétricamente a los dos proveedores: es la condición que ya estaba probada en producción (spec 020), solo que ahora la usan ambos sentidos.
+3. `generarJson()` decide el orden (`["gemini", "groq"]` o `["groq", "gemini"]` según `proveedor`), llama al primero, y si falla con `mereceReserva`, llama al segundo. Si el segundo tampoco puede, **el mensaje de error se construye a partir del fallo del primero** (el elegido), y el campo `reserva` de la respuesta describe qué pasó con el segundo — igual que hoy, donde el error es siempre el de Gemini y `reserva` describe qué pasó con Groq.
+4. La comprobación de `GEMINI_API_KEY` deja de ser un corte previo obligatorio: pasa a vivir dentro de `intentarGemini()`, que devuelve `{ ok: false, mereceReserva: true, motivo: "sin-clave" }` si falta, igual que ya hace `intentarGroq()` con `GROQ_API_KEY`. Así una petición con "Probar Groq primero" no depende de que Gemini esté configurado para intentarlo primero (hoy es un caso imposible porque Gemini siempre tiene clave en este proyecto, pero deja de estar el código asumiéndolo sin necesidad).
+5. Los códigos de error que hoy se llaman `gemini-error` y `gemini-inalcanzable` (los que cubren cualquier fallo que no sea 429/503) pasan a llamarse `ia-error` e `ia-inalcanzable`, sin más cambio: son genéricos por proveedor desde el principio, así que solo hacía falta quitarles el nombre de uno solo. `js/consulta.js` (`mensajeDeFalloDeIa()`) se actualiza para reconocer el prefijo `ia-` en vez de `gemini`. `cuota-agotada`, `ia-saturada` y `respuesta-ilegible` ya eran genéricos y no cambian.
 
 ### Qué manda el cliente
 
@@ -68,7 +74,8 @@ Sin colección nueva. `leerAjustes()` en `js/ajustes.js` devuelve `"automatico"`
 ## 6. Casos límite
 
 - **Sin `GROQ_API_KEY` configurada y "Probar Groq primero" elegido**: la petición cae a Gemini directamente, con el mismo código `sin-clave` que ya usa la reserva automática hoy.
-- **Los dos proveedores fallan**: se ve el mismo error que hoy cuando falla la reserva automática (el de Gemini gana, por ser el que mejor explica qué pasó, según la lógica ya existente en `generarJson()`).
+- **Los dos proveedores fallan**: gana el error del proveedor que se intentó primero (el elegido), con `reserva` describiendo qué pasó con el segundo. Con "Automático" es exactamente el comportamiento de hoy (gana Gemini); con "Probar Groq primero" gana el de Groq.
+- **`proveedorIa` llega con un valor que no es ninguno de los dos conocidos** (manipulado a mano, o un valor futuro no soportado todavía): el servidor lo trata como `"automatico"`.
 - **Cambiar la opción a media conversación**: no afecta a lo ya respondido, solo a la siguiente petición que se mande.
 - **Cambiar la opción y no guardar el resto de Ajustes**: no hay conflicto, es un guardado aparte del formulario "Mi objetivo".
 - **Reiniciar datos**: `proveedorIa` vive en el documento de ajustes, no en ninguna colección de las que cubre el reinicio (spec 006/019); no se toca al reiniciar.
@@ -81,21 +88,26 @@ Sin colección nueva. `leerAjustes()` en `js/ajustes.js` devuelve `"automatico"`
 | `js/ajustes.js` | `leerAjustes()` devuelve `proveedorIa` con valor por defecto; función nueva para guardarlo suelto (igual que `guardarFotoPerfil()`) |
 | `index.html` | sección nueva "Proveedor de IA" en Ajustes, con el desplegable |
 | `js/app.js` | pinta el desplegable con el valor guardado, lo guarda al cambiar, y pasa el valor a las cinco llamadas de IA |
-| `js/conversacion.js`, `js/consulta.js`, `js/dietas.js`, `js/tablas.js`, `js/analisis.js` | añaden `proveedor` al cuerpo de su petición |
-| `api/consulta.js`, `api/dieta.js`, `api/tabla.js`, `api/analisis.js` | leen `proveedor` del cuerpo y lo pasan a `generarJson()` |
-| `api/_ia.js` | `generarJson()` acepta `proveedor` e invierte el orden Gemini/Groq cuando toca, reutilizando la lógica de caída ya existente |
+| `js/conversacion.js`, `js/consulta.js`, `js/dietas.js`, `js/tablas.js` | añaden `proveedor` al cuerpo de su petición (ya mandan un objeto con `...contexto`/`...extra` donde encaja) |
+| `js/analisis.js` | `pedirAnalisisALaIa(uid, comidas)` cambia de firma para aceptar también `proveedor`: hoy es la única de las cinco que no tiene ya un cuerpo abierto a más campos |
+| `api/consulta.js`, `api/dieta.js`, `api/tabla.js`, `api/analisis.js` | leen `proveedor` del cuerpo y lo pasan como cuarto argumento a `generarJson()` |
+| `api/_ia.js` | `generarJson()` se reestructura en `intentarGemini()` / `intentarGroq()` (cada una llama e interpreta su propio formato) más un orquestador que decide orden y quién gana el error final; `gemini-error`/`gemini-inalcanzable` pasan a `ia-error`/`ia-inalcanzable` |
 | `docs/PRODUCTO.md` | texto actualizado, ver sección 10 |
 
 Sin cambios en `firestore.rules` (mismo documento y las mismas reglas que ya cubren `usuarios/{uid}`), ni en `vercel.json`.
 
-**Estimación: ~180-220 líneas.** Dentro del límite de la spec pequeña.
+**Estimación: ~260-320 líneas.** Por encima de lo calculado al principio: `api/_ia.js` necesita más que un intercambio de orden, ver sección 4. Está en el límite de lo que el proyecto considera una rebanada pequeña (~300 líneas); si al implementar se ve que se dispara, avisar antes de seguir y valorar dejar fuera `js/analisis.js` (el análisis nutricional) para una spec aparte.
 
 ## 8. Decisiones tomadas
 
 - **Desplegable de dos opciones, no tres** → decisión del usuario el 2026-08-19. "Solo Gemini" con la red de seguridad activada se comporta exactamente igual que "Automático" (Gemini ya es el primero hoy, y ya cae a Groq en los mismos casos), así que una tercera opción idéntica a la primera no aportaba nada y solo confundiría.
 - **Se cae al otro proveedor igualmente si el elegido falla** → decisión del usuario. Forzar un proveedor sin red de seguridad se descartó: el objetivo es poder *probar* Groq a propósito, no arriesgarse a quedarse sin respuesta por elegir mal.
 - **Se aplica a las cuatro funciones de IA, no solo a la conversación** → decisión del usuario.
-- **El orden solo cambia entre Gemini y Groq, no las condiciones de cuándo caer al otro** → decisión técnica, para no crear un segundo comportamiento distinto del que ya existe y está probado (spec 020): un 400 sigue sin saltar de proveedor, sea cual sea el orden.
+- **El orden solo cambia entre Gemini y Groq, no las condiciones de cuándo caer al otro** → decisión técnica, para no crear un segundo comportamiento distinto del que ya existe y está probado (spec 020): un 400 sigue sin saltar de proveedor, sea cual sea el orden. La condición (`mereceReserva`) pasa a aplicarse simétricamente a los dos proveedores, en vez de estar escrita solo pensando en Gemini.
+- **`generarJson()` se reestructura en dos funciones por proveedor, no en un simple intercambio de orden** → detectado por el agente `revisor-specs` el 2026-08-19: la interpretación de una respuesta correcta solo sabía leer el formato de Gemini, así que invertir el orden literalmente habría hecho que una respuesta *buena* de Groq se leyera como ilegible. Cada proveedor necesita su propia interpretación de éxito y de fallo.
+- **Cuando fallan los dos, gana el error del proveedor elegido en primer lugar** → decisión técnica, para que "Automático" no cambie de comportamiento (sigue ganando Gemini) y "Probar Groq primero" muestre el error del proveedor que el usuario quería probar, no el del que solo actuó de red de seguridad.
+- **`GEMINI_API_KEY` deja de comprobarse por adelantado y pasa a comprobarse dentro de `intentarGemini()`** → decisión técnica, para que "Probar Groq primero" no dependa de una comprobación pensada para cuando Gemini iba siempre primero.
+- **Un valor de `proveedorIa` desconocido se trata como `"automatico"`** → decisión técnica: el servidor no confía en lo que mande el navegador para decidir un comportamiento con consecuencias (a qué proveedor se manda la petición).
 - **Vive en el documento de ajustes del usuario, no en el navegador** → decisión técnica, coherente con el resto de preferencias de la app (nombre, foto, objetivo): así se mantiene entre dispositivos y sesiones.
 
 ## 9. Fuera de spec: ideas apuntadas
