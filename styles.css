@@ -141,6 +141,53 @@ header {
   display: block;
 }
 
+/* Sub-pestañas dentro de Comidas y Ejercicio (spec 035) -------------------
+
+   Comidas eran seis bloques en una sola página y Ejercicio cinco: solo se
+   recorrían con scroll ciego. Se reparten en tres pestañas, las mismas en las
+   dos secciones para que la de al lado se aprenda sola.
+
+   La fila NO es fija como la barra inferior: pertenece al contenido, y una
+   segunda barra pegada a la pantalla robaría el poco alto que hay en un
+   móvil. */
+
+.subpestanas {
+  display: flex;
+  gap: var(--e1);
+  margin-bottom: var(--e4);
+  border-bottom: 1px solid var(--borde);
+}
+
+.subpestana {
+  flex: 1;
+  min-width: 0;
+  padding: var(--e3) var(--e2);
+  background: none;
+  border: none;
+  border-radius: 0;
+  color: var(--tinta-suave);
+  /* Mismo apaño que en la barra inferior: en 320 px "Catálogo" va justo, así
+     que la letra se encoge sola hasta caber, sin partirse ni abreviarse. */
+  font-size: clamp(0.75rem, 3.5vw, 0.9rem);
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.subpestana.activa {
+  color: var(--acento);
+  /* Además del color, la línea: el color solo no basta para distinguirla. */
+  box-shadow: inset 0 -2px 0 var(--acento);
+}
+
+.subseccion {
+  display: none;
+}
+
+.subseccion.activa {
+  display: block;
+}
+
 /* Navegación inferior ----------------------------------------------------
 
    Fija abajo en todos los tamaños. En pantallas anchas la barra llega de

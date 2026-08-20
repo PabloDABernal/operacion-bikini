@@ -218,7 +218,7 @@ function id(nombre) {
 
 const PESTANA_INICIAL = "hoy";
 
-function abrirPestana(nombre) {
+function abrirPestana(nombre, subseccion) {
   document.querySelectorAll(".seccion").forEach((seccion) => {
     seccion.classList.toggle("activa", seccion.dataset.seccion === nombre);
   });
@@ -227,15 +227,72 @@ function abrirPestana(nombre) {
     boton.classList.toggle("activa", boton.dataset.seccion === nombre);
   });
 
+  // Comidas y Ejercicio tienen sub-pestañas dentro (spec 035). Sin decir cuál,
+  // se abre la primera: entrar en Comidas es entrar a apuntar, que es lo que se
+  // hace veinte veces al día. No se recuerda dónde estabas.
+  const fila = document.querySelector(`.subpestanas[data-de="${nombre}"]`);
+  if (fila) {
+    abrirSubpestana(
+      nombre,
+      subseccion || fila.querySelector(".subpestana").dataset.subseccion
+    );
+  }
+
   // Desde arriba: al cambiar de sección se ve el principio, no donde te
   // quedaste en la sección anterior.
   window.scrollTo(0, 0);
 }
 
+// Hermana de abrirPestana() para las sub-pestañas (spec 035). Se busca dentro
+// de la sección y no en todo el documento: las dos secciones con sub-pestañas
+// usan los mismos nombres de contenedor y la de al lado no debe enterarse.
+function abrirSubpestana(seccion, nombre) {
+  const caja = document.querySelector(`.seccion[data-seccion="${seccion}"]`);
+  if (!caja) return;
+
+  caja.querySelectorAll(".subseccion").forEach((bloque) => {
+    bloque.classList.toggle("activa", bloque.dataset.subseccion === nombre);
+  });
+
+  caja.querySelectorAll(".subpestana").forEach((boton) => {
+    const puesta = boton.dataset.subseccion === nombre;
+    boton.classList.toggle("activa", puesta);
+    // aria-current y no role="tab": un patrón de pestañas a medias, sin
+    // tabpanel ni flechas del teclado, le promete a un lector de pantalla algo
+    // que la app no hace.
+    if (puesta) {
+      boton.setAttribute("aria-current", "true");
+    } else {
+      boton.removeAttribute("aria-current");
+    }
+  });
+}
+
 // La barra y los atajos provisionales de Ajustes hacen lo mismo: llevar a una
-// sección. El botón lo dice en su data-seccion.
+// sección. El botón lo dice en su data-seccion, y si además trae
+// data-subseccion, deja abierta esa sub-pestaña al llegar.
+//
+// OJO con el selector: la clase .atajo también la lleva el botón de "Pedir
+// dieta"/"Pedir tabla", que se crea en tiempo de ejecución y NO navega a
+// ninguna parte. Aquí no choca porque esto corre al cargar, antes de que ese
+// botón exista. No convertir esto en un listener delegado ni volver a
+// consultar el selector más tarde: ese botón acabaría llamando a
+// abrirPestana(undefined).
 document.querySelectorAll(".nav-boton, .atajo").forEach((boton) => {
-  boton.addEventListener("click", () => abrirPestana(boton.dataset.seccion));
+  boton.addEventListener("click", () =>
+    abrirPestana(boton.dataset.seccion, boton.dataset.subseccion)
+  );
+});
+
+document.querySelectorAll(".subpestana").forEach((boton) => {
+  boton.addEventListener("click", () => {
+    abrirSubpestana(
+      boton.closest(".seccion").dataset.seccion,
+      boton.dataset.subseccion
+    );
+    // Igual que al cambiar de sección: se ve el principio del contenido.
+    window.scrollTo(0, 0);
+  });
 });
 
 // Confirmación breve al guardar: sin esto, guardar un pesaje no produce

@@ -63,8 +63,8 @@
 
       <div id="atajos-hoy">
         <button type="button" class="atajo" data-seccion="consulta">Pasar consulta</button>
-        <button type="button" class="atajo" data-seccion="comidas">Hacer dieta</button>
-        <button type="button" class="atajo" data-seccion="ejercicio">Tabla de ejercicios</button>
+        <button type="button" class="atajo" data-seccion="comidas" data-subseccion="dieta">Hacer dieta</button>
+        <button type="button" class="atajo" data-seccion="ejercicio" data-subseccion="tabla">Tabla de ejercicios</button>
         <button type="button" class="atajo" data-seccion="fotos">Foto del día</button>
       </div>
 
@@ -143,6 +143,17 @@
         Primero inicia tu operación bikini desde Hoy.
       </p>
       <div class="contenido-operacion">
+
+      <!-- Sub-pestañas (spec 035). Comidas y Ejercicio tienen la misma forma
+           a propósito: se aprenden una sola vez. -->
+      <div class="subpestanas" data-de="comidas">
+        <button type="button" class="subpestana activa" data-subseccion="apuntar" aria-current="true">Apuntar</button>
+        <button type="button" class="subpestana" data-subseccion="dieta">Mi dieta</button>
+        <button type="button" class="subpestana" data-subseccion="recetas">Recetas</button>
+      </div>
+
+      <!-- Sub-pestaña: Apuntar -->
+      <div class="subseccion activa" data-subseccion="apuntar">
       <h2>Nueva comida</h2>
       <form id="form-comida">
         <label for="comida-texto">Qué has comido</label>
@@ -170,6 +181,58 @@
         <p id="guardado-repetir" class="guardado" role="status"></p>
       </div>
 
+      <!-- El diario. Se llama igual que su gemelo de Ejercicio (spec 035). -->
+      <h2>Lo que llevo apuntado</h2>
+      <div class="filtro-dia">
+        <label for="filtro-comidas">Ver un día</label>
+        <input type="date" id="filtro-comidas">
+        <button type="button" id="btn-quitar-filtro-comidas" class="enlace oculta">Quitar filtro</button>
+      </div>
+      <p id="estado-comidas"></p>
+      <button type="button" id="btn-reintentar-comidas" class="oculta">Reintentar</button>
+      <ul id="lista-comidas"></ul>
+      <button type="button" id="btn-desplegar-comidas" class="desplegar oculta"></button>
+      </div>
+
+      <!-- Sub-pestaña: Mi dieta -->
+      <div class="subseccion" data-subseccion="dieta">
+      <!-- La semana de menús (spec 028) -->
+      <h2>Mi dieta</h2>
+      <p id="estado-dieta" class="explicacion"></p>
+
+      <!-- Montar la semana a mano no gasta cupo de IA: con el recetario basta.
+           Va arriba porque cuando no hay dieta es la acción que toca. -->
+      <button type="button" id="btn-semana-blanco">Empezar una semana en blanco</button>
+
+      <div id="semana-dieta"></div>
+      <p id="aviso-dieta" class="explicacion"></p>
+      <p id="error-semana" class="error" role="alert"></p>
+      <p id="guardado-dieta" class="guardado" role="status"></p>
+
+      <!-- Pedir un plan, en su sección (spec 024). Dejó de llamarse "Hacer
+           dieta" en la spec 035: se pisaba con "Mi dieta" de aquí arriba. -->
+      <h2>Pedírsela a la IA</h2>
+      <p class="explicacion">
+        Se la pide a la IA con tus datos y tus gustos, y te la deja montada
+        como semana. Puedes pedir dos al día.
+      </p>
+      <div id="pedir-dieta"></div>
+
+      <form id="form-plan-dieta" class="oculta">
+        <label for="instrucciones-dieta">¿Algo que deba tener en cuenta?</label>
+        <textarea id="instrucciones-dieta" rows="3" maxlength="500"
+          placeholder="el jueves salgo a comer fuera, ponme ese día libre"></textarea>
+        <button type="submit" id="btn-pedir-dieta">Pedir</button>
+        <button type="button" id="btn-cancelar-dieta" class="enlace">Cancelar</button>
+      </form>
+
+      <p id="cupo-dieta" class="explicacion"></p>
+      <p id="estado-plan-dieta" class="explicacion"></p>
+      <p id="error-plan-dieta" class="error" role="alert"></p>
+      </div>
+
+      <!-- Sub-pestaña: Recetas -->
+      <div class="subseccion" data-subseccion="recetas">
       <!-- Recetario (spec 026) -->
       <h2>Mis recetas</h2>
       <p id="estado-recetas" class="explicacion"></p>
@@ -200,50 +263,8 @@
 
       <div id="lista-recetas"></div>
       <button type="button" id="btn-desplegar-recetas" class="desplegar oculta"></button>
-
-      <!-- La semana de menús (spec 028) -->
-      <h2>Mi dieta</h2>
-      <p id="estado-dieta" class="explicacion"></p>
-
-      <!-- Montar la semana a mano no gasta cupo de IA: con el recetario basta.
-           Va arriba porque cuando no hay dieta es la acción que toca. -->
-      <button type="button" id="btn-semana-blanco">Empezar una semana en blanco</button>
-
-      <div id="semana-dieta"></div>
-      <p id="aviso-dieta" class="explicacion"></p>
-      <p id="error-semana" class="error" role="alert"></p>
-      <p id="guardado-dieta" class="guardado" role="status"></p>
-
-      <!-- Pedir un plan, en su sección (spec 024) -->
-      <h2>Hacer dieta</h2>
-      <p class="explicacion">
-        Se la pide a la IA con tus datos y tus gustos, y te la deja montada
-        como semana. Puedes pedir dos al día.
-      </p>
-      <div id="pedir-dieta"></div>
-
-      <form id="form-plan-dieta" class="oculta">
-        <label for="instrucciones-dieta">¿Algo que deba tener en cuenta?</label>
-        <textarea id="instrucciones-dieta" rows="3" maxlength="500"
-          placeholder="el jueves salgo a comer fuera, ponme ese día libre"></textarea>
-        <button type="submit" id="btn-pedir-dieta">Pedir</button>
-        <button type="button" id="btn-cancelar-dieta" class="enlace">Cancelar</button>
-      </form>
-
-      <p id="cupo-dieta" class="explicacion"></p>
-      <p id="estado-plan-dieta" class="explicacion"></p>
-      <p id="error-plan-dieta" class="error" role="alert"></p>
-
-      <h2>Mis comidas</h2>
-      <div class="filtro-dia">
-        <label for="filtro-comidas">Ver un día</label>
-        <input type="date" id="filtro-comidas">
-        <button type="button" id="btn-quitar-filtro-comidas" class="enlace oculta">Quitar filtro</button>
       </div>
-      <p id="estado-comidas"></p>
-      <button type="button" id="btn-reintentar-comidas" class="oculta">Reintentar</button>
-      <ul id="lista-comidas"></ul>
-      <button type="button" id="btn-desplegar-comidas" class="desplegar oculta"></button>
+
       </div>
     </div>
 
@@ -253,6 +274,17 @@
         Primero inicia tu operación bikini desde Hoy.
       </p>
       <div class="contenido-operacion">
+
+      <!-- Sub-pestañas (spec 035). Las mismas tres que Comidas, en el mismo
+           orden: la sección de al lado se aprende sola. -->
+      <div class="subpestanas" data-de="ejercicio">
+        <button type="button" class="subpestana activa" data-subseccion="apuntar" aria-current="true">Apuntar</button>
+        <button type="button" class="subpestana" data-subseccion="tabla">Mi tabla</button>
+        <button type="button" class="subpestana" data-subseccion="catalogo">Catálogo</button>
+      </div>
+
+      <!-- Sub-pestaña: Apuntar -->
+      <div class="subseccion activa" data-subseccion="apuntar">
       <h2>Nuevo ejercicio</h2>
       <form id="form-ejercicio">
         <label for="ejercicio-texto">Qué has hecho</label>
@@ -276,8 +308,61 @@
       <p id="error-ejercicio" class="error" role="alert"></p>
       <p id="guardado-ejercicio" class="guardado" role="status"></p>
 
-      <!-- Catálogo de ejercicios (spec 029) -->
-      <h2>Mis ejercicios</h2>
+      <!-- El diario. Se llama igual que su gemelo de Comidas (spec 035). -->
+      <h2>Lo que llevo apuntado</h2>
+      <div class="filtro-dia">
+        <label for="filtro-ejercicios">Ver un día</label>
+        <input type="date" id="filtro-ejercicios">
+        <button type="button" id="btn-quitar-filtro-ejercicios" class="enlace oculta">Quitar filtro</button>
+      </div>
+      <p id="estado-ejercicios"></p>
+      <button type="button" id="btn-reintentar-ejercicios" class="oculta">Reintentar</button>
+      <ul id="lista-ejercicios"></ul>
+      <button type="button" id="btn-desplegar-ejercicios" class="desplegar oculta"></button>
+      </div>
+
+      <!-- Sub-pestaña: Mi tabla -->
+      <div class="subseccion" data-subseccion="tabla">
+      <!-- La semana de entrenamientos (spec 029) -->
+      <h2>Mi tabla</h2>
+      <p id="estado-tabla" class="explicacion"></p>
+
+      <!-- Montarla a mano no gasta cupo de IA: con el catálogo basta. Va
+           arriba porque cuando no hay tabla es la acción que toca. -->
+      <button type="button" id="btn-semana-blanco-tabla">Empezar una semana en blanco</button>
+
+      <div id="semana-tabla"></div>
+      <p id="aviso-tabla" class="explicacion"></p>
+      <p id="error-semana-tabla" class="error" role="alert"></p>
+      <p id="guardado-tabla" class="guardado" role="status"></p>
+
+      <!-- Pedir un plan, en su sección (spec 024). Dejó de llamarse "Tabla de
+           ejercicios" en la spec 035: se pisaba con "Mi tabla" de aquí arriba. -->
+      <h2>Pedírsela a la IA</h2>
+      <p class="explicacion">
+        Se la pide a la IA con tus datos y tus gustos, y te la deja montada
+        como semana. Puedes pedir dos al día.
+      </p>
+      <div id="pedir-ejercicio"></div>
+
+      <form id="form-plan-ejercicio" class="oculta">
+        <label for="instrucciones-ejercicio">¿Algo que deba tener en cuenta?</label>
+        <textarea id="instrucciones-ejercicio" rows="3" maxlength="500"
+          placeholder="el sábado juego al pádel, no me pongas nada ese día"></textarea>
+        <button type="submit" id="btn-pedir-ejercicio">Pedir</button>
+        <button type="button" id="btn-cancelar-ejercicio" class="enlace">Cancelar</button>
+      </form>
+
+      <p id="cupo-ejercicio" class="explicacion"></p>
+      <p id="estado-plan-ejercicio" class="explicacion"></p>
+      <p id="error-plan-ejercicio" class="error" role="alert"></p>
+      </div>
+
+      <!-- Sub-pestaña: Catálogo -->
+      <div class="subseccion" data-subseccion="catalogo">
+      <!-- Catálogo de ejercicios (spec 029). Dejó de llamarse "Mis ejercicios"
+           en la spec 035: se pisaba con el diario de la pestaña Apuntar. -->
+      <h2>Ejercicios que me sé</h2>
       <p id="estado-catalogo" class="explicacion"></p>
 
       <button type="button" id="btn-nuevo-ejercicio-catalogo">Nuevo ejercicio</button>
@@ -302,51 +387,8 @@
 
       <div id="lista-catalogo"></div>
       <button type="button" id="btn-desplegar-catalogo" class="desplegar oculta"></button>
-
-      <!-- La semana de entrenamientos (spec 029) -->
-      <h2>Mi tabla</h2>
-      <p id="estado-tabla" class="explicacion"></p>
-
-      <!-- Montarla a mano no gasta cupo de IA: con el catálogo basta. Va
-           arriba porque cuando no hay tabla es la acción que toca. -->
-      <button type="button" id="btn-semana-blanco-tabla">Empezar una semana en blanco</button>
-
-      <div id="semana-tabla"></div>
-      <p id="aviso-tabla" class="explicacion"></p>
-      <p id="error-semana-tabla" class="error" role="alert"></p>
-      <p id="guardado-tabla" class="guardado" role="status"></p>
-
-      <!-- Pedir un plan, en su sección (spec 024) -->
-      <h2>Tabla de ejercicios</h2>
-      <p class="explicacion">
-        Se la pide a la IA con tus datos y tus gustos, y te la deja montada
-        como semana. Puedes pedir dos al día.
-      </p>
-      <div id="pedir-ejercicio"></div>
-
-      <form id="form-plan-ejercicio" class="oculta">
-        <label for="instrucciones-ejercicio">¿Algo que deba tener en cuenta?</label>
-        <textarea id="instrucciones-ejercicio" rows="3" maxlength="500"
-          placeholder="el sábado juego al pádel, no me pongas nada ese día"></textarea>
-        <button type="submit" id="btn-pedir-ejercicio">Pedir</button>
-        <button type="button" id="btn-cancelar-ejercicio" class="enlace">Cancelar</button>
-      </form>
-
-      <p id="cupo-ejercicio" class="explicacion"></p>
-      <p id="estado-plan-ejercicio" class="explicacion"></p>
-      <p id="error-plan-ejercicio" class="error" role="alert"></p>
-      <!-- "Mis ejercicios" pasó a ser el catálogo (spec 029), así que el
-           diario se llama por lo que es: lo que has entrenado. -->
-      <h2>Mis entrenamientos apuntados</h2>
-      <div class="filtro-dia">
-        <label for="filtro-ejercicios">Ver un día</label>
-        <input type="date" id="filtro-ejercicios">
-        <button type="button" id="btn-quitar-filtro-ejercicios" class="enlace oculta">Quitar filtro</button>
       </div>
-      <p id="estado-ejercicios"></p>
-      <button type="button" id="btn-reintentar-ejercicios" class="oculta">Reintentar</button>
-      <ul id="lista-ejercicios"></ul>
-      <button type="button" id="btn-desplegar-ejercicios" class="desplegar oculta"></button>
+
       </div>
     </div>
 
