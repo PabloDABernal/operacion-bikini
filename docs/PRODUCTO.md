@@ -66,7 +66,7 @@ Sale de usar la app con dos meses de datos. Cambia la estructura, no solo el asp
 - No sustituye a un profesional médico real: siempre debe recordar (disclaimer) que ante dudas o falta de resultados hay que consultar a un médico.
 - No da diagnósticos médicos ni detecta enfermedades.
 - No comparte datos entre los dos usuarios: cada uno ve solo lo suyo.
-- No entrena modelos propios: usa APIs de IA de terceros tal cual (Google Gemini y, cuando este falla, Groq como reserva).
+- No entrena modelos propios: usa APIs de IA de terceros tal cual (Google Gemini por defecto, con Groq como reserva automática si falla; desde Ajustes cada usuario puede elegir probar Groq primero).
 - No compara ni clasifica a los dos usuarios entre sí: no hay ranking ni objetivos compartidos.
 - No pesa alimentos ni da calorías exactas: solo estimaciones en rango, porque cualquier otra cosa sería precisión fingida.
 
