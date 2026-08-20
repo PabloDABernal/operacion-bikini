@@ -2,7 +2,7 @@
 
 Documento para retomar el trabajo en frío. Se actualiza al terminar cada spec.
 
-**Última actualización:** 19 de agosto de 2026 (spec 031 terminada y validada — todo lo planeado está cerrado)
+**Última actualización:** 19 de agosto de 2026 (spec 032 terminada y validada)
 
 ## Dónde estamos
 
@@ -10,7 +10,7 @@ Documento para retomar el trabajo en frío. Se actualiza al terminar cada spec.
 
 **https://operacion-bikini.vercel.app**
 
-**Las specs 001 a 031 están todas implementadas, desplegadas y validadas por el usuario.** La app se usa a diario.
+**Las specs 001 a 032 están todas implementadas, desplegadas y validadas por el usuario.** La app se usa a diario.
 
 La v2 se amplió dos veces sobre la marcha, según el usuario iba probando:
 
@@ -18,7 +18,9 @@ La v2 se amplió dos veces sobre la marcha, según el usuario iba probando:
 - **Ampliación** (13 de agosto, specs 011-020): salió de usar la app con dos meses de datos sembrados.
 - **v3** (16 de agosto, specs 021-028): salió de usarla otra vez, ya con todo lo anterior encima.
 
-**No queda ninguna spec pendiente de lo hablado hasta ahora.** Lo siguiente es decidir con el usuario: el rehacer las pantallas que pidió el 16 de agosto, o alguna idea del backlog.
+Todo lo de esas tres fases está cerrado. Desde ahí, el 19 de agosto se empezó a tirar de `docs/BACKLOG.md`: primero limpieza de código muerto, luego la spec 032 (elegir proveedor de IA desde Ajustes).
+
+**No queda ninguna spec abierta.** Lo siguiente es decidir con el usuario: el rehacer las pantallas que pidió el 16 de agosto, o la siguiente idea del backlog.
 
 ## Specs
 
@@ -55,6 +57,7 @@ La v2 se amplió dos veces sobre la marcha, según el usuario iba probando:
 | 029 | Ejercicios y tablas: la semana de entrenamientos, guardada y editable | ✅ completada |
 | 030 | Detalle nutricional automático: grupos de alimentos y calorías en rango | ✅ completada |
 | 031 | Gamificación: puntos, racha con día de gracia y emblemas | ✅ completada |
+| 032 | Elegir el proveedor de IA desde Ajustes (Automático / Groq primero) | ✅ completada |
 
 ## Qué toca ahora
 
@@ -64,6 +67,7 @@ El usuario dijo el 16 de agosto que quiere **rehacer las pantallas de forma más
 
 ## Deuda conocida
 
+- **Spec 032, detectado al probar en producción y ya corregido**: la capa gratuita de Groq va **por modelo**, no por cuenta entera, y `llamarAGroq()` solo pasaba al siguiente modelo de `MODELOS_GROQ` ante un 404 (modelo inexistente), nunca ante un 429 (modelo sin cuota). El modelo grande (`llama-3.3-70b-versatile`, el primero de la lista) es el más tacaño en cuota gratuita, así que un 429 suyo daba Groq entero por perdido sin probar los otros dos. Ahora un 429 también pasa al siguiente modelo. De paso, los mensajes de error de la IA (`cuota-agotada`, `ia-saturada`, etc.) llevan un campo `proveedor` nuevo: con dos proveedores elegibles, el mensaje ya no bastaba para saber si había sido Gemini o Groq.
 - **Código muerto de la spec 029 borrado el 19 de agosto**: `pedirPlanEspecializado()` y `URL_PLAN`/`MAXIMO_INSTRUCCIONES` en `js/consulta.js`, y el archivo `api/plan.js` entero (con su entrada en `vercel.json`). Los planes de dieta y tabla ya eran semanas estructuradas desde las specs 028/029; esto solo quitaba el camino viejo que ya no llamaba nadie. `quedanPlanesHoy`, `pedidosHoy` y `guardarMarcaDePlan` siguen vivos, el cupo de planes no cambia.
 - **Spec 031, detectado por `revisor-codigo` y ya corregido**: la entrevista que abre o reabre una operación se guarda en `consultas` con modo `inicial`/`reinicio` antes de crear la operación, así que sin filtrarla el emblema "Primera consulta" salía conseguido desde el segundo cero. `js/gamificacion.js` ya excluye esos dos modos. Si algún día se añade otro modo de entrevista automática a `consultas`, hay que acordarse de excluirlo también.
 - **Fix del 19 de agosto**: los recuentos de "Ajustes → Reiniciar datos" solo se leían una vez, al iniciar sesión, y salían desactualizados hasta recargar la página entera. Se refrescan también al abrir Ajustes, y hay un botón manual (`btn-actualizar-recuentos`) para forzarlo. Detectado al probar la spec 030.

@@ -32,7 +32,6 @@ Ideas surgidas durante la implementación, no implementadas. Una línea cada una
 - Comparar dos operaciones entre sí ("en la primera perdiste más que en la segunda").
 - Reabrir o borrar una operación archivada. Hoy lo archivado no se puede editar ni deshacer.
 - Borrar una operación concreta del histórico desde su tarjeta (la spec 019 borra el histórico entero o nada).
-- Elegir el proveedor de IA desde Ajustes, para poder probar Groq a propósito (la spec 020 solo lo usa como reserva automática).
 - Un tercer proveedor de IA si Gemini y Groq se quedan cortos.
 - Etiquetas de mes encima del calendario de constancia cuando el rango es largo (spec 021).
 - Lista de la compra a partir de las recetas de una semana (spec 026).

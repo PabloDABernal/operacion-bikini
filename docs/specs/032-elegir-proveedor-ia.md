@@ -1,6 +1,6 @@
 # 032 — Elegir el proveedor de IA desde Ajustes
 
-- **Estado:** en implementación (código en `main`, `revisor-codigo` con veredicto CUMPLE el 2026-08-19). Pendiente de que el usuario la pruebe.
+- **Estado:** ✅ completada (probada por el usuario en producción el 2026-08-19)
 - **Fecha:** 2026-08-19
 - **Referencia en PRODUCTO.md:** "Qué explícitamente NO hace", la línea sobre no entrenar modelos propios (usa Gemini y Groq como reserva). Necesita actualizarse — ver sección 10.
 
