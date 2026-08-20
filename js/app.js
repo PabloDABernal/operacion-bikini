@@ -159,7 +159,8 @@ import {
   validarAjustes,
   leerAjustes,
   guardarAjustes,
-  guardarFotoPerfil
+  guardarFotoPerfil,
+  guardarProveedorIa
 } from "./ajustes.js";
 
 import { subirFotoDePerfil, recorteRedondo } from "./perfil.js";
@@ -604,6 +605,9 @@ function campoDesplegable(opciones, valorActual, clase) {
 // El peso objetivo vive en Ajustes; se cachea aquí para que la gráfica no
 // tenga que volver a leerlo de Firestore cada vez que se repinta.
 let pesoObjetivoActual = null;
+// Qué proveedor de IA probar primero (spec 032): "automatico" o
+// "groq-primero". Se manda con cada petición a la IA.
+let proveedorIaActual = "automatico";
 
 // --- Estadísticas de peso ------------------------------------------------
 
@@ -1029,7 +1033,8 @@ id("btn-analizar").addEventListener("click", async () => {
   try {
     const respuesta = await pedirAnalisisALaIa(
       uidActual,
-      deHoy.map(({ momento, texto }) => ({ momento, texto }))
+      deHoy.map(({ momento, texto }) => ({ momento, texto })),
+      proveedorIaActual
     );
 
     await guardarAnalisis(
@@ -1501,7 +1506,8 @@ async function generarDieta(instrucciones) {
 
   const respuesta = await pedirDietaALaIa(uidActual, instrucciones, registros, {
     nombre: ajustes.nombre || "",
-    perfil: ajustes.perfil || ""
+    perfil: ajustes.perfil || "",
+    proveedor: ajustes.proveedorIa || "automatico"
   });
 
   // Primero las recetas: la semana las enlaza por nombre, así que tienen que
@@ -2018,7 +2024,8 @@ async function generarTabla(instrucciones) {
 
   const respuesta = await pedirTablaALaIa(uidActual, instrucciones, registros, {
     nombre: ajustes.nombre || "",
-    perfil: ajustes.perfil || ""
+    perfil: ajustes.perfil || "",
+    proveedor: ajustes.proveedorIa || "automatico"
   });
 
   // Primero los ejercicios: la semana los enlaza por nombre, así que tienen
@@ -3147,11 +3154,24 @@ async function refrescarAjustes() {
         : String(ajustes.pesoObjetivoKg).replace(".", ",");
     id("altura").value = ajustes.alturaCm == null ? "" : ajustes.alturaCm;
     id("fecha-objetivo").value = ajustes.fechaObjetivo || "";
+    proveedorIaActual = ajustes.proveedorIa || "automatico";
+    id("proveedor-ia").value = proveedorIaActual;
   } catch {
     id("error-ajustes").textContent =
       "No se han podido cargar los ajustes. Comprueba tu conexión.";
   }
 }
+
+id("proveedor-ia").addEventListener("change", async (evento) => {
+  proveedorIaActual = evento.target.value;
+  try {
+    await guardarProveedorIa(uidActual, proveedorIaActual);
+    avisarGuardado("guardado-proveedor");
+  } catch {
+    id("error-ajustes").textContent =
+      "No se ha podido guardar el proveedor de IA. Comprueba tu conexión.";
+  }
+});
 
 id("form-ajustes").addEventListener("submit", async (evento) => {
   evento.preventDefault();

@@ -458,6 +458,14 @@
         <button type="submit" id="btn-guardar-ajustes">Guardar</button>
       </form>
 
+      <h2>Proveedor de IA</h2>
+      <label for="proveedor-ia">Cuál se prueba primero</label>
+      <select id="proveedor-ia">
+        <option value="automatico">Automático (recomendado)</option>
+        <option value="groq-primero">Probar Groq primero</option>
+      </select>
+      <p id="guardado-proveedor" class="guardado" role="status"></p>
+
       <p id="aviso-ajustes" class="explicacion"></p>
       <p id="error-ajustes" class="error" role="alert"></p>
 

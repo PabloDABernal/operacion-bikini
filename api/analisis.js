@@ -215,7 +215,8 @@ module.exports = async (req, res) => {
         responseSchema: ESQUEMA
       }
     },
-    "Detalle nutricional"
+    "Detalle nutricional",
+    cuerpo.proveedor
   );
 
   // generarJson ya ha respondido si algo falló.

@@ -87,7 +87,7 @@ export function guardarAnalisis(uid, fecha, datos, comidasAnalizadas, vecesPrevi
   });
 }
 
-export async function pedirAnalisisALaIa(uid, comidas) {
+export async function pedirAnalisisALaIa(uid, comidas, proveedor) {
   const idToken = await auth.currentUser.getIdToken();
 
   let respuesta;
@@ -98,7 +98,7 @@ export async function pedirAnalisisALaIa(uid, comidas) {
         "Content-Type": "application/json",
         Authorization: `Bearer ${idToken}`
       },
-      body: JSON.stringify({ comidas }),
+      body: JSON.stringify({ comidas, proveedor }),
       signal: AbortSignal.timeout(ESPERA_MAXIMA_MS)
     });
   } catch (fallo) {

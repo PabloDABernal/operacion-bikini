@@ -50,10 +50,11 @@ const MENSAJES = {
 
 const MENSAJE_GENERICO = "No se ha podido continuar la consulta. Inténtalo de nuevo.";
 
-// Un fallo de Gemini que no sea de los conocidos llega con el estado HTTP que
-// devolvió Google: enseñarlo es lo único que distingue "está saturado" de
-// "algo va mal de verdad".
-// El código puede traer pegado el motivo de que la reserva no funcionara.
+// Un fallo del proveedor que no sea de los conocidos llega con el estado HTTP
+// que devolvió (spec 032: puede ser Gemini o Groq, según cuál se eligiera):
+// enseñarlo es lo único que distingue "está saturado" de "algo va mal de
+// verdad". El código puede traer pegado el motivo de que la reserva no
+// funcionara.
 function mensajeConReserva(codigo) {
   if (!codigo) return null;
   const [base, motivo] = codigo.split(" · reserva: ");
@@ -63,7 +64,7 @@ function mensajeConReserva(codigo) {
 }
 
 function mensajeDeFalloDeIa(codigo) {
-  if (!codigo || !codigo.startsWith("gemini")) return null;
+  if (!codigo || !codigo.startsWith("ia-")) return null;
   return `La IA no ha respondido (${codigo}). Vuelve a intentarlo en un momento.`;
 }
 
@@ -219,7 +220,11 @@ export function modoDeBienvenida(operaciones) {
 async function contextoDelUsuario(uid) {
   try {
     const ajustes = await leerAjustes(uid);
-    return { nombre: ajustes.nombre || "", perfil: ajustes.perfil || "" };
+    return {
+      nombre: ajustes.nombre || "",
+      perfil: ajustes.perfil || "",
+      proveedor: ajustes.proveedorIa || "automatico"
+    };
   } catch {
     // Sin contexto la consulta funciona igual, solo que más genérica.
     return {};

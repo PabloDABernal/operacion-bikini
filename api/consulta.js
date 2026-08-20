@@ -191,7 +191,8 @@ module.exports = async (req, res) => {
         responseSchema: ESQUEMA
       }
     },
-    debeCerrar ? "Plan" : "Turno de consulta"
+    debeCerrar ? "Plan" : "Turno de consulta",
+    cuerpo.proveedor
   );
 
   // generarJson ya ha respondido si algo falló.
@@ -230,7 +231,8 @@ module.exports = async (req, res) => {
             responseSchema: ESQUEMA
           }
         },
-        "Rutina de ejercicio"
+        "Rutina de ejercicio",
+        cuerpo.proveedor
       );
 
       if (!soloEjercicio) return;

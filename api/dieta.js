@@ -185,7 +185,8 @@ module.exports = async (req, res) => {
         responseSchema: ESQUEMA
       }
     },
-    "Dieta de la semana"
+    "Dieta de la semana",
+    cuerpo.proveedor
   );
 
   // generarJson ya ha respondido si algo falló.

@@ -253,14 +253,21 @@ function jsonDeGroq(datos, esquema) {
   return objeto;
 }
 
-// Llama a Gemini y devuelve el JSON ya parseado, o null con la respuesta ya
-// enviada si algo ha fallado. Centraliza el mapeo de errores para que las dos
-// funciones den exactamente los mismos códigos.
-async function generarJson(res, cuerpo, etiqueta) {
+// Un 429/503/5xx significa que el proveedor está saturado o sin cuota: se
+// merece que se pruebe al otro. Un 400 NO: significa que la petición está mal
+// formada, y mandársela a otro solo escondería el fallo. Se usa igual para
+// los dos proveedores, en los dos sentidos (spec 032).
+function estadoMereceReserva(estado) {
+  return estado === 429 || estado === 503 || estado >= 500;
+}
+
+// Intenta Gemini e interpreta su propio formato de respuesta. Nunca escribe
+// en `res`: solo informa de qué pasó, para que la decisión de qué responder
+// al navegador quede en un único sitio (generarJson).
+async function intentarGemini(cuerpo, etiqueta) {
   if (!process.env.GEMINI_API_KEY) {
     console.error("Falta la variable de entorno GEMINI_API_KEY en este despliegue.");
-    res.status(502).json({ error: "gemini-error" });
-    return null;
+    return { ok: false, proveedor: "gemini", mereceReserva: true, motivo: "sin-clave" };
   }
 
   let respuesta;
@@ -268,85 +275,7 @@ async function generarJson(res, cuerpo, etiqueta) {
     respuesta = await llamarAGemini(cuerpo, etiqueta);
   } catch (fallo) {
     console.error(`No se pudo llamar a Gemini: ${fallo.message}`);
-    res.status(502).json({ error: "gemini-inalcanzable" });
-    return null;
-  }
-
-  // Si Google está saturado, sin cuota o roto, se le pregunta a Groq. Un 400
-  // NO salta de proveedor: significa que la petición está mal formada, y
-  // mandársela a otro solo escondería el fallo.
-  const mereceReserva =
-    respuesta.status === 429 || respuesta.status === 503 || respuesta.status >= 500;
-
-  // Por qué la reserva no salvó la petición. Va al navegador junto al error
-  // para no tener que bucear en los logs: sin esto, "la IA está saturada" no
-  // distingue "falta la clave de Groq" de "Groq también ha fallado".
-  let reserva = "no-hacia-falta";
-
-  if (mereceReserva) {
-    if (!process.env.GROQ_API_KEY) {
-      reserva = "sin-clave";
-      console.error("Gemini falló y no hay GROQ_API_KEY: no hay reserva posible.");
-    } else {
-      console.error(`Gemini respondió ${respuesta.status}: se prueba con Groq.`);
-      const esquema = cuerpo.generationConfig && cuerpo.generationConfig.responseSchema;
-
-      try {
-        const deGroq = await llamarAGroq(cuerpo, etiqueta);
-
-        if (deGroq && deGroq.ok) {
-          const objeto = jsonDeGroq(await deGroq.json(), esquema);
-          if (objeto) return objeto;
-          reserva = "json-ilegible";
-          console.error("Groq devolvió algo que no es el JSON esperado.");
-        } else if (deGroq) {
-          reserva = `http-${deGroq.status}`;
-          const detalle = await deGroq.text().catch(() => "(sin cuerpo)");
-          console.error(`Groq respondió ${deGroq.status}: ${detalle.slice(0, 300)}`);
-
-          // Un 401 casi siempre es la clave mal pegada. Se registra su forma,
-          // nunca su contenido, para poder descartarlo sin verla.
-          if (deGroq.status === 401) {
-            // La forma de la clave (cuánto mide y su prefijo) no es secreta y
-            // resuelve el 401 de un vistazo: una clave truncada o de otro
-            // sitio se ve enseguida. El contenido no sale nunca de aquí.
-            const clave = claveDeGroq();
-            // Todas las claves de Groq miden 56 y empiezan por "gsk_", así que
-            // la forma no distingue una clave de otra. La huella sí: son los
-            // primeros caracteres de su SHA-256, que se pueden calcular
-            // también en el equipo del usuario y comparar. No permite
-            // reconstruir la clave.
-            const huella = require("crypto")
-              .createHash("sha256")
-              .update(clave)
-              .digest("hex")
-              .slice(0, 8);
-
-            reserva = `http-401 · clave de ${clave.length} car., huella ${huella}`;
-            console.error(
-              `La clave de Groq mide ${clave.length} caracteres, empieza por ` +
-                `"${clave.slice(0, 4)}" y su huella SHA-256 empieza por ${huella}.`
-            );
-          }
-        }
-      } catch (fallo) {
-        reserva = "inalcanzable";
-        console.error(`No se pudo llamar a Groq: ${fallo.message}`);
-      }
-    }
-    // Si Groq tampoco puede, se sigue abajo y gana el error de Gemini, que es
-    // el que mejor explica qué pasa (cuota agotada o saturación).
-  }
-
-  if (respuesta.status === 429) {
-    res.status(429).json({ error: "cuota-agotada", reserva });
-    return null;
-  }
-
-  if (respuesta.status === 503) {
-    console.error("Gemini saturado y sin reserva disponible.");
-    res.status(503).json({ error: "ia-saturada", reserva });
-    return null;
+    return { ok: false, proveedor: "gemini", mereceReserva: true, motivo: "inalcanzable" };
   }
 
   if (!respuesta.ok) {
@@ -355,8 +284,13 @@ async function generarJson(res, cuerpo, etiqueta) {
     // solo el código HTTP, que basta para diagnosticar.
     const detalle = await respuesta.text().catch(() => "(sin cuerpo)");
     console.error(`Gemini respondió ${respuesta.status}: ${detalle}`);
-    res.status(502).json({ error: "gemini-error", estado: respuesta.status });
-    return null;
+    return {
+      ok: false,
+      proveedor: "gemini",
+      mereceReserva: estadoMereceReserva(respuesta.status),
+      motivo: "http",
+      estado: respuesta.status
+    };
   }
 
   let datos;
@@ -364,8 +298,7 @@ async function generarJson(res, cuerpo, etiqueta) {
     datos = await respuesta.json();
   } catch {
     console.error("Gemini devolvió algo que no es JSON.");
-    res.status(502).json({ error: "respuesta-ilegible" });
-    return null;
+    return { ok: false, proveedor: "gemini", mereceReserva: true, motivo: "respuesta-ilegible" };
   }
 
   const candidato = datos.candidates && datos.candidates[0];
@@ -380,8 +313,7 @@ async function generarJson(res, cuerpo, etiqueta) {
       `Respuesta sin texto. finishReason=${candidato ? candidato.finishReason : "(sin candidato)"}, ` +
         `promptFeedback=${JSON.stringify(datos.promptFeedback || null)}`
     );
-    res.status(502).json({ error: "respuesta-ilegible" });
-    return null;
+    return { ok: false, proveedor: "gemini", mereceReserva: true, motivo: "respuesta-ilegible" };
   }
 
   // STOP es el final normal. Cualquier otra cosa (MAX_TOKENS, SAFETY) explica
@@ -391,15 +323,147 @@ async function generarJson(res, cuerpo, etiqueta) {
   }
 
   try {
-    return JSON.parse(parte.text);
+    return { ok: true, json: JSON.parse(parte.text) };
   } catch {
     console.error(
       `JSON ilegible (finishReason=${candidato.finishReason}, ${parte.text.length} caracteres): ` +
         parte.text.slice(0, 300)
     );
-    res.status(502).json({ error: "respuesta-ilegible" });
-    return null;
+    return { ok: false, proveedor: "gemini", mereceReserva: true, motivo: "respuesta-ilegible" };
   }
+}
+
+// Intenta Groq e interpreta su propio formato de respuesta (OpenAI). Misma
+// forma de resultado que intentarGemini, para que generarJson trate a los dos
+// proveedores por igual.
+async function intentarGroq(cuerpo, etiqueta) {
+  if (!process.env.GROQ_API_KEY) {
+    console.error("No hay GROQ_API_KEY: no se puede probar con Groq.");
+    return { ok: false, proveedor: "groq", mereceReserva: true, motivo: "sin-clave" };
+  }
+
+  let respuesta;
+  try {
+    respuesta = await llamarAGroq(cuerpo, etiqueta);
+  } catch (fallo) {
+    console.error(`No se pudo llamar a Groq: ${fallo.message}`);
+    return { ok: false, proveedor: "groq", mereceReserva: true, motivo: "inalcanzable" };
+  }
+
+  if (!respuesta.ok) {
+    const detalle = await respuesta.text().catch(() => "(sin cuerpo)");
+    console.error(`Groq respondió ${respuesta.status}: ${detalle.slice(0, 300)}`);
+
+    // Un 401 casi siempre es la clave mal pegada. Se registra su forma, nunca
+    // su contenido, para poder descartarlo sin verla.
+    if (respuesta.status === 401) {
+      // La forma de la clave (cuánto mide y su prefijo) no es secreta y
+      // resuelve el 401 de un vistazo: una clave truncada o de otro sitio se
+      // ve enseguida. El contenido no sale nunca de aquí. Todas las claves de
+      // Groq miden 56 y empiezan por "gsk_", así que la forma no distingue
+      // una clave de otra: la huella (los primeros caracteres de su
+      // SHA-256) sí, y se puede calcular también en el equipo del usuario y
+      // comparar sin reconstruir la clave.
+      const clave = claveDeGroq();
+      const huella = require("crypto")
+        .createHash("sha256")
+        .update(clave)
+        .digest("hex")
+        .slice(0, 8);
+
+      console.error(
+        `La clave de Groq mide ${clave.length} caracteres, empieza por ` +
+          `"${clave.slice(0, 4)}" y su huella SHA-256 empieza por ${huella}.`
+      );
+
+      return {
+        ok: false,
+        proveedor: "groq",
+        mereceReserva: estadoMereceReserva(respuesta.status),
+        motivo: `http-401 · clave de ${clave.length} car., huella ${huella}`,
+        estado: respuesta.status
+      };
+    }
+
+    return {
+      ok: false,
+      proveedor: "groq",
+      mereceReserva: estadoMereceReserva(respuesta.status),
+      motivo: `http-${respuesta.status}`,
+      estado: respuesta.status
+    };
+  }
+
+  const esquema = cuerpo.generationConfig && cuerpo.generationConfig.responseSchema;
+  const objeto = jsonDeGroq(await respuesta.json(), esquema);
+  if (!objeto) {
+    console.error("Groq devolvió algo que no es el JSON esperado.");
+    return { ok: false, proveedor: "groq", mereceReserva: true, motivo: "json-ilegible" };
+  }
+
+  return { ok: true, json: objeto };
+}
+
+const INTENTOS = { gemini: intentarGemini, groq: intentarGroq };
+
+// Convierte el resultado de fallo del segundo proveedor en el texto de
+// "reserva" que ya se manda al navegador junto al error del primero: explica
+// por qué la reserva no salvó la petición, sin tener que bucear en los logs.
+function comoReserva(resultado) {
+  return resultado.motivo === "http" ? `http-${resultado.estado}` : resultado.motivo;
+}
+
+// Construye la respuesta final a partir del fallo del proveedor que se
+// intentó primero (el elegido): es el que mejor explica qué ha pasado. El
+// campo `reserva` cuenta aparte qué le ha pasado al segundo, si se llegó a
+// intentar.
+function responderFalloFinal(res, primero, reserva) {
+  if (primero.estado === 429) {
+    res.status(429).json({ error: "cuota-agotada", reserva });
+    return;
+  }
+
+  if (primero.estado === 503) {
+    console.error(`${primero.proveedor} saturado y sin reserva disponible.`);
+    res.status(503).json({ error: "ia-saturada", reserva });
+    return;
+  }
+
+  if (primero.motivo === "respuesta-ilegible" || primero.motivo === "json-ilegible") {
+    res.status(502).json({ error: "respuesta-ilegible", reserva });
+    return;
+  }
+
+  if (primero.motivo === "inalcanzable") {
+    res.status(502).json({ error: "ia-inalcanzable", reserva });
+    return;
+  }
+
+  // sin-clave, o un HTTP que no sea 429/503/5xx (400, 401, 403, 404...).
+  res.status(502).json({ error: "ia-error", estado: primero.estado, reserva });
+}
+
+// Llama al proveedor elegido y, si hace falta, a su reserva; devuelve el JSON
+// ya parseado, o null con la respuesta ya enviada si nada ha funcionado.
+// `proveedor` es "automatico" (Gemini primero) o "groq-primero"; cualquier
+// otro valor se trata como "automatico" (spec 032): el servidor no confía en
+// lo que mande el navegador para decidir a quién preguntar.
+async function generarJson(res, cuerpo, etiqueta, proveedor) {
+  const orden = proveedor === "groq-primero" ? ["groq", "gemini"] : ["gemini", "groq"];
+
+  const primero = await INTENTOS[orden[0]](cuerpo, etiqueta);
+  if (primero.ok) return primero.json;
+
+  let reserva = "no-hacia-falta";
+
+  if (primero.mereceReserva) {
+    const segundo = await INTENTOS[orden[1]](cuerpo, etiqueta);
+    if (segundo.ok) return segundo.json;
+    reserva = comoReserva(segundo);
+  }
+
+  responderFalloFinal(res, primero, reserva);
+  return null;
 }
 
 module.exports = {

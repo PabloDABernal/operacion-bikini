@@ -186,7 +186,8 @@ export async function enviarMensaje(uid, hilo, texto) {
 
   const respuesta = await turnoDeIa(mensajes, registros, {
     nombre: ajustes.nombre || "",
-    perfil: ajustes.perfil || ""
+    perfil: ajustes.perfil || "",
+    proveedor: ajustes.proveedorIa || "automatico"
   });
 
   if (!respuesta.pregunta) {

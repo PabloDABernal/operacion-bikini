@@ -80,10 +80,18 @@ export async function leerAjustes(uid) {
       pesoObjetivoKg: null,
       alturaCm: null,
       fechaObjetivo: null,
-      fotoPerfil: null
+      fotoPerfil: null,
+      proveedorIa: "automatico"
     };
   }
-  return { nombre: "", perfil: "", fotoPerfil: null, ...instantanea.data() };
+  return { nombre: "", perfil: "", fotoPerfil: null, proveedorIa: "automatico", ...instantanea.data() };
+}
+
+// Preferencia de qué proveedor de IA probar primero (spec 032). Va por su
+// lado, como la foto de perfil: así no depende del formulario "Mi objetivo" y
+// se guarda al momento, sin botón "Guardar" propio.
+export function guardarProveedorIa(uid, proveedorIa) {
+  return setDoc(referenciaDe(uid), { proveedorIa, actualizadoEn: serverTimestamp() }, { merge: true });
 }
 
 // Lo que la entrevista de bienvenida (spec 016) saca de la conversación. Cada
