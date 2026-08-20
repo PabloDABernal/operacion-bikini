@@ -2,7 +2,7 @@
 
 Documento para retomar el trabajo en frío. Se actualiza al terminar cada spec.
 
-**Última actualización:** 20 de agosto de 2026 (spec 034 terminada y validada; la v4 en marcha)
+**Última actualización:** 20 de agosto de 2026 (spec 035 terminada y validada; la v4 a mitad)
 
 ## Dónde estamos
 
@@ -10,7 +10,7 @@ Documento para retomar el trabajo en frío. Se actualiza al terminar cada spec.
 
 **https://operacion-bikini.vercel.app**
 
-**Las specs 001 a 034 están todas implementadas, desplegadas y validadas por el usuario.** La app se usa a diario.
+**Las specs 001 a 035 están todas implementadas, desplegadas y validadas por el usuario.** La app se usa a diario.
 
 La v2 se amplió dos veces sobre la marcha, según el usuario iba probando:
 
@@ -62,6 +62,7 @@ El 20 de agosto arrancó la **v4**, que sale de una auditoría de usabilidad hec
 | 032 | Elegir el proveedor de IA desde Ajustes (Automático / Groq primero) | ✅ completada |
 | 033 | Tocar un punto de la gráfica de peso para ver su fecha y su peso | ✅ completada |
 | 034 | La confirmación de guardado, en el propio botón de la semana | ✅ completada |
+| 035 | Sub-pestañas en Comidas y Ejercicio, y nombres que dejan de pisarse | ✅ completada |
 
 ## Qué toca ahora
 
@@ -72,8 +73,8 @@ Las cuatro specs de la v4, **en este orden y no en otro**:
 | Spec | Qué | Estado |
 |---|---|---|
 | 034 | La confirmación de guardado, en el propio botón | ✅ completada |
-| 035 | Sub-pestañas en Comidas y Ejercicio, y nombres que dejan de pisarse | siguiente |
-| 036 | Vista de escritorio en varias columnas | pendiente |
+| 035 | Sub-pestañas en Comidas y Ejercicio, y nombres que dejan de pisarse | ✅ completada |
+| 036 | Vista de escritorio en varias columnas | siguiente |
 | 037 | Fotos en la navegación, zonas táctiles y fecha/hora plegables | pendiente |
 
 **Por qué la 035 va antes que la 036:** los trozos en que se parta Comidas en el móvil son exactamente las columnas del escritorio. Al revés habría que recolocar el CSS dos veces.
