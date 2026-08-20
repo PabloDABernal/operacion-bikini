@@ -1,6 +1,6 @@
 # 033 — Tocar un punto de la gráfica de peso
 
-- **Estado:** borrador
+- **Estado:** revisada (agente `revisor-specs`, 2026-08-19; bloqueante sobre `abrirArchivo()` y mejora del `cursor: pointer`, ambos corregidos)
 - **Fecha:** 2026-08-19
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (v2)", punto "Gráfica de evolución del peso". No añade nada nuevo al alcance del producto, solo hace consultable un dato que la gráfica ya dibuja — no hace falta tocar `PRODUCTO.md`.
 
@@ -25,24 +25,31 @@ Tocar (o pasar el ratón por encima de) un punto de la gráfica de peso enseña 
 - La línea de detalle debajo de la gráfica de peso, con su texto inicial y su actualización al tocar.
 - Reiniciar el detalle al cambiar de rango.
 
+- **La línea de detalle con toque solo entra en la pestaña Peso**, no en la gráfica de una operación archivada (Ajustes → Histórico → ver una operación): `dibujarGrafica()` se llama también ahí (`abrirArchivo()` en `js/app.js`), de solo lectura y sin ningún párrafo de detalle a mano. Ahí el `<title>` (tooltip con ratón) sigue funcionando igual que en el resto de puntos, porque no depende de tener un callback; lo único que no hace nada en el archivo es el toque en pantalla táctil, que no tiene dónde escribir el resultado.
+
 ### NO entra (explícitamente fuera)
 
 - **Tocar la línea de la media móvil**: solo los puntos (círculos) de los pesajes reales, que es lo que pidió el backlog. La media no es un dato que el usuario haya apuntado.
 - **Editar el pesaje desde la gráfica**: tocar un punto solo consulta, no lleva a "Mis pesajes" ni abre el formulario de edición.
 - **Resaltar visualmente el punto tocado** (cambiar su color o tamaño): solo se pide ver el dato, no un estado de selección persistente.
 - **Mostrar la media móvil de ese día junto al peso real**: decisión del usuario, solo el peso real.
+- **Línea de detalle en la gráfica de una operación archivada**: ver arriba. Añadirla ahí no es difícil, pero no lo pidió el backlog y esa pantalla no tiene hueco reservado para ese párrafo; se puede apuntar en `docs/BACKLOG.md` si algún día se echa en falta.
 
 ## 4. Comportamiento detallado
 
 Sigue exactamente el patrón que ya usa `dibujarCalendario()` en `js/grafica-svg.js` para el calendario de constancia (spec 021): cada punto lleva un `<title>` con el texto (tooltip con ratón, y lo leen los lectores de pantalla) y un `addEventListener("click", ...)` que llama a un callback `alTocar(dia)`, pasado desde `js/app.js`, que escribe el texto en la línea de detalle.
 
+`dibujarGrafica()` recibe `alTocar` como parámetro **opcional**: `dibujarGrafica(diarios, pesoObjetivo, totalPesajes, alTocar)`. Si no se pasa (como en `abrirArchivo()`, que hoy la llama con solo tres argumentos), el `click` no hace nada — un no-op por defecto —, y el `<title>` funciona igual porque no depende del callback. Así no hay que tocar `abrirArchivo()` ni la gráfica de operaciones archivadas para nada.
+
 Texto del tooltip y de la línea de detalle: `"27/07/2026: 82,4 kg"` (fecha formateada con `formatearFecha()`, peso formateado con el mismo `kg()` que ya usa el resto de la gráfica).
+
+Los puntos llevan `cursor: pointer` en `styles.css`, igual que `.casilla` del calendario: sin eso, nada indica que se puedan tocar.
 
 ### Dónde vive
 
-En `index.html`, un párrafo nuevo `#grafica-peso-detalle` debajo de `#grafica-peso`, con la misma clase `comparador-detalle` que ya usa `#calendario-detalle` (mismo estilo, cero CSS nuevo).
+En `index.html`, un párrafo nuevo `#grafica-peso-detalle` debajo de `#grafica-peso`, con la misma clase `comparador-detalle` que ya usa `#calendario-detalle` (mismo estilo, cero CSS nuevo más allá del `cursor: pointer`).
 
-En `js/app.js`, `refrescarGrafica()` pasa el callback `alTocar` a `dibujarGrafica()` y reinicia el texto del detalle cada vez que se repinta (por eso el criterio 5 se cumple solo con reutilizar lo que ya hace `pintarCalendario()`).
+En `js/app.js`, `refrescarGrafica()` (la única que pinta la pestaña Peso) pasa el callback `alTocar` a `dibujarGrafica()` y reinicia el texto del detalle cada vez que se repinta (por eso el criterio 5 se cumple solo con reutilizar lo que ya hace `pintarCalendario()`). `abrirArchivo()` no cambia.
 
 ## 5. Modelo de datos
 
@@ -59,11 +66,12 @@ Ninguno. No se guarda nada nuevo: todo sale de los `diarios` que `dibujarGrafica
 
 | Archivo | Cambio |
 |---|---|
-| `js/grafica-svg.js` | `dibujarGrafica()` acepta un callback `alTocar` y añade `<title>` + evento de click a cada punto |
-| `js/app.js` | `refrescarGrafica()` pasa el callback y pinta el texto en `#grafica-peso-detalle`; lo reinicia al repintar |
+| `js/grafica-svg.js` | `dibujarGrafica()` acepta un callback `alTocar` **opcional** (no-op si no se pasa) y añade `<title>` + evento de click a cada punto |
+| `js/app.js` | `refrescarGrafica()` pasa el callback y pinta el texto en `#grafica-peso-detalle`; lo reinicia al repintar. `abrirArchivo()` no cambia: sigue llamando a `dibujarGrafica()` sin el callback nuevo |
 | `index.html` | párrafo nuevo `#grafica-peso-detalle` |
+| `styles.css` | `.grafica-punto { cursor: pointer; }`, para que los puntos se vean tocables como ya se ven las casillas del calendario |
 
-Sin cambios en `styles.css` (reutiliza `.comparador-detalle`), `firestore.rules` ni ningún otro archivo.
+Reutiliza `.comparador-detalle` para el párrafo nuevo. Sin cambios en `firestore.rules` ni ningún otro archivo.
 
 **Estimación: ~40-60 líneas.** Muy por debajo del límite de la spec pequeña.
 
@@ -71,6 +79,8 @@ Sin cambios en `styles.css` (reutiliza `.comparador-detalle`), `firestore.rules`
 
 - **El detalle se ve debajo de la gráfica, como el calendario de constancia** → decisión del usuario el 2026-08-19. Reutiliza un patrón ya existente y probado, en vez de un tooltip flotante nuevo que el proyecto no tiene en ningún otro sitio.
 - **Solo el peso real de ese día, no también la media móvil** → decisión del usuario. Es justo lo que pedía la línea del backlog, sin añadir un segundo número que nadie pidió.
+- **`alTocar` es opcional en `dibujarGrafica()`, y la gráfica de una operación archivada se queda sin línea de detalle** → detectado por el agente `revisor-specs` el 2026-08-19: `dibujarGrafica()` se llama también desde `abrirArchivo()` (histórico de operaciones), que no tiene párrafo de detalle. Hacer el callback opcional evita tocar esa pantalla, que es de solo lectura y no lo pidió nadie; el tooltip con ratón sigue funcionando ahí igual, solo el toque en pantalla táctil no hace nada.
+- **`.grafica-punto` lleva `cursor: pointer`** → mejora señalada por el `revisor-specs`: sin eso, nada indica visualmente que los puntos se pueden tocar, al revés que `.casilla` del calendario.
 
 ## 9. Fuera de spec: ideas apuntadas
 
