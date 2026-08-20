@@ -102,6 +102,9 @@ Sin cambios en `firestore.rules` (mismo documento y las mismas reglas que ya cub
 
 ## 8. Decisiones tomadas
 
+- **Añadidos durante la prueba manual del usuario (2026-08-19), no previstos en la redacción inicial**:
+  - Las respuestas de error (`cuota-agotada`, `ia-saturada`, `respuesta-ilegible`, `ia-inalcanzable`, `ia-error`) llevan ahora un campo `proveedor`, y el código que arma el mensaje en pantalla lo añade entre paréntesis. Al probar "Probar Groq primero" el usuario vio un `cuota-agotada (reserva: http-503)` y sospechó, con razón, que el mensaje no decía quién lo había dado — con dos proveedores elegibles ya no se podía dar por hecho que fuera Gemini.
+  - `llamarAGroq()` solo pasaba al siguiente modelo de `MODELOS_GROQ` ante un 404 (modelo inexistente), no ante un 429 (modelo sin cuota). Cada modelo de Groq tiene su propia cuota gratuita, y el primero de la lista (el más grande, `llama-3.3-70b-versatile`) es el más tacaño: un 429 suyo daba por perdido todo Groq sin probar los otros dos, que suelen tener margen de sobra. Ahora un 429 también pasa al siguiente modelo.
 - **Desplegable de dos opciones, no tres** → decisión del usuario el 2026-08-19. "Solo Gemini" con la red de seguridad activada se comporta exactamente igual que "Automático" (Gemini ya es el primero hoy, y ya cae a Groq en los mismos casos), así que una tercera opción idéntica a la primera no aportaba nada y solo confundiría.
 - **Se cae al otro proveedor igualmente si el elegido falla** → decisión del usuario. Forzar un proveedor sin red de seguridad se descartó: el objetivo es poder *probar* Groq a propósito, no arriesgarse a quedarse sin respuesta por elegir mal.
 - **Se aplica a las cuatro funciones de IA, no solo a la conversación** → decisión del usuario.
