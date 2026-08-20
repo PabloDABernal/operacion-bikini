@@ -2,7 +2,7 @@
 
 Documento para retomar el trabajo en frío. Se actualiza al terminar cada spec.
 
-**Última actualización:** 20 de agosto de 2026 (spec 033 terminada y validada)
+**Última actualización:** 20 de agosto de 2026 (spec 034 terminada y validada; la v4 en marcha)
 
 ## Dónde estamos
 
@@ -10,7 +10,7 @@ Documento para retomar el trabajo en frío. Se actualiza al terminar cada spec.
 
 **https://operacion-bikini.vercel.app**
 
-**Las specs 001 a 033 están todas implementadas, desplegadas y validadas por el usuario.** La app se usa a diario.
+**Las specs 001 a 034 están todas implementadas, desplegadas y validadas por el usuario.** La app se usa a diario.
 
 La v2 se amplió dos veces sobre la marcha, según el usuario iba probando:
 
@@ -19,6 +19,8 @@ La v2 se amplió dos veces sobre la marcha, según el usuario iba probando:
 - **v3** (16 de agosto, specs 021-028): salió de usarla otra vez, ya con todo lo anterior encima.
 
 Todo lo de esas tres fases está cerrado. Desde ahí, el 19 de agosto se empezó a tirar de `docs/BACKLOG.md`: primero limpieza de código muerto, luego la spec 032 (elegir proveedor de IA desde Ajustes) y la 033 (tocar un punto de la gráfica de peso).
+
+El 20 de agosto arrancó la **v4**, que sale de una auditoría de usabilidad hecha sobre el código. No añade funciones: recoloca las que hay. Está descrita en `docs/PRODUCTO.md`, apartado "Qué hará (v4)".
 
 **No queda ninguna spec abierta.** Lo siguiente es decidir con el usuario: el rehacer las pantallas que pidió el 16 de agosto, o la siguiente idea del backlog.
 
@@ -59,12 +61,24 @@ Todo lo de esas tres fases está cerrado. Desde ahí, el 19 de agosto se empezó
 | 031 | Gamificación: puntos, racha con día de gracia y emblemas | ✅ completada |
 | 032 | Elegir el proveedor de IA desde Ajustes (Automático / Groq primero) | ✅ completada |
 | 033 | Tocar un punto de la gráfica de peso para ver su fecha y su peso | ✅ completada |
+| 034 | La confirmación de guardado, en el propio botón de la semana | ✅ completada |
 
 ## Qué toca ahora
 
-**No hay ninguna spec abierta.** Todo lo descrito en `docs/PRODUCTO.md` (v1, v2, ampliación y v3) está implementado y probado.
+**La v4, empezada el 20 de agosto.** Aquel "rehacer las pantallas de forma más lógica" que el usuario pidió el 16 de agosto ya está concretado y en `PRODUCTO.md`. Salió de una auditoría de usabilidad sobre el código: Comidas y Ejercicio se habían convertido en páginas de cinco y seis bloques que solo se recorren con scroll ciego, y en un monitor la app es una columna de 512 px con dos desiertos a los lados.
 
-El usuario dijo el 16 de agosto que quiere **rehacer las pantallas de forma más lógica**. No hay nada decidido todavía: hay que preguntarle qué tiene en mente antes de tocar nada. Alternativa: mirar `docs/BACKLOG.md` y proponer la siguiente spec pequeña de ahí.
+Las cuatro specs de la v4, **en este orden y no en otro**:
+
+| Spec | Qué | Estado |
+|---|---|---|
+| 034 | La confirmación de guardado, en el propio botón | ✅ completada |
+| 035 | Sub-pestañas en Comidas y Ejercicio, y nombres que dejan de pisarse | siguiente |
+| 036 | Vista de escritorio en varias columnas | pendiente |
+| 037 | Fotos en la navegación, zonas táctiles y fecha/hora plegables | pendiente |
+
+**Por qué la 035 va antes que la 036:** los trozos en que se parta Comidas en el móvil son exactamente las columnas del escritorio. Al revés habría que recolocar el CSS dos veces.
+
+**La 035 roza el límite de las ~300 líneas** que marca `CLAUDE.md`. Se decidió no partirla: Comidas y Ejercicio son la misma estructura repetida, y dejar la app medio migrada entre dos sesiones es peor. Si al implementarla se desmadra, avisar antes de seguir.
 
 ## Deuda conocida
 

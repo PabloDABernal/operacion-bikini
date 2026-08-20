@@ -1,6 +1,6 @@
 # 034 — La confirmación de guardado, donde está el dedo
 
-- **Estado:** en implementación (código en `main`, `revisor-specs` y `revisor-codigo` con veredicto CUMPLE el 2026-08-20). Pendiente de que el usuario la pruebe.
+- **Estado:** ✅ completada. Validada por el usuario el 2026-08-20 probando en producción.
 - **Fecha:** 2026-08-20
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (v4, decidida el 20 de agosto de 2026)", punto **"La confirmación aparece donde está el dedo"**.
 
