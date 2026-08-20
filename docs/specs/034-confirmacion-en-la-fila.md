@@ -1,6 +1,6 @@
 # 034 — La confirmación de guardado, donde está el dedo
 
-- **Estado:** revisada (`revisor-specs`: CUMPLE, 2026-08-20)
+- **Estado:** en implementación (código en `main`, `revisor-specs` y `revisor-codigo` con veredicto CUMPLE el 2026-08-20). Pendiente de que el usuario la pruebe.
 - **Fecha:** 2026-08-20
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (v4, decidida el 20 de agosto de 2026)", punto **"La confirmación aparece donde está el dedo"**.
 
@@ -152,4 +152,65 @@ Anotadas en `docs/BACKLOG.md` el 2026-08-20:
 
 ## ✅ Para probar a mano
 
-Lo rellena el agente `qa-manual` antes de la prueba.
+En https://operacion-bikini.vercel.app, con una operación en marcha.
+
+**Preparación:** en **Comidas**, baja hasta "Mi dieta" y comprueba que hay una
+semana guardada (si no, pulsa "Empezar una semana en blanco" y rellena un par de
+celdas). Lo mismo en **Ejercicio** → "Mi tabla".
+
+### Camino feliz — dieta
+
+1. En **Comidas** → "Mi dieta", con la semana entera desplegada, pulsa
+   **"Me lo he comido"** en una comida del **primer día**. El botón pasa al
+   momento a **"✓ Guardado"**, relleno en color de apoyo. **Sin hacer scroll:**
+   esa es toda la gracia de la spec.
+2. Espera 3 segundos → vuelve a decir "Me lo he comido" y se puede pulsar otra
+   vez.
+3. Baja a **"Mis comidas"** → la comida está ahí con la fecha de hoy.
+
+### Camino feliz — tabla
+
+4. En **Ejercicio** → "Mi tabla", pulsa **"Lo he hecho"** en una sesión del
+   primer día → el botón pasa a **"✓ Guardado"**, igual que arriba.
+5. A los 3 segundos vuelve a "Lo he hecho".
+6. Baja a **"Mis entrenamientos apuntados"** → el entrenamiento está ahí con la
+   fecha de hoy.
+
+### Casos límite
+
+7. **Sin conexión.** Pon el móvil en modo avión (o en el ordenador, F12 →
+   Network → Offline). Pulsa "Me lo he comido" → el botón dice
+   **"✗ No se ha guardado"** en rojo, y debajo de los siete días aparece el
+   mensaje de error de siempre. Quita el modo avión y vuelve a pulsar →
+   "✓ Guardado". Comprueba en "Mis comidas" que **solo se ha apuntado una vez**.
+8. **Pulsar dos veces.** Pulsa "Me lo he comido" y vuelve a pulsar en cuanto
+   diga "✓ Guardado" → no pasa nada, está deshabilitado. En "Mis comidas" hay
+   un solo registro.
+9. **Editar con el aviso puesto.** Pulsa "Me lo he comido" y, sin esperar, pulsa
+   "Editar" en esa misma comida → el aviso desaparece antes de los 3 segundos.
+   **Es lo esperado** y está aceptado en la spec: repintar la semana se lleva el
+   botón por delante. Cancela la edición; nada queda roto.
+10. **Cambiar de sección.** Pulsa "Me lo he comido", vete a **Hoy** y vuelve a
+    **Comidas** → el botón está normal, sin quedarse pillado en "✓ Guardado".
+
+### Regresiones sobre las specs 028 y 029
+
+11. En "Mi dieta", edita una celda y guárdala → se actualiza como siempre.
+    Luego pulsa "Me lo he comido" en esa celda → lo que llega a "Mis comidas" es
+    el texto **nuevo**.
+12. En "Mi tabla", edita un día (minutos o intensidad) y guárdalo → se
+    actualiza. Pulsa "Lo he hecho" → lo apuntado lleva los datos nuevos.
+13. Pulsa **"Vaciar y empezar de nuevo"** en la dieta → la semana queda vacía
+    con sus `+`. Vuelve a montarla o pídesela a la IA con **"Pedir"** → todo
+    igual que antes de esta spec.
+14. Lo mismo en la tabla: vaciar y pedirla a la IA.
+
+### Que no se haya roto nada más
+
+15. En **Peso**, guarda un pesaje → el aviso **"Guardado"** sale como siempre,
+    en su párrafo debajo del formulario, **no** dentro del botón.
+16. Lo mismo al guardar una receta nueva, una comida suelta y un ejercicio
+    suelto: párrafo de siempre. La spec 034 solo cambia los dos botones de la
+    semana.
+
+Si todo pasa, la spec queda **completada**.
