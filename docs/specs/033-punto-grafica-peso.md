@@ -1,6 +1,6 @@
 # 033 — Tocar un punto de la gráfica de peso
 
-- **Estado:** revisada (agente `revisor-specs`, 2026-08-19; bloqueante sobre `abrirArchivo()` y mejora del `cursor: pointer`, ambos corregidos)
+- **Estado:** en implementación (código en `main`, `revisor-codigo` con veredicto CUMPLE el 2026-08-19). Pendiente de que el usuario la pruebe.
 - **Fecha:** 2026-08-19
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (v2)", punto "Gráfica de evolución del peso". No añade nada nuevo al alcance del producto, solo hace consultable un dato que la gráfica ya dibuja — no hace falta tocar `PRODUCTO.md`.
 
@@ -88,4 +88,35 @@ Ninguna nueva; la idea del backlog queda cerrada con esta spec.
 
 ## ✅ Para probar a mano
 
-(El agente `qa-manual` lo afina antes de la prueba, con los pasos concretos.)
+En https://operacion-bikini.vercel.app, con una operación en marcha y **al menos 4 pesajes en días distintos** (para ver varios puntos en la gráfica). La prueba se hace principalmente en **móvil** (toque en puntos); el paso con ratón es opcional, solo si tienes un ordenador a mano.
+
+### Camino feliz: tocar un punto (móvil)
+
+1. En **Peso**, debajo de la gráfica hay un párrafo que dice **"Toca un punto para ver su fecha y su peso."** — el detalle, vacío al principio.
+2. **Toca uno de los puntos de la gráfica** (un círculo, un pesaje real). El párrafo debe cambiar y mostrar la fecha y el peso exactos de ese día, en formato `27/07/2026: 82,4 kg`.
+3. Toca otro punto distinto. El párrafo se actualiza con los datos del nuevo punto.
+4. Toca el mismo punto varias veces seguidas. El texto no cambia, sigue mostrando lo mismo.
+
+### Cambiar de rango (criterio 5)
+
+5. Fíjate en qué rango está activo encima de la gráfica (1 sem, 1 mes...).
+6. Pulsa un rango distinto. La gráfica se redibuja y el párrafo de detalle **vuelve al texto inicial** "Toca un punto para ver su fecha y su peso." — se ha limpiado.
+7. Toca un punto de la gráfica nueva: vuelve a funcionar igual.
+
+### Casos límite
+
+8. Si algún rango deja un único pesaje en la gráfica (por ejemplo "1 sem" con solo un pesaje esa semana), ese punto se puede tocar igual y enseña su dato.
+9. La **línea gris de la media móvil no se puede tocar**: solo los puntos (círculos) responden. Tocar la línea entre puntos no hace nada.
+
+### Tooltip con ratón (opcional, solo si pruebas desde ordenador)
+
+10. Pasa el ratón por encima de un punto sin hacer clic: debe verse el tooltip nativo del navegador con el mismo formato `27/07/2026: 82,4 kg`.
+
+### Regresión: gráfica de una operación archivada
+
+11. Ve a **Ajustes → Histórico** y abre una operación ya cerrada. En su gráfica, comprueba que el tooltip con ratón (si pruebas desde ordenador) sigue funcionando igual que antes. Tocarla desde el móvil no debe hacer nada (correcto: esa pantalla no tiene párrafo de detalle) — y sobre todo, **no debe dar ningún error ni romper la pantalla**.
+
+### Lo que hay que mirar con lupa
+
+- El formato del texto es `DD/MM/AAAA: NN,N kg`, con coma decimal — si ves un punto en vez de coma, es un fallo.
+- Si al cambiar de rango el párrafo se queda con el dato del punto anterior en vez de limpiarse, es un fallo.
