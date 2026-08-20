@@ -1,6 +1,6 @@
 # 033 — Tocar un punto de la gráfica de peso
 
-- **Estado:** en implementación (código en `main`, `revisor-codigo` con veredicto CUMPLE el 2026-08-19). Pendiente de que el usuario la pruebe.
+- **Estado:** ✅ completada. Validada por el usuario el 2026-08-20 probando en producción.
 - **Fecha:** 2026-08-19
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (v2)", punto "Gráfica de evolución del peso". No añade nada nuevo al alcance del producto, solo hace consultable un dato que la gráfica ya dibuja — no hace falta tocar `PRODUCTO.md`.
 

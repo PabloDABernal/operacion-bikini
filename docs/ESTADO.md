@@ -2,7 +2,7 @@
 
 Documento para retomar el trabajo en frío. Se actualiza al terminar cada spec.
 
-**Última actualización:** 19 de agosto de 2026 (spec 032 terminada y validada)
+**Última actualización:** 20 de agosto de 2026 (spec 033 terminada y validada)
 
 ## Dónde estamos
 
@@ -10,7 +10,7 @@ Documento para retomar el trabajo en frío. Se actualiza al terminar cada spec.
 
 **https://operacion-bikini.vercel.app**
 
-**Las specs 001 a 032 están todas implementadas, desplegadas y validadas por el usuario.** La app se usa a diario.
+**Las specs 001 a 033 están todas implementadas, desplegadas y validadas por el usuario.** La app se usa a diario.
 
 La v2 se amplió dos veces sobre la marcha, según el usuario iba probando:
 
@@ -18,7 +18,7 @@ La v2 se amplió dos veces sobre la marcha, según el usuario iba probando:
 - **Ampliación** (13 de agosto, specs 011-020): salió de usar la app con dos meses de datos sembrados.
 - **v3** (16 de agosto, specs 021-028): salió de usarla otra vez, ya con todo lo anterior encima.
 
-Todo lo de esas tres fases está cerrado. Desde ahí, el 19 de agosto se empezó a tirar de `docs/BACKLOG.md`: primero limpieza de código muerto, luego la spec 032 (elegir proveedor de IA desde Ajustes).
+Todo lo de esas tres fases está cerrado. Desde ahí, el 19 de agosto se empezó a tirar de `docs/BACKLOG.md`: primero limpieza de código muerto, luego la spec 032 (elegir proveedor de IA desde Ajustes) y la 033 (tocar un punto de la gráfica de peso).
 
 **No queda ninguna spec abierta.** Lo siguiente es decidir con el usuario: el rehacer las pantallas que pidió el 16 de agosto, o la siguiente idea del backlog.
 
@@ -58,6 +58,7 @@ Todo lo de esas tres fases está cerrado. Desde ahí, el 19 de agosto se empezó
 | 030 | Detalle nutricional automático: grupos de alimentos y calorías en rango | ✅ completada |
 | 031 | Gamificación: puntos, racha con día de gracia y emblemas | ✅ completada |
 | 032 | Elegir el proveedor de IA desde Ajustes (Automático / Groq primero) | ✅ completada |
+| 033 | Tocar un punto de la gráfica de peso para ver su fecha y su peso | ✅ completada |
 
 ## Qué toca ahora
 
