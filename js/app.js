@@ -215,6 +215,8 @@ function id(nombre) {
 const PESTANA_INICIAL = "hoy";
 
 function abrirPestana(nombre, subseccion) {
+  pintarDiagnosticoNav(`ANTES(${nombre})`);
+
   document.querySelectorAll(".seccion").forEach((seccion) => {
     seccion.classList.toggle("activa", seccion.dataset.seccion === nombre);
   });
@@ -234,17 +236,15 @@ function abrirPestana(nombre, subseccion) {
     );
   }
 
+  pintarDiagnosticoNav(`DESPUES-SYNC(${nombre})`);
+
   // Desde arriba: al cambiar de sección se ve el principio, no donde te
   // quedaste en la sección anterior.
-  //
-  // Con requestAnimationFrame y no al momento: mostrar una sección que no se
-  // había pintado en esta carga (display: none → block) es un cambio de
-  // diseño grande de golpe, y hacer scrollTo() en el mismo instante —antes de
-  // que el navegador termine ese diseño— puede dejar la barra de navegación
-  // (position: fixed) sin repintar hasta el siguiente toque o scroll. Se ve
-  // más en Ejercicio por ser la sección más alta. Esperar a un fotograma deja
-  // que el diseño nuevo se asiente antes de mover el scroll.
-  requestAnimationFrame(() => window.scrollTo(0, 0));
+  requestAnimationFrame(() => {
+    window.scrollTo(0, 0);
+    pintarDiagnosticoNav(`DESPUES-RAF(${nombre})`);
+    setTimeout(() => pintarDiagnosticoNav(`DESPUES-200ms(${nombre})`), 200);
+  });
 }
 
 // Hermana de abrirPestana() para las sub-pestañas (spec 035). Se busca dentro
@@ -272,35 +272,42 @@ function abrirSubpestana(seccion, nombre) {
   });
 }
 
-// La barra de navegación se ve "bajarse" o desaparecer en algunos móviles
-// (detectado en Ejercicio, probando la spec 038): con position: fixed, un
-// navegador móvil puede posicionarla contra el viewport de diseño (el que
-// habría sin su propia barra de direcciones) en vez de contra el viewport
-// visual (lo que de verdad se ve), y la deja fuera de la pantalla cuando su
-// propia barra está expandida. window.visualViewport da el tamaño y el
-// desplazamiento reales; con eso se corrige a mano cuánto hay que subir la
-// barra para que quede siempre pegada a lo que el usuario ve de verdad.
-// Sin visualViewport (navegadores muy antiguos) no se hace nada: se queda
-// el comportamiento de toda la vida.
-if (window.visualViewport) {
-  const barraInferior = id("nav-inferior");
-
-  const ajustarBarraInferior = () => {
-    // En escritorio la barra ya no es fixed (spec 009): no hay nada que
-    // corregir, y aplicar una traslación ahí solo estorbaría.
-    if (getComputedStyle(barraInferior).position !== "fixed") {
-      barraInferior.style.transform = "";
-      return;
-    }
-    const vv = window.visualViewport;
-    const hueco = window.innerHeight - vv.height - vv.offsetTop;
-    barraInferior.style.transform = hueco > 0 ? `translateY(-${hueco}px)` : "";
-  };
-
-  window.visualViewport.addEventListener("resize", ajustarBarraInferior);
-  window.visualViewport.addEventListener("scroll", ajustarBarraInferior);
-  window.addEventListener("resize", ajustarBarraInferior);
-  ajustarBarraInferior();
+// --- DIAGNÓSTICO TEMPORAL, quitar en cuanto se resuelva el bug de la barra
+// de navegación en Ejercicio (móvil) ---------------------------------------
+//
+// Dos intentos a ciegas (visualViewport, retrasar el scrollTo) no lo han
+// arreglado. En vez de un tercer intento a ciegas, esto pinta en pantalla
+// los números reales del móvil donde pasa, para verlo con datos y no con
+// suposiciones. Se dispara solo al cambiar de pestaña.
+function pintarDiagnosticoNav(momento) {
+  let caja = document.getElementById("debug-nav");
+  if (!caja) {
+    caja = document.createElement("pre");
+    caja.id = "debug-nav";
+    caja.style.cssText =
+      "position:fixed;top:0;left:0;right:0;z-index:99999;background:#000;" +
+      "color:#0f0;font:10px/1.3 monospace;padding:6px;margin:0;" +
+      "white-space:pre-wrap;max-height:40vh;overflow:auto;";
+    document.body.appendChild(caja);
+  }
+  const nav = id("nav-inferior");
+  const r = nav.getBoundingClientRect();
+  const cs = getComputedStyle(nav);
+  const vv = window.visualViewport;
+  const linea = `${momento} ${JSON.stringify({
+    innerH: window.innerHeight,
+    vvH: vv ? Math.round(vv.height) : null,
+    vvTop: vv ? Math.round(vv.offsetTop) : null,
+    scrollY: Math.round(window.scrollY),
+    docH: document.documentElement.scrollHeight,
+    navTop: Math.round(r.top),
+    navBottom: Math.round(r.bottom),
+    navH: Math.round(r.height),
+    pos: cs.position,
+    disp: cs.display,
+    transform: cs.transform
+  })}\n`;
+  caja.textContent += linea;
 }
 
 // La barra y los atajos provisionales de Ajustes hacen lo mismo: llevar a una
