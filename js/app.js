@@ -215,8 +215,6 @@ function id(nombre) {
 const PESTANA_INICIAL = "hoy";
 
 function abrirPestana(nombre, subseccion) {
-  pintarDiagnosticoNav(`ANTES(${nombre})`);
-
   document.querySelectorAll(".seccion").forEach((seccion) => {
     seccion.classList.toggle("activa", seccion.dataset.seccion === nombre);
   });
@@ -236,14 +234,11 @@ function abrirPestana(nombre, subseccion) {
     );
   }
 
-  pintarDiagnosticoNav(`DESPUES-SYNC(${nombre})`);
-
   // Desde arriba: al cambiar de sección se ve el principio, no donde te
   // quedaste en la sección anterior.
   requestAnimationFrame(() => {
     window.scrollTo(0, 0);
-    pintarDiagnosticoNav(`DESPUES-RAF(${nombre})`);
-    setTimeout(() => pintarDiagnosticoNav(`DESPUES-200ms(${nombre})`), 200);
+    ajustarBarraInferior();
   });
 }
 
@@ -272,42 +267,37 @@ function abrirSubpestana(seccion, nombre) {
   });
 }
 
-// --- DIAGNÓSTICO TEMPORAL, quitar en cuanto se resuelva el bug de la barra
-// de navegación en Ejercicio (móvil) ---------------------------------------
+// La barra de navegación desaparecía en Ejercicio, en móvil. Confirmado con
+// un panel de diagnóstico en pantalla (21 de agosto): al entrar en Ejercicio,
+// window.innerHeight saltaba de 681 a 733 mientras que
+// window.visualViewport.height —lo que de verdad se ve— se quedaba en 681.
+// Un hueco de 52 px, justo donde vive la barra: al ser position: fixed, el
+// navegador la coloca contra el innerHeight "de diseño" (733), no contra lo
+// que realmente se ve (681), y queda fuera de la pantalla.
 //
-// Dos intentos a ciegas (visualViewport, retrasar el scrollTo) no lo han
-// arreglado. En vez de un tercer intento a ciegas, esto pinta en pantalla
-// los números reales del móvil donde pasa, para verlo con datos y no con
-// suposiciones. Se dispara solo al cambiar de pestaña.
-function pintarDiagnosticoNav(momento) {
-  let caja = document.getElementById("debug-nav");
-  if (!caja) {
-    caja = document.createElement("pre");
-    caja.id = "debug-nav";
-    caja.style.cssText =
-      "position:fixed;top:0;left:0;right:0;z-index:99999;background:#000;" +
-      "color:#0f0;font:10px/1.3 monospace;padding:6px;margin:0;" +
-      "white-space:pre-wrap;max-height:40vh;overflow:auto;";
-    document.body.appendChild(caja);
+// El primer intento de arreglo tenía esta misma cuenta pero nunca se
+// disparaba al cambiar de pestaña: solo escuchaba los eventos resize/scroll
+// de visualViewport, y ninguno de los dos salta cuando lo que cambia es la
+// altura del documento al mostrar una sección distinta. Ahora abrirPestana()
+// la llama directamente tras el scrollTo(), que es cuando hace falta.
+function ajustarBarraInferior() {
+  const barraInferior = id("nav-inferior");
+  // En escritorio la barra ya no es fixed (spec 009): no hay nada que
+  // corregir, y aplicar una traslación ahí solo estorbaría.
+  if (getComputedStyle(barraInferior).position !== "fixed") {
+    barraInferior.style.transform = "";
+    return;
   }
-  const nav = id("nav-inferior");
-  const r = nav.getBoundingClientRect();
-  const cs = getComputedStyle(nav);
   const vv = window.visualViewport;
-  const linea = `${momento} ${JSON.stringify({
-    innerH: window.innerHeight,
-    vvH: vv ? Math.round(vv.height) : null,
-    vvTop: vv ? Math.round(vv.offsetTop) : null,
-    scrollY: Math.round(window.scrollY),
-    docH: document.documentElement.scrollHeight,
-    navTop: Math.round(r.top),
-    navBottom: Math.round(r.bottom),
-    navH: Math.round(r.height),
-    pos: cs.position,
-    disp: cs.display,
-    transform: cs.transform
-  })}\n`;
-  caja.textContent += linea;
+  if (!vv) return;
+  const hueco = window.innerHeight - vv.height - vv.offsetTop;
+  barraInferior.style.transform = hueco > 0 ? `translateY(-${hueco}px)` : "";
+}
+
+if (window.visualViewport) {
+  window.visualViewport.addEventListener("resize", ajustarBarraInferior);
+  window.visualViewport.addEventListener("scroll", ajustarBarraInferior);
+  window.addEventListener("resize", ajustarBarraInferior);
 }
 
 // La barra y los atajos provisionales de Ajustes hacen lo mismo: llevar a una
