@@ -57,6 +57,10 @@
       </div>
 
       <div id="bloque-hoy" class="oculta">
+
+      <!-- Dos columnas en escritorio (spec 036). Izquierda lo del dia y lo que
+           toca hacer; derecha como vas llevandolo. En movil no hacen nada. -->
+      <div class="columna">
       <h2 id="hoy-fecha"></h2>
 
       <ul id="hoy-resumen" class="resumen"></ul>
@@ -76,7 +80,9 @@
       <p id="viejo-analisis" class="explicacion"></p>
       <div id="detalle-analisis"></div>
       <p id="error-analisis" class="error" role="alert"></p>
+      </div>
 
+      <div class="columna">
       <h2>Constancia</h2>
       <div id="rangos-calendario" class="rangos"></div>
       <div id="calendario" class="bloque-calendario"></div>
@@ -88,6 +94,8 @@
       <p id="gamificacion-gracia" class="explicacion"></p>
       <div id="gamificacion-emblemas"></div>
       </div>
+
+      </div>
     </div>
 
     <!-- Sección: Peso (spec 001, solo cambia de sitio) -->
@@ -96,6 +104,12 @@
         Primero inicia tu operación bikini desde Hoy.
       </p>
       <div class="contenido-operacion">
+
+      <!-- Dos columnas en escritorio (spec 036). En movil no hacen nada: son
+           bloques normales, uno debajo de otro. Izquierda lo que haces y su
+           efecto; derecha el detalle. El reparto sale del orden que el HTML ya
+           tenia, para no cambiar como se ve en el movil. -->
+      <div class="columna">
       <h2>Nuevo pesaje</h2>
       <form id="form-pesaje">
         <label for="peso">Peso (kg)</label>
@@ -119,7 +133,9 @@
       <div id="grafica-peso" class="bloque-grafica"></div>
       <p id="grafica-vacia" class="explicacion"></p>
       <p id="grafica-peso-detalle" class="comparador-detalle"></p>
+      </div>
 
+      <div class="columna">
       <h2>Mis pesajes</h2>
       <div class="filtro-dia">
         <label for="filtro-pesajes">Ver un día</label>
@@ -134,6 +150,8 @@
       <!-- Estadísticas (spec 015) -->
       <h2>Estadísticas</h2>
       <ul id="estadisticas" class="resumen"></ul>
+      </div>
+
       </div>
     </div>
 

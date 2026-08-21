@@ -33,6 +33,10 @@
   --sombra: 0 -2px 16px rgba(0, 0, 0, 0.5);
 
   --ancho-columna: 32rem;
+  /* El tope en escritorio (spec 036). Da para tres columnas cómodas sin que
+     los renglones se hagan tan largos que el ojo se pierda al saltar de línea:
+     en un monitor de 1920 quedan márgenes, y son a propósito. */
+  --ancho-ancho: 69rem;
   --barra-alto: 3.5rem;
 
   /* Que el navegador pinte de oscuro lo suyo: calendarios de los campos de
@@ -1482,4 +1486,97 @@ button:disabled {
   border-color: var(--acento);
   color: var(--sobre-acento);
   font-weight: 700;
+}
+
+/* Vista de escritorio (spec 036) -----------------------------------------
+
+   Hasta aquí la app era un móvil estirado: en un monitor, una columna de
+   512 px con dos desiertos a los lados. A partir de 64 rem se ensancha y los
+   bloques de las secciones que tienen varios se reparten en columnas, de modo
+   que lo que en el móvil son sub-pestañas aquí se ve a la vez.
+
+   Todo es CSS a propósito. El JavaScript sigue moviendo la clase .activa igual
+   que antes; en escritorio esa clase simplemente no decide nada. Por eso
+   estrechar la ventana devuelve la vista de móvil al instante, sin recargar y
+   sin dos estados que mantener sincronizados.
+
+   El corte de 48 rem (barra a la cabecera, spec 009) sigue intacto: este es un
+   segundo escalón por encima de aquel. */
+
+@media (min-width: 64rem) {
+  body {
+    max-width: var(--ancho-ancho);
+  }
+
+  /* Las sub-pestañas dejan de tener sentido: si los tres bloques se ven a la
+     vez, unos botones que ya no filtran nada solo estorban. Cada columna
+     conserva su <h2>, que sin la fila de pestañas es la única pista. */
+  .subpestanas {
+    display: none;
+  }
+
+  /* Se enseñan todas, tenga o no la clase .activa. */
+  .subseccion {
+    display: block;
+  }
+
+  /* Comidas y Ejercicio: tres columnas. La del medio, más ancha, porque
+     la semana lleva siete días dentro. Los .subseccion de la spec 035 hacen
+     de columnas tal cual, sin tocar el HTML. */
+  /* El :not(.oculta) NO es adorno. Sin operación en marcha el JavaScript
+     oculta estos contenedores poniéndoles .oculta, que es una sola clase:
+     estos selectores tienen más peso y le ganarían, así que el contenido
+     reaparecería en escritorio justo cuando no debe verse. */
+  .seccion[data-seccion="comidas"] .contenido-operacion:not(.oculta),
+  .seccion[data-seccion="ejercicio"] .contenido-operacion:not(.oculta) {
+    display: grid;
+    grid-template-columns: 1fr 1.4fr 1fr;
+    gap: var(--e6);
+    align-items: start;
+  }
+
+  /* Hoy y Peso: dos columnas. En Peso la izquierda es la más ancha porque
+     lleva la gráfica. */
+  #bloque-hoy:not(.oculta) {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--e6);
+    align-items: start;
+  }
+
+  .seccion[data-seccion="peso"] .contenido-operacion:not(.oculta) {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: var(--e6);
+    align-items: start;
+  }
+
+  /* align-items: start en las cuatro rejillas de arriba: cada columna acaba
+     donde acabe. Sin esto, la más corta se estiraría hasta igualar a la más
+     larga y su fondo quedaría colgando en el vacío. */
+
+  /* Una conversación a 1100 px de ancho se lee fatal: Consulta se queda
+     estrecha y centrada. Algo más que el ancho de móvil, que aquí sobra
+     sitio. */
+  .seccion[data-seccion="consulta"] {
+    max-width: 42rem;
+    margin: 0 auto;
+  }
+
+  /* Ajustes no se recoloca en esta spec (sigue en el backlog), pero SÍ hay que
+     impedir que se ensanche: sus formularios estirados a 1100 px serían una
+     pantalla peor que la de hoy. */
+  .seccion[data-seccion="ajustes"] {
+    max-width: var(--ancho-columna);
+    margin: 0 auto;
+  }
+
+  /* El aviso legal cuelga de #pantalla-principal, fuera de toda sección, así
+     que heredaría el ancho nuevo en todas las pantallas. Mismo motivo que
+     Consulta: es un párrafo largo. */
+  .disclaimer {
+    max-width: var(--ancho-columna);
+    margin-left: auto;
+    margin-right: auto;
+  }
 }
