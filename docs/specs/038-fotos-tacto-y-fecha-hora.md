@@ -1,6 +1,6 @@
 # 038 — Fotos en la navegación, zonas táctiles y fecha/hora plegable en Ejercicio y Peso
 
-- **Estado:** revisada (revisor-specs: LISTA PARA IMPLEMENTAR el 2026-08-21, sin bloqueantes)
+- **Estado:** en implementación (código en `main`, `revisor-specs` y `revisor-codigo` con veredicto favorable el 2026-08-21). Pendiente de que el usuario la pruebe.
 - **Fecha:** 2026-08-21
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (v4, decidida el 20 de agosto de 2026)", puntos **"Fotos deja de estar escondida"** y **"Menos fricción al apuntar"**.
 
@@ -157,5 +157,63 @@ veces (una por formulario).
 
 ## ✅ Para probar a mano
 
-*(Lo afina el agente `qa-manual` antes de la prueba, con el detalle exacto de
-la implementación.)*
+Se prueba en producción: https://operacion-bikini.vercel.app, con una
+operación en marcha.
+
+### Navegación: Fotos
+
+1. Mira la barra de navegación (abajo en móvil, arriba en escritorio):
+   ahora tiene **seis botones — Hoy, Peso, Comidas, Ejercicio, Fotos,
+   Consulta**, en ese orden.
+2. Toca "Fotos": llegas a la sección de fotos.
+3. Vuelve a **Hoy** y toca el atajo **"Foto del día"**: llegas al mismo sitio
+   que con el botón de la barra.
+
+### Zona táctil de los enlaces
+
+4. En cualquier sitio con un enlace (p. ej. "Cambiar fecha y hora" en
+   Comidas, o "Quitar filtro" tras filtrar por día en cualquier lista):
+   fíjate en que el texto se ve **del mismo tamaño de siempre**, pero hay
+   más aire a su alrededor. Tócalo cerca del borde de ese aire, no solo
+   sobre la letra: debe responder igual.
+
+### Ejercicio y Peso: fecha y hora plegadas
+
+5. Entra en **Ejercicio → Apuntar**. Tras "Intensidad" **no ves Fecha ni
+   Hora**: hay un botón "Cambiar fecha y hora".
+6. Sin tocarlo, rellena "Qué has hecho" y "Minutos", y guarda. Se apunta con
+   la fecha y hora de ahora mismo (como si los campos hubieran estado
+   siempre a la vista).
+7. Abre el formulario de nuevo (o guarda otro ejercicio): Fecha y Hora
+   **vuelven a estar plegadas**, con el botón de nuevo visible.
+8. Esta vez, toca "Cambiar fecha y hora": aparecen los campos y el botón
+   desaparece. Cambia la fecha o la hora y guarda: se apunta con lo que
+   pusiste.
+9. Repite los pasos 5 a 8 en **Peso → Nuevo pesaje** (el botón va tras
+   "Peso (kg)", que es el único otro campo).
+
+### Casos límite
+
+10. Con la ventana a **320 px de ancho** (F12 → modo responsive), mira la
+    barra con los seis botones: la letra se encoge, pero ningún botón se
+    parte en dos líneas ni desaparece.
+11. Con esa misma anchura, filtra por día en Comidas o Ejercicio: la fila
+    con el campo de fecha y el enlace "Quitar filtro" sigue cabiendo (puede
+    envolver a una segunda línea, pero nada se corta ni se sale de la
+    pantalla).
+12. En Ejercicio o en Peso, guarda **dos veces seguidas sin recargar la
+    página**: las dos veces, Fecha y Hora empiezan plegadas.
+
+### Regresión
+
+13. **Comidas → Apuntar** sigue exactamente igual que tras la spec 037:
+    chips de "Lo de siempre" junto al texto, Fecha y Hora plegadas con el
+    mismo patrón. Esta spec no la tocó.
+14. Los seis botones de la barra llevan cada uno a su sección, y **Ajustes**
+    (desde el avatar) sigue accesible y sin cambios.
+15. Sin operación en marcha, entra en **Fotos** desde la barra: ves el mismo
+    aviso "Primero inicia tu operación bikini desde Hoy" que en Peso,
+    Comidas y Ejercicio — la sección no se rompe por tener ya un botón
+    propio.
+
+Si todo lo anterior pasa, la spec 038 queda **completada**.
