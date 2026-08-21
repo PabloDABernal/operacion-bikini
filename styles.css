@@ -53,10 +53,8 @@ body {
   max-width: var(--ancho-columna);
   margin: 0 auto;
   padding: var(--e4);
-  /* Con la barra abajo en position: sticky (spec 038) ya no hace falta hueco
-     extra para que no tape el final del contenido: ocupa su propio sitio en
-     el flujo, no se superpone. */
-  padding-bottom: var(--e4);
+  /* Hueco para que la barra inferior no tape el final del contenido. */
+  padding-bottom: calc(var(--barra-alto) + env(safe-area-inset-bottom) + var(--e6));
   background: var(--fondo);
   color: var(--tinta);
   line-height: 1.5;
@@ -145,20 +143,6 @@ header {
 
 .seccion.activa {
   display: block;
-  /* Con la barra en sticky (spec 038), si el contenido de la sección es más
-     corto que la pantalla, la barra se queda pegada justo debajo de él, no
-     en el borde real de abajo — deja un hueco visible (Fotos y Ejercicio con
-     poco apuntado). #pantalla-principal ocupa al menos toda la pantalla
-     (ver más abajo) y esta sección crece para llenar lo que sobre, así la
-     barra cae siempre en el borde real. */
-  flex: 1 0 auto;
-}
-
-#pantalla-principal.pantalla {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-  min-height: 100dvh;
 }
 
 /* Sub-pestañas dentro de Comidas y Ejercicio (spec 035) -------------------
@@ -210,31 +194,27 @@ header {
 
 /* Navegación inferior ----------------------------------------------------
 
-   Pegada abajo en todos los tamaños. En pantallas anchas la barra llega de
+   Fija abajo en todos los tamaños. En pantallas anchas la barra llega de
    lado a lado, pero sus botones se quedan en la columna de contenido: unos
    botones estirados a lo largo de un monitor quedan ridículos.
 
-   position: sticky y no fixed (cambiado el 21 de agosto, spec 038): con
-   fixed, algunos navegadores móviles la posicionaban contra un viewport más
-   alto del que de verdad se veía —según cuánto contenido tuviera la sección
-   abierta—, y la barra quedaba fuera de la pantalla o saltaba de sitio al
-   cambiar de pestaña. sticky la deja en el flujo normal del documento, así
-   que ese desajuste no puede pasar: siempre ocupa su hueco real, sin JS que
-   la reposicione a mano. */
+   Se probó position: sticky el 21 de agosto (spec 038) para evitar un bug de
+   fixed en Ejercicio (ver más abajo), pero sticky no vale para una barra que
+   tiene que verse siempre: en una página más alta que la pantalla (como
+   Ejercicio, con muchos registros) solo se pega abajo cuando el scroll llega
+   cerca del final, no desde el principio. Vuelta a fixed, con el arreglo de
+   verdad para el bug original: ver ajustarBarraInferior() en js/app.js. */
 
 #nav-inferior {
-  position: sticky;
+  position: fixed;
+  left: 0;
+  right: 0;
   bottom: 0;
   z-index: 20;
   background: var(--superficie);
   border-top: 1px solid var(--borde);
   box-shadow: var(--sombra);
   padding-bottom: env(safe-area-inset-bottom);
-  /* De borde a borde pese al padding lateral del body: antes lo conseguía
-     position: fixed con left/right: 0, que ignoraba el padding entero. En
-     escritorio (48rem) esto se anula: ahí ya no hace falta. */
-  margin-left: calc(-1 * var(--e4));
-  margin-right: calc(-1 * var(--e4));
 }
 
 #nav-inferior .interior {
@@ -285,11 +265,6 @@ header {
     display: grid;
     grid-template-columns: auto 1fr;
     column-gap: var(--e4);
-    /* El min-height y el flex de .seccion.activa eran cosa del móvil, para
-       que la barra sticky cayera siempre en el borde real de la pantalla.
-       Aquí la barra ya no está abajo (va a la cabecera), así que no hace
-       falta forzar altura mínima ni que la sección crezca para llenarla. */
-    min-height: auto;
   }
 
   #pantalla-principal > * {
@@ -308,10 +283,6 @@ header {
     background: none;
     box-shadow: none;
     padding-bottom: var(--e2);
-    /* El margen negativo de borde a borde era cosa del móvil: aquí no hace
-       falta, la barra vive junto a la cabecera, no pegada a los cantos. */
-    margin-left: 0;
-    margin-right: 0;
     /* La cabecera ya trae su línea inferior; la barra lleva la suya para que
        entre las dos parezca una sola raya de lado a lado. */
     border-top: none;

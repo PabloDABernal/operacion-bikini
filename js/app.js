@@ -236,7 +236,10 @@ function abrirPestana(nombre, subseccion) {
 
   // Desde arriba: al cambiar de sección se ve el principio, no donde te
   // quedaste en la sección anterior.
-  window.scrollTo(0, 0);
+  requestAnimationFrame(() => {
+    window.scrollTo(0, 0);
+    ajustarBarraInferior();
+  });
 }
 
 // Hermana de abrirPestana() para las sub-pestañas (spec 035). Se busca dentro
@@ -262,6 +265,41 @@ function abrirSubpestana(seccion, nombre) {
       boton.removeAttribute("aria-current");
     }
   });
+}
+
+// La barra de navegación desaparecía en Ejercicio, en móvil. Confirmado con
+// un panel de diagnóstico en pantalla (21 de agosto): al entrar en Ejercicio,
+// window.innerHeight saltaba de 681 a 733 mientras que
+// window.visualViewport.height —lo que de verdad se ve— se quedaba en 681.
+// Un hueco de 52 px, justo donde vive la barra: al ser position: fixed, el
+// navegador la coloca contra el innerHeight "de diseño" (733), no contra lo
+// que realmente se ve (681), y queda fuera de la pantalla.
+//
+// Se probó quitar fixed y poner sticky (spec 038), pero sticky no sirve para
+// una barra que tiene que verse siempre: en una página más alta que la
+// pantalla (como Ejercicio, con muchos registros) solo se pega abajo cuando
+// el scroll llega cerca del final. Vuelta a fixed con este arreglo, que sí
+// funciona: abrirPestana() llama a esta función tras el scrollTo(), que es
+// cuando hace falta (los eventos resize/scroll de visualViewport, por sí
+// solos, no saltan cuando lo que cambia es la altura del documento).
+function ajustarBarraInferior() {
+  const barraInferior = id("nav-inferior");
+  // En escritorio la barra ya no es fixed (spec 009): no hay nada que
+  // corregir, y aplicar una traslación ahí solo estorbaría.
+  if (getComputedStyle(barraInferior).position !== "fixed") {
+    barraInferior.style.transform = "";
+    return;
+  }
+  const vv = window.visualViewport;
+  if (!vv) return;
+  const hueco = window.innerHeight - vv.height - vv.offsetTop;
+  barraInferior.style.transform = hueco > 0 ? `translateY(-${hueco}px)` : "";
+}
+
+if (window.visualViewport) {
+  window.visualViewport.addEventListener("resize", ajustarBarraInferior);
+  window.visualViewport.addEventListener("scroll", ajustarBarraInferior);
+  window.addEventListener("resize", ajustarBarraInferior);
 }
 
 // La barra y los atajos provisionales de Ajustes hacen lo mismo: llevar a una
