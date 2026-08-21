@@ -2,7 +2,7 @@
 
 Documento para retomar el trabajo en frío. Se actualiza al terminar cada spec.
 
-**Última actualización:** 21 de agosto de 2026 (spec 036 implementada y desplegada, **pendiente de que el usuario la pruebe**)
+**Última actualización:** 21 de agosto de 2026 (specs 036 y 037 implementadas y desplegadas, **pendientes de que el usuario las pruebe**)
 
 ## Dónde estamos
 
@@ -76,21 +76,17 @@ Las specs de la v4, **en este orden y no en otro**:
 | 034 | La confirmación de guardado, en el propio botón | ✅ completada |
 | 035 | Sub-pestañas en Comidas y Ejercicio, y nombres que dejan de pisarse | ✅ completada |
 | 036 | Vista de escritorio en varias columnas | ⏳ **en pruebas**: desplegada, con varios fixes ya aplicados el 21 de agosto (ver "Deuda conocida"), aún sin el visto bueno final del usuario |
-| 037 | Comidas integradas, Hoy completo y detalle real en el calendario (ampliación de la v4 del 21 de agosto) | 📝 spec en borrador (`docs/specs/037-el-dia-a-la-vista.md`), pendiente de `revisor-specs` |
+| 037 | Comidas integradas, Hoy completo y detalle real en el calendario (ampliación de la v4 del 21 de agosto) | ⏳ desplegada, sin probar (`revisor-codigo` pilló y se corrigió un bug de desempate por hora) |
 | 038 | Fotos en la navegación, zonas táctiles y fecha/hora plegables en Ejercicio y Peso | idea suelta, aún sin spec (era la "037" hasta que el 21 de agosto se le adelantó otra) |
 
 **Por qué la 035 va antes que la 036:** los trozos en que se parta Comidas en el móvil son exactamente las columnas del escritorio. Al revés habría que recolocar el CSS dos veces.
 
 ### Lo primero al retomar
 
-**Implementar la 037** (`docs/specs/037-el-dia-a-la-vista.md`, ya revisada por
-`revisor-specs`): el usuario decidió el 21 de agosto seguir sin esperar a
-cerrar del todo la 036, porque la base que necesita (columnas de escritorio,
-`#bloque-hoy`, `.contenido-operacion`, las `subseccion` de Comidas) ya está
-probada en producción. La 036 sigue con el guion de
-`docs/specs/036-vista-escritorio.md` pendiente de cerrarse — se retoma
-aparte si al probarla aparece algo que no encaje con lo que construya la 037
-encima.
+**Pedirle al usuario que pruebe la 036 y la 037**, ambas desplegadas y sin
+validar: la 036 con el guion de `docs/specs/036-vista-escritorio.md`, la 037
+con el de `docs/specs/037-el-dia-a-la-vista.md`. Ninguna de las dos se cierra
+sin que el usuario la pruebe de verdad (regla de `CLAUDE.md`).
 
 Dos puntos del guion en los que el usuario tenía que fijarse y aún no ha
 contestado:

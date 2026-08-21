@@ -1,6 +1,6 @@
 # 037 — El día, más a la vista: comidas integradas, Hoy completo y detalle en el calendario
 
-- **Estado:** revisada (revisor-specs: NECESITA CAMBIOS el 2026-08-21, corregido el mismo día — contradicción de orden en Hoy resuelta con el usuario)
+- **Estado:** en implementación (código en `main`, `revisor-specs` y `revisor-codigo` con veredicto favorable el 2026-08-21 — revisor-codigo pilló un bug de desempate por hora, ya corregido). Pendiente de que el usuario la pruebe.
 - **Fecha:** 2026-08-21
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (ampliación de la v4, decidida el 21 de agosto de 2026)".
 
@@ -207,5 +207,83 @@ se resuelve aparte y no debería chocar con lo que aquí se construye encima.
 
 ## ✅ Para probar a mano
 
-*(Lo afina el agente `qa-manual` antes de la prueba, con el detalle exacto de
-la implementación.)*
+Se prueba en producción: https://operacion-bikini.vercel.app, con una
+operación en marcha.
+
+**Antes de empezar**: para tener chips que probar, apunta antes una comida
+sencilla (p. ej. "café con leche") si no tienes ya alguna que se repita a
+menudo — "Lo de siempre" tarda un par de repeticiones en ofrecerla.
+
+### Comidas: chips y fecha/hora plegada
+
+1. Entra en **Comidas → Apuntar**. Bajo el textarea "Qué has comido" (y no en
+   un bloque aparte más abajo) ves los chips de tus comidas habituales, si
+   tienes alguna. El bloque "Lo de siempre" con su propio título **ya no
+   existe** como tal.
+2. Toca un chip. Se guarda al instante (mismo comportamiento que el botón de
+   antes) y aparece en el diario de abajo con la hora de ahora mismo.
+3. En el formulario, **no ves Fecha ni Hora** de entrada — solo Qué has
+   comido, los chips y Momento. Hay un botón/enlace "Cambiar fecha y hora".
+4. Tócalo: aparecen los campos Fecha y Hora, y el botón desaparece.
+5. Sin tocar esos campos, escribe algo y guarda. Se guarda con la fecha y
+   hora de ahora (igual que si los hubieras visto desde el principio).
+6. Tras guardar, **Fecha y Hora vuelven a plegarse** (reaparece el botón
+   "Cambiar fecha y hora").
+7. Sal de Comidas y vuelve a entrar (o cambia de sub-pestaña y vuelve a
+   "Apuntar"): Fecha y Hora **siguen plegadas**, no se queda recordado que
+   las habías desplegado antes.
+8. Con el formulario más corto, "Lo que llevo apuntado" queda más cerca
+   arriba: se nota menos scroll para llegar a él que antes.
+
+### Hoy: la lista completa del día
+
+9. Abre **Hoy**. Donde antes había una línea fija por tipo (Peso, Comidas,
+   Ejercicio) con solo lo último, ahora hay una **lista con todos los
+   registros de hoy** — si has apuntado dos comidas hoy, aparecen las dos.
+10. Cada línea dice qué es (Peso / Comida / Ejercicio) y a qué hora, y están
+    **ordenadas de la más tardía a la más temprana** (lo último del día,
+    arriba).
+11. Hay **tres botones fijos** ("+ Peso", "+ Comidas", "+ Ejercicio"),
+    separados de la lista. Tócalos: cada uno lleva a su pantalla de apuntar,
+    igual que antes.
+12. Sin nada apuntado hoy (o en un usuario/operación recién iniciada), el
+    hueco vacío de siempre sigue ahí, con los tres "+", sin una lista vacía
+    rara en medio.
+
+### Calendario: detalle real de un día
+
+13. En Hoy, en el calendario de constancia, **toca un día con registros**.
+    Debajo aparece, línea por línea: el texto de cada comida de ese día (con
+    su hora si la tiene), el de cada ejercicio (con minutos y hora), y el
+    peso si lo hay — no solo "comida, ejercicio" como antes.
+14. Toca un día **sin registros**: sigue diciendo "`fecha` — sin registros",
+    como siempre.
+15. Con un día tocado y su detalle visible, **cambia el rango del
+    calendario** (p. ej. de "1 mes" a "3 meses"): el detalle vuelve a "Toca
+    un día para ver qué apuntaste" — no se queda mostrando el de un día que
+    puede haber desaparecido del rango nuevo.
+
+### Casos límite
+
+16. Si tienes varias comidas habituales, los chips se **envuelven en varias
+    líneas** en vez de desbordar o cortarse.
+17. Apunta dos comidas hoy **a la misma hora exacta** (o edita una para que
+    coincida con otra): en Hoy, entre esas dos, el orden debe ser el mismo
+    en que las guardaste (la que guardaste después, arriba) — no deben salir
+    al revés.
+
+### Que no se haya roto nada
+
+18. En **móvil** (o el modo responsive del navegador a menos de 768 px):
+    Comidas y Ejercicio siguen funcionando exactamente igual que antes de
+    esta spec, con sus sub-pestañas.
+19. **Ejercicio → Apuntar** y **Peso → Nuevo pesaje** siguen mostrando Fecha
+    y Hora **siempre visibles**, sin plegar y sin chips: esta spec no los
+    tocaba.
+20. Apunta un ejercicio y un pesaje cualquiera y comprueba que aparecen en la
+    lista de Hoy, con su hora, igual que las comidas.
+21. En escritorio, con la ventana ancha (columnas de la spec 036): todo lo
+    anterior se ve igual de bien repartido en columnas, sin barras de scroll
+    raras ni texto cortado en la lista de Hoy ni en los chips.
+
+Si todo lo anterior pasa, la spec 037 queda **completada**.
