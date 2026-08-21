@@ -853,13 +853,18 @@ button:disabled {
   margin-left: auto;
 }
 
-/* Botón que se lee como enlace: acción secundaria y poco tentadora. */
+/* Botón que se lee como enlace: acción secundaria y poco tentadora. La zona
+   táctil llega a 44x44 px (spec 038) sin que el texto se note más grande:
+   es relleno alrededor, no una letra mayor. */
 .enlace {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
   background: none;
   border: none;
   color: var(--tinta-suave);
   text-decoration: underline;
-  padding: 0;
+  padding: var(--e2) var(--e1);
   font-size: 0.85rem;
 }
 

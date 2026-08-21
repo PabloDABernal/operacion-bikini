@@ -1260,6 +1260,12 @@ const listaPeso = crearLista({
     actualizarPesaje(uid, pesajeId, valores.pesoKg, valores.fecha, valores.hora)
 });
 
+// Fecha y hora plegadas (spec 038, mismo patrón que Comidas en la 037).
+id("btn-fecha-hora-pesaje").addEventListener("click", () => {
+  id("campos-fecha-hora-pesaje").classList.remove("oculta");
+  id("btn-fecha-hora-pesaje").classList.add("oculta");
+});
+
 id("form-pesaje").addEventListener("submit", async (evento) => {
   evento.preventDefault();
   const error = id("error-pesaje");
@@ -1283,6 +1289,8 @@ id("form-pesaje").addEventListener("submit", async (evento) => {
     id("peso").value = "";
     id("fecha").value = hoyISO();
     id("hora").value = horaActual();
+    id("campos-fecha-hora-pesaje").classList.add("oculta");
+    id("btn-fecha-hora-pesaje").classList.remove("oculta");
     await listaPeso.refrescar();
   } catch {
     error.textContent = "No se ha podido guardar. Comprueba tu conexión.";
@@ -2432,6 +2440,12 @@ const listaEjercicios = crearLista({
     )
 });
 
+// Fecha y hora plegadas (spec 038, mismo patrón que Comidas en la 037).
+id("btn-fecha-hora-ejercicio").addEventListener("click", () => {
+  id("campos-fecha-hora-ejercicio").classList.remove("oculta");
+  id("btn-fecha-hora-ejercicio").classList.add("oculta");
+});
+
 id("form-ejercicio").addEventListener("submit", async (evento) => {
   evento.preventDefault();
   const error = id("error-ejercicio");
@@ -2466,6 +2480,8 @@ id("form-ejercicio").addEventListener("submit", async (evento) => {
     id("ejercicio-intensidad").value = INTENSIDAD_POR_DEFECTO;
     id("ejercicio-fecha").value = hoyISO();
     id("ejercicio-hora").value = horaActual();
+    id("campos-fecha-hora-ejercicio").classList.add("oculta");
+    id("btn-fecha-hora-ejercicio").classList.remove("oculta");
     await listaEjercicios.refrescar();
   } catch {
     error.textContent = "No se ha podido guardar. Comprueba tu conexión.";

@@ -126,11 +126,17 @@
         <label for="peso">Peso (kg)</label>
         <input type="text" id="peso" inputmode="decimal" placeholder="82,4">
 
-        <label for="fecha">Fecha</label>
-        <input type="date" id="fecha">
+        <!-- Fecha y hora plegadas (spec 038, mismo patrón que Comidas en la
+             037): casi siempre es "ahora", así que no hace falta verlas para
+             guardar. -->
+        <button type="button" id="btn-fecha-hora-pesaje" class="enlace">Cambiar fecha y hora</button>
+        <div id="campos-fecha-hora-pesaje" class="oculta">
+          <label for="fecha">Fecha</label>
+          <input type="date" id="fecha">
 
-        <label for="hora">Hora</label>
-        <input type="time" id="hora">
+          <label for="hora">Hora</label>
+          <input type="time" id="hora">
+        </div>
 
         <button type="submit" id="btn-guardar">Guardar pesaje</button>
       </form>
@@ -336,11 +342,17 @@
         <label for="ejercicio-intensidad">Intensidad</label>
         <select id="ejercicio-intensidad"></select>
 
-        <label for="ejercicio-fecha">Fecha</label>
-        <input type="date" id="ejercicio-fecha">
+        <!-- Fecha y hora plegadas (spec 038, mismo patrón que Comidas en la
+             037): casi siempre es "ahora", así que no hace falta verlas para
+             guardar. -->
+        <button type="button" id="btn-fecha-hora-ejercicio" class="enlace">Cambiar fecha y hora</button>
+        <div id="campos-fecha-hora-ejercicio" class="oculta">
+          <label for="ejercicio-fecha">Fecha</label>
+          <input type="date" id="ejercicio-fecha">
 
-        <label for="ejercicio-hora">Hora</label>
-        <input type="time" id="ejercicio-hora">
+          <label for="ejercicio-hora">Hora</label>
+          <input type="time" id="ejercicio-hora">
+        </div>
 
         <button type="submit" id="btn-guardar-ejercicio">Guardar ejercicio</button>
       </form>
@@ -633,6 +645,7 @@
         <button type="button" class="nav-boton" data-seccion="peso">Peso</button>
         <button type="button" class="nav-boton" data-seccion="comidas">Comidas</button>
         <button type="button" class="nav-boton" data-seccion="ejercicio">Ejercicio</button>
+        <button type="button" class="nav-boton" data-seccion="fotos">Fotos</button>
         <button type="button" class="nav-boton" data-seccion="consulta">Consulta</button>
       </div>
     </nav>
