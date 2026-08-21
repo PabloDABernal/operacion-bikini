@@ -1,6 +1,6 @@
 # 036 — Vista de escritorio en varias columnas
 
-- **Estado:** revisada (`revisor-specs`: bloqueante del reparto de Peso, corregido; y las tres mejoras, incorporadas, 2026-08-21)
+- **Estado:** en implementación (código en `main`, `revisor-specs` y `revisor-codigo` con veredicto CUMPLE el 2026-08-21). Pendiente de que el usuario la pruebe.
 - **Fecha:** 2026-08-21
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (v4, decidida el 20 de agosto de 2026)", punto **"Vista de escritorio en varias columnas"**.
 
@@ -237,4 +237,86 @@ que algo se ha entendido mal: parar y avisar.
 
 ## ✅ Para probar a mano
 
-Lo rellena el agente `qa-manual` antes de la prueba.
+Esta se prueba **en el ordenador**, que es de lo que va. En
+https://operacion-bikini.vercel.app, con una operación en marcha.
+
+Para cambiar de ancho: F12 → modo responsive, o simplemente arrastra el borde de
+la ventana, que para esto vale igual.
+
+### Lo primero: que el móvil siga intacto
+
+1. **Antes de mirar el escritorio**, abre la app en el móvil de verdad. Comidas
+   y Ejercicio deben tener sus tres sub-pestañas **funcionando igual que ayer**.
+   Si algo ha cambiado en el móvil, esta spec está mal.
+
+### El escritorio
+
+2. En el ordenador, ventana **a pantalla completa**. La app ocupa una franja
+   ancha centrada (~1100 px), no la columna estrecha de antes. En un monitor
+   grande quedan márgenes a los lados: **es a propósito**.
+3. **Comidas**: **no hay fila de sub-pestañas**. Se ven las tres a la vez, en
+   columnas: **Apuntar | Mi dieta | Recetas**, de izquierda a derecha. La del
+   medio es la más ancha.
+4. **Ejercicio**: igual, **Apuntar | Mi tabla | Catálogo**.
+5. **Hoy**: dos columnas. Izquierda la fecha, el resumen, los atajos y "Qué has
+   comido hoy". Derecha "Constancia" y "Puntos y racha".
+6. **Peso**: dos columnas. Izquierda "Nuevo pesaje" y la gráfica. Derecha "Mis
+   pesajes" y "Estadísticas".
+7. **Consulta**: sigue en **una columna estrecha y centrada**, no estirada de
+   lado a lado.
+8. **Ajustes**: sigue igual de estrecha que siempre, centrada. Los formularios
+   **no** se estiran.
+9. El **aviso legal** del final tampoco se estira: estrecho y centrado.
+
+### Estrechar y ensanchar en caliente
+
+10. Con Comidas abierta, **arrastra el borde de la ventana** hasta estrecharla.
+    Al cruzar los ~1024 px deben **reaparecer las sub-pestañas** y verse solo
+    una. Ensánchala otra vez: vuelven las tres columnas. Sin recargar.
+11. Hazlo despacio pasando por anchos intermedios (~800 px): ahí la barra de
+    navegación está arriba pero sigue habiendo una sola columna y sub-pestañas.
+    **No debe quedarse ningún estado a medias** ni verse un bloque cortado.
+
+### El caso que más fácil se rompe
+
+12. **Sin operación en marcha, en escritorio.** Si tienes forma de probarlo
+    (o cuando cierres la operación), entra en **Comidas**, **Ejercicio**, **Hoy**
+    y **Peso** con la ventana ancha: debe verse **solo** el aviso de "Primero
+    inicia tu operación bikini desde Hoy". **No debe reaparecer ningún
+    formulario, ni una rejilla vacía, ni columnas fantasma.**
+
+    *(Este es el fallo que casi se cuela: las reglas de columnas tenían más
+    peso que la clase que oculta el contenido. Si ves algo asomar aquí,
+    dímelo.)*
+
+### Regresiones en escritorio
+
+13. **Comidas**: guarda una comida, toca "Lo de siempre", crea y borra una
+    receta, edita una celda de la semana y pulsa **"Me lo he comido"** → el
+    botón dice "✓ Guardado". Todo dentro de sus columnas.
+14. **Ejercicio**: lo mismo con el catálogo, la tabla y **"Lo he hecho"**.
+15. **Peso**: guarda un pesaje, cambia el rango de la gráfica y **toca un punto**
+    (spec 033) → sale su fecha y su peso debajo.
+16. **Hoy**: los cuatro atajos llevan donde deben. **"Hacer dieta"** abre
+    Comidas y la columna "Mi dieta" **ya se ve** sin buscarla.
+17. Los filtros "Ver un día" y los botones de desplegar listas largas siguen
+    respondiendo en las dos secciones.
+18. **Fotos**: la rejilla de miniaturas se estira y caben más por fila, sin
+    romperse. Abre una foto: el visor sale por encima, centrado, como siempre.
+19. **Ajustes → Histórico**: abre una operación archivada. La ventana sale
+    centrada y se lee bien.
+
+### Dos cosas a las que quiero que mires con lupa
+
+20. **La cabecera**: al ensanchar, tu avatar y tu email se van a la izquierda del
+    todo y los botones de navegación a la derecha del todo, con mucho hueco en
+    medio. Es lo normal en una app de escritorio, pero **si te chirría, dímelo**
+    y lo ajustamos.
+21. **La gráfica de peso al redimensionar**: la gráfica se dibuja al ancho que
+    tiene su hueco en ese momento. Si cambias el tamaño de la ventana **con Peso
+    ya abierta**, puede quedarse con el ancho viejo hasta que salgas y vuelvas a
+    entrar en la sección. **Comprueba si pasa.** Si pasa, no se arregla aquí:
+    está anotado y se decide aparte, porque tocar el redibujado es JavaScript y
+    esta spec no lo toca.
+
+Si todo pasa, la spec queda **completada**.
