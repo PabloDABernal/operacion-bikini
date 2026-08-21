@@ -2,7 +2,7 @@
 
 Documento para retomar el trabajo en frío. Se actualiza al terminar cada spec.
 
-**Última actualización:** 20 de agosto de 2026 (spec 035 terminada y validada; la v4 a mitad)
+**Última actualización:** 21 de agosto de 2026 (spec 036 implementada y desplegada, **pendiente de que el usuario la pruebe**)
 
 ## Dónde estamos
 
@@ -10,7 +10,7 @@ Documento para retomar el trabajo en frío. Se actualiza al terminar cada spec.
 
 **https://operacion-bikini.vercel.app**
 
-**Las specs 001 a 035 están todas implementadas, desplegadas y validadas por el usuario.** La app se usa a diario.
+**Las specs 001 a 035 están implementadas, desplegadas y validadas por el usuario.** La **036 está en `main` y desplegada, pero SIN validar**: el usuario se fue antes de probarla. La app se usa a diario.
 
 La v2 se amplió dos veces sobre la marcha, según el usuario iba probando:
 
@@ -63,6 +63,7 @@ El 20 de agosto arrancó la **v4**, que sale de una auditoría de usabilidad hec
 | 033 | Tocar un punto de la gráfica de peso para ver su fecha y su peso | ✅ completada |
 | 034 | La confirmación de guardado, en el propio botón de la semana | ✅ completada |
 | 035 | Sub-pestañas en Comidas y Ejercicio, y nombres que dejan de pisarse | ✅ completada |
+| 036 | Vista de escritorio en varias columnas | ⏳ desplegada, sin probar |
 
 ## Qué toca ahora
 
@@ -74,14 +75,37 @@ Las cuatro specs de la v4, **en este orden y no en otro**:
 |---|---|---|
 | 034 | La confirmación de guardado, en el propio botón | ✅ completada |
 | 035 | Sub-pestañas en Comidas y Ejercicio, y nombres que dejan de pisarse | ✅ completada |
-| 036 | Vista de escritorio en varias columnas | siguiente |
-| 037 | Fotos en la navegación, zonas táctiles y fecha/hora plegables | pendiente |
+| 036 | Vista de escritorio en varias columnas | ⏳ desplegada, sin probar |
+| 036 | Vista de escritorio en varias columnas | ⏳ **desplegada, sin probar** |
+| 037 | Fotos en la navegación, zonas táctiles y fecha/hora plegables | siguiente, cuando la 036 se valide |
 
 **Por qué la 035 va antes que la 036:** los trozos en que se parta Comidas en el móvil son exactamente las columnas del escritorio. Al revés habría que recolocar el CSS dos veces.
+
+### Lo primero al retomar
+
+**Pedirle al usuario que pruebe la 036** con el guion que ya está escrito al final
+de `docs/specs/036-vista-escritorio.md`. Hasta que no la valide, no se empieza la
+037: el flujo de `CLAUDE.md` dice que una spec no se cierra sin prueba manual.
+
+Dos puntos del guion en los que el usuario tenía que fijarse y aún no ha
+contestado:
+
+- **Paso 20**: al ensanchar, en la cabecera el avatar y el email se van a un
+  extremo y la barra de navegación al otro, con mucho hueco en medio. Es normal
+  en escritorio, pero quedó pendiente de que él diga si le chirría.
+- **Paso 21**: si se cambia el tamaño de la ventana **con Peso ya abierta**, la
+  gráfica puede quedarse con el ancho viejo hasta salir y volver a entrar en la
+  sección. `dibujarGrafica()` se llama al pintar la sección, no al redimensionar.
+  **Si pasa, no se arregla en la 036**: es JavaScript y esa spec no lo toca. Ya
+  está anotado en el backlog.
 
 **La 035 roza el límite de las ~300 líneas** que marca `CLAUDE.md`. Se decidió no partirla: Comidas y Ejercicio son la misma estructura repetida, y dejar la app medio migrada entre dos sesiones es peor. Si al implementarla se desmadra, avisar antes de seguir.
 
 ## Deuda conocida
+
+- **Trampa de CSS de la spec 036, ya resuelta pero fácil de romper otra vez**: las reglas de rejilla del `@media` de 64 rem llevan `:not(.oculta)` a propósito. Sin él ganan en especificidad a la clase `.oculta` con la que `js/app.js` esconde `#bloque-hoy` y `.contenido-operacion` cuando no hay operación en marcha, y **todos los formularios reaparecen en escritorio justo cuando no deben verse**. Si alguien "limpia" esos `:not(.oculta)`, vuelve el fallo. Está comentado en `styles.css`.
+- **La clase `.atajo` sirve para dos cosas distintas** (detectado en la spec 035): los atajos de Hoy, que navegan, y el botón "Pedir dieta"/"Pedir tabla" que se crea en tiempo de ejecución y **no navega**. El enganche de navegación funciona porque `querySelectorAll(".nav-boton, .atajo")` corre al cargar, antes de que ese botón exista. **No convertirlo nunca en un listener delegado** ni volver a consultar el selector más tarde: el botón de pedir empezaría a llamar a `abrirPestana(undefined)`. Comentado en `js/app.js`.
+- **La gráfica de peso no se redibuja al cambiar el tamaño de la ventana**: `dibujarGrafica()` se llama al pintar la sección. Sospecha abierta desde la spec 036, **sin confirmar**: pendiente de que el usuario lo compruebe (paso 21 de su guion). En `docs/BACKLOG.md`.
 
 - **Spec 032, detectado al probar en producción y ya corregido**: la capa gratuita de Groq va **por modelo**, no por cuenta entera, y `llamarAGroq()` solo pasaba al siguiente modelo de `MODELOS_GROQ` ante un 404 (modelo inexistente), nunca ante un 429 (modelo sin cuota). El modelo grande (`llama-3.3-70b-versatile`, el primero de la lista) es el más tacaño en cuota gratuita, así que un 429 suyo daba Groq entero por perdido sin probar los otros dos. Ahora un 429 también pasa al siguiente modelo. De paso, los mensajes de error de la IA (`cuota-agotada`, `ia-saturada`, etc.) llevan un campo `proveedor` nuevo: con dos proveedores elegibles, el mensaje ya no bastaba para saber si había sido Gemini o Groq.
 - **Código muerto de la spec 029 borrado el 19 de agosto**: `pedirPlanEspecializado()` y `URL_PLAN`/`MAXIMO_INSTRUCCIONES` en `js/consulta.js`, y el archivo `api/plan.js` entero (con su entrada en `vercel.json`). Los planes de dieta y tabla ya eran semanas estructuradas desde las specs 028/029; esto solo quitaba el camino viejo que ya no llamaba nadie. `quedanPlanesHoy`, `pedidosHoy` y `guardarMarcaDePlan` siguen vivos, el cupo de planes no cambia.

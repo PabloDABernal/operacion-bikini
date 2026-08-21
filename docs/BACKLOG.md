@@ -51,3 +51,5 @@ Ideas surgidas durante la implementación, no implementadas. Una línea cada una
 - Sub-pestañas también en Ajustes, si las de Comidas y Ejercicio funcionan bien.
 - El aviso de guardado dura 3 segundos fijos y desaparece solo; valorar si algún caso pide que se quede hasta que lo cierres.
 - Que la semana de dieta y de tabla marquen qué has cumplido hoy. Descartado a propósito en la v4 para no contradecir la spec 028; si algún día se quiere, hay que cambiar PRODUCTO.md primero.
+- Redibujar la gráfica de peso al cambiar el tamaño de la ventana (spec 036: se dibuja al pintar la sección, no al redimensionar). Sin confirmar que haga falta.
+- Revisar el hueco de la cabecera en escritorio, entre la identidad y la barra de navegación (spec 036, paso 20 del guion). Pendiente de la opinión del usuario.
