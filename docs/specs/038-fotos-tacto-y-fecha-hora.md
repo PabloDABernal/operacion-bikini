@@ -1,6 +1,6 @@
 # 038 — Fotos en la navegación, zonas táctiles y fecha/hora plegable en Ejercicio y Peso
 
-- **Estado:** borrador
+- **Estado:** revisada (revisor-specs: LISTA PARA IMPLEMENTAR el 2026-08-21, sin bloqueantes)
 - **Fecha:** 2026-08-21
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (v4, decidida el 20 de agosto de 2026)", puntos **"Fotos deja de estar escondida"** y **"Menos fricción al apuntar"**.
 
@@ -40,7 +40,7 @@ se aciertan sin puntería, y Ejercicio y Peso se comportan como Comidas.
 - Añadir "Fotos" como sexto botón de la navegación principal.
 - Ampliar la zona táctil de la clase `.enlace` a 44×44 px como mínimo, en
   toda la app.
-- Comidas y Ejercicio: plegar Fecha y Hora del formulario de apuntar, con el
+- Ejercicio y Peso: plegar Fecha y Hora del formulario de apuntar, con el
   mismo patrón que la spec 037 usó en Comidas (control que despliega, se
   repliega solo al guardar con éxito).
 
@@ -103,6 +103,11 @@ se aciertan sin puntería, y Ejercicio y Peso se comportan como Comidas.
 
 ## 6. Casos límite
 
+- **Enlaces dentro de una fila estrecha**: `btn-quitar-filtro-pesajes`,
+  `-comidas` y `-ejercicios` viven dentro de `.filtro-dia`, en una fila flex
+  junto a un `<input type="date">`. Al dar más relleno a `.enlace`, hay que
+  comprobar que esa fila no se descuadra en móvil a 320 px (el input y el
+  enlace deben seguir cabiendo uno junto al otro, envolviendo si hace falta).
 - **Con la ventana muy estrecha (320 px) y seis botones en la barra**: el
   texto se encoge con el `clamp()` ya existente; ningún botón debe partirse
   en dos líneas ni desaparecer.
