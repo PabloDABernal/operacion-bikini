@@ -236,7 +236,15 @@ function abrirPestana(nombre, subseccion) {
 
   // Desde arriba: al cambiar de sección se ve el principio, no donde te
   // quedaste en la sección anterior.
-  window.scrollTo(0, 0);
+  //
+  // Con requestAnimationFrame y no al momento: mostrar una sección que no se
+  // había pintado en esta carga (display: none → block) es un cambio de
+  // diseño grande de golpe, y hacer scrollTo() en el mismo instante —antes de
+  // que el navegador termine ese diseño— puede dejar la barra de navegación
+  // (position: fixed) sin repintar hasta el siguiente toque o scroll. Se ve
+  // más en Ejercicio por ser la sección más alta. Esperar a un fotograma deja
+  // que el diseño nuevo se asiente antes de mover el scroll.
+  requestAnimationFrame(() => window.scrollTo(0, 0));
 }
 
 // Hermana de abrirPestana() para las sub-pestañas (spec 035). Se busca dentro
