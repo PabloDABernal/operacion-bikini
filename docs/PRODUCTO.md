@@ -113,7 +113,7 @@ lo que ya se guarda.
   diario de comidas se vea antes, sin tanto scroll.
 - **"Hoy" con la lista completa del día**: el resumen de una línea por tipo
   (peso/comida/ejercicio) se sustituye por una lista de todo lo dado de alta
-  hoy, en el orden en que se apuntó.
+  hoy, ordenada por la hora de cada registro (más tardía primero).
 - **Detalle real en el calendario de constancia**: al tocar un día ya no basta
   con saber qué tipos se apuntaron ("comida, ejercicio"); debajo del
   calendario se ve el texto exacto de cada comida y ejercicio de ese día (con

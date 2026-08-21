@@ -63,6 +63,17 @@
       <div class="columna">
       <h2 id="hoy-fecha"></h2>
 
+      <!-- Los "+" de antes vivían uno por línea de resumen; con una lista de
+           N líneas por tipo (spec 037) pasan a un sitio fijo, separado de la
+           lista. Llevan la clase .atajo para engancharse a la navegación
+           igual que los de aquí abajo (ver el aviso más abajo sobre no
+           convertir esto en un listener delegado). -->
+      <div id="mas-hoy">
+        <button type="button" class="atajo" data-seccion="peso">+ Peso</button>
+        <button type="button" class="atajo" data-seccion="comidas">+ Comidas</button>
+        <button type="button" class="atajo" data-seccion="ejercicio">+ Ejercicio</button>
+      </div>
+
       <ul id="hoy-resumen" class="resumen"></ul>
 
       <div id="atajos-hoy">
@@ -180,27 +191,34 @@
         <label for="comida-texto">Qué has comido</label>
         <textarea id="comida-texto" rows="2" placeholder="lentejas y una manzana"></textarea>
 
+        <!-- "Lo de siempre" (spec 013), integrado junto al alta desde la
+             spec 037: antes era un bloque propio al final de la pantalla y
+             parecía una sección escondida. -->
+        <div id="bloque-lo-de-siempre" class="oculta">
+          <div id="lo-de-siempre" class="chips"></div>
+          <p id="error-repetir" class="error" role="alert"></p>
+          <p id="guardado-repetir" class="guardado" role="status"></p>
+        </div>
+
         <label for="comida-momento">Momento</label>
         <select id="comida-momento"></select>
 
-        <label for="comida-fecha">Fecha</label>
-        <input type="date" id="comida-fecha">
+        <!-- Fecha y hora plegadas (spec 037): casi siempre es "ahora", así
+             que no hace falta verlas para guardar. -->
+        <button type="button" id="btn-fecha-hora-comida" class="enlace">Cambiar fecha y hora</button>
+        <div id="campos-fecha-hora-comida" class="oculta">
+          <label for="comida-fecha">Fecha</label>
+          <input type="date" id="comida-fecha">
 
-        <label for="comida-hora">Hora</label>
-        <input type="time" id="comida-hora">
+          <label for="comida-hora">Hora</label>
+          <input type="time" id="comida-hora">
+        </div>
 
         <button type="submit" id="btn-guardar-comida">Guardar comida</button>
       </form>
 
       <p id="error-comida" class="error" role="alert"></p>
       <p id="guardado-comida" class="guardado" role="status"></p>
-
-      <div id="bloque-lo-de-siempre" class="oculta">
-        <h2>Lo de siempre</h2>
-        <div id="lo-de-siempre"></div>
-        <p id="error-repetir" class="error" role="alert"></p>
-        <p id="guardado-repetir" class="guardado" role="status"></p>
-      </div>
 
       <!-- El diario. Se llama igual que su gemelo de Ejercicio (spec 035). -->
       <h2>Lo que llevo apuntado</h2>

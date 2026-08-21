@@ -456,8 +456,7 @@ button:disabled {
   font-weight: 700;
 }
 
-/* Lo último apuntado hoy. Si el texto es largo, se recorta: la fila no crece
-   y el + no se mueve de sitio. */
+/* Un texto largo se recorta: la fila no crece. */
 .resumen-valor {
   overflow: hidden;
   text-overflow: ellipsis;
@@ -465,19 +464,8 @@ button:disabled {
   min-width: 0;
 }
 
-.boton-mas {
-  flex: 0 0 auto;
-  width: 2.25rem;
-  height: 2.25rem;
-  padding: 0;
-  font-size: 1.25rem;
-  line-height: 1;
-  font-weight: 700;
-  border-color: var(--acento);
-  color: var(--acento);
-}
-
-#atajos-hoy {
+#atajos-hoy,
+#mas-hoy {
   display: flex;
   flex-wrap: wrap;
   gap: var(--e2);
@@ -535,16 +523,24 @@ button:disabled {
   color: var(--tinta-suave);
 }
 
-#lo-de-siempre {
+/* "Lo de siempre" como chips junto al alta (spec 037): antes era una lista
+   de botones a ancho completo, uno debajo de otro; ahora son chips que se
+   envuelven en varias líneas si no caben, para ocupar poco junto al campo
+   de texto. */
+.chips {
   display: flex;
-  flex-direction: column;
+  flex-wrap: wrap;
   gap: var(--e2);
+  margin: var(--e2) 0;
 }
 
-.boton-repetir {
-  width: 100%;
-  text-align: left;
-  /* Un texto largo no debe estirar el botón ni partirlo en tres líneas. */
+.chip {
+  width: auto;
+  max-width: 100%;
+  padding: var(--e1) var(--e3);
+  font-size: 0.85rem;
+  border-radius: 999px;
+  /* Un texto largo no debe estirar el chip a todo lo ancho. */
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -654,6 +650,13 @@ button:disabled {
   font-size: 0.9rem;
   margin: var(--e1) 0 0;
   min-height: 1.2rem;
+}
+
+/* El detalle del calendario (spec 037) puede llevar varias líneas —una por
+   registro del día—, a diferencia de su gemelo de la gráfica de peso, que
+   siempre es una sola línea. */
+#calendario-detalle {
+  white-space: pre-line;
 }
 
 /* Calendario de constancia: dibujado y con estilos, pero todavía sin pantalla

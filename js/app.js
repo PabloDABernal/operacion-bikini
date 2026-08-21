@@ -23,11 +23,7 @@ import { pesosPorDia, mediaMovil, calendarioDeConstancia } from "./grafica.js";
 
 import { estadisticasDePeso } from "./estadisticas.js";
 
-import {
-  dibujarGrafica,
-  dibujarCalendario,
-  textoDeCasilla
-} from "./grafica-svg.js";
+import { dibujarGrafica, dibujarCalendario } from "./grafica-svg.js";
 
 import {
   dibujarCalendarioMes,
@@ -851,56 +847,58 @@ function fechaLarga(iso) {
   return FORMATO_FECHA_LARGA.format(new Date(anio, mes - 1, dia, 12));
 }
 
-// Una línea del resumen: la etiqueta, lo último apuntado hoy (si hay algo) y
-// un + que lleva a la pantalla donde se apunta. Sin nada apuntado, solo el +.
+// Una línea de un registro: la etiqueta y el texto con su hora si la tiene.
 function conHora(registro, texto) {
   return registro.hora ? `${texto} · ${formatearHora(registro.hora)}` : texto;
 }
 
-function lineaDeResumen(etiqueta, ultimo, seccion) {
+function lineaDeRegistro(etiqueta, registro, texto) {
   const fila = document.createElement("li");
-  fila.append(celda(etiqueta, "resumen-etiqueta"), celda(ultimo ?? "", "resumen-valor"));
-
-  const mas = botonDeFila("+", () => abrirPestana(seccion));
-  mas.className = "boton-mas";
-  mas.setAttribute("aria-label", `Apuntar en ${etiqueta}`);
-  fila.appendChild(mas);
-
+  fila.append(
+    celda(etiqueta, "resumen-etiqueta"),
+    celda(conHora(registro, texto), "resumen-valor")
+  );
   return fila;
 }
 
+// La lista completa de hoy (spec 037): antes solo se veía lo último de cada
+// tipo, aunque hubiera varias comidas. Ahora se ven todos los registros de
+// hoy, ordenados por su hora (la más tardía primero) y con los que no tienen
+// hora al final, en el orden en que ya vienen cargados. Los "+" para apuntar
+// viven aparte, en #mas-hoy: no tiene sentido uno por línea con N líneas por
+// tipo.
 function pintarResumen(registros) {
   const hoy = hoyISO();
   const lista = id("hoy-resumen");
+  const deHoy = (regs) => regs.filter((r) => r.fecha === hoy);
 
-  // Las listas vienen de más reciente a más antigua, así que lo último de hoy
-  // es lo primero que aparece con la fecha de hoy.
-  const ultimoDeHoy = (registros) => registros.find((r) => r.fecha === hoy);
+  const entradas = [
+    ...deHoy(registros.pesajes).map((r) => ({
+      registro: r,
+      etiqueta: "Peso",
+      texto: `${r.pesoKg.toFixed(1).replace(".", ",")} kg`
+    })),
+    ...deHoy(registros.comidas).map((r) => ({
+      registro: r,
+      etiqueta: "Comida",
+      texto: r.texto
+    })),
+    ...deHoy(registros.ejercicios).map((r) => ({
+      registro: r,
+      etiqueta: "Ejercicio",
+      texto: `${r.texto} · ${r.minutos} min`
+    }))
+  ];
 
-  const pesaje = ultimoDeHoy(registros.pesajes);
-  const comida = ultimoDeHoy(registros.comidas);
-  const ejercicio = ultimoDeHoy(registros.ejercicios);
+  const conHoraEntradas = entradas
+    .filter((entrada) => entrada.registro.hora)
+    .sort((a, b) => (a.registro.hora < b.registro.hora ? 1 : -1));
+  const sinHoraEntradas = entradas.filter((entrada) => !entrada.registro.hora);
 
   lista.innerHTML = "";
-  lista.append(
-    lineaDeResumen(
-      "Peso",
-      pesaje
-        ? conHora(pesaje, `${pesaje.pesoKg.toFixed(1).replace(".", ",")} kg`)
-        : null,
-      "peso"
-    ),
-    lineaDeResumen(
-      "Comidas",
-      comida ? conHora(comida, comida.texto) : null,
-      "comidas"
-    ),
-    lineaDeResumen(
-      "Ejercicio",
-      ejercicio ? conHora(ejercicio, `${ejercicio.texto} · ${ejercicio.minutos} min`) : null,
-      "ejercicio"
-    )
-  );
+  [...conHoraEntradas, ...sinHoraEntradas].forEach(({ registro, etiqueta, texto }) => {
+    lista.appendChild(lineaDeRegistro(etiqueta, registro, texto));
+  });
 }
 
 // --- Calendario de constancia --------------------------------------------
@@ -933,6 +931,26 @@ function pintarRangos() {
   });
 }
 
+// El detalle real de un día (spec 037): antes solo decía qué categorías se
+// habían apuntado ("comida, ejercicio"); ahora enseña el texto de cada
+// registro de ese día, sin recortar.
+function detalleDelDia(fecha, registros) {
+  const deEseDia = (regs) => regs.filter((r) => r.fecha === fecha);
+
+  const lineas = [
+    ...deEseDia(registros.pesajes).map(
+      (r) => `Peso: ${conHora(r, `${r.pesoKg.toFixed(1).replace(".", ",")} kg`)}`
+    ),
+    ...deEseDia(registros.comidas).map((r) => `Comida: ${conHora(r, r.texto)}`),
+    ...deEseDia(registros.ejercicios).map(
+      (r) => `Ejercicio: ${conHora(r, `${r.texto} · ${r.minutos} min`)}`
+    )
+  ];
+
+  if (lineas.length === 0) return `${formatearFecha(fecha)} — sin registros`;
+  return `${formatearFecha(fecha)}\n${lineas.join("\n")}`;
+}
+
 function pintarCalendario(registros) {
   const contenedor = id("calendario");
   const detalle = id("calendario-detalle");
@@ -946,7 +964,7 @@ function pintarCalendario(registros) {
   const alTocar = (casilla) => {
     // Con el ratón basta el <title>; en el móvil no hay hover, así que el
     // toque escribe el detalle aquí debajo.
-    detalle.textContent = textoDeCasilla(casilla);
+    detalle.textContent = detalleDelDia(casilla.fecha, registros);
   };
 
   // Cada rango pide una forma distinta: un mapa de calor de dos columnas no
@@ -2235,7 +2253,7 @@ function pintarLoDeSiempre(comidas) {
       `${etiquetaDeMomento(habitual.momento)} · ${habitual.texto}`,
       () => repetirComida(habitual, boton)
     );
-    boton.className = "boton-repetir";
+    boton.className = "chip";
     contenedor.appendChild(boton);
   });
 }
@@ -2299,6 +2317,14 @@ const listaComidas = crearLista({
     )
 });
 
+// Fecha y hora plegadas (spec 037): casi siempre es "ahora", así que no
+// hace falta verlas para guardar. Una vez desplegadas no hace falta volver
+// a plegarlas para guardar: solo se replegán al guardar con éxito.
+id("btn-fecha-hora-comida").addEventListener("click", () => {
+  id("campos-fecha-hora-comida").classList.remove("oculta");
+  id("btn-fecha-hora-comida").classList.add("oculta");
+});
+
 id("form-comida").addEventListener("submit", async (evento) => {
   evento.preventDefault();
   const error = id("error-comida");
@@ -2330,6 +2356,8 @@ id("form-comida").addEventListener("submit", async (evento) => {
     id("comida-momento").value = MOMENTO_POR_DEFECTO;
     id("comida-fecha").value = hoyISO();
     id("comida-hora").value = horaActual();
+    id("campos-fecha-hora-comida").classList.add("oculta");
+    id("btn-fecha-hora-comida").classList.remove("oculta");
     await listaComidas.refrescar();
   } catch {
     error.textContent = "No se ha podido guardar. Comprueba tu conexión.";
