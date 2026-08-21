@@ -100,6 +100,25 @@ Lo que **no** cambia: la semana de dieta y la de tabla siguen sin guardar estado
 —no marcan qué has cumplido y qué no—, tal y como se decidió al diseñarlas. Aquí
 solo se arregla el aviso de guardado.
 
+## Qué hará (ampliación de la v4, decidida el 21 de agosto de 2026)
+
+Sale de probar la 036 en producción. Sigue sin añadir funciones: muestra mejor
+lo que ya se guarda.
+
+- **Comidas: "lo de siempre" integrado**: en vez de una lista aparte debajo del
+  formulario, las comidas que más se repiten se ofrecen como chips justo bajo
+  el campo de texto de "Nueva comida"; tocar uno la guarda igual que antes.
+  Fecha y hora del formulario se pliegan —casi siempre es "ahora"— y solo se
+  despliegan si hace falta cambiarlas, para que el formulario ocupe menos y el
+  diario de comidas se vea antes, sin tanto scroll.
+- **"Hoy" con la lista completa del día**: el resumen de una línea por tipo
+  (peso/comida/ejercicio) se sustituye por una lista de todo lo dado de alta
+  hoy, en el orden en que se apuntó.
+- **Detalle real en el calendario de constancia**: al tocar un día ya no basta
+  con saber qué tipos se apuntaron ("comida, ejercicio"); debajo del
+  calendario se ve el texto exacto de cada comida y ejercicio de ese día (con
+  su hora) y el peso, sin recortar.
+
 ## Qué explícitamente NO hace
 
 - No sustituye a un profesional médico real: siempre debe recordar (disclaimer) que ante dudas o falta de resultados hay que consultar a un médico.
@@ -131,5 +150,5 @@ solo se arregla el aviso de guardado.
 - **v1 (beta, deadline 31 de agosto)**: todo el alcance descrito arriba (registro completo + consejos + consulta + fotos), priorizando que funcione sobre que esté pulido visualmente. **Terminada y probada el 11 de agosto de 2026** (specs 001 a 005), 20 días antes del plazo.
 - **v2 (en curso desde el 11 de agosto de 2026, sin fecha límite)**: lo descrito en "Qué hará (v2)". El criterio con el que se eligió: la v2 no se pierde por falta de funciones, se pierde si dejamos de usar la app; así que primero va lo que quita fricción y lo que se disfruta a diario. Razonamiento completo en `docs/propuestas/v2-usabilidad-y-gamificacion.md`.
 - **v3 (16 de agosto de 2026)**: lo descrito en "Qué hará (v3)". Terminada y probada.
-- **v4 (desde el 20 de agosto de 2026, sin fecha límite)**: lo descrito en "Qué hará (v4)". No añade funciones: reordena lo que ya hay para que se encuentre, y estrena la vista de escritorio. Sale de una auditoría de usabilidad hecha sobre el código el 20 de agosto.
+- **v4 (desde el 20 de agosto de 2026, sin fecha límite)**: lo descrito en "Qué hará (v4)" y en su ampliación del 21 de agosto. No añade funciones: reordena lo que ya hay para que se encuentre, y estrena la vista de escritorio. Sale de una auditoría de usabilidad hecha sobre el código el 20 de agosto, y de probar la 036 en producción el 21.
 - **Descartado para v2**: notificaciones push (mucho trabajo y acaban silenciadas), integración con básculas o pulseras, y comparativa de fotos lado a lado, que se pospone.

@@ -69,23 +69,24 @@ El 20 de agosto arrancó la **v4**, que sale de una auditoría de usabilidad hec
 
 **La v4, empezada el 20 de agosto.** Aquel "rehacer las pantallas de forma más lógica" que el usuario pidió el 16 de agosto ya está concretado y en `PRODUCTO.md`. Salió de una auditoría de usabilidad sobre el código: Comidas y Ejercicio se habían convertido en páginas de cinco y seis bloques que solo se recorren con scroll ciego, y en un monitor la app es una columna de 512 px con dos desiertos a los lados.
 
-Las cuatro specs de la v4, **en este orden y no en otro**:
+Las specs de la v4, **en este orden y no en otro**:
 
 | Spec | Qué | Estado |
 |---|---|---|
 | 034 | La confirmación de guardado, en el propio botón | ✅ completada |
 | 035 | Sub-pestañas en Comidas y Ejercicio, y nombres que dejan de pisarse | ✅ completada |
-| 036 | Vista de escritorio en varias columnas | ⏳ desplegada, sin probar |
-| 036 | Vista de escritorio en varias columnas | ⏳ **desplegada, sin probar** |
-| 037 | Fotos en la navegación, zonas táctiles y fecha/hora plegables | siguiente, cuando la 036 se valide |
+| 036 | Vista de escritorio en varias columnas | ⏳ **en pruebas**: desplegada, con varios fixes ya aplicados el 21 de agosto (ver "Deuda conocida"), aún sin el visto bueno final del usuario |
+| 037 | Comidas integradas, Hoy completo y detalle real en el calendario (ampliación de la v4 del 21 de agosto) | 📝 spec en borrador (`docs/specs/037-el-dia-a-la-vista.md`), pendiente de `revisor-specs` |
+| 038 | Fotos en la navegación, zonas táctiles y fecha/hora plegables en Ejercicio y Peso | idea suelta, aún sin spec (era la "037" hasta que el 21 de agosto se le adelantó otra) |
 
 **Por qué la 035 va antes que la 036:** los trozos en que se parta Comidas en el móvil son exactamente las columnas del escritorio. Al revés habría que recolocar el CSS dos veces.
 
 ### Lo primero al retomar
 
-**Pedirle al usuario que pruebe la 036** con el guion que ya está escrito al final
-de `docs/specs/036-vista-escritorio.md`. Hasta que no la valide, no se empieza la
-037: el flujo de `CLAUDE.md` dice que una spec no se cierra sin prueba manual.
+**Seguir probando la 036** con el guion de `docs/specs/036-vista-escritorio.md`
+mientras se decide si la 037 se implementa ya o se espera a que la 036 quede
+del todo validada. El flujo de `CLAUDE.md` dice que una spec no se cierra sin
+prueba manual, así que la 036 sigue abierta hasta que el usuario lo confirme.
 
 Dos puntos del guion en los que el usuario tenía que fijarse y aún no ha
 contestado:
