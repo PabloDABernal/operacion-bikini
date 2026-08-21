@@ -472,6 +472,9 @@ function crearLista(config) {
   const filtro = id(config.filtro);
   const botonQuitarFiltro = id(config.quitarFiltro);
   const botonDesplegar = id(config.desplegar);
+  // Gemelo arriba del todo (spec 035-fix): mismo estado, mismo texto, para no
+  // tener que bajar hasta el final de una lista larga solo para recogerla.
+  const botonDesplegarArriba = id(config.desplegarArriba);
 
   let registros = [];
   let editandoId = null;
@@ -520,6 +523,8 @@ function crearLista(config) {
     botonDesplegar.textContent = desplegada
       ? "Ver menos"
       : `Ver todos (${registros.length})`;
+    botonDesplegarArriba.classList.toggle("oculta", !hayEscondidos && !desplegada);
+    botonDesplegarArriba.textContent = botonDesplegar.textContent;
   }
 
   filtro.addEventListener("change", () => {
@@ -541,6 +546,12 @@ function crearLista(config) {
     // sin esto la ventana se queda mirando el hueco en blanco de donde
     // colgaba la lista larga, y hay que subir a mano para volver a verla.
     if (!desplegada) botonDesplegar.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  });
+
+  // El de arriba no tiene ese problema: ya está donde está la vista.
+  botonDesplegarArriba.addEventListener("click", () => {
+    desplegada = !desplegada;
+    pintar();
   });
 
   function filaDeLectura(registro) {
@@ -1196,6 +1207,7 @@ const listaPeso = crearLista({
   filtro: "filtro-pesajes",
   quitarFiltro: "btn-quitar-filtro-pesajes",
   desplegar: "btn-desplegar-pesajes",
+  desplegarArriba: "btn-desplegar-pesajes-arriba",
   textoSinEseDia: "No hay pesajes de ese día.",
   textoVacio:
     "Aún no has apuntado ningún pesaje. Pésate al levantarte, antes de desayunar: es el momento más comparable.",
@@ -1270,6 +1282,7 @@ let recetasDesplegadas = false;
 function pintarRecetas() {
   const contenedor = id("lista-recetas");
   const boton = id("btn-desplegar-recetas");
+  const botonArriba = id("btn-desplegar-recetas-arriba");
 
   contenedor.innerHTML = "";
   id("estado-recetas").textContent = recetasCargadas.length
@@ -1287,6 +1300,8 @@ function pintarRecetas() {
   boton.textContent = recetasDesplegadas
     ? "Ver menos"
     : `Ver todas (${recetasCargadas.length})`;
+  botonArriba.classList.toggle("oculta", !hayEscondidas && !recetasDesplegadas);
+  botonArriba.textContent = boton.textContent;
 }
 
 function tarjetaDeReceta(receta) {
@@ -1393,6 +1408,11 @@ id("btn-desplegar-recetas").addEventListener("click", () => {
   if (!recetasDesplegadas) {
     id("btn-desplegar-recetas").scrollIntoView({ behavior: "smooth", block: "nearest" });
   }
+});
+
+id("btn-desplegar-recetas-arriba").addEventListener("click", () => {
+  recetasDesplegadas = !recetasDesplegadas;
+  pintarRecetas();
 });
 
 id("form-receta").addEventListener("submit", async (evento) => {
@@ -1705,6 +1725,7 @@ let catalogoDesplegado = false;
 function pintarCatalogo() {
   const contenedor = id("lista-catalogo");
   const boton = id("btn-desplegar-catalogo");
+  const botonArriba = id("btn-desplegar-catalogo-arriba");
 
   contenedor.innerHTML = "";
   id("estado-catalogo").textContent = catalogoCargado.length
@@ -1724,6 +1745,8 @@ function pintarCatalogo() {
   boton.textContent = catalogoDesplegado
     ? "Ver menos"
     : `Ver todos (${catalogoCargado.length})`;
+  botonArriba.classList.toggle("oculta", !hayEscondidos && !catalogoDesplegado);
+  botonArriba.textContent = boton.textContent;
 }
 
 function tarjetaDeEjercicio(ejercicio) {
@@ -1828,6 +1851,11 @@ id("btn-desplegar-catalogo").addEventListener("click", () => {
   if (!catalogoDesplegado) {
     id("btn-desplegar-catalogo").scrollIntoView({ behavior: "smooth", block: "nearest" });
   }
+});
+
+id("btn-desplegar-catalogo-arriba").addEventListener("click", () => {
+  catalogoDesplegado = !catalogoDesplegado;
+  pintarCatalogo();
 });
 
 id("form-ejercicio-catalogo").addEventListener("submit", async (evento) => {
@@ -2236,6 +2264,7 @@ const listaComidas = crearLista({
   filtro: "filtro-comidas",
   quitarFiltro: "btn-quitar-filtro-comidas",
   desplegar: "btn-desplegar-comidas",
+  desplegarArriba: "btn-desplegar-comidas-arriba",
   textoSinEseDia: "No hay comidas de ese día.",
   recortarPorDias: true,
   textoVacio:
@@ -2320,6 +2349,7 @@ const listaEjercicios = crearLista({
   filtro: "filtro-ejercicios",
   quitarFiltro: "btn-quitar-filtro-ejercicios",
   desplegar: "btn-desplegar-ejercicios",
+  desplegarArriba: "btn-desplegar-ejercicios-arriba",
   textoSinEseDia: "No hay ejercicios de ese día.",
   recortarPorDias: true,
   textoVacio:

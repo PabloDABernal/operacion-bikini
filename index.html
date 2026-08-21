@@ -142,6 +142,9 @@
         <input type="date" id="filtro-pesajes">
         <button type="button" id="btn-quitar-filtro-pesajes" class="enlace oculta">Quitar filtro</button>
       </div>
+      <!-- Gemelo del de abajo (spec 035-fix): recoger una lista larga desde
+           arriba, sin bajar hasta el final a buscarlo. -->
+      <button type="button" id="btn-desplegar-pesajes-arriba" class="desplegar oculta"></button>
       <p id="estado-lista"></p>
       <button type="button" id="btn-reintentar" class="oculta">Reintentar</button>
       <ul id="lista-pesajes"></ul>
@@ -206,6 +209,7 @@
         <input type="date" id="filtro-comidas">
         <button type="button" id="btn-quitar-filtro-comidas" class="enlace oculta">Quitar filtro</button>
       </div>
+      <button type="button" id="btn-desplegar-comidas-arriba" class="desplegar oculta"></button>
       <p id="estado-comidas"></p>
       <button type="button" id="btn-reintentar-comidas" class="oculta">Reintentar</button>
       <ul id="lista-comidas"></ul>
@@ -278,6 +282,7 @@
       <p id="error-receta" class="error" role="alert"></p>
       <p id="guardado-receta" class="guardado" role="status"></p>
 
+      <button type="button" id="btn-desplegar-recetas-arriba" class="desplegar oculta"></button>
       <div id="lista-recetas"></div>
       <button type="button" id="btn-desplegar-recetas" class="desplegar oculta"></button>
       </div>
@@ -332,6 +337,7 @@
         <input type="date" id="filtro-ejercicios">
         <button type="button" id="btn-quitar-filtro-ejercicios" class="enlace oculta">Quitar filtro</button>
       </div>
+      <button type="button" id="btn-desplegar-ejercicios-arriba" class="desplegar oculta"></button>
       <p id="estado-ejercicios"></p>
       <button type="button" id="btn-reintentar-ejercicios" class="oculta">Reintentar</button>
       <ul id="lista-ejercicios"></ul>
@@ -401,6 +407,7 @@
       <p id="error-catalogo" class="error" role="alert"></p>
       <p id="guardado-catalogo" class="guardado" role="status"></p>
 
+      <button type="button" id="btn-desplegar-catalogo-arriba" class="desplegar oculta"></button>
       <div id="lista-catalogo"></div>
       <button type="button" id="btn-desplegar-catalogo" class="desplegar oculta"></button>
       </div>
