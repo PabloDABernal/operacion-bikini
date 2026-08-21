@@ -890,9 +890,15 @@ function pintarResumen(registros) {
     }))
   ];
 
+  // Comparador de tres vías: con la misma hora, Array#sort es estable y
+  // conserva el orden de carga (por creadoEn), que es lo que pide la spec
+  // para el empate — un "a < b ? 1 : -1" a secas invertiría ese orden.
   const conHoraEntradas = entradas
     .filter((entrada) => entrada.registro.hora)
-    .sort((a, b) => (a.registro.hora < b.registro.hora ? 1 : -1));
+    .sort((a, b) => {
+      if (a.registro.hora === b.registro.hora) return 0;
+      return a.registro.hora < b.registro.hora ? 1 : -1;
+    });
   const sinHoraEntradas = entradas.filter((entrada) => !entrada.registro.hora);
 
   lista.innerHTML = "";
