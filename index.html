@@ -219,22 +219,16 @@
       <p id="estado-dieta" class="explicacion"></p>
 
       <!-- Montar la semana a mano no gasta cupo de IA: con el recetario basta.
-           Va arriba porque cuando no hay dieta es la acción que toca. -->
-      <button type="button" id="btn-semana-blanco">Empezar una semana en blanco</button>
-
-      <div id="semana-dieta"></div>
-      <p id="aviso-dieta" class="explicacion"></p>
-      <p id="error-semana" class="error" role="alert"></p>
-      <p id="guardado-dieta" class="guardado" role="status"></p>
-
-      <!-- Pedir un plan, en su sección (spec 024). Dejó de llamarse "Hacer
-           dieta" en la spec 035: se pisaba con "Mi dieta" de aquí arriba. -->
-      <h2>Pedírsela a la IA</h2>
+           Pedírsela a la IA (spec 024) va justo al lado: son las dos formas
+           de tener una semana y ninguna pinta más escondida que la otra. -->
+      <div class="acciones-semana">
+        <button type="button" id="btn-semana-blanco">Empezar una semana en blanco</button>
+        <div id="pedir-dieta"></div>
+      </div>
       <p class="explicacion">
-        Se la pide a la IA con tus datos y tus gustos, y te la deja montada
-        como semana. Puedes pedir dos al día.
+        Pedírsela a la IA te la deja montada con tus datos y tus gustos, como
+        semana. Puedes pedir dos al día.
       </p>
-      <div id="pedir-dieta"></div>
 
       <form id="form-plan-dieta" class="oculta">
         <label for="instrucciones-dieta">¿Algo que deba tener en cuenta?</label>
@@ -247,6 +241,11 @@
       <p id="cupo-dieta" class="explicacion"></p>
       <p id="estado-plan-dieta" class="explicacion"></p>
       <p id="error-plan-dieta" class="error" role="alert"></p>
+
+      <div id="semana-dieta"></div>
+      <p id="aviso-dieta" class="explicacion"></p>
+      <p id="error-semana" class="error" role="alert"></p>
+      <p id="guardado-dieta" class="guardado" role="status"></p>
       </div>
 
       <!-- Sub-pestaña: Recetas -->
@@ -345,23 +344,17 @@
       <h2>Mi tabla</h2>
       <p id="estado-tabla" class="explicacion"></p>
 
-      <!-- Montarla a mano no gasta cupo de IA: con el catálogo basta. Va
-           arriba porque cuando no hay tabla es la acción que toca. -->
-      <button type="button" id="btn-semana-blanco-tabla">Empezar una semana en blanco</button>
-
-      <div id="semana-tabla"></div>
-      <p id="aviso-tabla" class="explicacion"></p>
-      <p id="error-semana-tabla" class="error" role="alert"></p>
-      <p id="guardado-tabla" class="guardado" role="status"></p>
-
-      <!-- Pedir un plan, en su sección (spec 024). Dejó de llamarse "Tabla de
-           ejercicios" en la spec 035: se pisaba con "Mi tabla" de aquí arriba. -->
-      <h2>Pedírsela a la IA</h2>
+      <!-- Montarla a mano no gasta cupo de IA: con el catálogo basta.
+           Pedírsela a la IA (spec 024) va justo al lado: son las dos formas
+           de tener una semana y ninguna pinta más escondida que la otra. -->
+      <div class="acciones-semana">
+        <button type="button" id="btn-semana-blanco-tabla">Empezar una semana en blanco</button>
+        <div id="pedir-ejercicio"></div>
+      </div>
       <p class="explicacion">
-        Se la pide a la IA con tus datos y tus gustos, y te la deja montada
-        como semana. Puedes pedir dos al día.
+        Pedírsela a la IA te la deja montada con tus datos y tus gustos, como
+        semana. Puedes pedir dos al día.
       </p>
-      <div id="pedir-ejercicio"></div>
 
       <form id="form-plan-ejercicio" class="oculta">
         <label for="instrucciones-ejercicio">¿Algo que deba tener en cuenta?</label>
@@ -374,6 +367,11 @@
       <p id="cupo-ejercicio" class="explicacion"></p>
       <p id="estado-plan-ejercicio" class="explicacion"></p>
       <p id="error-plan-ejercicio" class="error" role="alert"></p>
+
+      <div id="semana-tabla"></div>
+      <p id="aviso-tabla" class="explicacion"></p>
+      <p id="error-semana-tabla" class="error" role="alert"></p>
+      <p id="guardado-tabla" class="guardado" role="status"></p>
       </div>
 
       <!-- Sub-pestaña: Catálogo -->

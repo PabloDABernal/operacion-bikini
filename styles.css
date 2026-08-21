@@ -593,6 +593,10 @@ button:disabled {
    para que la fila no crezca ni empuje al botón de borrar. */
 .registro-texto {
   flex: 1;
+  /* Sin min-width: 0 un flex item nunca se encoge por debajo de su contenido,
+     así que el recorte de arriba no llega a aplicarse y la fila (y su columna
+     entera, en escritorio) se ensancha para caber el texto. */
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1246,6 +1250,7 @@ button:disabled {
 
 .receta-nombre {
   flex: 1;
+  min-width: 0;
   font-weight: 600;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1273,6 +1278,17 @@ button:disabled {
 .receta-acciones button {
   padding: var(--e2) var(--e3);
   font-size: 0.85rem;
+}
+
+/* Las dos formas de tener una semana, en la misma fila: montarla a mano o
+   pedírsela a la IA. Con dieta activa los dos botones son compactos y caben
+   uno al lado del otro; sin dieta, "Empezar en blanco" es la acción
+   principal (.accion-principal, a ancho completo) y el de la IA baja debajo. */
+.acciones-semana {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e2);
+  align-items: center;
 }
 
 /* La semana de la dieta (spec 028) */
@@ -1530,7 +1546,7 @@ button:disabled {
   .seccion[data-seccion="comidas"] .contenido-operacion:not(.oculta),
   .seccion[data-seccion="ejercicio"] .contenido-operacion:not(.oculta) {
     display: grid;
-    grid-template-columns: 1fr 1.4fr 1fr;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr) minmax(0, 1fr);
     gap: var(--e6);
     align-items: start;
   }
@@ -1539,21 +1555,31 @@ button:disabled {
      lleva la gráfica. */
   #bloque-hoy:not(.oculta) {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     gap: var(--e6);
     align-items: start;
   }
 
   .seccion[data-seccion="peso"] .contenido-operacion:not(.oculta) {
     display: grid;
-    grid-template-columns: 1.4fr 1fr;
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
     gap: var(--e6);
     align-items: start;
   }
 
   /* align-items: start en las cuatro rejillas de arriba: cada columna acaba
      donde acabe. Sin esto, la más corta se estiraría hasta igualar a la más
-     larga y su fondo quedaría colgando en el vacío. */
+     larga y su fondo quedaría colgando en el vacío.
+
+     Los tracks van con minmax(0, …) y no solo "1fr": un 1fr a secas lleva un
+     mínimo implícito de "auto" (el ancho del contenido más ancho que no se
+     pueda partir), así que una fila con texto largo puede ensanchar toda la
+     columna y aparecen barras de scroll. min-width: 0 en el hijo directo
+     (abajo) hace lo mismo un nivel más adentro. */
+  .subseccion,
+  .columna {
+    min-width: 0;
+  }
 
   /* Una conversación a 1100 px de ancho se lee fatal: Consulta se queda
      estrecha y centrada. Algo más que el ancho de móvil, que aquí sobra

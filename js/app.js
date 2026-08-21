@@ -537,6 +537,10 @@ function crearLista(config) {
   botonDesplegar.addEventListener("click", () => {
     desplegada = !desplegada;
     pintar();
+    // Al recoger la lista, el botón (y la lista corta) suben muchas líneas:
+    // sin esto la ventana se queda mirando el hueco en blanco de donde
+    // colgaba la lista larga, y hay que subir a mano para volver a verla.
+    if (!desplegada) botonDesplegar.scrollIntoView({ behavior: "smooth", block: "nearest" });
   });
 
   function filaDeLectura(registro) {
@@ -1386,6 +1390,9 @@ id("btn-cancelar-receta").addEventListener("click", cerrarFormularioDeReceta);
 id("btn-desplegar-recetas").addEventListener("click", () => {
   recetasDesplegadas = !recetasDesplegadas;
   pintarRecetas();
+  if (!recetasDesplegadas) {
+    id("btn-desplegar-recetas").scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
 });
 
 id("form-receta").addEventListener("submit", async (evento) => {
@@ -1571,7 +1578,7 @@ async function apuntarDeLaDieta(comida, boton) {
   error.textContent = "";
 
   try {
-    await guardarComida(uidActual, comida.texto, comida.momento, hoyISO(), "");
+    await guardarComida(uidActual, comida.texto, comida.momento, hoyISO(), horaActual());
     avisarGuardado("guardado-dieta");
     responderEnBoton(boton, true);
     await listaComidas.refrescar();
@@ -1818,6 +1825,9 @@ id("btn-cancelar-ejercicio-catalogo").addEventListener(
 id("btn-desplegar-catalogo").addEventListener("click", () => {
   catalogoDesplegado = !catalogoDesplegado;
   pintarCatalogo();
+  if (!catalogoDesplegado) {
+    id("btn-desplegar-catalogo").scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
 });
 
 id("form-ejercicio-catalogo").addEventListener("submit", async (evento) => {
@@ -2090,7 +2100,7 @@ async function apuntarDeLaTabla(sesion, boton) {
       sesion.minutos,
       sesion.intensidad,
       hoyISO(),
-      ""
+      horaActual()
     );
     avisarGuardado("guardado-tabla");
     responderEnBoton(boton, true);
@@ -2208,7 +2218,7 @@ async function repetirComida(habitual, boton) {
   boton.disabled = true;
 
   try {
-    await guardarComida(uidActual, habitual.texto, habitual.momento, hoyISO());
+    await guardarComida(uidActual, habitual.texto, habitual.momento, hoyISO(), horaActual());
     avisarGuardado("guardado-repetir");
     await listaComidas.refrescar();
   } catch {
