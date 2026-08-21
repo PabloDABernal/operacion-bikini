@@ -1,6 +1,6 @@
 # 037 — El día, más a la vista: comidas integradas, Hoy completo y detalle en el calendario
 
-- **Estado:** borrador
+- **Estado:** revisada (revisor-specs: NECESITA CAMBIOS el 2026-08-21, corregido el mismo día — contradicción de orden en Hoy resuelta con el usuario)
 - **Fecha:** 2026-08-21
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (ampliación de la v4, decidida el 21 de agosto de 2026)".
 
@@ -27,9 +27,8 @@ detalle real sin que el usuario tenga que ir a buscarlo a otra pantalla.
    cerca de la parte de arriba: menos scroll para verlo tras abrir Comidas.
 4. **Hoy**: el resumen deja de mostrar una sola línea por tipo (Peso, Comidas,
    Ejercicio) y en su lugar hay una lista de **todos** los registros de hoy,
-   en el orden en que se apuntaron (el más reciente primero, igual que las
-   demás listas de la app). Cada línea dice qué es y a qué hora. Sigue
-   habiendo un botón "+" para apuntar más de cada tipo.
+   ordenados por su **hora** (la más tardía primero). Cada línea dice qué es
+   y a qué hora. Sigue habiendo un botón "+" para apuntar más de cada tipo.
 5. Sin nada apuntado hoy, Hoy enseña el mismo hueco vacío que antes (con sus
    "+"), no una lista en blanco rara.
 6. **Calendario de constancia**: al tocar un día con registros, debajo del
@@ -80,7 +79,11 @@ detalle real sin que el usuario tenga que ir a buscarlo a otra pantalla.
   `Momento`, `Fecha` u `Hora` de orden).
 - El comportamiento de cada chip no cambia: tocarlo llama a la misma
   `repetirComida()` que ya guarda la comida con la hora actual (fix del 21 de
-  agosto) y avisa en el propio chip o cerca, igual que el botón de antes.
+  agosto). Dónde cae el aviso de guardado/error (`guardado-repetir`,
+  `error-repetir`) al mover los chips de sitio **es libre**: puede seguir
+  siendo un texto cerca del contenedor de chips, sin que haga falta parar a
+  preguntarlo — lo único que importa es que se vea sin buscarlo, igual que
+  exige ya el resto de la app (spec 034).
 - Sin comidas habituales que ofrecer, el contenedor de chips queda vacío
   y no ocupa espacio (igual que hoy oculta el bloque entero).
 
@@ -103,18 +106,21 @@ detalle real sin que el usuario tenga que ir a buscarlo a otra pantalla.
 - `pintarResumen()` deja de coger solo `ultimoDeHoy()` de cada tipo. En su
   lugar recorre `registros.pesajes`, `registros.comidas` y
   `registros.ejercicios` filtrando por `fecha === hoy`, junta los tres en una
-  sola lista y la ordena por hora (los que no tengan hora, al final o al
-  principio del grupo de su tipo — a decidir con el mismo criterio que ya usa
-  el resto de la app para registros sin hora).
+  sola lista y la ordena **por el campo `hora` del registro**, de más tardía
+  a más temprana (18:30 antes que 09:00). Los registros de hoy sin hora
+  (el campo es opcional) van todos **al final de la lista**, después de los
+  que sí tienen hora; entre ellos, en el orden en que ya vienen cargados
+  (por `creadoEn`, como el resto de listas de la app).
 - Cada línea muestra qué tipo es (peso/comida/ejercicio), el texto o valor, y
   la hora si la tiene — reutilizando `conHora()` y el formato que ya existe
   por tipo (`${pesoKg} kg`, el texto de la comida, `texto · minutos min`).
 - El botón "+" por tipo, que hoy vive en cada línea de resumen, pasa a un
   sitio que tenga sentido con una lista de N líneas por tipo en vez de una
-  fija: por ejemplo, tres botones "+" fijos arriba o abajo de la lista (Peso,
-  Comidas, Ejercicio), en vez de uno colgado de cada línea. Los tres siguen
-  llevando a la sección/subsección correspondiente igual que hoy
-  (`abrirPestana(seccion)`).
+  fija: tres botones "+" (Peso, Comidas, Ejercicio) en un sitio fijo de la
+  pantalla, separados de la lista. **Dónde exactamente (arriba o debajo de la
+  lista) es libre**: lo decide quien implemente, sin que haga falta parar a
+  preguntarlo. Los tres siguen llevando a la sección/subsección
+  correspondiente igual que hoy (`abrirPestana(seccion)`).
 - Sin nada apuntado hoy, se mantiene el estado vacío actual (los "+" sin
   ninguna línea encima).
 
@@ -141,9 +147,11 @@ se muestran.
 
 - **Muchas comidas habituales**: los chips deben envolver (wrap) en varias
   líneas si no caben en una, igual que hace hoy `#lo-de-siempre`.
-- **Varios registros del mismo tipo a la misma hora, hoy**: en la lista de
-  Hoy, el orden entre ellos es el mismo que ya usan las listas normales
-  (por `creadoEn`, no por hora de reloj).
+- **Varios registros a la misma hora, hoy (del mismo tipo o de tipos
+  distintos)**: el orden entre ellos es el mismo que ya usan las listas
+  normales (por `creadoEn`, no hay desempate nuevo que inventar).
+- **Registros de hoy sin hora**: van todos al final de la lista, como se fija
+  arriba — no se mezclan por posición estimada con los que sí tienen hora.
 - **Un día del calendario con varias comidas o ejercicios**: todas se listan,
   sin recortar (decisión tomada explícitamente: nada de "ver más" aquí).
 - **Cambiar de rango en el calendario** con un día ya seleccionado: el
@@ -165,9 +173,16 @@ se muestran.
 
 **Tamaño estimado: por encima de las ~300 líneas** que marca `CLAUDE.md` — es
 la suma de tres cambios (spec 035 sola, con una forma parecida, ya rozó ese
-límite). Se implementa en tres pasos dentro de esta misma spec, en el orden
-del criterio de "esto funciona" (Comidas → Hoy → Calendario), avisando si
-alguno de los tres se dispara por su cuenta.
+límite). El usuario, avisado del riesgo, decidió el 2026-08-21 implementarla
+en una sola sesión de todos modos. Se hace en tres pasos dentro de esa misma
+sesión, en el orden del criterio de "esto funciona" (Comidas → Hoy →
+Calendario), avisando si alguno de los tres se dispara por su cuenta.
+
+Se implementa **ya**, sin esperar a que el usuario dé por completamente
+validada la spec 036: la base que 037 necesita (columnas de escritorio,
+`#bloque-hoy`, `.contenido-operacion`, las `subseccion` de Comidas) ya está
+probada en producción. Si al validar la 036 aparece algún cambio en esa base,
+se resuelve aparte y no debería chocar con lo que aquí se construye encima.
 
 ## 8. Decisiones tomadas
 
@@ -178,6 +193,9 @@ alguno de los tres se dispara por su cuenta.
 | En el calendario, todo el detalle sin recortar | Elegido por el usuario el 2026-08-21, frente a recortar como las demás listas |
 | Una sola spec para las tres cosas | Elegido por el usuario el 2026-08-21, aun sabiendo que probablemente supere las ~300 líneas |
 | Ejercicio se queda fuera | El usuario solo pidió esto para Comidas; se anota en el backlog por si se quiere igualar |
+| En Hoy, la lista se ordena por la hora del registro (más tardía primero), no por `creadoEn` | Elegido por el usuario el 2026-08-21, tras detectar `revisor-specs` que la spec se contradecía entre "el más reciente primero" y "ordenada por hora" |
+| Se implementa en una sola sesión, sin dividir en tres specs | Elegido por el usuario el 2026-08-21, pese a la recomendación de `revisor-specs` de reconfirmarlo |
+| Se implementa ya, sin esperar a que el usuario valide del todo la 036 | Elegido por el usuario el 2026-08-21: la base que necesita ya está probada en producción |
 
 ## 9. Fuera de spec: ideas apuntadas
 

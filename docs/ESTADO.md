@@ -83,10 +83,14 @@ Las specs de la v4, **en este orden y no en otro**:
 
 ### Lo primero al retomar
 
-**Seguir probando la 036** con el guion de `docs/specs/036-vista-escritorio.md`
-mientras se decide si la 037 se implementa ya o se espera a que la 036 quede
-del todo validada. El flujo de `CLAUDE.md` dice que una spec no se cierra sin
-prueba manual, así que la 036 sigue abierta hasta que el usuario lo confirme.
+**Implementar la 037** (`docs/specs/037-el-dia-a-la-vista.md`, ya revisada por
+`revisor-specs`): el usuario decidió el 21 de agosto seguir sin esperar a
+cerrar del todo la 036, porque la base que necesita (columnas de escritorio,
+`#bloque-hoy`, `.contenido-operacion`, las `subseccion` de Comidas) ya está
+probada en producción. La 036 sigue con el guion de
+`docs/specs/036-vista-escritorio.md` pendiente de cerrarse — se retoma
+aparte si al probarla aparece algo que no encaje con lo que construya la 037
+encima.
 
 Dos puntos del guion en los que el usuario tenía que fijarse y aún no ha
 contestado:
