@@ -264,6 +264,37 @@ function abrirSubpestana(seccion, nombre) {
   });
 }
 
+// La barra de navegación se ve "bajarse" o desaparecer en algunos móviles
+// (detectado en Ejercicio, probando la spec 038): con position: fixed, un
+// navegador móvil puede posicionarla contra el viewport de diseño (el que
+// habría sin su propia barra de direcciones) en vez de contra el viewport
+// visual (lo que de verdad se ve), y la deja fuera de la pantalla cuando su
+// propia barra está expandida. window.visualViewport da el tamaño y el
+// desplazamiento reales; con eso se corrige a mano cuánto hay que subir la
+// barra para que quede siempre pegada a lo que el usuario ve de verdad.
+// Sin visualViewport (navegadores muy antiguos) no se hace nada: se queda
+// el comportamiento de toda la vida.
+if (window.visualViewport) {
+  const barraInferior = id("nav-inferior");
+
+  const ajustarBarraInferior = () => {
+    // En escritorio la barra ya no es fixed (spec 009): no hay nada que
+    // corregir, y aplicar una traslación ahí solo estorbaría.
+    if (getComputedStyle(barraInferior).position !== "fixed") {
+      barraInferior.style.transform = "";
+      return;
+    }
+    const vv = window.visualViewport;
+    const hueco = window.innerHeight - vv.height - vv.offsetTop;
+    barraInferior.style.transform = hueco > 0 ? `translateY(-${hueco}px)` : "";
+  };
+
+  window.visualViewport.addEventListener("resize", ajustarBarraInferior);
+  window.visualViewport.addEventListener("scroll", ajustarBarraInferior);
+  window.addEventListener("resize", ajustarBarraInferior);
+  ajustarBarraInferior();
+}
+
 // La barra y los atajos provisionales de Ajustes hacen lo mismo: llevar a una
 // sección. El botón lo dice en su data-seccion, y si además trae
 // data-subseccion, deja abierta esa sub-pestaña al llegar.
