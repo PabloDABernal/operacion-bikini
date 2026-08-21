@@ -145,6 +145,20 @@ header {
 
 .seccion.activa {
   display: block;
+  /* Con la barra en sticky (spec 038), si el contenido de la sección es más
+     corto que la pantalla, la barra se queda pegada justo debajo de él, no
+     en el borde real de abajo — deja un hueco visible (Fotos y Ejercicio con
+     poco apuntado). #pantalla-principal ocupa al menos toda la pantalla
+     (ver más abajo) y esta sección crece para llenar lo que sobre, así la
+     barra cae siempre en el borde real. */
+  flex: 1 0 auto;
+}
+
+#pantalla-principal.pantalla {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
 }
 
 /* Sub-pestañas dentro de Comidas y Ejercicio (spec 035) -------------------
@@ -271,6 +285,11 @@ header {
     display: grid;
     grid-template-columns: auto 1fr;
     column-gap: var(--e4);
+    /* El min-height y el flex de .seccion.activa eran cosa del móvil, para
+       que la barra sticky cayera siempre en el borde real de la pantalla.
+       Aquí la barra ya no está abajo (va a la cabecera), así que no hace
+       falta forzar altura mínima ni que la sección crezca para llenarla. */
+    min-height: auto;
   }
 
   #pantalla-principal > * {
