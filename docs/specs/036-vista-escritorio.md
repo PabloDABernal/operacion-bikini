@@ -1,6 +1,6 @@
 # 036 — Vista de escritorio en varias columnas
 
-- **Estado:** en implementación (código en `main`, `revisor-specs` y `revisor-codigo` con veredicto CUMPLE el 2026-08-21). Pendiente de que el usuario la pruebe.
+- **Estado:** ✅ completada (probada y confirmada por el usuario el 2026-08-21).
 - **Fecha:** 2026-08-21
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (v4, decidida el 20 de agosto de 2026)", punto **"Vista de escritorio en varias columnas"**.
 

@@ -2,7 +2,7 @@
 
 Documento para retomar el trabajo en frío. Se actualiza al terminar cada spec.
 
-**Última actualización:** 21 de agosto de 2026 (specs 036 y 037 implementadas y desplegadas, **pendientes de que el usuario las pruebe**)
+**Última actualización:** 21 de agosto de 2026 (specs 036 y 037 completadas y validadas por el usuario)
 
 ## Dónde estamos
 
@@ -10,7 +10,7 @@ Documento para retomar el trabajo en frío. Se actualiza al terminar cada spec.
 
 **https://operacion-bikini.vercel.app**
 
-**Las specs 001 a 035 están implementadas, desplegadas y validadas por el usuario.** La **036 está en `main` y desplegada, pero SIN validar**: el usuario se fue antes de probarla. La app se usa a diario.
+**Las specs 001 a 037 están implementadas, desplegadas y validadas por el usuario.** La app se usa a diario.
 
 La v2 se amplió dos veces sobre la marcha, según el usuario iba probando:
 
@@ -22,7 +22,7 @@ Todo lo de esas tres fases está cerrado. Desde ahí, el 19 de agosto se empezó
 
 El 20 de agosto arrancó la **v4**, que sale de una auditoría de usabilidad hecha sobre el código. No añade funciones: recoloca las que hay. Está descrita en `docs/PRODUCTO.md`, apartado "Qué hará (v4)".
 
-**No queda ninguna spec abierta.** Lo siguiente es decidir con el usuario: el rehacer las pantallas que pidió el 16 de agosto, o la siguiente idea del backlog.
+**No queda ninguna spec abierta.** El "rehacer las pantallas de forma más lógica" que el usuario pidió el 16 de agosto ya se resolvió con las specs 034-037. Lo siguiente es decidir con el usuario: la 038 (fotos en la navegación, zonas táctiles y fecha/hora plegable en Ejercicio y Peso) o la siguiente idea del backlog.
 
 ## Specs
 
@@ -63,48 +63,42 @@ El 20 de agosto arrancó la **v4**, que sale de una auditoría de usabilidad hec
 | 033 | Tocar un punto de la gráfica de peso para ver su fecha y su peso | ✅ completada |
 | 034 | La confirmación de guardado, en el propio botón de la semana | ✅ completada |
 | 035 | Sub-pestañas en Comidas y Ejercicio, y nombres que dejan de pisarse | ✅ completada |
-| 036 | Vista de escritorio en varias columnas | ⏳ desplegada, sin probar |
+| 036 | Vista de escritorio en varias columnas | ✅ completada |
+| 037 | Comidas integradas, Hoy completo y detalle real en el calendario | ✅ completada |
 
 ## Qué toca ahora
 
-**La v4, empezada el 20 de agosto.** Aquel "rehacer las pantallas de forma más lógica" que el usuario pidió el 16 de agosto ya está concretado y en `PRODUCTO.md`. Salió de una auditoría de usabilidad sobre el código: Comidas y Ejercicio se habían convertido en páginas de cinco y seis bloques que solo se recorren con scroll ciego, y en un monitor la app es una columna de 512 px con dos desiertos a los lados.
-
-Las specs de la v4, **en este orden y no en otro**:
+**La v4, empezada el 20 de agosto y ya cerrada.** Aquel "rehacer las pantallas de forma más lógica" que el usuario pidió el 16 de agosto salió de una auditoría de usabilidad sobre el código: Comidas y Ejercicio se habían convertido en páginas de cinco y seis bloques que solo se recorren con scroll ciego, y en un monitor la app era una columna de 512 px con dos desiertos a los lados. Se resolvió en cuatro specs, con una ampliación el 21 de agosto tras usar la 036 en producción:
 
 | Spec | Qué | Estado |
 |---|---|---|
 | 034 | La confirmación de guardado, en el propio botón | ✅ completada |
 | 035 | Sub-pestañas en Comidas y Ejercicio, y nombres que dejan de pisarse | ✅ completada |
-| 036 | Vista de escritorio en varias columnas | ⏳ **en pruebas**: desplegada, con varios fixes ya aplicados el 21 de agosto (ver "Deuda conocida"), aún sin el visto bueno final del usuario |
-| 037 | Comidas integradas, Hoy completo y detalle real en el calendario (ampliación de la v4 del 21 de agosto) | ⏳ desplegada, sin probar (`revisor-codigo` pilló y se corrigió un bug de desempate por hora) |
-| 038 | Fotos en la navegación, zonas táctiles y fecha/hora plegables en Ejercicio y Peso | idea suelta, aún sin spec (era la "037" hasta que el 21 de agosto se le adelantó otra) |
-
-**Por qué la 035 va antes que la 036:** los trozos en que se parta Comidas en el móvil son exactamente las columnas del escritorio. Al revés habría que recolocar el CSS dos veces.
+| 036 | Vista de escritorio en varias columnas | ✅ completada |
+| 037 | Comidas integradas, Hoy completo y detalle real en el calendario (ampliación de la v4 del 21 de agosto) | ✅ completada |
 
 ### Lo primero al retomar
 
-**Pedirle al usuario que pruebe la 036 y la 037**, ambas desplegadas y sin
-validar: la 036 con el guion de `docs/specs/036-vista-escritorio.md`, la 037
-con el de `docs/specs/037-el-dia-a-la-vista.md`. Ninguna de las dos se cierra
-sin que el usuario la pruebe de verdad (regla de `CLAUDE.md`).
+**No queda ninguna spec abierta.** La siguiente candidata es la **038**
+(fotos en la navegación, zonas táctiles más grandes, y fecha/hora plegable
+en Ejercicio y Peso por simetría con lo que la 037 le hizo a Comidas) —
+todavía es una idea suelta, sin spec escrita. Preguntarle al usuario si
+quiere seguir por ahí o prefiere tirar de otra cosa de `docs/BACKLOG.md`.
 
-Dos puntos del guion en los que el usuario tenía que fijarse y aún no ha
-contestado:
+Dos cosas quedaron sin confirmar del guion de la 036 y conviene no perderlas
+de vista si algún día se tocan la cabecera o la gráfica de peso:
 
-- **Paso 20**: al ensanchar, en la cabecera el avatar y el email se van a un
-  extremo y la barra de navegación al otro, con mucho hueco en medio. Es normal
-  en escritorio, pero quedó pendiente de que él diga si le chirría.
-- **Paso 21**: si se cambia el tamaño de la ventana **con Peso ya abierta**, la
-  gráfica puede quedarse con el ancho viejo hasta salir y volver a entrar en la
-  sección. `dibujarGrafica()` se llama al pintar la sección, no al redimensionar.
-  **Si pasa, no se arregla en la 036**: es JavaScript y esa spec no lo toca. Ya
-  está anotado en el backlog.
-
-**La 035 roza el límite de las ~300 líneas** que marca `CLAUDE.md`. Se decidió no partirla: Comidas y Ejercicio son la misma estructura repetida, y dejar la app medio migrada entre dos sesiones es peor. Si al implementarla se desmadra, avisar antes de seguir.
+- **Cabecera en escritorio**: al ensanchar, el avatar/email y la barra de
+  navegación se separan a los extremos con mucho hueco en medio. El usuario
+  no dijo que le chirriara al validar la spec, así que se da por aceptado
+  como está.
+- **Redibujado de la gráfica de peso al redimensionar la ventana**: sigue
+  como sospecha sin confirmar del todo (`dibujarGrafica()` se llama al
+  pintar la sección, no al redimensionar). Anotado en `docs/BACKLOG.md`.
 
 ## Deuda conocida
 
-- **Fixes del 21 de agosto, al probar la spec 036 en el navegador**: el usuario vio barras de scroll feas en las columnas de Comidas en escritorio. Causa: `.registro-texto` y `.receta-nombre` son `flex: 1` con recorte por `text-overflow: ellipsis`, pero sin `min-width: 0` un flex item nunca se encoge por debajo del ancho de su contenido, así que el recorte no llegaba a aplicarse y una comida con texto largo ensanchaba toda la columna. Además los `grid-template-columns` de las cuatro rejillas de escritorio iban con `1fr` a secas, que lleva el mismo mínimo implícito a nivel de rejilla; ahora son `minmax(0, …)`. De paso, tres retoques pedidos en la misma sesión: "Pedírsela a la IA" (dieta y tabla) se ha subido junto a "Empezar una semana en blanco"/"Vaciar y empezar de nuevo" en vez de quedar al final de la columna, pareciendo una sección escondida; los botones "Ver menos" de listas largas (comidas, ejercicios, pesajes, recetas, catálogo) hacen scroll hasta sí mismos al recogerse, para no dejar la ventana mirando un hueco en blanco; y apuntar automáticamente desde la dieta/tabla o desde "Lo de siempre" ya guarda la hora actual (antes se guardaba sin hora). **Pendiente de que el usuario lo pruebe en el navegador de verdad.**
+- **Fixes del 21 de agosto, al probar la spec 036 en el navegador**: el usuario vio barras de scroll feas en las columnas de Comidas en escritorio. Causa: `.registro-texto` y `.receta-nombre` son `flex: 1` con recorte por `text-overflow: ellipsis`, pero sin `min-width: 0` un flex item nunca se encoge por debajo del ancho de su contenido, así que el recorte no llegaba a aplicarse y una comida con texto largo ensanchaba toda la columna. Además los `grid-template-columns` de las cuatro rejillas de escritorio iban con `1fr` a secas, que lleva el mismo mínimo implícito a nivel de rejilla; ahora son `minmax(0, …)`. De paso, tres retoques pedidos en la misma sesión: "Pedírsela a la IA" (dieta y tabla) se ha subido junto a "Empezar una semana en blanco"/"Vaciar y empezar de nuevo" en vez de quedar al final de la columna, pareciendo una sección escondida; los botones "Ver menos" de listas largas (comidas, ejercicios, pesajes, recetas, catálogo) hacen scroll hasta sí mismos al recogerse, para no dejar la ventana mirando un hueco en blanco; y apuntar automáticamente desde la dieta/tabla o desde "Lo de siempre" ya guarda la hora actual (antes se guardaba sin hora). Confirmado por el usuario el 21 de agosto.
 - **Trampa de CSS de la spec 036, ya resuelta pero fácil de romper otra vez**: las reglas de rejilla del `@media` de 64 rem llevan `:not(.oculta)` a propósito. Sin él ganan en especificidad a la clase `.oculta` con la que `js/app.js` esconde `#bloque-hoy` y `.contenido-operacion` cuando no hay operación en marcha, y **todos los formularios reaparecen en escritorio justo cuando no deben verse**. Si alguien "limpia" esos `:not(.oculta)`, vuelve el fallo. Está comentado en `styles.css`.
 - **La clase `.atajo` sirve para dos cosas distintas** (detectado en la spec 035): los atajos de Hoy, que navegan, y el botón "Pedir dieta"/"Pedir tabla" que se crea en tiempo de ejecución y **no navega**. El enganche de navegación funciona porque `querySelectorAll(".nav-boton, .atajo")` corre al cargar, antes de que ese botón exista. **No convertirlo nunca en un listener delegado** ni volver a consultar el selector más tarde: el botón de pedir empezaría a llamar a `abrirPestana(undefined)`. Comentado en `js/app.js`.
 - **La gráfica de peso no se redibuja al cambiar el tamaño de la ventana**: `dibujarGrafica()` se llama al pintar la sección. Sospecha abierta desde la spec 036, **sin confirmar**: pendiente de que el usuario lo compruebe (paso 21 de su guion). En `docs/BACKLOG.md`.
@@ -138,6 +132,6 @@ contestado:
 ## Pendiente de decidir por el usuario
 
 - `PRODUCTO.md` llama "collage de evolución" a lo que es una cuadrícula de miniaturas. O se cambia la palabra, o se hace el collage de verdad.
-- **Rehacer las pantallas de forma más lógica**: el usuario lo pidió el 16 de agosto, sin concretar. Preguntarle qué tiene en mente antes de tocar nada.
+- **Si se sigue con la 038** (fotos en la navegación, zonas táctiles, fecha/hora plegable en Ejercicio y Peso) o con otra idea de `docs/BACKLOG.md`.
 
 El resto de ideas sueltas, en `docs/BACKLOG.md`.

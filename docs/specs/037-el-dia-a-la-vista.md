@@ -1,6 +1,6 @@
 # 037 — El día, más a la vista: comidas integradas, Hoy completo y detalle en el calendario
 
-- **Estado:** en implementación (código en `main`, `revisor-specs` y `revisor-codigo` con veredicto favorable el 2026-08-21 — revisor-codigo pilló un bug de desempate por hora, ya corregido). Pendiente de que el usuario la pruebe.
+- **Estado:** ✅ completada (probada y confirmada por el usuario el 2026-08-21).
 - **Fecha:** 2026-08-21
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (ampliación de la v4, decidida el 21 de agosto de 2026)".
 
