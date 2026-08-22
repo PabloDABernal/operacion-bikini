@@ -1,6 +1,6 @@
 # 040 — Recordar las últimas instrucciones al pedir dieta o tabla
 
-- **Estado:** en implementación (código en `main`, `revisor-specs` y `revisor-codigo` con veredicto favorable el 2026-08-21). Pendiente de que el usuario la pruebe.
+- **Estado:** ✅ completada (probada y confirmada por el usuario el 2026-08-21).
 - **Fecha:** 2026-08-21
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (ampliación de la v2, decidida el 13 de agosto de 2026)", bullet "Consultas especializadas", ampliado hoy para incluir esta spec.
 

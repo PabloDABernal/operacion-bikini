@@ -2,7 +2,7 @@
 
 Documento para retomar el trabajo en frío. Se actualiza al terminar cada spec.
 
-**Última actualización:** 21 de agosto de 2026 (v4 cerrada del todo; spec 039 completada, primera de una limpieza del backlog con decisiones delegadas al agente)
+**Última actualización:** 21 de agosto de 2026 (v4 cerrada del todo; specs 039 y 040 completadas; **pendiente publicar firestore.rules**, ver "Lo primero al retomar")
 
 ## Dónde estamos
 
@@ -10,7 +10,7 @@ Documento para retomar el trabajo en frío. Se actualiza al terminar cada spec.
 
 **https://operacion-bikini.vercel.app**
 
-**Las specs 001 a 039 están implementadas, desplegadas y validadas por el usuario.** La app se usa a diario.
+**Las specs 001 a 040 están implementadas, desplegadas y validadas por el usuario.** La app se usa a diario.
 
 La v2 se amplió dos veces sobre la marcha, según el usuario iba probando:
 
@@ -67,7 +67,7 @@ El 20 de agosto arrancó la **v4**, que sale de una auditoría de usabilidad hec
 | 037 | Comidas integradas, Hoy completo y detalle real en el calendario | ✅ completada |
 | 038 | Fotos en la navegación, zonas táctiles y fecha/hora plegable en Ejercicio y Peso | ✅ completada |
 | 039 | Quitar la foto de perfil | ✅ completada |
-| 040 | Recordar las últimas instrucciones al pedir dieta o tabla | ⏳ desplegada, sin probar |
+| 040 | Recordar las últimas instrucciones al pedir dieta o tabla | ✅ completada |
 
 ## Qué toca ahora
 
@@ -83,13 +83,27 @@ El 20 de agosto arrancó la **v4**, que sale de una auditoría de usabilidad hec
 
 ### Lo primero al retomar
 
-**Pedirle al usuario que pruebe la 040** (recordar las últimas instrucciones
-al pedir dieta o tabla, guion en `docs/specs/040-recordar-instrucciones.md`).
-Sigue la limpieza de `docs/BACKLOG.md` por decisión delegada del 21 de
-agosto ("te dejo decidir"). Mientras el usuario no diga lo contrario, seguir
-el mismo patrón: elegir un ítem pequeño y autocontenido, escribir su spec
-documentando las decisiones de producto en la sección 8 en vez de
-entrevistar, pasar `revisor-specs` → implementar → `revisor-codigo` →
+**1. Publicar `firestore.rules`.** Pendiente desde el 21 de agosto: se
+añadió un tercer usuario a la lista blanca (`jrecio0086@gmail.com`, cuñado
+del propietario, entra con Google) en los tres sitios de código
+(`js/firebase-config.js`, `api/_auth.js`, `firestore.rules`) y ya está
+desplegado en Vercel, pero **las reglas de Firestore no se han publicado**:
+la sesión remota donde se hizo el cambio no tenía `firebase login` guardado
+(contenedor nuevo cada vez). Sin publicarlas, el nuevo usuario pasa el
+login pero Firestore le bloquea sus propios datos con un error de permisos
+que parece un bug. Ejecutar donde haya sesión de Firebase:
+
+```
+npx --yes firebase-tools deploy --only firestore:rules
+```
+
+**2. Seguir limpiando `docs/BACKLOG.md`** por decisión delegada del usuario
+el 21 de agosto ("te dejo decidir, vamos a limpiar el backlog"): specs 039
+(quitar la foto de perfil) y 040 (recordar instrucciones al pedir dieta o
+tabla) ya completadas y confirmadas. Mientras el usuario no diga lo
+contrario, seguir el mismo patrón: elegir un ítem pequeño y autocontenido,
+escribir su spec documentando las decisiones de producto en la sección 8 en
+vez de entrevistar, pasar `revisor-specs` → implementar → `revisor-codigo` →
 guion de prueba, y parar ahí — la prueba manual siempre la hace el usuario,
 eso no se delega.
 
