@@ -2,7 +2,7 @@
 
 Documento para retomar el trabajo en frío. Se actualiza al terminar cada spec.
 
-**Última actualización:** 21 de agosto de 2026 (specs 036, 037 y 038 completadas y validadas por el usuario — v4 cerrada del todo)
+**Última actualización:** 21 de agosto de 2026 (v4 cerrada del todo; spec 039 completada, primera de una limpieza del backlog con decisiones delegadas al agente)
 
 ## Dónde estamos
 
@@ -10,7 +10,7 @@ Documento para retomar el trabajo en frío. Se actualiza al terminar cada spec.
 
 **https://operacion-bikini.vercel.app**
 
-**Las specs 001 a 038 están implementadas, desplegadas y validadas por el usuario.** La app se usa a diario.
+**Las specs 001 a 039 están implementadas, desplegadas y validadas por el usuario.** La app se usa a diario.
 
 La v2 se amplió dos veces sobre la marcha, según el usuario iba probando:
 
@@ -22,7 +22,7 @@ Todo lo de esas tres fases está cerrado. Desde ahí, el 19 de agosto se empezó
 
 El 20 de agosto arrancó la **v4**, que sale de una auditoría de usabilidad hecha sobre el código. No añade funciones: recoloca las que hay. Está descrita en `docs/PRODUCTO.md`, apartado "Qué hará (v4)".
 
-**La v4 está cerrada del todo** (specs 034-038). El 21 de agosto el usuario dijo "te dejo decidir, vamos a limpiar el backlog" — Claude empezó a tirar de `docs/BACKLOG.md` por su cuenta, descartando dos falsas alarmas y abriendo la **spec 039** (quitar la foto de perfil), desplegada y **pendiente de que el usuario la pruebe**.
+**La v4 está cerrada del todo** (specs 034-038). El 21 de agosto el usuario dijo "te dejo decidir, vamos a limpiar el backlog" — Claude tira de `docs/BACKLOG.md` por su cuenta desde entonces: descartó dos falsas alarmas y completó la **spec 039** (quitar la foto de perfil), **probada y confirmada**. Sigue tirando del backlog salvo que el usuario diga lo contrario.
 
 ## Specs
 
@@ -66,7 +66,7 @@ El 20 de agosto arrancó la **v4**, que sale de una auditoría de usabilidad hec
 | 036 | Vista de escritorio en varias columnas | ✅ completada |
 | 037 | Comidas integradas, Hoy completo y detalle real en el calendario | ✅ completada |
 | 038 | Fotos en la navegación, zonas táctiles y fecha/hora plegable en Ejercicio y Peso | ✅ completada |
-| 039 | Quitar la foto de perfil | ⏳ desplegada, sin probar |
+| 039 | Quitar la foto de perfil | ✅ completada |
 
 ## Qué toca ahora
 
@@ -82,13 +82,14 @@ El 20 de agosto arrancó la **v4**, que sale de una auditoría de usabilidad hec
 
 ### Lo primero al retomar
 
-**Pedirle al usuario que pruebe la 039** (quitar la foto de perfil, guion en
-`docs/specs/039-quitar-foto-de-perfil.md`). Es la primera spec que sale de
-limpiar `docs/BACKLOG.md` por decisión delegada del usuario ("te dejo
-decidir") el 21 de agosto — sin la entrevista habitual de `/nueva-spec`, con
-las decisiones de producto documentadas en la sección 8 de la propia spec.
-Después de esta, seguir tirando del backlog del mismo modo si el usuario no
-dice lo contrario.
+**Seguir tirando de `docs/BACKLOG.md`.** El usuario delegó la decisión el 21
+de agosto ("te dejo decidir, vamos a limpiar el backlog") y confirmó la
+spec 039 (quitar la foto de perfil) sin objeciones. Mientras no diga lo
+contrario, seguir el mismo patrón: elegir un ítem pequeño y autocontenido,
+escribir su spec documentando las decisiones de producto en la sección 8 en
+vez de entrevistar, pasar `revisor-specs` → implementar → `revisor-codigo` →
+guion de prueba, y parar ahí — la prueba manual siempre la hace el usuario,
+eso no se delega.
 
 Dos cosas quedaron sin confirmar del guion de la 036 y conviene no perderlas
 de vista si algún día se tocan la cabecera o la gráfica de peso:

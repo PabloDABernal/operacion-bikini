@@ -1,6 +1,6 @@
 # 039 — Quitar la foto de perfil
 
-- **Estado:** en implementación (código en `main`, `revisor-specs` y `revisor-codigo` con veredicto favorable el 2026-08-21). Pendiente de que el usuario la pruebe.
+- **Estado:** ✅ completada (probada y confirmada por el usuario el 2026-08-21).
 - **Fecha:** 2026-08-21
 - **Referencia en PRODUCTO.md:** apartado "Perfil con foto" (v2, ampliación del 13 de agosto), ampliado hoy para incluir esta spec.
 
