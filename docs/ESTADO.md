@@ -2,7 +2,7 @@
 
 Documento para retomar el trabajo en frío. Se actualiza al terminar cada spec.
 
-**Última actualización:** 22 de agosto de 2026 (`firestore.rules` publicadas; specs 041 y 042 completadas; **spec 043 implementada y desplegada, pendiente de que el usuario la pruebe**)
+**Última actualización:** 22 de agosto de 2026 (specs 041-043 completadas; **arranca la v5**: specs 044, 045 y 046 escritas, la 044 desplegada y pendiente de probar)
 
 ## Dónde estamos
 
@@ -70,7 +70,10 @@ El 20 de agosto arrancó la **v4**, que sale de una auditoría de usabilidad hec
 | 040 | Recordar las últimas instrucciones al pedir dieta o tabla | ✅ completada |
 | 041 | Ajustes en pestañas (Perfil, Operación, App, Zona de peligro) | ✅ completada |
 | 042 | Chips de ejercicios frecuentes, que rellenan el formulario | ✅ completada |
-| 043 | Las filas del diario, en dos líneas y con iconos | 🧪 implementada, pendiente de que el usuario la pruebe |
+| 043 | Las filas del diario, en dos líneas y con iconos | ✅ completada |
+| 044 | Fuera los planes y fuera "Abandonar consulta" (v5) | 🧪 implementada, pendiente de que el usuario la pruebe |
+| 045 | La consulta, como revisión de lo hecho desde la anterior (v5) | 📝 spec escrita, sin implementar |
+| 046 | La consulta propone dieta o tabla, y tú aceptas (v5) | 📝 spec escrita, sin implementar |
 
 ## Qué toca ahora
 
@@ -94,15 +97,29 @@ entra con Google) ya tiene permisos sobre sus propios datos. Está en los
 tres sitios de código: `js/firebase-config.js`, `api/_auth.js` y
 `firestore.rules`.
 
-**2. La spec 043 (filas del diario en dos líneas, con iconos) está
-implementada y desplegada, a la espera de que el usuario la pruebe.** Sale de
-que el 22 de agosto vio en su pantalla que el nombre del ejercicio no se leía
-en escritorio: `.registro-texto` era `flex: 1` con recorte por `ellipsis`, así
-que en una columna estrecha se encogía hasta desaparecer. El guion está al
-final de `docs/specs/043-filas-del-diario-en-dos-lineas.md`; lo que más importa
-es el paso 14, porque `.registro-texto`, `.registro-detalle` y `.pesaje-fecha`
-las siguen usando el histórico, la dieta, la tabla, las estadísticas y dos
-cabeceras, y **no se han tocado a propósito**.
+**2. La v5 está en marcha y es lo que manda ahora**, por encima del backlog.
+Sale de que el usuario miró Consulta el 22 de agosto y vio dos cosas: que
+"Abandonar consulta" fallaba y no tenía sentido, y que "Mis planes" duplicaba
+peor lo que ya hacen la dieta y la tabla semanales. La idea que manda: la app
+tiene un nutricionista al que preguntas dudas cuando quieras y que además te
+pasa consulta cada cierto tiempo para ver cómo vas, animarte o apretarte.
+Está en `docs/PRODUCTO.md`, apartado "Qué hará (v5…)", y repartida **desde el
+principio** en tres specs (no se parten a posteriori):
+
+| Spec | Qué | Estado |
+|---|---|---|
+| 044 | Fuera los planes y fuera "Abandonar consulta" | 🧪 desplegada, pendiente de probar |
+| 045 | La consulta, como revisión de lo hecho desde la anterior | 📝 escrita |
+| 046 | La consulta propone dieta o tabla, y tú aceptas | 📝 escrita |
+
+**La trampa de la 044, que casi se lleva por delante el cupo:** la colección
+`planes` guarda dos cosas distintas. Los planes retirados, y las **marcas de
+cupo** de dietas y tablas (spec 027). El array `planesCargados` lo leen
+`generarDieta()`, `generarTabla()`, `pintarEspecializadas()` y el autorrelleno
+de instrucciones de la spec 040, y solo se llena en `refrescarConsulta()`. La
+primera versión de la spec mandaba borrar `listarPlanes()` y `planesCargados`;
+`revisor-specs` lo paró. **Si alguien vuelve a tocarlos, el cupo de dietas y
+tablas pasa a estar siempre entero y el autorrelleno deja de funcionar.**
 
 **3. Seguir limpiando `docs/BACKLOG.md`** por decisión delegada del usuario
 el 21 de agosto ("te dejo decidir, vamos a limpiar el backlog"): specs 039

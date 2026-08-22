@@ -133,9 +133,7 @@ import {
   quedanConsultasHoy,
   empezarConsulta,
   responder,
-  abandonarConsulta,
   TIPOS_ESPECIALIZADOS,
-  etiquetaDePlan,
   guardarMarcaDePlan,
   quedanPlanesHoy,
   PLANES_POR_DIA,
@@ -2665,18 +2663,6 @@ id("form-ejercicio").addEventListener("submit", async (evento) => {
   }
 });
 
-// --- Consejos ------------------------------------------------------------
-
-function formatearFechaYHora(creadoEn) {
-  if (!creadoEn) return "";
-  const fecha = creadoEn.toDate();
-  const dosDigitos = (numero) => String(numero).padStart(2, "0");
-  return (
-    `${dosDigitos(fecha.getDate())}/${dosDigitos(fecha.getMonth() + 1)}/` +
-    `${fecha.getFullYear()} ${dosDigitos(fecha.getHours())}:${dosDigitos(fecha.getMinutes())}`
-  );
-}
-
 // --- Conversación con el nutricionista (spec 023) ------------------------
 //
 // "Consejos" ya no es una sección: los de antes se enseñan aquí dentro, como
@@ -2788,46 +2774,6 @@ function pintarHilo(consulta) {
   });
 }
 
-function pintarPlanes(todos) {
-  // Las dietas y las tablas semanales dejan aquí una marca para gastar cupo,
-  // pero su contenido vive en su propia semana: pintarlas aquí serían tarjetas
-  // vacías (specs 028 y 029).
-  //
-  // Se miran los dos nombres: las marcas anteriores a la spec 029 llevan
-  // esDietaSemanal y volverían a salir si solo se mirara el nuevo.
-  const planes = todos.filter((plan) => !plan.esPlanSemanal && !plan.esDietaSemanal);
-
-  const contenedor = id("lista-planes");
-  contenedor.innerHTML = "";
-  id("estado-planes").textContent = planes.length
-    ? ""
-    : "Aún no tienes ningún plan.";
-
-  planes.forEach((plan) => {
-    const tarjeta = document.createElement("article");
-    tarjeta.className = "plan";
-
-    const fecha = document.createElement("p");
-    fecha.className = "consejo-fecha";
-    // Los planes de antes de la spec 017 no tienen tipo: son planes completos.
-    fecha.textContent = `${etiquetaDePlan(plan)} · ${formatearFechaYHora(plan.creadoEn)}`;
-    tarjeta.appendChild(fecha);
-
-    [
-      ["Nutrición", plan.nutricion],
-      ["Ejercicio", plan.ejercicio]
-    ].forEach(([titulo, texto]) => {
-      const encabezado = document.createElement("h3");
-      encabezado.textContent = titulo;
-      const parrafo = document.createElement("p");
-      parrafo.textContent = texto;
-      tarjeta.append(encabezado, parrafo);
-    });
-
-    contenedor.appendChild(tarjeta);
-  });
-}
-
 // Los tres estados de la pantalla: consulta en curso, recién terminada, y
 // sin consulta (con o sin cupo para hoy).
 function pintarEstadoConsulta() {
@@ -2842,7 +2788,6 @@ function pintarEstadoConsulta() {
   const primeraVez = !hayOperacion;
 
   id("form-respuesta").classList.toggle("oculta", !enCurso);
-  id("btn-abandonar").classList.toggle("oculta", !enCurso);
   id("btn-empezar-consulta").classList.toggle("oculta", enCurso);
   id("explicacion-inicial").classList.toggle("oculta", enCurso || !primeraVez);
 
@@ -2862,7 +2807,7 @@ function pintarEstadoConsulta() {
         : "Empezar consulta";
     id("aviso-consulta").textContent = quedanHoy
       ? terminada
-        ? "Consulta terminada. Tu plan es el primero de la lista."
+        ? "Consulta terminada. Lo que te ha dicho está al final de la conversación."
         : ""
       : "Ya has pasado consulta 2 veces hoy.";
   }
@@ -2966,8 +2911,10 @@ async function refrescarConsulta() {
     consultaAbierta = consultaEnCurso(
       consultas.filter((consulta) => consulta.modo !== "conversacion")
     );
+    // planesCargados NO es "los planes retirados en la spec 044": es lo que
+    // alimenta el cupo diario de dietas y tablas (spec 027) y el autorrelleno
+    // de instrucciones (spec 040). Se sigue leyendo aunque ya no se pinte.
     planesCargados = planes;
-    pintarPlanes(planes);
     pintarEstadoConsulta();
     pintarConversacion();
     pintarEspecializadas();
@@ -3045,19 +2992,6 @@ id("form-respuesta").addEventListener("submit", async (evento) => {
       // La entrevista ha creado la operación: hasta ahora no se podía apuntar.
       await refrescarOperaciones();
     }
-  }
-});
-
-id("btn-abandonar").addEventListener("click", async () => {
-  if (!confirm("¿Abandonar esta consulta? Se perderá la conversación.")) return;
-
-  try {
-    await abandonarConsulta(uidActual, consultaAbierta.id);
-    id("respuesta-texto").value = "";
-    await refrescarConsulta();
-  } catch {
-    id("error-consulta").textContent =
-      "No se ha podido abandonar la consulta. Comprueba tu conexión.";
   }
 });
 

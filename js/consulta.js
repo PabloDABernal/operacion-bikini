@@ -265,8 +265,8 @@ export async function empezarConsulta(uid, consultas) {
   });
 }
 
-// Añade la respuesta del usuario y el siguiente turno de la IA. Si la IA
-// devuelve el plan, cierra la consulta y guarda el plan.
+// Añade la respuesta del usuario y el siguiente turno de la IA. Si la IA cierra
+// la consulta, el cierre se guarda como último mensaje del hilo (spec 044).
 export async function responder(uid, consulta, texto) {
   const [registros, contexto] = await Promise.all([
     recogerRegistros(uid),
@@ -280,18 +280,14 @@ export async function responder(uid, consulta, texto) {
   });
   const referencia = doc(db, "usuarios", uid, "consultas", consulta.id);
 
-  if (respuesta.tipo === "plan") {
+  if (respuesta.tipo === "cierre") {
+    // El cierre se guarda como un mensaje más de la IA (spec 044): es lo último
+    // que te dice al despedirte, y su sitio es el final de la conversación. Ya
+    // no se crea ningún documento en "planes".
     await updateDoc(referencia, {
-      mensajes,
+      mensajes: [...mensajes, { de: "ia", texto: respuesta.cierre }],
       estado: "terminada",
       terminadaEn: serverTimestamp()
-    });
-
-    await addDoc(planesDe(uid), {
-      nutricion: respuesta.nutricion,
-      ejercicio: respuesta.ejercicio,
-      consultaId: consulta.id,
-      creadoEn: serverTimestamp()
     });
 
     // La entrevista de bienvenida deja los ajustes rellenos y el perfil
@@ -329,15 +325,6 @@ export const TIPOS_ESPECIALIZADOS = {
   ejercicio: { etiqueta: "Tabla de ejercicio", plural: "tablas" }
 };
 
-export function etiquetaDePlan(plan) {
-  const tipo = TIPOS_ESPECIALIZADOS[plan.tipo];
-  if (!tipo) return "Plan completo";
-
-  // Los planes de antes de la spec 027 llevan alcance ("3 días", "para hoy");
-  // los nuevos son siempre la semana, así que no hace falta decirlo.
-  return plan.alcance ? `${tipo.etiqueta} · ${plan.alcance}` : tipo.etiqueta;
-}
-
 // El cupo se cuenta sobre los planes guardados, no sobre las consultas: es el
 // dato que dice la verdad, porque un plan que falló no llegó a guardarse.
 export function pedidosHoy(planes, tipo) {
@@ -360,8 +347,8 @@ export function quedanPlanesHoy(planes, tipo) {
 // cupo se cuenta sobre los planes: dejan aquí su marca para que cuente igual.
 //
 // El campo se llamaba esDietaSemanal hasta la spec 029, cuando la tabla pasó a
-// dejar la misma marca. Las marcas ya guardadas conservan el nombre viejo y
-// pintarPlanes() reconoce los dos: migrarlas no aportaba nada.
+// dejar la misma marca. Las marcas ya guardadas conservan el nombre viejo;
+// migrarlas no aportaba nada, y desde la spec 044 ya no las pinta nadie.
 export function guardarMarcaDePlan(uid, tipo, instrucciones) {
   return addDoc(planesDe(uid), {
     nutricion: "",
@@ -373,9 +360,3 @@ export function guardarMarcaDePlan(uid, tipo, instrucciones) {
   });
 }
 
-export function abandonarConsulta(uid, consultaId) {
-  return updateDoc(doc(db, "usuarios", uid, "consultas", consultaId), {
-    estado: "abandonada",
-    terminadaEn: serverTimestamp()
-  });
-}

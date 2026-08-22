@@ -153,6 +153,40 @@ que la v4 dejó sin tocar. Tampoco añade funciones.
   se puede deducir— se recortaba hasta desaparecer. Editar y borrar dejan de
   ser dos palabras y pasan a ser dos iconos.
 
+## Qué hará (v5: la consulta como revisión periódica, decidida el 22 de agosto de 2026)
+
+Sale de usar Consulta con la app ya llena. El diagnóstico del usuario: la
+pantalla arrastra un modelo de cuando no existían la dieta ni la tabla
+semanales. Hoy una consulta termina pariendo un "plan" de texto —pautas de
+nutrición y una rutina— que **duplica** lo que ya viven en Comidas y en
+Ejercicio, y encima con menos detalle y sin poder marcarlo ni editarlo. Y para
+salir de una consulta a medias hay un botón de "Abandonar consulta", que es lo
+que hace un formulario, no lo que hace un paciente.
+
+La idea que manda a partir de ahora: **la app tiene un nutricionista al que
+puedes preguntarle dudas cuando quieras, y que además te pasa consulta cada
+cierto tiempo para ver cómo vas, animarte o echarte la bronca.**
+
+- **La consulta es una revisión, no una entrevista de alta.** Al pasar consulta,
+  la IA repasa lo que has hecho **desde la consulta anterior** (peso, comidas,
+  ejercicio, constancia) y te habla de eso: qué ha ido bien, qué se ha torcido y
+  qué toca ahora. La entrevista larga sigue existiendo, pero solo donde tiene
+  sentido: la primera vez, al abrir una operación.
+- **Se puede pasar consulta cuando quieras, con la app avisando.** No hay
+  bloqueo por calendario: la pantalla te dice cuánto hace de la última y te
+  sugiere esperar si fue hace nada, pero la decisión es tuya. Sigue habiendo un
+  tope diario, que es una cuestión de cuota de IA, no de producto.
+- **"Abandonar consulta" desaparece.** Una consulta a medias se retoma o se
+  deja estar; no hace falta un botón para tirarla a la basura.
+- **Los planes desaparecen como concepto.** Lo que antes era un "plan" ahora
+  son dos cosas que ya existen y son mejores: la **dieta de la semana** y la
+  **tabla de ejercicio**. Lo que la consulta produce es su propio cierre —el
+  repaso y lo que toca—, que se lee en la conversación, no una tarjeta aparte.
+  Los planes ya guardados no se borran: dejan de enseñarse.
+- **La consulta puede proponerte dieta o tabla nuevas.** Si de la revisión sale
+  que toca cambiar la semana, la IA te lo propone y te lo deja a un toque. No
+  te sustituye la dieta ni la tabla sin que lo aceptes.
+
 ## Qué explícitamente NO hace
 
 - No sustituye a un profesional médico real: siempre debe recordar (disclaimer) que ante dudas o falta de resultados hay que consultar a un médico.
@@ -168,9 +202,9 @@ que la v4 dejó sin tocar. Tampoco añade funciones.
 - **Comida**: registro de una ingesta (qué se ha comido, cuándo). Se puede corregir después.
 - **Ejercicio**: registro de una actividad física (qué, duración/intensidad, cuándo). Se puede corregir después.
 - **Foto de progreso**: foto asociada a una fecha, para seguimiento visual y cuadrícula de evolución.
-- **Consulta**: conversación guiada por la IA (tipo entrevista) que termina generando un plan de nutrición y ejercicio.
+- **Consulta**: revisión con la IA. La primera de todas es la entrevista que abre una operación; las siguientes repasan lo hecho desde la consulta anterior y terminan diciéndote cómo vas y qué toca.
 - **Consejo**: feedback puntual generado por la IA a partir del historial reciente, sin ser una conversación guiada completa.
-- **Plan**: resultado de una consulta (nutrición + ejercicio) asociado a un usuario.
+- ~~**Plan**~~: retirado en la v5 (22 de agosto de 2026). Lo que producía —pautas de nutrición y una rutina, en texto— lo hacen mejor la *dieta* y la *tabla de ejercicio*, que además se pueden editar y marcar. Los planes ya guardados siguen en la base de datos, sin enseñarse.
 - **Racha**: días seguidos apuntando algo. Admite un día de gracia por semana, para que un despiste no la rompa.
 - **Punto**: unidad que se gana al registrar. Premia la conducta, no los kilos.
 - **Receta**: nombre, raciones, ingredientes y preparación. Se puede cocinar leyéndola y la IA puede reutilizarla.
@@ -185,4 +219,5 @@ que la v4 dejó sin tocar. Tampoco añade funciones.
 - **v2 (en curso desde el 11 de agosto de 2026, sin fecha límite)**: lo descrito en "Qué hará (v2)". El criterio con el que se eligió: la v2 no se pierde por falta de funciones, se pierde si dejamos de usar la app; así que primero va lo que quita fricción y lo que se disfruta a diario. Razonamiento completo en `docs/propuestas/v2-usabilidad-y-gamificacion.md`.
 - **v3 (16 de agosto de 2026)**: lo descrito en "Qué hará (v3)". Terminada y probada.
 - **v4 (desde el 20 de agosto de 2026, sin fecha límite)**: lo descrito en "Qué hará (v4)" y en sus dos ampliaciones, la del 21 y la del 22 de agosto. No añade funciones: reordena lo que ya hay para que se encuentre, y estrena la vista de escritorio. Sale de una auditoría de usabilidad hecha sobre el código el 20 de agosto, y de probar la 036 en producción el 21.
+- **v5 (desde el 22 de agosto de 2026, sin fecha límite)**: lo descrito en "Qué hará (v5)". Sale de usar Consulta con la app ya llena y ver que arrastraba el modelo de antes de que existieran la dieta y la tabla semanales. Se reparte en las specs 044, 045 y 046.
 - **Descartado para v2**: notificaciones push (mucho trabajo y acaban silenciadas), integración con básculas o pulseras, y comparativa de fotos lado a lado, que se pospone.
