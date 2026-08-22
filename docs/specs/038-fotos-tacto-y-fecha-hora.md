@@ -1,6 +1,6 @@
 # 038 — Fotos en la navegación, zonas táctiles y fecha/hora plegable en Ejercicio y Peso
 
-- **Estado:** en implementación (código en `main`, `revisor-specs` y `revisor-codigo` con veredicto favorable el 2026-08-21). Pendiente de que el usuario la pruebe.
+- **Estado:** ✅ completada (probada y confirmada por el usuario el 2026-08-21, incluida la vuelta atrás de `sticky` a `fixed` en la barra de navegación tras el bug de Ejercicio).
 - **Fecha:** 2026-08-21
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (v4, decidida el 20 de agosto de 2026)", puntos **"Fotos deja de estar escondida"** y **"Menos fricción al apuntar"**.
 

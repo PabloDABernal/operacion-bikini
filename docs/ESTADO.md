@@ -2,7 +2,7 @@
 
 Documento para retomar el trabajo en frío. Se actualiza al terminar cada spec.
 
-**Última actualización:** 21 de agosto de 2026 (specs 036 y 037 completadas y validadas por el usuario)
+**Última actualización:** 21 de agosto de 2026 (specs 036, 037 y 038 completadas y validadas por el usuario — v4 cerrada del todo)
 
 ## Dónde estamos
 
@@ -10,7 +10,7 @@ Documento para retomar el trabajo en frío. Se actualiza al terminar cada spec.
 
 **https://operacion-bikini.vercel.app**
 
-**Las specs 001 a 037 están implementadas, desplegadas y validadas por el usuario.** La app se usa a diario.
+**Las specs 001 a 038 están implementadas, desplegadas y validadas por el usuario.** La app se usa a diario.
 
 La v2 se amplió dos veces sobre la marcha, según el usuario iba probando:
 
@@ -22,7 +22,7 @@ Todo lo de esas tres fases está cerrado. Desde ahí, el 19 de agosto se empezó
 
 El 20 de agosto arrancó la **v4**, que sale de una auditoría de usabilidad hecha sobre el código. No añade funciones: recoloca las que hay. Está descrita en `docs/PRODUCTO.md`, apartado "Qué hará (v4)".
 
-**No queda ninguna spec abierta.** El "rehacer las pantallas de forma más lógica" que el usuario pidió el 16 de agosto ya se resolvió con las specs 034-037. Lo siguiente es decidir con el usuario: la 038 (fotos en la navegación, zonas táctiles y fecha/hora plegable en Ejercicio y Peso) o la siguiente idea del backlog.
+**No queda ninguna spec abierta. La v4 está cerrada del todo** (specs 034-038). El "rehacer las pantallas de forma más lógica" que el usuario pidió el 16 de agosto ya se resolvió por completo. Lo siguiente es decidir con el usuario la próxima idea, tirando de `docs/BACKLOG.md`.
 
 ## Specs
 
@@ -65,10 +65,11 @@ El 20 de agosto arrancó la **v4**, que sale de una auditoría de usabilidad hec
 | 035 | Sub-pestañas en Comidas y Ejercicio, y nombres que dejan de pisarse | ✅ completada |
 | 036 | Vista de escritorio en varias columnas | ✅ completada |
 | 037 | Comidas integradas, Hoy completo y detalle real en el calendario | ✅ completada |
+| 038 | Fotos en la navegación, zonas táctiles y fecha/hora plegable en Ejercicio y Peso | ✅ completada |
 
 ## Qué toca ahora
 
-**La v4, empezada el 20 de agosto y ya cerrada.** Aquel "rehacer las pantallas de forma más lógica" que el usuario pidió el 16 de agosto salió de una auditoría de usabilidad sobre el código: Comidas y Ejercicio se habían convertido en páginas de cinco y seis bloques que solo se recorren con scroll ciego, y en un monitor la app era una columna de 512 px con dos desiertos a los lados. Se resolvió en cuatro specs, con una ampliación el 21 de agosto tras usar la 036 en producción:
+**La v4, empezada el 20 de agosto, está cerrada del todo.** Aquel "rehacer las pantallas de forma más lógica" que el usuario pidió el 16 de agosto salió de una auditoría de usabilidad sobre el código: Comidas y Ejercicio se habían convertido en páginas de cinco y seis bloques que solo se recorren con scroll ciego, y en un monitor la app era una columna de 512 px con dos desiertos a los lados. Se resolvió en cinco specs, con una ampliación el 21 de agosto tras usar la 036 en producción:
 
 | Spec | Qué | Estado |
 |---|---|---|
@@ -76,14 +77,13 @@ El 20 de agosto arrancó la **v4**, que sale de una auditoría de usabilidad hec
 | 035 | Sub-pestañas en Comidas y Ejercicio, y nombres que dejan de pisarse | ✅ completada |
 | 036 | Vista de escritorio en varias columnas | ✅ completada |
 | 037 | Comidas integradas, Hoy completo y detalle real en el calendario (ampliación de la v4 del 21 de agosto) | ✅ completada |
+| 038 | Fotos en la navegación, zonas táctiles y fecha/hora plegable en Ejercicio y Peso | ✅ completada |
 
 ### Lo primero al retomar
 
-**No queda ninguna spec abierta.** La siguiente candidata es la **038**
-(fotos en la navegación, zonas táctiles más grandes, y fecha/hora plegable
-en Ejercicio y Peso por simetría con lo que la 037 le hizo a Comidas) —
-todavía es una idea suelta, sin spec escrita. Preguntarle al usuario si
-quiere seguir por ahí o prefiere tirar de otra cosa de `docs/BACKLOG.md`.
+**No queda ninguna spec abierta.** Preguntarle al usuario qué idea de
+`docs/BACKLOG.md` quiere abordar a continuación — no hay ninguna
+candidata concreta ya decidida.
 
 Dos cosas quedaron sin confirmar del guion de la 036 y conviene no perderlas
 de vista si algún día se tocan la cabecera o la gráfica de peso:
@@ -138,6 +138,6 @@ de vista si algún día se tocan la cabecera o la gráfica de peso:
 ## Pendiente de decidir por el usuario
 
 - `PRODUCTO.md` llama "collage de evolución" a lo que es una cuadrícula de miniaturas. O se cambia la palabra, o se hace el collage de verdad.
-- **Si se sigue con la 038** (fotos en la navegación, zonas táctiles, fecha/hora plegable en Ejercicio y Peso) o con otra idea de `docs/BACKLOG.md`.
+- **Qué idea de `docs/BACKLOG.md` se aborda a continuación.** La v4 está cerrada del todo (specs 034-038).
 
 El resto de ideas sueltas, en `docs/BACKLOG.md`.
