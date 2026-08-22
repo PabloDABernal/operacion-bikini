@@ -2,7 +2,7 @@
 
 Documento para retomar el trabajo en frío. Se actualiza al terminar cada spec.
 
-**Última actualización:** 22 de agosto de 2026 (v4 cerrada del todo; specs 039 y 040 completadas; `firestore.rules` ya publicadas)
+**Última actualización:** 22 de agosto de 2026 (`firestore.rules` publicadas; **spec 041 implementada y desplegada, pendiente de que el usuario la pruebe**)
 
 ## Dónde estamos
 
@@ -68,6 +68,7 @@ El 20 de agosto arrancó la **v4**, que sale de una auditoría de usabilidad hec
 | 038 | Fotos en la navegación, zonas táctiles y fecha/hora plegable en Ejercicio y Peso | ✅ completada |
 | 039 | Quitar la foto de perfil | ✅ completada |
 | 040 | Recordar las últimas instrucciones al pedir dieta o tabla | ✅ completada |
+| 041 | Ajustes en pestañas (Perfil, Operación, App, Zona de peligro) | 🧪 implementada, pendiente de que el usuario la pruebe |
 
 ## Qué toca ahora
 
@@ -91,7 +92,14 @@ entra con Google) ya tiene permisos sobre sus propios datos. Está en los
 tres sitios de código: `js/firebase-config.js`, `api/_auth.js` y
 `firestore.rules`.
 
-**2. Seguir limpiando `docs/BACKLOG.md`** (esto es lo que toca ahora) por decisión delegada del usuario
+**2. La spec 041 (Ajustes en pestañas) está implementada y desplegada, a la
+espera de que el usuario la pruebe.** El guion está al final de
+`docs/specs/041-ajustes-en-pestanas.md`. El paso delicado es el 12: comprobar
+con la red cortada que el error al guardar el proveedor de IA se ve en la
+pestaña "App" y no queda escrito en un párrafo invisible de otra pestaña.
+Hasta que el usuario confirme, la 041 NO se marca como completada.
+
+**3. Seguir limpiando `docs/BACKLOG.md`** por decisión delegada del usuario
 el 21 de agosto ("te dejo decidir, vamos a limpiar el backlog"): specs 039
 (quitar la foto de perfil) y 040 (recordar instrucciones al pedir dieta o
 tabla) ya completadas y confirmadas. Mientras el usuario no diga lo

@@ -1604,12 +1604,26 @@ button:disabled {
     margin: 0 auto;
   }
 
-  /* Ajustes no se recoloca en esta spec (sigue en el backlog), pero SÍ hay que
-     impedir que se ensanche: sus formularios estirados a 1100 px serían una
+  /* Ajustes no se ensancha: sus formularios estirados a 1100 px serían una
      pantalla peor que la de hoy. */
   .seccion[data-seccion="ajustes"] {
     max-width: var(--ancho-columna);
     margin: 0 auto;
+  }
+
+  /* Y por lo mismo, Ajustes es LA excepción de la vista de escritorio (spec
+     041): sus pestañas no se esconden y sus bloques no se reparten en
+     columnas. En el resto de secciones las pestañas sobran porque los bloques
+     caben a la vez; aquí no hay ancho que repartir, así que siguen haciendo
+     falta para filtrar. Estas dos reglas deshacen, solo para Ajustes, el
+     .subpestanas { display: none } y el .subseccion { display: block } de
+     arriba; ganan por especificidad, así que el orden da igual. */
+  .seccion[data-seccion="ajustes"] .subpestanas {
+    display: flex;
+  }
+
+  .seccion[data-seccion="ajustes"] .subseccion:not(.activa) {
+    display: none;
   }
 
   /* El aviso legal cuelga de #pantalla-principal, fuera de toda sección, así

@@ -119,6 +119,24 @@ lo que ya se guarda.
   calendario se ve el texto exacto de cada comida y ejercicio de ese día (con
   su hora) y el peso, sin recortar.
 
+## Qué hará (segunda ampliación de la v4, decidida el 22 de agosto de 2026)
+
+Sale del mismo diagnóstico de usabilidad del 20 de agosto, en el único punto
+que la v4 dejó sin tocar. Tampoco añade funciones.
+
+- **Ajustes deja de ser una columna de siete bloques**: hoy conviven en una
+  sola página la foto de perfil, el objetivo, el proveedor de IA, la sesión,
+  finalizar la operación, el histórico y el reinicio de datos, en ese orden.
+  Pasa a partirse en pestañas propias, igual que Comidas y Ejercicio en la
+  spec 035: **Perfil**, **Operación**, **App** y una pestaña aparte para la
+  **zona de peligro**. Lo de todos los días deja de compartir pantalla con el
+  borrado irreversible.
+- **Ajustes es la excepción en escritorio**: a diferencia del resto de
+  secciones, en pantalla ancha sus pestañas **no** desaparecen ni sus bloques
+  se reparten en columnas. Un formulario estirado se lee peor, así que Ajustes
+  se queda estrecho, centrado y con las pestañas puestas. Es una excepción
+  consciente a la vista de escritorio de la spec 036.
+
 ## Qué explícitamente NO hace
 
 - No sustituye a un profesional médico real: siempre debe recordar (disclaimer) que ante dudas o falta de resultados hay que consultar a un médico.
@@ -150,5 +168,5 @@ lo que ya se guarda.
 - **v1 (beta, deadline 31 de agosto)**: todo el alcance descrito arriba (registro completo + consejos + consulta + fotos), priorizando que funcione sobre que esté pulido visualmente. **Terminada y probada el 11 de agosto de 2026** (specs 001 a 005), 20 días antes del plazo.
 - **v2 (en curso desde el 11 de agosto de 2026, sin fecha límite)**: lo descrito en "Qué hará (v2)". El criterio con el que se eligió: la v2 no se pierde por falta de funciones, se pierde si dejamos de usar la app; así que primero va lo que quita fricción y lo que se disfruta a diario. Razonamiento completo en `docs/propuestas/v2-usabilidad-y-gamificacion.md`.
 - **v3 (16 de agosto de 2026)**: lo descrito en "Qué hará (v3)". Terminada y probada.
-- **v4 (desde el 20 de agosto de 2026, sin fecha límite)**: lo descrito en "Qué hará (v4)" y en su ampliación del 21 de agosto. No añade funciones: reordena lo que ya hay para que se encuentre, y estrena la vista de escritorio. Sale de una auditoría de usabilidad hecha sobre el código el 20 de agosto, y de probar la 036 en producción el 21.
+- **v4 (desde el 20 de agosto de 2026, sin fecha límite)**: lo descrito en "Qué hará (v4)" y en sus dos ampliaciones, la del 21 y la del 22 de agosto. No añade funciones: reordena lo que ya hay para que se encuentre, y estrena la vista de escritorio. Sale de una auditoría de usabilidad hecha sobre el código el 20 de agosto, y de probar la 036 en producción el 21.
 - **Descartado para v2**: notificaciones push (mucho trabajo y acaban silenciadas), integración con básculas o pulseras, y comparativa de fotos lado a lado, que se pospone.

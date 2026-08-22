@@ -525,15 +525,18 @@
 
     <!-- Sección: Ajustes -->
     <div class="seccion" data-seccion="ajustes">
-      <h2>Foto de perfil</h2>
-      <div class="bloque-foto-perfil">
-        <span id="avatar-ajustes" class="avatar"></span>
-        <button type="button" id="btn-cambiar-foto">Subir foto de perfil</button>
-        <button type="button" id="btn-quitar-foto" class="enlace oculta">Quitar foto</button>
-        <input type="file" id="archivo-perfil" accept="image/*" class="oculta">
+      <!-- Sub-pestañas (spec 041). Mismo patrón que Comidas y Ejercicio, por
+           el mismo motivo: eran siete bloques en una columna y el borrado
+           irreversible compartía pantalla con el peso objetivo. -->
+      <div class="subpestanas" data-de="ajustes">
+        <button type="button" class="subpestana activa" data-subseccion="perfil" aria-current="true">Perfil</button>
+        <button type="button" class="subpestana" data-subseccion="operacion">Operación</button>
+        <button type="button" class="subpestana" data-subseccion="app">App</button>
+        <button type="button" class="subpestana" data-subseccion="peligro">Zona de peligro</button>
       </div>
-      <p id="estado-perfil" class="explicacion" role="status"></p>
 
+      <!-- Sub-pestaña: Perfil -->
+      <div class="subseccion activa" data-subseccion="perfil">
       <h2>Mi objetivo</h2>
       <form id="form-ajustes">
         <label for="nombre">Cómo quieres que te llamen</label>
@@ -555,21 +558,21 @@
         <button type="submit" id="btn-guardar-ajustes">Guardar</button>
       </form>
 
-      <h2>Proveedor de IA</h2>
-      <label for="proveedor-ia">Cuál se prueba primero</label>
-      <select id="proveedor-ia">
-        <option value="automatico">Automático (recomendado)</option>
-        <option value="groq-primero">Probar Groq primero</option>
-      </select>
-      <p id="guardado-proveedor" class="guardado" role="status"></p>
-
       <p id="aviso-ajustes" class="explicacion"></p>
       <p id="error-ajustes" class="error" role="alert"></p>
 
-      <h2>Sesión</h2>
-      <p class="explicacion">Has entrado como <span id="email-ajustes"></span>.</p>
-      <button type="button" id="btn-salir">Cerrar sesión</button>
+      <h2>Foto de perfil</h2>
+      <div class="bloque-foto-perfil">
+        <span id="avatar-ajustes" class="avatar"></span>
+        <button type="button" id="btn-cambiar-foto">Subir foto de perfil</button>
+        <button type="button" id="btn-quitar-foto" class="enlace oculta">Quitar foto</button>
+        <input type="file" id="archivo-perfil" accept="image/*" class="oculta">
+      </div>
+      <p id="estado-perfil" class="explicacion" role="status"></p>
+      </div>
 
+      <!-- Sub-pestaña: Operación -->
+      <div class="subseccion" data-subseccion="operacion">
       <!-- Operaciones (spec 018) -->
       <h2>Operación bikini</h2>
       <div id="bloque-finalizar">
@@ -600,7 +603,28 @@
       <h2>Histórico</h2>
       <p id="estado-historico"></p>
       <div id="lista-historico"></div>
+      </div>
 
+      <!-- Sub-pestaña: App -->
+      <div class="subseccion" data-subseccion="app">
+      <h2>Proveedor de IA</h2>
+      <label for="proveedor-ia">Cuál se prueba primero</label>
+      <select id="proveedor-ia">
+        <option value="automatico">Automático (recomendado)</option>
+        <option value="groq-primero">Probar Groq primero</option>
+      </select>
+      <p id="guardado-proveedor" class="guardado" role="status"></p>
+      <!-- Párrafo propio y no el #error-ajustes de Perfil (spec 041): un error
+           escrito en una pestaña que no se está mirando no lo ve nadie. -->
+      <p id="error-proveedor" class="error" role="alert"></p>
+
+      <h2>Sesión</h2>
+      <p class="explicacion">Has entrado como <span id="email-ajustes"></span>.</p>
+      <button type="button" id="btn-salir">Cerrar sesión</button>
+      </div>
+
+      <!-- Sub-pestaña: Zona de peligro -->
+      <div class="subseccion" data-subseccion="peligro">
       <div class="zona-peligro">
         <h2>Reiniciar datos</h2>
         <p class="advertencia">
@@ -629,6 +653,7 @@
 
         <p id="estado-reinicio"></p>
         <p id="error-reinicio" class="error" role="alert"></p>
+      </div>
       </div>
     </div>
 

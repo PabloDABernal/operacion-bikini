@@ -43,8 +43,6 @@ Ideas surgidas durante la implementación, no implementadas. Una línea cada una
 
 ## De la auditoría de usabilidad (20 de agosto de 2026, v4)
 
-- Reordenar Ajustes: son siete bloques en una sola columna, mezclando lo de todos los días (perfil, objetivo) con la zona de peligro. La v4 no lo toca.
-- Sub-pestañas también en Ajustes, si las de Comidas y Ejercicio funcionan bien.
 - El aviso de guardado dura 3 segundos fijos y desaparece solo; valorar si algún caso pide que se quede hasta que lo cierres.
 - Que la semana de dieta y de tabla marquen qué has cumplido hoy. Descartado a propósito en la v4 para no contradecir la spec 028; si algún día se quiere, hay que cambiar PRODUCTO.md primero.
 - Chips o "lo de siempre" para ejercicios frecuentes en el formulario de Ejercicio, como los que la spec 037 le dio a Comidas. Fuera de la 038 porque Ejercicio no tenía un equivalente de "lo de siempre" que mover.

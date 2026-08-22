@@ -3446,7 +3446,9 @@ id("proveedor-ia").addEventListener("change", async (evento) => {
     await guardarProveedorIa(uidActual, proveedorIaActual);
     avisarGuardado("guardado-proveedor");
   } catch {
-    id("error-ajustes").textContent =
+    // Párrafo propio, no el de Perfil: desde la spec 041 este bloque vive en
+    // otra sub-pestaña, y un error escrito ahí no lo vería nadie.
+    id("error-proveedor").textContent =
       "No se ha podido guardar el proveedor de IA. Comprueba tu conexión.";
   }
 });
@@ -3645,6 +3647,7 @@ function limpiarFormularios() {
     "error-foto",
     "error-ajustes",
     "aviso-ajustes",
+    "error-proveedor",
     "error-reinicio",
     "estado-reinicio"
   ].forEach((campo) => {
