@@ -1,6 +1,6 @@
 # 040 — Recordar las últimas instrucciones al pedir dieta o tabla
 
-- **Estado:** borrador
+- **Estado:** en implementación (código en `main`, `revisor-specs` y `revisor-codigo` con veredicto favorable el 2026-08-21). Pendiente de que el usuario la pruebe.
 - **Fecha:** 2026-08-21
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (ampliación de la v2, decidida el 13 de agosto de 2026)", bullet "Consultas especializadas", ampliado hoy para incluir esta spec.
 
@@ -100,5 +100,43 @@ array ya cargado y una línea que rellena un campo.
 
 ## ✅ Para probar a mano
 
-*(Lo afina el agente `qa-manual` antes de la prueba, con el detalle exacto de
-la implementación.)*
+Se prueba en producción: https://operacion-bikini.vercel.app, con una
+operación en marcha. Si nunca has pedido una dieta o una tabla con
+instrucciones, pide una de cada con algo de texto (p. ej. "nada de lácteos"
+para la dieta, "el sábado descanso" para la tabla) antes de empezar, para
+tener algo que precargar.
+
+### Camino feliz
+
+1. En **Comidas → Mi dieta**, pulsa "Pedir dieta detallada": el campo
+   "¿Algo que deba tener en cuenta?" ya trae escrito lo último que pusiste
+   para una dieta, con el cursor al final.
+2. Pulsa "Cancelar" y vuelve a pulsar "Pedir dieta detallada": el campo
+   vuelve a traer el mismo texto (no se ha quedado vacío ni con nada raro).
+3. En **Ejercicio → Mi tabla**, pulsa "Pedir tabla de ejercicio": el campo
+   trae lo último que pusiste para una **tabla**, no el texto de la dieta —
+   son independientes.
+4. Cambia el texto precargado de la tabla, pide con ese texto nuevo (si te
+   queda cupo). Se pide con normalidad, igual que si lo hubieras escrito
+   desde cero.
+5. Vuelve a pulsar "Pedir tabla de ejercicio": ahora trae el texto que
+   acabas de pedir en el paso 4, no el de antes.
+
+### Casos límite
+
+6. Borra del todo el texto precargado (déjalo vacío) y pide así, sin
+   instrucciones. Se pide con normalidad.
+7. La próxima vez que abras ese formulario, el campo aparece vacío (la
+   última vez se pidió sin texto) — no aparece "undefined" ni ningún texto
+   extraño.
+
+### Regresión
+
+8. El cupo diario (2 dietas y 2 tablas) sigue funcionando igual: si ya
+   pediste 2 de un tipo hoy, el botón de "Pedir..." de ese tipo sale
+   deshabilitado, y el mensaje bajo el botón lo explica — igual que antes de
+   esta spec.
+9. Pedir dietas y tablas no comparte cupo entre sí: agotar el de dieta no
+   afecta al de tabla, ni al revés.
+
+Si todo lo anterior pasa, la spec 040 queda **completada**.

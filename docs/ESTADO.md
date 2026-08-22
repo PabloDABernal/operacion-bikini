@@ -67,6 +67,7 @@ El 20 de agosto arrancó la **v4**, que sale de una auditoría de usabilidad hec
 | 037 | Comidas integradas, Hoy completo y detalle real en el calendario | ✅ completada |
 | 038 | Fotos en la navegación, zonas táctiles y fecha/hora plegable en Ejercicio y Peso | ✅ completada |
 | 039 | Quitar la foto de perfil | ✅ completada |
+| 040 | Recordar las últimas instrucciones al pedir dieta o tabla | ⏳ desplegada, sin probar |
 
 ## Qué toca ahora
 
@@ -82,12 +83,13 @@ El 20 de agosto arrancó la **v4**, que sale de una auditoría de usabilidad hec
 
 ### Lo primero al retomar
 
-**Seguir tirando de `docs/BACKLOG.md`.** El usuario delegó la decisión el 21
-de agosto ("te dejo decidir, vamos a limpiar el backlog") y confirmó la
-spec 039 (quitar la foto de perfil) sin objeciones. Mientras no diga lo
-contrario, seguir el mismo patrón: elegir un ítem pequeño y autocontenido,
-escribir su spec documentando las decisiones de producto en la sección 8 en
-vez de entrevistar, pasar `revisor-specs` → implementar → `revisor-codigo` →
+**Pedirle al usuario que pruebe la 040** (recordar las últimas instrucciones
+al pedir dieta o tabla, guion en `docs/specs/040-recordar-instrucciones.md`).
+Sigue la limpieza de `docs/BACKLOG.md` por decisión delegada del 21 de
+agosto ("te dejo decidir"). Mientras el usuario no diga lo contrario, seguir
+el mismo patrón: elegir un ítem pequeño y autocontenido, escribir su spec
+documentando las decisiones de producto en la sección 8 en vez de
+entrevistar, pasar `revisor-specs` → implementar → `revisor-codigo` →
 guion de prueba, y parar ahí — la prueba manual siempre la hace el usuario,
 eso no se delega.
 
