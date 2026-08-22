@@ -1,6 +1,6 @@
 # 042 — Chips de ejercicios frecuentes
 
-- **Estado:** 📝 pendiente de implementar.
+- **Estado:** ✅ completada (probada y confirmada por el usuario el 2026-08-22).
 - **Fecha:** 2026-08-22
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (segunda ampliación de la v4, decidida el 22 de agosto de 2026)", punto **"Ejercicio también repite lo de siempre"**.
 
