@@ -1,6 +1,6 @@
 # 039 — Quitar la foto de perfil
 
-- **Estado:** borrador
+- **Estado:** en implementación (código en `main`, `revisor-specs` y `revisor-codigo` con veredicto favorable el 2026-08-21). Pendiente de que el usuario la pruebe.
 - **Fecha:** 2026-08-21
 - **Referencia en PRODUCTO.md:** apartado "Perfil con foto" (v2, ampliación del 13 de agosto), ampliado hoy para incluir esta spec.
 
@@ -112,5 +112,42 @@ función de tres líneas y su listener.
 
 ## ✅ Para probar a mano
 
-*(Lo afina el agente `qa-manual` antes de la prueba, con el detalle exacto de
-la implementación.)*
+Se prueba en producción: https://operacion-bikini.vercel.app.
+
+### Camino feliz
+
+1. Con una foto de perfil ya subida, entra en **Ajustes**. En "Foto de
+   perfil" ves el círculo con tu foto, el botón "Subir foto de perfil" y,
+   junto a él, **"Quitar foto"**.
+2. Toca "Quitar foto": se deshabilita y muestra "Quitando…"; al terminar, el
+   círculo vuelve a la inicial de tu email y el botón "Quitar foto"
+   desaparece.
+3. El avatar de la cabecera (arriba a la izquierda) también vuelve a la
+   inicial.
+4. Recarga la página (F5): sigue sin foto, y "Quitar foto" sigue sin
+   verse — no era solo un cambio visual.
+5. Toca "Subir foto de perfil" y sube una imagen: el círculo la muestra, y
+   "Quitar foto" reaparece junto a "Subir foto de perfil".
+6. Cierra sesión y vuelve a entrar con la misma cuenta: la foto sigue ahí y
+   "Quitar foto" sigue visible.
+
+### Casos límite
+
+7. En una cuenta que nunca subió foto (o justo después de quitarla): en
+   Ajustes solo se ve "Subir foto de perfil", nunca "Quitar foto".
+8. Toca "Quitar foto" dos veces seguidas muy rápido: la segunda pulsación no
+   hace nada (el botón ya está deshabilitado tras la primera).
+9. Sin conexión (puedes simularlo desde las herramientas de desarrollador),
+   toca "Quitar foto": el botón se deshabilita, aparece un error de conexión,
+   y al terminar la foto sigue ahí tal cual estaba.
+
+### Regresión
+
+10. Ve a **Ajustes → Reiniciar datos**, marca solo "Fotos" y bórralas: las
+    fotos de progreso desaparecen, pero la foto de perfil y el botón "Quitar
+    foto" siguen intactos — son cosas distintas.
+11. Quita la foto de perfil y comprueba que el resto de Ajustes (peso
+    objetivo, altura, nombre, cerrar sesión) sigue exactamente igual que
+    antes.
+
+Si todo lo anterior pasa, la spec 039 queda **completada**.

@@ -22,7 +22,7 @@ Todo lo de esas tres fases está cerrado. Desde ahí, el 19 de agosto se empezó
 
 El 20 de agosto arrancó la **v4**, que sale de una auditoría de usabilidad hecha sobre el código. No añade funciones: recoloca las que hay. Está descrita en `docs/PRODUCTO.md`, apartado "Qué hará (v4)".
 
-**No queda ninguna spec abierta. La v4 está cerrada del todo** (specs 034-038). El "rehacer las pantallas de forma más lógica" que el usuario pidió el 16 de agosto ya se resolvió por completo. Lo siguiente es decidir con el usuario la próxima idea, tirando de `docs/BACKLOG.md`.
+**La v4 está cerrada del todo** (specs 034-038). El 21 de agosto el usuario dijo "te dejo decidir, vamos a limpiar el backlog" — Claude empezó a tirar de `docs/BACKLOG.md` por su cuenta, descartando dos falsas alarmas y abriendo la **spec 039** (quitar la foto de perfil), desplegada y **pendiente de que el usuario la pruebe**.
 
 ## Specs
 
@@ -66,6 +66,7 @@ El 20 de agosto arrancó la **v4**, que sale de una auditoría de usabilidad hec
 | 036 | Vista de escritorio en varias columnas | ✅ completada |
 | 037 | Comidas integradas, Hoy completo y detalle real en el calendario | ✅ completada |
 | 038 | Fotos en la navegación, zonas táctiles y fecha/hora plegable en Ejercicio y Peso | ✅ completada |
+| 039 | Quitar la foto de perfil | ⏳ desplegada, sin probar |
 
 ## Qué toca ahora
 
@@ -81,9 +82,13 @@ El 20 de agosto arrancó la **v4**, que sale de una auditoría de usabilidad hec
 
 ### Lo primero al retomar
 
-**No queda ninguna spec abierta.** Preguntarle al usuario qué idea de
-`docs/BACKLOG.md` quiere abordar a continuación — no hay ninguna
-candidata concreta ya decidida.
+**Pedirle al usuario que pruebe la 039** (quitar la foto de perfil, guion en
+`docs/specs/039-quitar-foto-de-perfil.md`). Es la primera spec que sale de
+limpiar `docs/BACKLOG.md` por decisión delegada del usuario ("te dejo
+decidir") el 21 de agosto — sin la entrevista habitual de `/nueva-spec`, con
+las decisiones de producto documentadas en la sección 8 de la propia spec.
+Después de esta, seguir tirando del backlog del mismo modo si el usuario no
+dice lo contrario.
 
 Dos cosas quedaron sin confirmar del guion de la 036 y conviene no perderlas
 de vista si algún día se tocan la cabecera o la gráfica de peso:
