@@ -2775,7 +2775,20 @@ function pintarEspecializadas() {
     const boton = botonDeFila(`Pedir ${config.etiqueta.toLowerCase()}`, () => {
       id(`form-plan-${tipo}`).classList.remove("oculta");
       contenedor.classList.add("oculta");
-      id(`instrucciones-${tipo}`).focus();
+
+      // Las últimas instrucciones de este tipo, para no reescribirlas cada
+      // vez (spec 040). planesCargados ya viene de más reciente a más
+      // antiguo (orderBy("creadoEn", "desc") en listarPlanes()), así que el
+      // primero que coincida en tipo es el último plan pedido de ese tipo.
+      const campoInstrucciones = id(`instrucciones-${tipo}`);
+      const ultimoDeEsteTipo = planesCargados.find((plan) => plan.tipo === tipo);
+      campoInstrucciones.value = ultimoDeEsteTipo?.instrucciones || "";
+
+      campoInstrucciones.focus();
+      // El cursor al final: seguir escribiendo continúa el texto en vez de
+      // partirlo por el principio.
+      const fin = campoInstrucciones.value.length;
+      campoInstrucciones.setSelectionRange(fin, fin);
     });
     boton.className = "atajo";
     boton.disabled = quedan === 0 || !hayOperacion;
