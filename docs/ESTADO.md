@@ -2,7 +2,7 @@
 
 Documento para retomar el trabajo en frío. Se actualiza al terminar cada spec.
 
-**Última actualización:** 22 de agosto de 2026 (specs 041-043 completadas; **arranca la v5**: specs 044, 045 y 046 escritas, la 044 desplegada y pendiente de probar)
+**Última actualización:** 22 de agosto de 2026 (specs 041-044 completadas; v5 en marcha: la 044 confirmada, tocan la 045 y la 046)
 
 ## Dónde estamos
 
@@ -71,7 +71,7 @@ El 20 de agosto arrancó la **v4**, que sale de una auditoría de usabilidad hec
 | 041 | Ajustes en pestañas (Perfil, Operación, App, Zona de peligro) | ✅ completada |
 | 042 | Chips de ejercicios frecuentes, que rellenan el formulario | ✅ completada |
 | 043 | Las filas del diario, en dos líneas y con iconos | ✅ completada |
-| 044 | Fuera los planes y fuera "Abandonar consulta" (v5) | 🧪 implementada, pendiente de que el usuario la pruebe |
+| 044 | Fuera los planes y fuera "Abandonar consulta" (v5) | ✅ completada |
 | 045 | La consulta, como revisión de lo hecho desde la anterior (v5) | 📝 spec escrita, sin implementar |
 | 046 | La consulta propone dieta o tabla, y tú aceptas (v5) | 📝 spec escrita, sin implementar |
 
@@ -108,7 +108,7 @@ principio** en tres specs (no se parten a posteriori):
 
 | Spec | Qué | Estado |
 |---|---|---|
-| 044 | Fuera los planes y fuera "Abandonar consulta" | 🧪 desplegada, pendiente de probar |
+| 044 | Fuera los planes y fuera "Abandonar consulta" | ✅ completada |
 | 045 | La consulta, como revisión de lo hecho desde la anterior | 📝 escrita |
 | 046 | La consulta propone dieta o tabla, y tú aceptas | 📝 escrita |
 

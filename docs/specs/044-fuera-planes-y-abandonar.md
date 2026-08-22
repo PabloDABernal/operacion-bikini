@@ -1,6 +1,6 @@
 # 044 — Fuera los planes y fuera "Abandonar consulta"
 
-- **Estado:** 📝 pendiente de implementar.
+- **Estado:** ✅ completada (probada y confirmada por el usuario el 2026-08-22).
 - **Fecha:** 2026-08-22
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (v5: la consulta como revisión periódica, decidida el 22 de agosto de 2026)", puntos **"Abandonar consulta desaparece"** y **"Los planes desaparecen como concepto"**.
 - **Primera de tres.** La v5 se reparte desde el principio en 044 (esta: quitar lo que sobra y cambiar lo que produce una consulta), 045 (la consulta como revisión de lo hecho desde la anterior) y 046 (que proponga dieta o tabla). No se parte más a posteriori.
