@@ -2,7 +2,7 @@
 
 Documento para retomar el trabajo en frío. Se actualiza al terminar cada spec.
 
-**Última actualización:** 22 de agosto de 2026 (`firestore.rules` publicadas; spec 041 completada; **spec 042 implementada y desplegada, pendiente de que el usuario la pruebe**)
+**Última actualización:** 22 de agosto de 2026 (`firestore.rules` publicadas; specs 041 y 042 completadas; **spec 043 implementada y desplegada, pendiente de que el usuario la pruebe**)
 
 ## Dónde estamos
 
@@ -69,7 +69,8 @@ El 20 de agosto arrancó la **v4**, que sale de una auditoría de usabilidad hec
 | 039 | Quitar la foto de perfil | ✅ completada |
 | 040 | Recordar las últimas instrucciones al pedir dieta o tabla | ✅ completada |
 | 041 | Ajustes en pestañas (Perfil, Operación, App, Zona de peligro) | ✅ completada |
-| 042 | Chips de ejercicios frecuentes, que rellenan el formulario | 🧪 implementada, pendiente de que el usuario la pruebe |
+| 042 | Chips de ejercicios frecuentes, que rellenan el formulario | ✅ completada |
+| 043 | Las filas del diario, en dos líneas y con iconos | 🧪 implementada, pendiente de que el usuario la pruebe |
 
 ## Qué toca ahora
 
@@ -93,13 +94,15 @@ entra con Google) ya tiene permisos sobre sus propios datos. Está en los
 tres sitios de código: `js/firebase-config.js`, `api/_auth.js` y
 `firestore.rules`.
 
-**2. La spec 042 (chips de ejercicios frecuentes) está implementada y
-desplegada, a la espera de que el usuario la pruebe.** El guion está al final
-de `docs/specs/042-chips-ejercicios-frecuentes.md`. Lo que más importa
-comprobar es el paso 13: el cálculo de los chips es ahora código compartido
-(`masRepetidos()` en `js/hoy.js`), así que un fallo ahí se llevaría por delante
-también los chips de Comidas, que sí guardan de un toque. Hasta que el usuario
-confirme, la 042 NO se marca como completada.
+**2. La spec 043 (filas del diario en dos líneas, con iconos) está
+implementada y desplegada, a la espera de que el usuario la pruebe.** Sale de
+que el 22 de agosto vio en su pantalla que el nombre del ejercicio no se leía
+en escritorio: `.registro-texto` era `flex: 1` con recorte por `ellipsis`, así
+que en una columna estrecha se encogía hasta desaparecer. El guion está al
+final de `docs/specs/043-filas-del-diario-en-dos-lineas.md`; lo que más importa
+es el paso 14, porque `.registro-texto`, `.registro-detalle` y `.pesaje-fecha`
+las siguen usando el histórico, la dieta, la tabla, las estadísticas y dos
+cabeceras, y **no se han tocado a propósito**.
 
 **3. Seguir limpiando `docs/BACKLOG.md`** por decisión delegada del usuario
 el 21 de agosto ("te dejo decidir, vamos a limpiar el backlog"): specs 039

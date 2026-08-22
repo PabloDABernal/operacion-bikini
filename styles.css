@@ -573,23 +573,75 @@ button:disabled {
   border-bottom: 1px solid var(--borde);
 }
 
-#lista-pesajes li button,
-#lista-comidas li button,
-#lista-ejercicios li button {
+/* El :not() NO es adorno (spec 043): los iconos de editar y borrar son
+   <button> dentro de estos mismos <li>, y este selector (id + etiqueta) gana
+   en especificidad a la clase .icono-accion. Sin excluirlos, heredan este
+   padding y la zona táctil de 44 px se descuadra. */
+#lista-pesajes li button:not(.icono-accion),
+#lista-comidas li button:not(.icono-accion),
+#lista-ejercicios li button:not(.icono-accion) {
   padding: var(--e2) var(--e3);
   font-size: 0.85rem;
+}
+
+/* Las dos líneas de una fila del diario (spec 043) ------------------------
+
+   Antes iba todo en una línea, y el texto libre —lo único que no se puede
+   deducir— competía por el ancho con dos botones que ponían "Editar" y
+   "Borrar". En una columna estrecha de escritorio se recortaba hasta
+   desaparecer. Ahora la fila crece hacia abajo, no hacia los lados. */
+.registro-datos {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  /* Sin esto un flex item no baja del ancho de su contenido y el texto largo
+     volvería a ensanchar la columna entera (misma trampa que la spec 036). */
+  min-width: 0;
+}
+
+/* Ni nowrap, ni overflow: hidden, ni ellipsis: ese trío era exactamente lo que
+   hacía desaparecer el texto. Aquí se parte en varias líneas y ya está. */
+.registro-que {
+  overflow-wrap: anywhere;
+}
+
+.registro-meta {
+  color: var(--tinta-suave);
+  font-size: 0.85rem;
+}
+
+.registro-acciones {
+  display: flex;
+  gap: var(--e1);
+  /* Los iconos no se aplastan nunca, por larga que sea la comida. */
+  flex-shrink: 0;
+}
+
+/* Zona táctil de 44 px, mismo mínimo que fijó la spec 038 para los enlaces.
+   La papelera no va en rojo a propósito: el borrado ya pide confirmación, y
+   un rojo en cada fila convierte la lista en una alarma constante. */
+.icono-accion {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  background: none;
+  border: none;
+  color: var(--tinta-suave);
+}
+
+.icono-accion:hover,
+.icono-accion:focus-visible {
+  color: var(--tinta);
 }
 
 .pesaje-fecha {
   color: var(--tinta-suave);
   font-size: 0.9rem;
   white-space: nowrap;
-}
-
-.pesaje-peso {
-  font-weight: 700;
-  margin-left: auto;
-  margin-right: var(--e3);
 }
 
 /* El texto libre de comidas y ejercicios se recorta si no cabe,

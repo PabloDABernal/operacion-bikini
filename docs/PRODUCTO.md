@@ -145,6 +145,14 @@ que la v4 dejó sin tocar. Tampoco añade funciones.
   de la última vez) y espera a que confirmes, porque un ejercicio repetido casi
   nunca dura lo mismo. Se ahorra escribir, no se decide por el usuario.
 
+- **Lo apuntado se lee de un vistazo**: cada registro del diario (peso, comida
+  o ejercicio) pasa a ocupar dos líneas: arriba, **qué** fue; debajo y en gris,
+  cuándo y sus detalles (hora, minutos, intensidad, momento). Hasta ahora todo
+  iba en una sola línea y competía por el ancho con los botones, así que en una
+  columna estrecha el texto de la comida o del ejercicio —justo lo único que no
+  se puede deducir— se recortaba hasta desaparecer. Editar y borrar dejan de
+  ser dos palabras y pasan a ser dos iconos.
+
 ## Qué explícitamente NO hace
 
 - No sustituye a un profesional médico real: siempre debe recordar (disclaimer) que ante dudas o falta de resultados hay que consultar a un médico.

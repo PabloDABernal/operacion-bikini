@@ -613,10 +613,23 @@ function crearLista(config) {
     pintar();
   });
 
+  // Dos líneas (spec 043): arriba QUÉ fue, debajo cuándo y sus detalles. Antes
+  // iba todo en una línea y el texto libre competía por el ancho con los
+  // botones: en una columna estrecha se recortaba hasta desaparecer, que es
+  // justo lo único que no se puede deducir mirando la fila.
   function filaDeLectura(registro) {
     const fila = document.createElement("li");
+    const { que, detalles } = config.fila(registro);
 
-    const botonEditar = botonDeFila("Editar", () => {
+    const datos = document.createElement("div");
+    datos.className = "registro-datos";
+    datos.append(
+      celda(que || "—", "registro-que"),
+      // Se filtran los vacíos: un pesaje sin hora no debe dejar un "·" suelto.
+      celda(detalles.filter(Boolean).join(" · "), "registro-meta")
+    );
+
+    const botonEditar = botonDeIcono("lapiz", "Editar", () => {
       // Solo una fila en edición a la vez: abrir esta cierra la anterior y
       // descarta lo que hubiera escrito, sin preguntar.
       editandoId = registro.id;
@@ -624,9 +637,15 @@ function crearLista(config) {
       pintar();
     });
 
-    const botonBorrar = botonDeFila("Borrar", () => borrar(registro.id, botonBorrar));
+    const botonBorrar = botonDeIcono("papelera", "Borrar", () =>
+      borrar(registro.id, botonBorrar)
+    );
 
-    fila.append(...config.celdas(registro), botonEditar, botonBorrar);
+    const acciones = document.createElement("div");
+    acciones.className = "registro-acciones";
+    acciones.append(botonEditar, botonBorrar);
+
+    fila.append(datos, acciones);
     return fila;
   }
 
@@ -720,6 +739,51 @@ function botonDeFila(texto, alPulsar) {
   const elemento = document.createElement("button");
   elemento.type = "button";
   elemento.textContent = texto;
+  elemento.addEventListener("click", alPulsar);
+  return elemento;
+}
+
+// Iconos de editar y borrar de las filas del diario (spec 043).
+//
+// El color va como atributo, al contrario que en js/grafica-svg.js, donde cada
+// forma lleva su clase: currentColor no es un color, es "el que tenga el texto
+// aquí". Sacarlo a CSS obligaría a repetir el color del botón en dos sitios y
+// a mantenerlos sincronizados.
+const TRAZOS_DE_ICONO = {
+  lapiz: ["M12 20h9", "M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"],
+  papelera: ["M3 6h18", "M8 6V4h8v2", "M19 6l-1 14H6L5 6", "M10 11v6", "M14 11v6"]
+};
+
+function iconoDeAccion(nombre) {
+  const NS = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(NS, "svg");
+  svg.setAttribute("viewBox", "0 0 24 24");
+  svg.setAttribute("width", "20");
+  svg.setAttribute("height", "20");
+  svg.setAttribute("fill", "none");
+  svg.setAttribute("stroke", "currentColor");
+  svg.setAttribute("stroke-width", "2");
+  svg.setAttribute("stroke-linecap", "round");
+  svg.setAttribute("stroke-linejoin", "round");
+  // El dibujo no se anuncia: la acción la dice el aria-label del botón.
+  svg.setAttribute("aria-hidden", "true");
+
+  TRAZOS_DE_ICONO[nombre].forEach((d) => {
+    const trazo = document.createElementNS(NS, "path");
+    trazo.setAttribute("d", d);
+    svg.appendChild(trazo);
+  });
+
+  return svg;
+}
+
+function botonDeIcono(nombre, etiqueta, alPulsar) {
+  const elemento = document.createElement("button");
+  elemento.type = "button";
+  elemento.className = "icono-accion";
+  elemento.setAttribute("aria-label", etiqueta);
+  elemento.title = etiqueta;
+  elemento.appendChild(iconoDeAccion(nombre));
   elemento.addEventListener("click", alPulsar);
   return elemento;
 }
@@ -1303,10 +1367,10 @@ const listaPeso = crearLista({
   confirmacionBorrado: "¿Borrar este pesaje?",
   cargar: listarPesajes,
   borrar: borrarPesaje,
-  celdas: (pesaje) => [
-    celda(formatearFechaConHora(pesaje.fecha, pesaje.hora), "pesaje-fecha"),
-    celda(`${pesaje.pesoKg.toFixed(1).replace(".", ",")} kg`, "pesaje-peso")
-  ],
+  fila: (pesaje) => ({
+    que: `${pesaje.pesoKg.toFixed(1).replace(".", ",")} kg`,
+    detalles: [formatearFechaConHora(pesaje.fecha, pesaje.hora)]
+  }),
   campos: (pesaje) => {
     const fecha = campoFecha(pesaje.fecha);
     const hora = campoHoraEdicion(pesaje.hora);
@@ -2369,11 +2433,13 @@ const listaComidas = crearLista({
   confirmacionBorrado: "¿Borrar esta comida?",
   cargar: listarComidas,
   borrar: borrarComida,
-  celdas: (comida) => [
-    celda(formatearFechaConHora(comida.fecha, comida.hora), "pesaje-fecha"),
-    celda(etiquetaDeMomento(comida.momento), "registro-detalle"),
-    celda(comida.texto, "registro-texto")
-  ],
+  fila: (comida) => ({
+    que: comida.texto,
+    detalles: [
+      formatearFechaConHora(comida.fecha, comida.hora),
+      etiquetaDeMomento(comida.momento)
+    ]
+  }),
   campos: (comida) => {
     const fecha = campoFecha(comida.fecha);
     const hora = campoHoraEdicion(comida.hora);
@@ -2464,12 +2530,14 @@ const listaEjercicios = crearLista({
   confirmacionBorrado: "¿Borrar este ejercicio?",
   cargar: listarEjercicios,
   borrar: borrarEjercicio,
-  celdas: (ejercicio) => [
-    celda(formatearFechaConHora(ejercicio.fecha, ejercicio.hora), "pesaje-fecha"),
-    celda(ejercicio.texto, "registro-texto"),
-    celda(`${ejercicio.minutos} min`, "registro-detalle"),
-    celda(etiquetaDeIntensidad(ejercicio.intensidad), "registro-detalle")
-  ],
+  fila: (ejercicio) => ({
+    que: ejercicio.texto,
+    detalles: [
+      formatearFechaConHora(ejercicio.fecha, ejercicio.hora),
+      `${ejercicio.minutos} min`,
+      etiquetaDeIntensidad(ejercicio.intensidad)
+    ]
+  }),
   campos: (ejercicio) => {
     const fecha = campoFecha(ejercicio.fecha);
     const hora = campoHoraEdicion(ejercicio.hora);

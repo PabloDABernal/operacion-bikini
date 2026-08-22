@@ -50,3 +50,9 @@ Ideas surgidas durante la implementación, no implementadas. Una línea cada una
 
 - Que el chip enseñe también cuántas veces lo has hecho ("bici · 45 min · ×9").
 - Un chip para las series y repeticiones, si algún día se registran cargas.
+
+## De la spec 043 (filas del diario en dos líneas)
+
+- Llevar el mismo formato de dos líneas y los mismos iconos a las recetas, al
+  catálogo de ejercicios y al histórico de operaciones. La 043 solo cambió las
+  tres listas del diario.
