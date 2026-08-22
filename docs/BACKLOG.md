@@ -53,3 +53,5 @@ Ideas surgidas durante la implementación, no implementadas. Una línea cada una
 - Que la semana de dieta y de tabla marquen qué has cumplido hoy. Descartado a propósito en la v4 para no contradecir la spec 028; si algún día se quiere, hay que cambiar PRODUCTO.md primero.
 - Redibujar la gráfica de peso al cambiar el tamaño de la ventana (spec 036: se dibuja al pintar la sección, no al redimensionar). Sin confirmar que haga falta.
 - Revisar el hueco de la cabecera en escritorio, entre la identidad y la barra de navegación (spec 036, paso 20 del guion). Pendiente de la opinión del usuario.
+- Chips o "lo de siempre" para ejercicios frecuentes en el formulario de Ejercicio, como los que la spec 037 le dio a Comidas. Fuera de la 038 porque Ejercicio no tenía un equivalente de "lo de siempre" que mover.
+- Pulir el desplazamiento de 52 px de la barra de navegación en Ejercicio en móvil (aceptado el 21 de agosto, spec 038): el navegador mide ahí un hueco entre `innerHeight` y `visualViewport.height` que no aparece en las demás secciones. Si se retoma, medir primero con el panel de diagnóstico del historial de git (commit `5829e91`), no a ciegas.
