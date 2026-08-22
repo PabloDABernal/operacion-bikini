@@ -475,6 +475,7 @@ id("archivo-perfil").addEventListener("change", async (evento) => {
     const url = await subirFotoDePerfil(archivo);
     await guardarFotoPerfil(uidActual, url);
     pintarAvatar(url, emailActual);
+    id("btn-quitar-foto").classList.remove("oculta");
     estado.textContent = "";
   } catch {
     estado.textContent = "No se ha podido subir la foto. Comprueba tu conexión.";
@@ -482,6 +483,30 @@ id("archivo-perfil").addEventListener("change", async (evento) => {
     boton.disabled = false;
     // Sin esto, elegir el mismo archivo dos veces seguidas no dispara nada.
     evento.target.value = "";
+  }
+});
+
+// Quitar la foto de perfil (spec 039): solo borra el campo en Firestore, no
+// el archivo de Cloudinary — vive en una ruta que la acción "borrar" del
+// backend no puede tocar a propósito (ver api/cloudinary.js), y sobrescribir
+// esa misma ruta es lo que ya hace la próxima subida. guardarFotoPerfil()
+// sirve tal cual: guarda lo que se le pase, aquí null.
+id("btn-quitar-foto").addEventListener("click", async () => {
+  const estado = id("estado-perfil");
+  const boton = id("btn-quitar-foto");
+
+  estado.textContent = "Quitando…";
+  boton.disabled = true;
+
+  try {
+    await guardarFotoPerfil(uidActual, null);
+    pintarAvatar(null, emailActual);
+    boton.classList.add("oculta");
+    estado.textContent = "";
+  } catch {
+    estado.textContent = "No se ha podido quitar la foto. Comprueba tu conexión.";
+  } finally {
+    boton.disabled = false;
   }
 });
 
@@ -3383,6 +3408,7 @@ async function refrescarAjustes() {
     const ajustes = await leerAjustes(uidActual);
     pesoObjetivoActual = ajustes.pesoObjetivoKg ?? null;
     pintarAvatar(ajustes.fotoPerfil, emailActual);
+    id("btn-quitar-foto").classList.toggle("oculta", !ajustes.fotoPerfil);
     pintarNombre(ajustes.nombre);
     refrescarGrafica();
     id("nombre").value = ajustes.nombre || "";

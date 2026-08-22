@@ -50,15 +50,20 @@ su email, sin tener que subir otra imagen encima para "deshacerse" de ella.
 ## 4. Comportamiento detallado
 
 - Nuevo botón `#btn-quitar-foto` en `index.html`, junto a `#btn-cambiar-foto`
-  dentro de `.bloque-foto-perfil`. Empieza oculto (`class="oculta"`).
+  dentro de `.bloque-foto-perfil`. Empieza oculto (`class="oculta"`) — así
+  mientras `leerAjustes()` está cargando (antes de que `refrescarAjustes()`
+  resuelva) no hay parpadeo: no se ve hasta que se sabe que hay foto.
 - Al pintar Ajustes (donde ya se pinta el avatar con `pintarAvatar()`), el
   botón se enseña u oculta según si `ajustes.fotoPerfil` tiene valor.
-- Al tocarlo: llama a una función nueva en `js/ajustes.js` (p. ej.
-  `quitarFotoPerfil(uid)`, hermana de `guardarFotoPerfil(uid, url)`) que
-  pone `fotoPerfil` a `null` en Firestore. Después, `pintarAvatar(null,
+- Al tocarlo: llama a `guardarFotoPerfil(uid, null)` — la misma función que
+  ya usa la subida, sin ninguna nueva: guarda lo que se le pase con
+  `setDoc(..., { merge: true })`, y `null` es justo el valor que
+  `leerAjustes()` ya trata como "sin foto" para quien nunca subió ninguna. No
+  hace falta `deleteField()` ni una función hermana. Después, `pintarAvatar(null,
   emailActual)` y se oculta el botón "Quitar foto".
 - Mientras la operación está en curso, el botón se deshabilita (mismo patrón
-  que `btn-cambiar-foto` con `estado-perfil`).
+  que `btn-cambiar-foto` con `estado-perfil`) — cubre también el caso de
+  tocarlo dos veces seguidas rápido.
 
 ## 5. Modelo de datos
 
@@ -67,6 +72,9 @@ admite `null` — es lo que trae un usuario que nunca subió foto.
 
 ## 6. Casos límite
 
+- **Tocar "Quitar foto" dos veces seguidas muy rápido**: el botón se
+  deshabilita nada más tocarlo (igual que `btn-cambiar-foto`), así que la
+  segunda pulsación no llega a disparar nada.
 - **Quitar la foto y subir otra en el mismo momento** (dos pestañas, por
   ejemplo): gana la última escritura, como ya pasa hoy con cualquier campo
   de Ajustes — no hay bloqueo optimista en ningún otro campo de esta
@@ -82,8 +90,7 @@ admite `null` — es lo que trae un usuario que nunca subió foto.
 | Archivo | Qué se hace |
 |---|---|
 | `index.html` | Botón `#btn-quitar-foto` junto a `#btn-cambiar-foto`. |
-| `js/ajustes.js` | Función `quitarFotoPerfil(uid)`. |
-| `js/app.js` | Listener del nuevo botón; mostrar/ocultar según `ajustes.fotoPerfil` en el sitio donde ya se pinta el avatar de Ajustes. |
+| `js/app.js` | Listener del nuevo botón (reutiliza `guardarFotoPerfil(uid, null)`, sin tocar `js/ajustes.js`); mostrar/ocultar según `ajustes.fotoPerfil` en el sitio donde ya se pinta el avatar de Ajustes y tras subir una foto nueva. |
 | `docs/PRODUCTO.md` | Ya actualizado (ver cabecera de esta spec). |
 | `docs/ESTADO.md` | Al terminar, cuando el usuario la valide. |
 
