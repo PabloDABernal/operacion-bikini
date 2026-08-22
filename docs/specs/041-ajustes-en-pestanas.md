@@ -1,6 +1,6 @@
 # 041 — Ajustes en pestañas
 
-- **Estado:** 📝 pendiente de implementar.
+- **Estado:** ✅ completada (probada y confirmada por el usuario el 2026-08-22).
 - **Fecha:** 2026-08-22
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (segunda ampliación de la v4, decidida el 22 de agosto de 2026)", puntos **"Ajustes deja de ser una columna de siete bloques"** y **"Ajustes es la excepción en escritorio"**.
 
