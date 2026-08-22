@@ -12,7 +12,13 @@ const { peticionAutorizada, describirRegistros, generarJson } = require("./_ia")
 
 const MAXIMO_PREGUNTAS = 25;
 
-const INSTRUCCIONES = `Eres un nutricionista y entrenador personal haciendo la primera entrevista a una persona.
+// OJO: esta constante NO es "el modo normal". Es la base de la ENTREVISTA, y
+// INSTRUCCIONES_INICIAL e INSTRUCCIONES_REINICIO se construyen encima de ella
+// con template strings. Reescribirla aquí para hablar de revisiones le metería
+// a la entrevista de bienvenida un texto que dice justo lo contrario de lo que
+// tiene que hacer. El modo normal tiene su propia constante más abajo
+// (INSTRUCCIONES_REVISION, spec 045).
+const INSTRUCCIONES_ENTREVISTA = `Eres un nutricionista y entrenador personal haciendo la primera entrevista a una persona.
 
 Hablas SIEMPRE en español, tuteando, en tono cercano y directo.
 
@@ -37,7 +43,7 @@ Sobre el cierre:
 
 // La entrevista de bienvenida (spec 016): además del cierre, saca los datos que
 // van a Ajustes y un retrato de la persona que la IA reutilizará después.
-const INSTRUCCIONES_INICIAL = `${INSTRUCCIONES}
+const INSTRUCCIONES_INICIAL = `${INSTRUCCIONES_ENTREVISTA}
 
 ESTA ES LA ENTREVISTA DE BIENVENIDA. Además de lo anterior:
 - Tu PRIMERA pregunta es cómo quiere que le llames. Nada más.
@@ -54,7 +60,7 @@ Cuando cierres la consulta, rellena también estos campos:
 // A partir de la segunda operación (spec 018) la IA ya conoce a la persona:
 // no hace falta volver a preguntárselo todo, solo lo que cambia de un ciclo al
 // siguiente.
-const INSTRUCCIONES_REINICIO = `${INSTRUCCIONES}
+const INSTRUCCIONES_REINICIO = `${INSTRUCCIONES_ENTREVISTA}
 
 ESTA PERSONA YA HIZO LA ENTREVISTA ANTES Y EMPIEZA UNA ETAPA NUEVA. Además de lo anterior:
 - NO vuelvas a preguntarle lo que ya sabes de ella (gustos, aversiones, alergias, material, limitaciones): lo tienes en el contexto.
@@ -68,6 +74,33 @@ Cuando cierres la consulta, rellena también estos campos:
 - "pesoObjetivoKg": el NUEVO objetivo, solo el número.
 - "fechaObjetivo": en formato AAAA-MM-DD. Vacío si no ha dado plazo.
 - "perfil": el retrato de siempre, actualizado con lo que te acabe de contar. No pierdas lo que ya sabías.`;
+
+// La revisión periódica (spec 045): con una operación en marcha, pasar consulta
+// ya no es entrevistar a un desconocido, es mirar qué ha hecho desde la última
+// vez y decírselo. Constante propia, no una variante de la entrevista.
+const INSTRUCCIONES_REVISION = `Eres el nutricionista y entrenador personal de esta persona, y le estás pasando la revisión periódica.
+
+Hablas SIEMPRE en español, tuteando, en tono cercano y directo.
+
+Cómo funciona la revisión:
+- Empiezas TÚ, repasando lo que ves en sus registros del periodo: el peso, la constancia, qué ha comido y qué ha entrenado. Sé concreto con SUS datos, con números y con ejemplos suyos. Nada de generalidades.
+- Si los datos son buenos, dilo y anímale. Si se ha dejado, díselo claro y sin adornos, pero sin humillar. Eres su entrenador, no su amigo complaciente.
+- Si no ha apuntado nada en el periodo, DILO tal cual y pregúntale qué ha pasado. No te inventes un repaso que no puedes hacer.
+- NO vuelvas a preguntarle lo que ya sabes de ella (gustos, aversiones, alergias, material, limitaciones, horarios): lo tienes en el contexto. Preguntar eso otra vez es señal de que no la conoces.
+- Preguntas solo lo que necesitas para entender lo que ves en los datos: por qué se torció una semana, si algo ha cambiado, cómo se encuentra. UNA pregunta por turno.
+- Sé breve: con tres o cuatro preguntas deberías tener bastante para cerrar.
+- No des diagnósticos médicos ni hables de enfermedades. Si algo te parece preocupante, recomienda consultar a un médico.
+
+Cuando ya tengas bastante, en vez de otra pregunta cierras la consulta.
+
+Formato de respuesta (JSON). Devuelve SIEMPRE todos los campos, sin excepción:
+- Si sigues preguntando: {"tipo": "pregunta", "pregunta": "lo que le dices", "cierre": "", "nutricion": "", "ejercicio": ""}
+- Si ya has terminado: {"tipo": "cierre", "pregunta": "", "cierre": "...", "nutricion": "", "ejercicio": ""}
+
+Sobre el cierre:
+- "cierre": el resumen de la revisión. Cómo ha ido el periodo, qué le conviene priorizar y qué toca hacer hasta la próxima. En prosa, hablándole de tú. Máximo 200 palabras.
+- NO hagas un menú comida a comida ni una rutina día a día: esta persona ya tiene en la app una dieta semanal y una tabla de ejercicio para eso. Habla de pautas y de actitud, no de listas.
+- "nutricion" y "ejercicio" van SIEMPRE vacíos. Existen por compatibilidad y no se usan.`;
 
 // La conversación que dura (spec 023): aquí la IA no entrevista, charla. El
 // texto de su respuesta viaja en el campo "pregunta", que en este modo es
@@ -123,6 +156,15 @@ const ESQUEMA = {
   ]
 };
 
+// Qué periodo son los registros que van dentro del prompt. En una revisión no
+// es una ventana fija: es desde la consulta anterior (spec 045), así que decir
+// "los últimos 14 días" sería mentirle a la IA sobre sus propios datos justo
+// cuando se le pide que sea concreta con ellos.
+function encabezadoDeRegistros(desde) {
+  if (!desde) return "Estos son mis registros de los últimos 14 días:\n\n";
+  return `Estos son mis registros desde el ${desde}, que es el periodo que tienes que repasar:\n\n`;
+}
+
 // Lo que la IA ya sabe de esta persona, para no volver a preguntarlo.
 function contexto(nombre, perfil) {
   if (!nombre && !perfil) return "";
@@ -150,7 +192,7 @@ module.exports = async (req, res) => {
       ? INSTRUCCIONES_REINICIO
       : inicial
         ? INSTRUCCIONES_INICIAL
-        : INSTRUCCIONES;
+        : INSTRUCCIONES_REVISION;
 
   const preguntasHechas = mensajes.filter((mensaje) => mensaje.de === "ia").length;
   // La conversación no se cierra nunca: lo de cortar por número de preguntas
@@ -164,7 +206,7 @@ module.exports = async (req, res) => {
       parts: [
         {
           text:
-            "Estos son mis registros de los últimos 14 días:\n\n" +
+            encabezadoDeRegistros(cuerpo.desde) +
             describirRegistros(registros) +
             contexto(cuerpo.nombre, cuerpo.perfil) +
             (mensajes.length || conversacion

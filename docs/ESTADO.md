@@ -2,7 +2,7 @@
 
 Documento para retomar el trabajo en frío. Se actualiza al terminar cada spec.
 
-**Última actualización:** 22 de agosto de 2026 (specs 041-044 completadas; v5 en marcha: la 044 confirmada, tocan la 045 y la 046)
+**Última actualización:** 22 de agosto de 2026 (specs 041-044 completadas; v5 en marcha: **la 045 desplegada y pendiente de probar**, queda la 046)
 
 ## Dónde estamos
 
@@ -72,7 +72,7 @@ El 20 de agosto arrancó la **v4**, que sale de una auditoría de usabilidad hec
 | 042 | Chips de ejercicios frecuentes, que rellenan el formulario | ✅ completada |
 | 043 | Las filas del diario, en dos líneas y con iconos | ✅ completada |
 | 044 | Fuera los planes y fuera "Abandonar consulta" (v5) | ✅ completada |
-| 045 | La consulta, como revisión de lo hecho desde la anterior (v5) | 📝 spec escrita, sin implementar |
+| 045 | La consulta, como revisión de lo hecho desde la anterior (v5) | 🧪 implementada, pendiente de que el usuario la pruebe |
 | 046 | La consulta propone dieta o tabla, y tú aceptas (v5) | 📝 spec escrita, sin implementar |
 
 ## Qué toca ahora
@@ -109,8 +109,17 @@ principio** en tres specs (no se parten a posteriori):
 | Spec | Qué | Estado |
 |---|---|---|
 | 044 | Fuera los planes y fuera "Abandonar consulta" | ✅ completada |
-| 045 | La consulta, como revisión de lo hecho desde la anterior | 📝 escrita |
+| 045 | La consulta, como revisión de lo hecho desde la anterior | 🧪 desplegada, pendiente de probar |
 | 046 | La consulta propone dieta o tabla, y tú aceptas | 📝 escrita |
+
+**La trampa de la 045:** `INSTRUCCIONES` en `api/consulta.js` **no era "el modo
+normal"**: era la base de la entrevista, y `INSTRUCCIONES_INICIAL` e
+`INSTRUCCIONES_REINICIO` se construyen encima con template strings.
+Reescribirla in situ le habría metido a la entrevista de bienvenida un texto
+que dice "esto es una revisión, no preguntes lo que ya sabes" — lo contrario de
+lo que debe hacer. Lo paró `revisor-specs`. Ahora son dos constantes:
+`INSTRUCCIONES_ENTREVISTA` (base de inicial/reinicio, intacta) e
+`INSTRUCCIONES_REVISION` (modo normal).
 
 **La trampa de la 044, que casi se lleva por delante el cupo:** la colección
 `planes` guarda dos cosas distintas. Los planes retirados, y las **marcas de

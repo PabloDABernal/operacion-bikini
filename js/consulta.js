@@ -12,7 +12,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 import { db, auth } from "./firebase-config.js";
-import { hoyISO } from "./fechas.js";
+import { hoyISO, sumarDias } from "./fechas.js";
 import { listarPesajes } from "./pesajes.js";
 import { listarComidas } from "./comidas.js";
 import { listarEjercicios } from "./ejercicios.js";
@@ -20,6 +20,13 @@ import { leerAjustes, guardarLoAveriguado } from "./ajustes.js";
 import { listarOperaciones, crearOperacion } from "./operaciones.js";
 
 const DIAS_DE_HISTORIAL = 14;
+// Cada cuánto se espera pasar consulta. No bloquea nada: solo decide si la
+// pantalla dice "aún es pronto" (spec 045).
+export const DIAS_ENTRE_REVISIONES = 7;
+// Tope del periodo que ve la IA en una revisión. Los registros viajan como
+// texto dentro del prompt: sin tope, cuatro meses sin consulta harían una
+// petición enorme, con más cuota, más latencia y riesgo de respuesta truncada.
+const MAXIMO_DIAS_DE_REVISION = 30;
 const MAXIMO_CONSULTAS_DIARIAS = 2;
 export const MAXIMO_CARACTERES_RESPUESTA = 1000;
 // Justo por debajo de los 60 s que tiene la función en Vercel: así, cuando
@@ -80,16 +87,22 @@ function planesDe(uid) {
   return collection(db, "usuarios", uid, "planes");
 }
 
+function enISO(fecha) {
+  const mes = String(fecha.getMonth() + 1).padStart(2, "0");
+  const dia = String(fecha.getDate()).padStart(2, "0");
+  return `${fecha.getFullYear()}-${mes}-${dia}`;
+}
+
 function desdeCuando() {
   const limite = new Date();
   limite.setDate(limite.getDate() - (DIAS_DE_HISTORIAL - 1));
-  const mes = String(limite.getMonth() + 1).padStart(2, "0");
-  const dia = String(limite.getDate()).padStart(2, "0");
-  return `${limite.getFullYear()}-${mes}-${dia}`;
+  return enISO(limite);
 }
 
-async function recogerRegistros(uid) {
-  const limite = desdeCuando();
+// El "desde" solo lo usa la revisión (modo normal, spec 045). La entrevista de
+// bienvenida y la conversación siguen con la ventana fija de 14 días.
+async function recogerRegistros(uid, desde) {
+  const limite = desde || desdeCuando();
   const recientes = (registros) => registros.filter((r) => r.fecha >= limite);
 
   const [pesajes, comidas, ejercicios] = await Promise.all([
@@ -134,6 +147,47 @@ export async function listarPlanes(uid) {
 // entre pestañas, la más reciente gana).
 export function consultaEnCurso(consultas) {
   return consultas.find((consulta) => consulta.estado === "en-curso") || null;
+}
+
+// Las revisiones son las consultas "de verdad": ni la conversación, que es un
+// hilo aparte, ni la entrevista de bienvenida, que no repasa nada porque no hay
+// nada anterior que repasar. Los dos modos de bienvenida son los mismos que
+// js/gamificacion.js excluye para el emblema "Primera consulta".
+function esRevision(consulta) {
+  return (
+    consulta.modo !== "conversacion" &&
+    consulta.modo !== "inicial" &&
+    consulta.modo !== "reinicio"
+  );
+}
+
+// La última revisión terminada, o null si aún no hay ninguna en esta operación.
+// Las de operaciones anteriores no están: archivar() las mueve fuera al cerrar.
+export function ultimaRevision(consultas) {
+  const terminadas = consultas.filter(
+    (consulta) => consulta.estado === "terminada" && esRevision(consulta)
+  );
+
+  let ultima = null;
+  terminadas.forEach((consulta) => {
+    // terminadaEn puede faltar en documentos viejos: se cae a creadaEn.
+    const marca = consulta.terminadaEn || consulta.creadaEn;
+    if (!marca) return;
+    const actual = ultima && (ultima.terminadaEn || ultima.creadaEn);
+    if (!actual || marca.toMillis() > actual.toMillis()) ultima = consulta;
+  });
+
+  return ultima;
+}
+
+// Días naturales transcurridos desde una marca de Firestore. 0 = hoy mismo.
+export function diasDesde(marca) {
+  if (!marca) return null;
+  const desde = marca.toDate();
+  desde.setHours(0, 0, 0, 0);
+  const hoy = new Date();
+  hoy.setHours(0, 0, 0, 0);
+  return Math.round((hoy - desde) / 86400000);
 }
 
 // Las consultas abandonadas también cuentan: si no, se podría reiniciar sin fin.
@@ -235,22 +289,45 @@ async function contextoDelUsuario(uid) {
 }
 
 // Crea la consulta con la primera pregunta ya dentro.
+// Desde cuándo mira la IA en una revisión: desde la última consulta, o desde
+// que empezó la operación si aún no ha habido ninguna. Con tope de 30 días.
+function periodoDeRevision(consultas, operacionActiva) {
+  const tope = sumarDias(hoyISO(), -(MAXIMO_DIAS_DE_REVISION - 1));
+  const ultima = ultimaRevision(consultas);
+
+  let desde;
+  if (ultima) {
+    const marca = ultima.terminadaEn || ultima.creadaEn;
+    desde = marca ? enISO(marca.toDate()) : null;
+  } else if (operacionActiva) {
+    desde = operacionActiva.inicio || null;
+  }
+
+  if (!desde) return tope;
+  // El tope manda: un periodo más largo haría crecer el prompt sin límite.
+  return desde < tope ? tope : desde;
+}
+
 export async function empezarConsulta(uid, consultas) {
   if (!quedanConsultasHoy(consultas)) {
     throw errorConCodigo("limite-diario", "Límite diario de consultas alcanzado");
   }
 
-  const [registros, contexto, operaciones] = await Promise.all([
-    recogerRegistros(uid),
+  const [contexto, operaciones] = await Promise.all([
     contextoDelUsuario(uid),
     listarOperaciones(uid)
   ]);
 
   // Sin operación activa, esta consulta es la entrevista que abre una nueva.
-  const abriendo = !operaciones.some((operacion) => operacion.estado === "activa");
-  const modo = abriendo ? modoDeBienvenida(operaciones) : "normal";
+  const activa = operaciones.find((operacion) => operacion.estado === "activa");
+  const modo = activa ? "normal" : modoDeBienvenida(operaciones);
 
-  const respuesta = await turnoDeIa([], registros, { ...contexto, modo });
+  // Una revisión mira lo hecho desde la consulta anterior, no una ventana fija
+  // (spec 045). La entrevista de bienvenida no: no hay nada anterior.
+  const desde = modo === "normal" ? periodoDeRevision(consultas, activa) : null;
+  const registros = await recogerRegistros(uid, desde);
+
+  const respuesta = await turnoDeIa([], registros, { ...contexto, modo, desde });
 
   if (respuesta.tipo !== "pregunta") {
     throw errorConCodigo("respuesta-ilegible", "La IA no empezó con una pregunta");
@@ -259,6 +336,8 @@ export async function empezarConsulta(uid, consultas) {
   await addDoc(consultasDe(uid), {
     estado: "en-curso",
     modo,
+    // Se guarda para que los turnos siguientes usen el mismo periodo.
+    desde: desde || null,
     mensajes: [{ de: "ia", texto: respuesta.pregunta }],
     creadaEn: serverTimestamp(),
     terminadaEn: null
@@ -268,15 +347,19 @@ export async function empezarConsulta(uid, consultas) {
 // Añade la respuesta del usuario y el siguiente turno de la IA. Si la IA cierra
 // la consulta, el cierre se guarda como último mensaje del hilo (spec 044).
 export async function responder(uid, consulta, texto) {
+  // El mismo periodo con el que se empezó, para que la IA no vea una ventana
+  // distinta a mitad de conversación (spec 045).
+  const desde = consulta.desde || null;
   const [registros, contexto] = await Promise.all([
-    recogerRegistros(uid),
+    recogerRegistros(uid, desde),
     contextoDelUsuario(uid)
   ]);
   const mensajes = [...consulta.mensajes, { de: "usuario", texto }];
 
   const respuesta = await turnoDeIa(mensajes, registros, {
     ...contexto,
-    modo: consulta.modo || "normal"
+    modo: consulta.modo || "normal",
+    desde
   });
   const referencia = doc(db, "usuarios", uid, "consultas", consulta.id);
 

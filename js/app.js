@@ -130,6 +130,9 @@ import {
   listarConsultas,
   listarPlanes,
   consultaEnCurso,
+  DIAS_ENTRE_REVISIONES,
+  diasDesde,
+  ultimaRevision,
   quedanConsultasHoy,
   empezarConsulta,
   responder,
@@ -2774,6 +2777,28 @@ function pintarHilo(consulta) {
   });
 }
 
+// -1 significa "aún no ha habido ninguna revisión en esta operación"; null,
+// que no hay que enseñar nada.
+function diasDesdeLaUltimaRevision() {
+  if (!hayOperacion) return null;
+  const ultima = ultimaRevision(consultasCargadas);
+  if (!ultima) return -1;
+  const dias = diasDesde(ultima.terminadaEn || ultima.creadaEn);
+  return dias === null ? -1 : dias;
+}
+
+function textoDeUltimaRevision(dias) {
+  if (dias < 0) return "Aún no has pasado ninguna revisión en esta operación.";
+
+  const cuando =
+    dias === 0 ? "hoy" : dias === 1 ? "hace 1 día" : `hace ${dias} días`;
+  const linea = `Última consulta: ${cuando}.`;
+
+  return dias < DIAS_ENTRE_REVISIONES
+    ? `${linea} Aún es pronto: lo normal es pasar consulta cada semana.`
+    : linea;
+}
+
 // Los tres estados de la pantalla: consulta en curso, recién terminada, y
 // sin consulta (con o sin cupo para hoy).
 function pintarEstadoConsulta() {
@@ -2787,6 +2812,9 @@ function pintarEstadoConsulta() {
   // nueva (specs 016 y 018).
   const primeraVez = !hayOperacion;
 
+  // Con una consulta a medias no hay nada que contar de la anterior.
+  if (enCurso) id("ultima-revision").classList.add("oculta");
+
   id("form-respuesta").classList.toggle("oculta", !enCurso);
   id("btn-empezar-consulta").classList.toggle("oculta", enCurso);
   id("explicacion-inicial").classList.toggle("oculta", enCurso || !primeraVez);
@@ -2799,12 +2827,27 @@ function pintarEstadoConsulta() {
   if (enCurso) {
     id("aviso-consulta").textContent = "";
   } else {
+    // Cuánto hace de la última revisión (spec 045). Solo con operación en
+    // marcha: sin ella lo que toca es la entrevista, y no hay nada que repasar.
+    // Y no justo después de terminar una: decirle "aún es pronto" un segundo
+    // después de haber pasado consulta es obvio y suena a regañina.
+    const dias = terminada || primeraVez ? null : diasDesdeLaUltimaRevision();
+    // dias >= 0 no sobra: -1 es el centinela de "aún no ha habido ninguna
+    // revisión", y sin esto colaría por -1 < 7. El botón diría "Pasar consulta
+    // igual" (igual ¿que qué?) sin ningún aviso al lado que saltarse.
+    const pronto = dias !== null && dias >= 0 && dias < DIAS_ENTRE_REVISIONES;
+
+    id("ultima-revision").classList.toggle("oculta", dias === null);
+    id("ultima-revision").textContent = dias === null ? "" : textoDeUltimaRevision(dias);
+
     id("btn-empezar-consulta").disabled = !quedanHoy;
     id("btn-empezar-consulta").textContent = primeraVez
       ? "Iniciar operación bikini"
       : terminada
         ? "Empezar otra consulta"
-        : "Empezar consulta";
+        : pronto
+          ? "Pasar consulta igual"
+          : "Pasar consulta";
     id("aviso-consulta").textContent = quedanHoy
       ? terminada
         ? "Consulta terminada. Lo que te ha dicho está al final de la conversación."
