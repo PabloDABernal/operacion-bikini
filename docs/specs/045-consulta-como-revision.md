@@ -1,6 +1,6 @@
 # 045 — La consulta, como revisión de lo hecho desde la anterior
 
-- **Estado:** 📝 pendiente de implementar (después de la 044).
+- **Estado:** ✅ completada (probada y confirmada por el usuario el 2026-08-22).
 - **Fecha:** 2026-08-22
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (v5…)", puntos **"La consulta es una revisión, no una entrevista de alta"** y **"Se puede pasar consulta cuando quieras, con la app avisando"**.
 - **Segunda de tres.** Va después de la 044 (que ya quitó los planes y el botón de abandonar) y antes de la 046.
