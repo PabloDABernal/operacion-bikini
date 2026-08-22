@@ -336,6 +336,13 @@
         <label for="ejercicio-texto">Qué has hecho</label>
         <input type="text" id="ejercicio-texto" placeholder="bici">
 
+        <!-- Los ejercicios que más repites (spec 042). Al contrario que los
+             chips de Comidas, estos NO guardan: rellenan el formulario y
+             esperan, porque un ejercicio repetido casi nunca dura lo mismo. -->
+        <div id="bloque-ejercicios-frecuentes" class="oculta">
+          <div id="ejercicios-frecuentes" class="chips"></div>
+        </div>
+
         <label for="ejercicio-minutos">Minutos</label>
         <input type="text" id="ejercicio-minutos" inputmode="numeric" placeholder="45">
 

@@ -9,7 +9,6 @@ Ideas surgidas durante la implementación, no implementadas. Una línea cada una
 - Alta múltiple / botón "repetir en otra fecha" para rellenar varios días de golpe (útil para probar y para el "lo de siempre" de v2). Surgió al decidir la spec 007; se dejó fuera porque el alta con fecha pasada, una a una, ya cubre el caso.
 - Editar la fecha de una foto de progreso: hoy la fecha es el ID del documento en Firestore y el nombre del archivo en Cloudinary, así que cambiarla obliga a mover ambos. Fuera de la spec 007.
 - Elegir el encuadre de la foto de perfil al subirla (la spec 011 recorta centrado, sin editor).
-- Repetir un ejercicio de los habituales, como "lo de siempre" hace con las comidas. Fuera de la spec 010 porque un ejercicio repetido casi nunca dura lo mismo.
 - Que la pantalla "Hoy" se actualice sola al pasar la medianoche con la app abierta. Fuera de la spec 010: no se monta un temporizador para eso.
 - Iconos en la barra de navegación inferior (la spec 009 la deja solo con texto).
 - Ocultar la barra inferior automáticamente al abrir el teclado en Android, si al usarla resulta molesta. Detectado como riesgo en la spec 009.
@@ -45,5 +44,9 @@ Ideas surgidas durante la implementación, no implementadas. Una línea cada una
 
 - El aviso de guardado dura 3 segundos fijos y desaparece solo; valorar si algún caso pide que se quede hasta que lo cierres.
 - Que la semana de dieta y de tabla marquen qué has cumplido hoy. Descartado a propósito en la v4 para no contradecir la spec 028; si algún día se quiere, hay que cambiar PRODUCTO.md primero.
-- Chips o "lo de siempre" para ejercicios frecuentes en el formulario de Ejercicio, como los que la spec 037 le dio a Comidas. Fuera de la 038 porque Ejercicio no tenía un equivalente de "lo de siempre" que mover.
 - Pulir el desplazamiento de 52 px de la barra de navegación en Ejercicio en móvil (aceptado el 21 de agosto, spec 038): el navegador mide ahí un hueco entre `innerHeight` y `visualViewport.height` que no aparece en las demás secciones. Si se retoma, medir primero con el panel de diagnóstico del historial de git (commit `5829e91`), no a ciegas.
+
+## De la spec 042 (chips de ejercicios frecuentes)
+
+- Que el chip enseñe también cuántas veces lo has hecho ("bici · 45 min · ×9").
+- Un chip para las series y repeticiones, si algún día se registran cargas.

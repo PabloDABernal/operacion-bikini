@@ -30,7 +30,7 @@ import {
   MAXIMO_SEMANAS_CALENDARIO
 } from "./calendario.js";
 
-import { loDeSiempre } from "./hoy.js";
+import { loDeSiempre, masRepetidos } from "./hoy.js";
 
 import {
   validarPesaje,
@@ -1061,6 +1061,7 @@ function refrescarHoy() {
   pintarRangos();
   pintarCalendario(registros);
   pintarLoDeSiempre(registros.comidas);
+  pintarEjerciciosFrecuentes(registros.ejercicios);
   pintarAnalisis(registros.comidas);
   pintarGamificacion(registros);
 }
@@ -2508,6 +2509,49 @@ id("btn-fecha-hora-ejercicio").addEventListener("click", () => {
   id("campos-fecha-hora-ejercicio").classList.remove("oculta");
   id("btn-fecha-hora-ejercicio").classList.add("oculta");
 });
+
+// Los ejercicios que más repites, como chips junto al alta (spec 042).
+// Hermana de pintarLoDeSiempre(), con una diferencia deliberada: aquí el chip
+// rellena el formulario y no guarda nada. Un ejercicio repetido casi nunca
+// dura lo mismo, así que guardar de un toque apuntaría unos minutos heredados
+// que habría que ir a corregir después.
+function pintarEjerciciosFrecuentes(ejercicios) {
+  const bloque = id("bloque-ejercicios-frecuentes");
+  const contenedor = id("ejercicios-frecuentes");
+  const habituales = masRepetidos(ejercicios, hoyISO());
+
+  bloque.classList.toggle("oculta", habituales.length === 0);
+  contenedor.innerHTML = "";
+
+  habituales.forEach((habitual) => {
+    const ejercicio = habitual.registro;
+    // Los minutos se enseñan en el propio chip: así se ve de antemano qué va a
+    // rellenar, y a veces basta con confirmar sin tocar nada.
+    const etiqueta = ejercicio.minutos
+      ? `${habitual.texto} · ${ejercicio.minutos} min`
+      : habitual.texto;
+    const boton = botonDeFila(etiqueta, () => rellenarConEjercicio(ejercicio));
+    boton.className = "chip";
+    contenedor.appendChild(boton);
+  });
+}
+
+function rellenarConEjercicio(ejercicio) {
+  id("ejercicio-texto").value = ejercicio.texto;
+  id("ejercicio-minutos").value = ejercicio.minutos ?? "";
+  // Sin ?? el <select> se quedaría en su primera opción, que es una intensidad
+  // concreta y probablemente falsa, no un hueco vacío.
+  id("ejercicio-intensidad").value = ejercicio.intensidad ?? INTENSIDAD_POR_DEFECTO;
+  // Un error de un intento anterior ya no habla de lo que hay ahora en el
+  // formulario.
+  id("error-ejercicio").textContent = "";
+
+  // Los minutos son justo lo que casi siempre hay que cambiar, y seleccionados
+  // para poder teclear encima sin borrar antes.
+  const minutos = id("ejercicio-minutos");
+  minutos.focus();
+  minutos.select();
+}
 
 id("form-ejercicio").addEventListener("submit", async (evento) => {
   evento.preventDefault();

@@ -15,36 +15,33 @@ function clave(texto) {
   return texto.trim().toLowerCase().replace(/\s+/g, " ");
 }
 
-// Las comidas que más se repiten en los últimos 30 días. De cada una se
-// devuelve el texto y el momento de la vez más reciente, que es lo que se
-// repetirá al tocarla.
-export function loDeSiempre(comidas, hoy, maximo = MAXIMO_LO_DE_SIEMPRE) {
+// Los registros que más se repiten en los últimos 30 días, agrupados por su
+// texto. De cada grupo se devuelve el registro completo de la aparición MÁS
+// RECIENTE: es el que decide con qué valores se repite.
+//
+// Sirve para comidas y para ejercicios (spec 042). Lo único que le importa de
+// un registro es que tenga `texto` y `fecha`; el resto de campos viaja dentro
+// de `registro` y ya decide cada pantalla con cuáles se queda.
+export function masRepetidos(registros, hoy, maximo = MAXIMO_LO_DE_SIEMPRE) {
   const desde = sumarDias(hoy, -(DIAS_LO_DE_SIEMPRE - 1));
-  const recientes = comidas.filter((comida) => comida.fecha >= desde);
+  const recientes = registros.filter((registro) => registro.fecha >= desde);
 
   const porTexto = new Map();
 
-  recientes.forEach((comida) => {
-    const id = clave(comida.texto);
+  recientes.forEach((registro) => {
+    const id = clave(registro.texto);
     const acumulado = porTexto.get(id);
 
     if (!acumulado) {
-      porTexto.set(id, {
-        texto: comida.texto,
-        momento: comida.momento,
-        fecha: comida.fecha,
-        veces: 1
-      });
+      porTexto.set(id, { texto: registro.texto, fecha: registro.fecha, veces: 1, registro });
       return;
     }
 
     acumulado.veces += 1;
-    // Nos quedamos con la aparición más reciente: es la que decide con qué
-    // texto y con qué momento se repite.
-    if (comida.fecha > acumulado.fecha) {
-      acumulado.texto = comida.texto;
-      acumulado.momento = comida.momento;
-      acumulado.fecha = comida.fecha;
+    if (registro.fecha > acumulado.fecha) {
+      acumulado.texto = registro.texto;
+      acumulado.fecha = registro.fecha;
+      acumulado.registro = registro;
     }
   });
 
@@ -54,4 +51,15 @@ export function loDeSiempre(comidas, hoy, maximo = MAXIMO_LO_DE_SIEMPRE) {
       return a.fecha < b.fecha ? 1 : -1;
     })
     .slice(0, maximo);
+}
+
+// Las comidas que más se repiten. De cada una, el texto y el momento de la vez
+// más reciente, que es con lo que se repetirá al tocarla.
+export function loDeSiempre(comidas, hoy, maximo = MAXIMO_LO_DE_SIEMPRE) {
+  return masRepetidos(comidas, hoy, maximo).map((habitual) => ({
+    texto: habitual.texto,
+    momento: habitual.registro.momento,
+    fecha: habitual.fecha,
+    veces: habitual.veces
+  }));
 }

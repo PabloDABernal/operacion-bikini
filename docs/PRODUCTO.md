@@ -137,6 +137,14 @@ que la v4 dejó sin tocar. Tampoco añade funciones.
   se queda estrecho, centrado y con las pestañas puestas. Es una excepción
   consciente a la vista de escritorio de la spec 036.
 
+- **Ejercicio también repite lo de siempre**: los ejercicios que más se
+  repiten se ofrecen como chips junto al campo de "Nuevo ejercicio", igual que
+  las comidas desde la ampliación del 21 de agosto. Con una diferencia
+  deliberada: un chip de comida **guarda** la comida de un toque, mientras que
+  un chip de ejercicio **rellena el formulario** (nombre, minutos e intensidad
+  de la última vez) y espera a que confirmes, porque un ejercicio repetido casi
+  nunca dura lo mismo. Se ahorra escribir, no se decide por el usuario.
+
 ## Qué explícitamente NO hace
 
 - No sustituye a un profesional médico real: siempre debe recordar (disclaimer) que ante dudas o falta de resultados hay que consultar a un médico.
