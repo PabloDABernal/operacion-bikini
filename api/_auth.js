@@ -15,7 +15,8 @@ const FIREBASE_API_KEY = "AIzaSyCLYCIknr0aJDO0E8Sp4YmAMW3Hpnxo8Bw";
 // tienen las otras dos). Al añadir a alguien hay que tocar las tres.
 const EMAILS_AUTORIZADOS = [
   "pantonbernal@gmail.com",
-  "angels_recio@hotmail.com"
+  "angels_recio@hotmail.com",
+  "jrecio0086@gmail.com"
 ];
 
 // Valida el ID token contra el endpoint público de Google Identity Toolkit.

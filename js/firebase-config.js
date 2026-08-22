@@ -26,7 +26,8 @@ const firebaseConfig = {
 // Vercel y publicar las reglas (npx firebase-tools deploy --only firestore:rules).
 export const EMAILS_AUTORIZADOS = [
   "pantonbernal@gmail.com",
-  "angels_recio@hotmail.com"
+  "angels_recio@hotmail.com",
+  "jrecio0086@gmail.com"
 ];
 
 export function estaAutorizado(email) {
