@@ -2,7 +2,7 @@
 
 Documento para retomar el trabajo en frío. Se actualiza al terminar cada spec.
 
-**Última actualización:** 21 de agosto de 2026 (v4 cerrada del todo; specs 039 y 040 completadas; **pendiente publicar firestore.rules**, ver "Lo primero al retomar")
+**Última actualización:** 22 de agosto de 2026 (v4 cerrada del todo; specs 039 y 040 completadas; `firestore.rules` ya publicadas)
 
 ## Dónde estamos
 
@@ -83,21 +83,15 @@ El 20 de agosto arrancó la **v4**, que sale de una auditoría de usabilidad hec
 
 ### Lo primero al retomar
 
-**1. Publicar `firestore.rules`.** Pendiente desde el 21 de agosto: se
-añadió un tercer usuario a la lista blanca (`jrecio0086@gmail.com`, cuñado
-del propietario, entra con Google) en los tres sitios de código
-(`js/firebase-config.js`, `api/_auth.js`, `firestore.rules`) y ya está
-desplegado en Vercel, pero **las reglas de Firestore no se han publicado**:
-la sesión remota donde se hizo el cambio no tenía `firebase login` guardado
-(contenedor nuevo cada vez). Sin publicarlas, el nuevo usuario pasa el
-login pero Firestore le bloquea sus propios datos con un error de permisos
-que parece un bug. Ejecutar donde haya sesión de Firebase:
+**1. Reglas de Firestore: ya está hecho.** El 22 de agosto se publicaron
+con `npx --yes firebase-tools deploy --only firestore:rules` desde el PC
+(la sesión remota del 21 no tenía `firebase login` guardado). El tercer
+usuario de la lista blanca (`jrecio0086@gmail.com`, cuñado del propietario,
+entra con Google) ya tiene permisos sobre sus propios datos. Está en los
+tres sitios de código: `js/firebase-config.js`, `api/_auth.js` y
+`firestore.rules`.
 
-```
-npx --yes firebase-tools deploy --only firestore:rules
-```
-
-**2. Seguir limpiando `docs/BACKLOG.md`** por decisión delegada del usuario
+**2. Seguir limpiando `docs/BACKLOG.md`** (esto es lo que toca ahora) por decisión delegada del usuario
 el 21 de agosto ("te dejo decidir, vamos a limpiar el backlog"): specs 039
 (quitar la foto de perfil) y 040 (recordar instrucciones al pedir dieta o
 tabla) ya completadas y confirmadas. Mientras el usuario no diga lo
