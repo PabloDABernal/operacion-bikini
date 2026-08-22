@@ -14,7 +14,7 @@ Un grupo pequeño y cerrado de usuarios personales (empezando por mí, y probabl
 - Registro de pesajes (peso + fecha).
 - Registro de comidas.
 - Registro de ejercicio.
-- Subida de una foto de progreso por día, con seguimiento visual (collage de evolución).
+- Subida de una foto de progreso por día, con seguimiento visual (cuadrícula de evolución).
 - Botón **"Consejos"**: la IA analiza el historial reciente (pesajes, comidas, ejercicio) y da pautas puntuales.
 - Botón **"Pasar consulta"**: conversación guiada por la IA, tipo entrevista de nutricionista (pregunta gustos, hábitos, objetivos, mediciones...) que termina generando un plan de nutrición y un plan de ejercicio.
 - Disclaimer visible de que los consejos y planes los genera una IA y no sustituyen a un médico o nutricionista real.
@@ -133,7 +133,7 @@ lo que ya se guarda.
 - **Pesaje**: registro puntual de peso con fecha. Se puede corregir después.
 - **Comida**: registro de una ingesta (qué se ha comido, cuándo). Se puede corregir después.
 - **Ejercicio**: registro de una actividad física (qué, duración/intensidad, cuándo). Se puede corregir después.
-- **Foto de progreso**: foto asociada a una fecha, para seguimiento visual y collage de evolución.
+- **Foto de progreso**: foto asociada a una fecha, para seguimiento visual y cuadrícula de evolución.
 - **Consulta**: conversación guiada por la IA (tipo entrevista) que termina generando un plan de nutrición y ejercicio.
 - **Consejo**: feedback puntual generado por la IA a partir del historial reciente, sin ser una conversación guiada completa.
 - **Plan**: resultado de una consulta (nutrición + ejercicio) asociado a un usuario.
