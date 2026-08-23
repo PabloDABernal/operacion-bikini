@@ -2,7 +2,7 @@
 
 Documento para retomar el trabajo en frío. Se actualiza al terminar cada spec.
 
-**Última actualización:** 22 de agosto de 2026 (specs 041-045 completadas; **las 046 y 047 desplegadas y pendientes de probar**)
+**Última actualización:** 22 de agosto de 2026 (specs 041-045 completadas; **las 046, 047 y 048 desplegadas y pendientes de probar**)
 
 ## Dónde estamos
 
@@ -75,6 +75,7 @@ El 20 de agosto arrancó la **v4**, que sale de una auditoría de usabilidad hec
 | 045 | La consulta, como revisión de lo hecho desde la anterior (v5) | ✅ completada |
 | 046 | La consulta propone dieta o tabla, y tú aceptas (v5) | 🧪 implementada, pendiente de que el usuario la pruebe |
 | 047 | La revisión se puede empezar de verdad (arreglo de la v5) | 🧪 implementada, pendiente de que el usuario la pruebe |
+| 048 | Los flecos que dejó la v5 (auditoría del 23 de agosto) | 🧪 implementada, pendiente de que el usuario la pruebe |
 
 ## Qué toca ahora
 

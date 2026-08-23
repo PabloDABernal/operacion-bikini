@@ -1,6 +1,6 @@
 # 047 — La revisión se puede empezar de verdad
 
-- **Estado:** 📝 pendiente de implementar.
+- **Estado:** 🧪 implementada y desplegada el 2026-08-23; pendiente de que el usuario la pruebe.
 - **Fecha:** 2026-08-23
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (v5…)", punto **"Se puede pasar consulta cuando quieras, con la app avisando"**. No hay cambio de producto: PRODUCTO.md ya lo promete y el código no lo cumplía.
 

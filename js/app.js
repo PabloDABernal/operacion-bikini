@@ -3476,16 +3476,19 @@ async function abrirArchivo(operacion) {
       contenido.appendChild(rejilla);
     }
 
-    // Consejos y planes: el texto tal cual, que es lo que vale de ellos.
-    [
-      ["consejos", "consejos", (documento) => documento.texto],
-      [
-        "planes",
-        "planes",
-        (documento) =>
-          [documento.nutricion, documento.ejercicio].filter(Boolean).join("\n\n")
-      ]
-    ].forEach(([nombre, titulo, sacarTexto]) => {
+    // Los consejos: el texto tal cual, que es lo que vale de ellos.
+    //
+    // Aquí también se pintaban los "planes" hasta la spec 048. Se quitaron por
+    // dos motivos: la v5 los retiró como concepto y PRODUCTO.md dice que los
+    // guardados dejan de enseñarse, y además salían mal — en esa colección
+    // conviven los planes viejos y las marcas de cupo de dietas y tablas
+    // (spec 027), que no llevan texto, así que cada dieta pedida dejaba en el
+    // histórico una tarjeta vacía con "(sin texto)".
+    //
+    // Se siguen ARCHIVANDO: "planes" continúa en COLECCIONES de
+    // js/operaciones.js a propósito. Sacarla de ahí dejaría las marcas de cupo
+    // sin archivar.
+    [["consejos", "consejos", (documento) => documento.texto]].forEach(([nombre, titulo, sacarTexto]) => {
       const documentos = porNombre[nombre] || [];
       if (!documentos.length) return;
 
@@ -3500,8 +3503,9 @@ async function abrirArchivo(operacion) {
       });
     });
 
-    // Las consultas no se pintan una a una: son conversaciones largas y lo
-    // que queda de ellas es el plan, que sí está arriba. Se dice cuántas hubo.
+    // Las consultas no se pintan una a una: son conversaciones largas, y lo
+    // que valía de ellas —el plan— ya no existe desde la v5. Se dice cuántas
+    // hubo y con eso basta para hacerse una idea de la etapa.
     const consultas = porNombre.consultas || [];
     if (consultas.length) {
       const nota = document.createElement("p");
