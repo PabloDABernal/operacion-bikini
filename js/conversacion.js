@@ -67,10 +67,21 @@ function fechaDeConsejo(consejo) {
   return `${fecha.getFullYear()}-${mes}-${dia}`;
 }
 
-// El hilo que se pinta: los consejos de antes de la spec 023 se enseñan como
-// mensajes de la IA, mezclados por fecha con la conversación. No se migran ni
-// se copian; solo se muestran juntos.
-export function hiloCompleto(hilo, consejos) {
+// Los mensajes de una revisión no llevan fecha propia: solo los de la
+// conversación la llevan, desde la spec 023. Heredan la de su consulta, que es
+// lo que permite intercalarlas en el hilo (spec 050).
+function fechaDeConsulta(consulta) {
+  const marca = consulta.terminadaEn || consulta.creadaEn;
+  return marca && marca.toDate ? fechaDeConsejo({ creadoEn: marca }) : "";
+}
+
+// El hilo que se pinta, todo junto y por fecha (spec 050): la conversación, los
+// consejos de antes de la spec 023 y las revisiones. No se migra ni se copia
+// nada; solo se muestran juntos.
+//
+// El orden de concatenación decide los empates dentro de un mismo día, porque
+// el sort es estable: consejos (lo más viejo), revisiones, y la conversación.
+export function hiloCompleto(hilo, consejos, revisiones = []) {
   const deConsejos = consejos.map((consejo) => ({
     de: "ia",
     // Los tres bloques del consejo, seguidos: en una conversación no pintan
@@ -82,10 +93,20 @@ export function hiloCompleto(hilo, consejos) {
     esConsejoAntiguo: true
   }));
 
+  const deLasRevisiones = revisiones.flatMap((revision) => {
+    const fecha = fechaDeConsulta(revision);
+    return (revision.mensajes || []).map((mensaje, indice) => ({
+      ...mensaje,
+      fecha,
+      // Solo el primero: es donde va el separador que marca dónde empezó.
+      empiezaRevision: indice === 0 ? fecha || true : undefined
+    }));
+  });
+
   const deLaConversacion = hilo ? hilo.mensajes : [];
 
   // Los que no tienen fecha van primero: son los más viejos.
-  return [...deConsejos, ...deLaConversacion].sort((a, b) =>
+  return [...deConsejos, ...deLasRevisiones, ...deLaConversacion].sort((a, b) =>
     (a.fecha || "") < (b.fecha || "") ? -1 : (a.fecha || "") > (b.fecha || "") ? 1 : 0
   );
 }

@@ -187,6 +187,33 @@ cierto tiempo para ver cómo vas, animarte o echarte la bronca.**
   que toca cambiar la semana, la IA te lo propone y te lo deja a un toque. No
   te sustituye la dieta ni la tabla sin que lo aceptes.
 
+## Qué hará (v6: un solo hilo, decidida el 23 de agosto de 2026)
+
+Sale de usar la v5 recién hecha. El usuario lo dijo en una línea: *"es un poco
+lío lo de la conversación más la consulta, igual mejor que sea todo uno"*. Y
+tiene razón: la spec 023 se llamaba "una sola conversación" y hemos acabado con
+**dos hilos, dos cajas de texto y dos cupos** en la misma pantalla. Un
+nutricionista de verdad no tiene dos libretas.
+
+- **Un solo hilo con tu nutricionista.** Todo lo que habláis vive en el mismo
+  sitio y en orden: las dudas del día a día y las revisiones periódicas. Al
+  pasar consulta ves lo que ya habíais hablado, que es justo el contexto que
+  hace falta para entender lo que te dice.
+- **Una sola caja de texto.** Escribes en el mismo sitio siempre. Si hay una
+  revisión en marcha, lo que escribes le contesta a ella; si no, es una pregunta
+  normal.
+- **Un solo cupo: 20 mensajes al día.** Desaparece el cupo aparte de consultas.
+  Empezar una revisión cuenta como un mensaje, que es lo que la mantiene
+  acotada sin necesidad de un segundo número que explicar.
+- **"Pasar consulta" sigue siendo un botón.** La revisión no es un mensaje más:
+  es el momento en que le pides que se ponga a mirar tus datos y te diga cómo
+  vas. Se marca en el hilo para que se distinga de la charla normal.
+- **Lo ya hablado no se pierde.** Las conversaciones y las consultas que ya
+  tienes guardadas se enseñan juntas, ordenadas por fecha. No se migra ni se
+  borra nada: solo se pintan en el mismo hilo.
+- **La entrevista que abre una operación también vive ahí.** Es el principio de
+  la conversación con tu nutricionista, no un trámite aparte.
+
 ## Qué explícitamente NO hace
 
 - No sustituye a un profesional médico real: siempre debe recordar (disclaimer) que ante dudas o falta de resultados hay que consultar a un médico.
@@ -202,7 +229,7 @@ cierto tiempo para ver cómo vas, animarte o echarte la bronca.**
 - **Comida**: registro de una ingesta (qué se ha comido, cuándo). Se puede corregir después.
 - **Ejercicio**: registro de una actividad física (qué, duración/intensidad, cuándo). Se puede corregir después.
 - **Foto de progreso**: foto asociada a una fecha, para seguimiento visual y cuadrícula de evolución.
-- **Consulta**: revisión con la IA. La primera de todas es la entrevista que abre una operación; las siguientes repasan lo hecho desde la consulta anterior y terminan diciéndote cómo vas y qué toca.
+- **Consulta** (o **revisión**): el momento en que le pides a tu nutricionista que mire tus datos y te diga cómo vas. La primera de todas es la entrevista que abre una operación; las siguientes repasan lo hecho desde la anterior. Desde la v6 no es un hilo aparte: ocurre dentro de la conversación de siempre.
 - **Consejo**: feedback puntual generado por la IA a partir del historial reciente, sin ser una conversación guiada completa.
 - ~~**Plan**~~: retirado en la v5 (22 de agosto de 2026). Lo que producía —pautas de nutrición y una rutina, en texto— lo hacen mejor la *dieta* y la *tabla de ejercicio*, que además se pueden editar y marcar. Los planes ya guardados siguen en la base de datos, sin enseñarse.
 - **Racha**: días seguidos apuntando algo. Admite un día de gracia por semana, para que un despiste no la rompa.
@@ -220,4 +247,5 @@ cierto tiempo para ver cómo vas, animarte o echarte la bronca.**
 - **v3 (16 de agosto de 2026)**: lo descrito en "Qué hará (v3)". Terminada y probada.
 - **v4 (desde el 20 de agosto de 2026, sin fecha límite)**: lo descrito en "Qué hará (v4)" y en sus dos ampliaciones, la del 21 y la del 22 de agosto. No añade funciones: reordena lo que ya hay para que se encuentre, y estrena la vista de escritorio. Sale de una auditoría de usabilidad hecha sobre el código el 20 de agosto, y de probar la 036 en producción el 21.
 - **v5 (desde el 22 de agosto de 2026, sin fecha límite)**: lo descrito en "Qué hará (v5)". Sale de usar Consulta con la app ya llena y ver que arrastraba el modelo de antes de que existieran la dieta y la tabla semanales. Se reparte en las specs 044, 045 y 046.
+- **v6 (desde el 23 de agosto de 2026, sin fecha límite)**: lo descrito en "Qué hará (v6)". Sale de usar la v5 y ver que la pantalla de Consulta había acabado con dos hilos y dos cupos. Se reparte en las specs 050 (ver el hilo junto), 051 (una caja y un cupo) y 052 (la entrevista en el hilo).
 - **Descartado para v2**: notificaciones push (mucho trabajo y acaban silenciadas), integración con básculas o pulseras, y comparativa de fotos lado a lado, que se pospone.

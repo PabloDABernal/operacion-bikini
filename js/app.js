@@ -120,6 +120,7 @@ import {
   MAXIMO_CARACTERES,
   hiloDeConversacion,
   quedanMensajesHoy,
+  esRevision,
   hiloCompleto,
   enviarMensaje,
   consejosAntiguos
@@ -2697,12 +2698,33 @@ function pintarBurbuja(mensaje) {
   return burbuja;
 }
 
+// Un solo hilo (spec 050): la conversación, los consejos viejos y las
+// revisiones, por fecha. Antes las revisiones se pintaban aparte en
+// #hilo-consulta y había que mirar a dos sitios para seguir una misma charla.
+function separadorDeRevision(fecha) {
+  const marca = document.createElement("p");
+  marca.className = "separador-revision";
+  marca.textContent =
+    typeof fecha === "string" && fecha
+      ? `Revisión · ${formatearFecha(fecha)}`
+      : "Revisión";
+  return marca;
+}
+
 function pintarConversacion() {
   const contenedor = id("hilo-conversacion");
-  const mensajes = hiloCompleto(hiloAbierto, consejosDeAntes);
+  const revisiones = consultasCargadas.filter(esRevision);
+  const mensajes = hiloCompleto(hiloAbierto, consejosDeAntes, revisiones);
 
   contenedor.innerHTML = "";
-  mensajes.forEach((mensaje) => contenedor.appendChild(pintarBurbuja(mensaje)));
+  mensajes.forEach((mensaje) => {
+    // El separador no es un mensaje: es una marca del hilo que dice dónde
+    // empezó una revisión, para distinguirla de la charla del día a día.
+    if (mensaje.empiezaRevision) {
+      contenedor.appendChild(separadorDeRevision(mensaje.empiezaRevision));
+    }
+    contenedor.appendChild(pintarBurbuja(mensaje));
+  });
 
   if (!mensajes.length) {
     const vacio = document.createElement("p");
@@ -2770,19 +2792,6 @@ let consultaAbierta = null;
 // estado de sesión. El HILO ya no depende de ella desde la spec 046 — ese se
 // lee de Firestore y sobrevive a un F5.
 let consultaReciénTerminada = null;
-
-function pintarHilo(consulta) {
-  const hilo = id("hilo-consulta");
-  hilo.innerHTML = "";
-  if (!consulta) return;
-
-  consulta.mensajes.forEach((mensaje) => {
-    const burbuja = document.createElement("div");
-    burbuja.className = `mensaje mensaje-${mensaje.de}`;
-    burbuja.textContent = mensaje.texto;
-    hilo.appendChild(burbuja);
-  });
-}
 
 // Lo que la consulta te propuso al cerrarse (spec 046). Propone, no sustituye:
 // hasta que no tocas el botón, tu dieta y tu tabla siguen intactas.
@@ -2964,14 +2973,14 @@ function pintarEstadoConsulta() {
       : "Ya has pasado consulta 2 veces hoy.";
   }
 
-  // El hilo que se pinta NO depende de consultaReciénTerminada (spec 046): esa
-  // vive en memoria y se perdía al recargar, así que el cierre que la spec 044
-  // dejó "al final de la conversación" se esfumaba con un F5. Se pinta el de la
-  // última consulta terminada, que se lee de Firestore como todo lo demás.
-  // consultaReciénTerminada sigue viva, pero solo para el mensaje y el botón.
-  const aPintar = consultaAbierta || ultimaRevision(consultasCargadas);
-  pintarHilo(aPintar);
-  pintarPropuestas(consultaAbierta ? null : aPintar);
+  // Las revisiones ya no se pintan aquí: desde la spec 050 van dentro del hilo
+  // único, con el resto de la conversación (pintarConversacion). Lo que queda
+  // aquí es solo decidir de qué consulta cuelgan las propuestas.
+  //
+  // No depende de consultaReciénTerminada (spec 046): esa vive en memoria y se
+  // perdía al recargar. Sale de la última consulta terminada, leída de
+  // Firestore como todo lo demás.
+  pintarPropuestas(consultaAbierta ? null : ultimaRevision(consultasCargadas));
 }
 
 // --- Dietas y tablas de ejercicio (specs 024 y 027) ----------------------

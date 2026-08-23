@@ -153,7 +153,7 @@ export function consultaEnCurso(consultas) {
 // hilo aparte, ni la entrevista de bienvenida, que no repasa nada porque no hay
 // nada anterior que repasar. Los dos modos de bienvenida son los mismos que
 // js/gamificacion.js excluye para el emblema "Primera consulta".
-function esRevision(consulta) {
+export function esRevision(consulta) {
   return (
     consulta.modo !== "conversacion" &&
     consulta.modo !== "inicial" &&

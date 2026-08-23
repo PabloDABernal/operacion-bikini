@@ -2,7 +2,7 @@
 
 Documento para retomar el trabajo en frío. Se actualiza al terminar cada spec.
 
-**Última actualización:** 22 de agosto de 2026 (specs 041-045 completadas; **las 046 a 049 desplegadas y pendientes de probar**)
+**Última actualización:** 22 de agosto de 2026 (specs 041-045 completadas; **las 046 a 050 desplegadas y pendientes de probar**; arranca la v6)
 
 ## Dónde estamos
 
@@ -77,6 +77,9 @@ El 20 de agosto arrancó la **v4**, que sale de una auditoría de usabilidad hec
 | 047 | La revisión se puede empezar de verdad (arreglo de la v5) | 🧪 implementada, pendiente de que el usuario la pruebe |
 | 048 | Los flecos que dejó la v5 (auditoría del 23 de agosto) | 🧪 implementada, pendiente de que el usuario la pruebe |
 | 049 | El 413 de Groq y el prompt acotado | 🧪 implementada, pendiente de que el usuario la pruebe |
+| 050 | Un solo hilo: ver la conversación y las revisiones juntas (v6) | 🧪 implementada, pendiente de que el usuario la pruebe |
+| 051 | Una sola caja de texto y un solo cupo (v6) | 📝 spec escrita, sin implementar |
+| 052 | La entrevista de alta, también en el hilo (v6) | 📝 spec escrita, sin implementar |
 
 ## Qué toca ahora
 
@@ -114,6 +117,36 @@ principio** en tres specs (no se parten a posteriori):
 | 044 | Fuera los planes y fuera "Abandonar consulta" | ✅ completada |
 | 045 | La consulta, como revisión de lo hecho desde la anterior | ✅ completada |
 | 046 | La consulta propone dieta o tabla, y tú aceptas | 🧪 desplegada, pendiente de probar |
+
+**Arranca la v6 (23 de agosto).** El usuario probó la v5 y dijo: *"es un poco
+lío lo de la conversación más la consulta, igual mejor que sea todo uno, que
+cuando pases consulta puedas ver el histórico de conversación"*. Tiene razón:
+la spec 023 se llamaba "una sola conversación" y habíamos acabado con dos
+hilos, dos cajas de texto y dos cupos en la misma pantalla. Está en
+`docs/PRODUCTO.md`, apartado "Qué hará (v6…)", y va en tres specs:
+
+| Spec | Qué | Estado |
+|---|---|---|
+| 050 | Ver la conversación y las revisiones en un solo hilo | 🧪 desplegada |
+| 051 | Una sola caja de texto y un solo cupo | 📝 escrita |
+| 052 | La entrevista de alta, también en el hilo | 📝 escrita |
+
+**Se partió en tres ANTES de escribir código**, cuando `revisor-specs` avisó de
+que junto pasaba de 300 líneas (regla 4). El proyecto ya decidió no partir
+specs a posteriori.
+
+**El agujero que encontró `revisor-specs` en la 051, y que hay que respetar al
+implementarla:** `enviadosHoy()` cuenta solo los mensajes `de: "usuario"` con
+fecha de hoy **dentro del documento de la conversación**. Las revisiones viven
+en otro documento y su mensaje de apertura es de la IA, así que "empezar una
+revisión gasta un mensaje" no funciona escribiendo nada ahí. La solución
+escrita en la spec es que el contador mire **todas** las consultas, no que se
+escriban mensajes sintéticos: uno falso de usuario saldría pintado en el hilo.
+
+**Decisión del usuario en contra de la recomendación (spec 052):** la entrevista
+de alta también irá al hilo. Se recomendó dejarla aparte por riesgo —es el
+código que rellena Ajustes y crea la operación—, y él decidió que entre. Por eso
+va sola en su spec: si rompe algo, se revierte solo eso.
 
 **El fallo que destapó la 047, y la lección:** con una operación en marcha
 **no había forma de empezar una consulta**. `#btn-empezar-consulta` vivía

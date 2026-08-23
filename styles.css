@@ -906,6 +906,28 @@ button:disabled {
   border-left: 3px solid var(--acento);
 }
 
+/* Dónde empezó una revisión (spec 050). No es un mensaje: es una marca del
+   hilo, para distinguir de un vistazo la consulta de la charla del día a día.
+   Por eso va centrada, en gris y con líneas a los lados, y no como burbuja. */
+.separador-revision {
+  display: flex;
+  align-items: center;
+  gap: var(--e2);
+  margin: var(--e6) 0 var(--e3);
+  color: var(--tinta-suave);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.separador-revision::before,
+.separador-revision::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--borde);
+}
+
 .mensaje-usuario {
   background: var(--superficie-alta);
   border: 1px solid var(--borde);
