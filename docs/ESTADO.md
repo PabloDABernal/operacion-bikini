@@ -2,7 +2,7 @@
 
 Documento para retomar el trabajo en frío. Se actualiza al terminar cada spec.
 
-**Última actualización:** 22 de agosto de 2026 (specs 041-045 completadas; **la 046 desplegada y pendiente de probar** cierra la v5)
+**Última actualización:** 22 de agosto de 2026 (specs 041-045 completadas; **las 046 y 047 desplegadas y pendientes de probar**)
 
 ## Dónde estamos
 
@@ -74,6 +74,7 @@ El 20 de agosto arrancó la **v4**, que sale de una auditoría de usabilidad hec
 | 044 | Fuera los planes y fuera "Abandonar consulta" (v5) | ✅ completada |
 | 045 | La consulta, como revisión de lo hecho desde la anterior (v5) | ✅ completada |
 | 046 | La consulta propone dieta o tabla, y tú aceptas (v5) | 🧪 implementada, pendiente de que el usuario la pruebe |
+| 047 | La revisión se puede empezar de verdad (arreglo de la v5) | 🧪 implementada, pendiente de que el usuario la pruebe |
 
 ## Qué toca ahora
 
@@ -111,6 +112,17 @@ principio** en tres specs (no se parten a posteriori):
 | 044 | Fuera los planes y fuera "Abandonar consulta" | ✅ completada |
 | 045 | La consulta, como revisión de lo hecho desde la anterior | ✅ completada |
 | 046 | La consulta propone dieta o tabla, y tú aceptas | 🧪 desplegada, pendiente de probar |
+
+**El fallo que destapó la 047, y la lección:** con una operación en marcha
+**no había forma de empezar una consulta**. `#btn-empezar-consulta` vivía
+dentro de `#bloque-entrevista`, que `pintarEstadoConsulta()` escondía con
+`hayOperacion && !enCurso` — una regla de la spec 023, de cuando con una
+operación abierta lo único que existía era la conversación. Las specs 045 y 046
+se construyeron enteras sobre un camino que la interfaz no dejaba alcanzar, y
+sus guiones de prueba decían "ve a Consulta y mira encima del botón" sin
+comprobar que ese botón se viera. **Lección: cuando una spec cambia el
+comportamiento de un control, el guion tiene que empezar por verificar que ese
+control es visible y pulsable en el estado del que habla.**
 
 **Lo que salió a la luz en la 046:** el hilo de una consulta terminada **solo
 se veía mientras no recargaras**. Dependía de `consultaReciénTerminada`, una

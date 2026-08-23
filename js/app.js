@@ -2911,11 +2911,26 @@ function pintarEstadoConsulta() {
 
   id("form-respuesta").classList.toggle("oculta", !enCurso);
   id("btn-empezar-consulta").classList.toggle("oculta", enCurso);
+
+  // La explicación de la entrevista de alta solo aplica sin operación: con una
+  // en marcha, pasar consulta es una revisión, no un alta.
+  //
+  // OJO: esta condición vivía en el contenedor del botón (spec 023, cuando con
+  // una operación en marcha lo único que existía era la conversación), y eso
+  // escondía el botón de empezar justo en el estado en el que hace falta: no
+  // había forma de pasar consulta con una operación abierta. Ahora se queda
+  // donde tiene que estar, en los párrafos (spec 047).
+  const explicandoAlta = !hayOperacion && !enCurso;
+  id("explicacion-entrevista").classList.toggle("oculta", !explicandoAlta);
   id("explicacion-inicial").classList.toggle("oculta", enCurso || !primeraVez);
 
-  // Con operación en marcha se charla; sin ella, lo que toca es la entrevista
-  // que la abre. Y mientras la entrevista está a medias, manda ella.
-  id("bloque-entrevista").classList.toggle("oculta", hayOperacion && !enCurso);
+  // Llamar "Revisión" a la entrevista que abre la operación sería mentir: no
+  // hay nada anterior que revisar.
+  id("titulo-revision").classList.toggle("oculta", !hayOperacion);
+
+  // Mientras la consulta está a medias, la conversación se esconde: dos cajas
+  // de texto hablando con la misma IA por caminos distintos y con cupos
+  // distintos es la forma más segura de escribir en la que no querías.
   id("bloque-conversacion").classList.toggle("oculta", !hayOperacion || enCurso);
 
   if (enCurso) {

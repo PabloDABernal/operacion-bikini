@@ -456,42 +456,52 @@
     <div class="seccion" data-seccion="consulta">
       <h2>Pasar consulta</h2>
 
-      <!-- Sin operación en marcha, aquí se arranca la de bienvenida -->
-      <div id="bloque-entrevista">
-        <p class="explicacion">
-          La IA te entrevista como haría un nutricionista y, cuando tiene datos
-          suficientes, te genera un plan de nutrición y de ejercicio.
-        </p>
+      <!-- Sin operación en marcha, aquí se arranca la entrevista de alta.
+           Estos dos párrafos son lo ÚNICO que se esconde cuando ya hay una
+           operación: el botón de empezar vive fuera, porque con una operación
+           en marcha también se pasa consulta (spec 047). -->
+      <p id="explicacion-entrevista" class="explicacion">
+        La IA te entrevista como haría un nutricionista: te pregunta por tus
+        medidas, tus gustos y tu rutina, y con eso abre tu operación bikini.
+      </p>
+      <p id="explicacion-inicial" class="explicacion oculta">
+        Es la entrevista de bienvenida: te preguntará cómo quieres que te llame,
+        tus medidas y tus gustos, y dejará tus ajustes rellenos para que la IA
+        te conozca a partir de ahora.
+      </p>
+
+      <!-- La revisión periódica (specs 045-047). Este bloque NO se esconde
+           nunca: lo que cambia es si dentro hay un botón para empezar o un
+           formulario para contestar. -->
+      <div id="bloque-revision">
+        <h3 id="titulo-revision">Revisión</h3>
+
         <!-- Cuánto hace de la última revisión (spec 045). Orienta, no bloquea:
              el botón siempre se puede pulsar. -->
         <p id="ultima-revision" class="explicacion oculta"></p>
         <button type="button" id="btn-empezar-consulta">Empezar consulta</button>
-        <p id="explicacion-inicial" class="explicacion oculta">
-          Es la entrevista de bienvenida: te preguntará cómo quieres que te llame,
-          tus medidas y tus gustos, y dejará tus ajustes rellenos para que la IA
-          te conozca a partir de ahora.
-        </p>
         <p id="aviso-consulta" class="explicacion"></p>
+
+        <div id="hilo-consulta"></div>
+
+        <!-- Lo que la consulta te propone al cerrarse (spec 046). Propone; no
+             sustituye nada hasta que lo aceptas. -->
+        <div id="propuestas-consulta" class="oculta"></div>
+        <p id="error-propuesta" class="error" role="alert"></p>
+
+        <form id="form-respuesta" class="oculta">
+          <label for="respuesta-texto">Tu respuesta</label>
+          <textarea id="respuesta-texto" rows="3"></textarea>
+          <button type="submit" id="btn-responder">Responder</button>
+        </form>
+
+        <p id="estado-consulta"></p>
+        <p id="error-consulta" class="error" role="alert"></p>
       </div>
-
-      <div id="hilo-consulta"></div>
-
-      <!-- Lo que la consulta te propone al cerrarse (spec 046). Propone; no
-           sustituye nada hasta que lo aceptas. -->
-      <div id="propuestas-consulta" class="oculta"></div>
-      <p id="error-propuesta" class="error" role="alert"></p>
-
-      <form id="form-respuesta" class="oculta">
-        <label for="respuesta-texto">Tu respuesta</label>
-        <textarea id="respuesta-texto" rows="3"></textarea>
-        <button type="submit" id="btn-responder">Responder</button>
-      </form>
-
-      <p id="estado-consulta"></p>
-      <p id="error-consulta" class="error" role="alert"></p>
 
       <!-- La conversación que dura -->
       <div id="bloque-conversacion" class="oculta">
+        <h3>Habla con tu nutricionista</h3>
         <div id="hilo-conversacion" class="hilo"></div>
 
         <form id="form-conversacion">
