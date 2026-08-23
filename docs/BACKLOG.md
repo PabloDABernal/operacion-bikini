@@ -56,3 +56,13 @@ Ideas surgidas durante la implementación, no implementadas. Una línea cada una
 - Llevar el mismo formato de dos líneas y los mismos iconos a las recetas, al
   catálogo de ejercicios y al histórico de operaciones. La 043 solo cambió las
   tres listas del diario.
+
+## De la spec 049 (el 413 de Groq)
+
+- Acotar el bloque de registros del prompt por **caracteres** y no solo por
+  número de registros: hoy el texto de una comida no tiene límite de longitud,
+  así que alguien escribiendo párrafos podría seguir haciendo crecer la
+  petición. Cortar el texto de un usuario es una decisión propia.
+- Resumir los registros por día ("3 comidas, 45 min de bici") en vez de
+  listarlos uno a uno cuando el periodo es largo: diría más con menos texto,
+  pero cambia lo que la IA ve.

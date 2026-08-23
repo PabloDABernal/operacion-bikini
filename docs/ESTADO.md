@@ -2,7 +2,7 @@
 
 Documento para retomar el trabajo en frío. Se actualiza al terminar cada spec.
 
-**Última actualización:** 22 de agosto de 2026 (specs 041-045 completadas; **las 046, 047 y 048 desplegadas y pendientes de probar**)
+**Última actualización:** 22 de agosto de 2026 (specs 041-045 completadas; **las 046 a 049 desplegadas y pendientes de probar**)
 
 ## Dónde estamos
 
@@ -76,6 +76,7 @@ El 20 de agosto arrancó la **v4**, que sale de una auditoría de usabilidad hec
 | 046 | La consulta propone dieta o tabla, y tú aceptas (v5) | 🧪 implementada, pendiente de que el usuario la pruebe |
 | 047 | La revisión se puede empezar de verdad (arreglo de la v5) | 🧪 implementada, pendiente de que el usuario la pruebe |
 | 048 | Los flecos que dejó la v5 (auditoría del 23 de agosto) | 🧪 implementada, pendiente de que el usuario la pruebe |
+| 049 | El 413 de Groq y el prompt acotado | 🧪 implementada, pendiente de que el usuario la pruebe |
 
 ## Qué toca ahora
 
@@ -186,6 +187,25 @@ de vista si algún día se tocan la cabecera o la gráfica de peso:
   - **Vuelta a `position: fixed`**, que es lo correcto para una barra siempre visible, con el arreglo de JS que sí funcionaba (`ajustarBarraInferior()`, enganchado en `abrirPestana()` tras el `scrollTo()`). Se revirtieron el `sticky`, los márgenes negativos de borde a borde que necesitaba, el `flex`/`min-height` de `.seccion.activa`/`#pantalla-principal`, y el padding del `body` volvió a reservar hueco para la barra fija. Verificado con Playwright: con una página mucho más alta que la pantalla, arriba del todo y sin haber hecho scroll, la barra ya está visible desde el primer instante — que es justo el caso que sticky no cumplía.
   - **Confirmado por el usuario el 21 de agosto: ya se ve en Ejercicio.** Queda un detalle estético aceptado a propósito: en Ejercicio (la sección donde se mide el hueco de 52 px), la barra queda desplazada esos 52 px respecto a las demás secciones, donde el hueco no aparece y no hace falta corregir nada. El usuario lo notó y decidió dejarlo así antes que seguir tocando algo que ya funciona. Si algún día se quiere ese último pulido, el panel de diagnóstico (código en el historial de git, commit `5829e91`) es la forma de medirlo con datos, no otro intento a ciegas.
 
+- **El 413 de Groq, detectado en producción el 23 de agosto (spec 049).** El
+  usuario vio `ia-saturada (gemini) · reserva: http-413`: Gemini saturado, la
+  reserva de Groq entró bien, y Groq devolvió 413 = la petición no cabe en su
+  **límite de tokens por minuto**. Ese límite, como la cuota, **va por modelo**,
+  y el grande (el primero de `MODELOS_GROQ`) es el más tacaño. Es la misma
+  trampa que el 429 de la spec 032 con otro número. Ahora el 413 hace lo mismo
+  que el 429 en los **dos** puntos de decisión: probar el siguiente modelo
+  dentro de Groq (`llamarAGroq`) y probar el otro proveedor
+  (`estadoMereceReserva`) — sin lo segundo, con "Groq primero" elegido, Gemini
+  no llegaba a intentarse nunca. **Si aparece un código nuevo de "no puedo",
+  mirar esos dos sitios, no uno.**
+- **El prompt crecía sin freno (spec 049).** La spec 045 pasó la ventana de la
+  revisión de 14 días fijos a un mes, pero `describirRegistros()` escribe una
+  línea por registro: un mes con cinco comidas al día son doscientas líneas
+  dentro del prompt, y por eso Groq se ahogaba. Ahora hay topes
+  (`MAXIMO_PESAJES` 30, `MAXIMO_COMIDAS` 60, `MAXIMO_EJERCICIOS` 30) y, cuando
+  recorta, se lo dice a la IA. **El recorte se queda con los primeros elementos
+  porque las listas llegan de más reciente a más antigua: si algún día se
+  cambia ese orden, el recorte se quedaría con lo viejo sin que lo note nadie.**
 - **Spec 032, detectado al probar en producción y ya corregido**: la capa gratuita de Groq va **por modelo**, no por cuenta entera, y `llamarAGroq()` solo pasaba al siguiente modelo de `MODELOS_GROQ` ante un 404 (modelo inexistente), nunca ante un 429 (modelo sin cuota). El modelo grande (`llama-3.3-70b-versatile`, el primero de la lista) es el más tacaño en cuota gratuita, así que un 429 suyo daba Groq entero por perdido sin probar los otros dos. Ahora un 429 también pasa al siguiente modelo. De paso, los mensajes de error de la IA (`cuota-agotada`, `ia-saturada`, etc.) llevan un campo `proveedor` nuevo: con dos proveedores elegibles, el mensaje ya no bastaba para saber si había sido Gemini o Groq.
 - **Código muerto de la spec 029 borrado el 19 de agosto**: `pedirPlanEspecializado()` y `URL_PLAN`/`MAXIMO_INSTRUCCIONES` en `js/consulta.js`, y el archivo `api/plan.js` entero (con su entrada en `vercel.json`). Los planes de dieta y tabla ya eran semanas estructuradas desde las specs 028/029; esto solo quitaba el camino viejo que ya no llamaba nadie. `quedanPlanesHoy`, `pedidosHoy` y `guardarMarcaDePlan` siguen vivos, el cupo de planes no cambia.
 - **Spec 031, detectado por `revisor-codigo` y ya corregido**: la entrevista que abre o reabre una operación se guarda en `consultas` con modo `inicial`/`reinicio` antes de crear la operación, así que sin filtrarla el emblema "Primera consulta" salía conseguido desde el segundo cero. `js/gamificacion.js` ya excluye esos dos modos. Si algún día se añade otro modo de entrevista automática a `consultas`, hay que acordarse de excluirlo también.

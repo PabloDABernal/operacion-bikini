@@ -23,31 +23,55 @@ const MODELOS = [
   "gemini-1.5-flash"
 ];
 
+// Topes del bloque de registros que va DENTRO del prompt (spec 049). Sin esto
+// crecía sin freno: la spec 045 pasó la ventana de la revisión de 14 días
+// fijos a un mes, y aquí se escribe una línea por registro, así que un mes
+// apuntando cinco comidas al día son doscientas líneas. Groq responde 413
+// (petición demasiado grande para su límite de tokens por minuto) mucho antes
+// que Gemini, y la reserva se caía justo cuando más falta hacía.
+//
+// Tres constantes y no una compartida: cada bloque crece a su ritmo.
+const MAXIMO_PESAJES = 30;
+const MAXIMO_COMIDAS = 60;
+const MAXIMO_EJERCICIOS = 30;
+
+// Se queda con los N primeros porque las listas llegan de MÁS RECIENTE a más
+// antigua (así las ordenan listarPesajes/listarComidas/listarEjercicios, por
+// fecha descendente). OJO: si algún día se cambiara ese orden, esto se
+// quedaría con lo más viejo y no lo notaría nadie.
+//
+// Cuando recorta lo dice: si se callara, la IA daría por hecho que ahí empieza
+// tu historial y podría echarte la bronca por dos semanas sin pesarte que en
+// realidad no cabían.
+function recortar(registros, maximo, describir) {
+  if (!registros.length) return "- sin registros";
+
+  const lineas = registros.slice(0, maximo).map(describir);
+  const fuera = registros.length - lineas.length;
+  if (fuera > 0) lineas.push(`- (y ${fuera} más antiguos, que no caben aquí)`);
+
+  return lineas.join("\n");
+}
+
 // Resumen de los registros del usuario, en texto plano para el prompt.
 function describirRegistros({ pesajes = [], comidas = [], ejercicios = [] }) {
   const lineas = [];
 
   lineas.push("PESAJES (kg):");
-  lineas.push(
-    pesajes.length
-      ? pesajes.map((p) => `- ${p.fecha}: ${p.pesoKg} kg`).join("\n")
-      : "- sin registros"
-  );
+  lineas.push(recortar(pesajes, MAXIMO_PESAJES, (p) => `- ${p.fecha}: ${p.pesoKg} kg`));
 
   lineas.push("\nCOMIDAS:");
   lineas.push(
-    comidas.length
-      ? comidas.map((c) => `- ${c.fecha} (${c.momento}): ${c.texto}`).join("\n")
-      : "- sin registros"
+    recortar(comidas, MAXIMO_COMIDAS, (c) => `- ${c.fecha} (${c.momento}): ${c.texto}`)
   );
 
   lineas.push("\nEJERCICIO:");
   lineas.push(
-    ejercicios.length
-      ? ejercicios
-          .map((e) => `- ${e.fecha}: ${e.texto}, ${e.minutos} min, intensidad ${e.intensidad}`)
-          .join("\n")
-      : "- sin registros"
+    recortar(
+      ejercicios,
+      MAXIMO_EJERCICIOS,
+      (e) => `- ${e.fecha}: ${e.texto}, ${e.minutos} min, intensidad ${e.intensidad}`
+    )
   );
 
   return lineas.join("\n");
@@ -214,21 +238,25 @@ async function llamarAGroq(cuerpo, etiqueta) {
       body: JSON.stringify(aFormatoGroq(cuerpo, modelo))
     });
 
-    // 404 significa que ese nombre no existe para esta clave. 429 significa
-    // que ESE modelo se quedó sin cuota, no que Groq entero la haya agotado:
-    // cada modelo tiene la suya, y el grande (el primero de la lista) suele
-    // ser el más tacaño en la capa gratuita. En los dos casos merece la pena
-    // probar el siguiente antes de rendirse.
-    if (ultimaRespuesta.status !== 404 && ultimaRespuesta.status !== 429) {
+    // Tres códigos significan lo mismo a efectos de decidir: ESTE modelo no
+    // puede, otro quizá sí.
+    // - 404: ese nombre no existe para esta clave.
+    // - 429: ESE modelo se quedó sin cuota, no Groq entero (spec 032).
+    // - 413: la petición no cabe en su límite de tokens por minuto (spec 049).
+    // Los límites de Groq van POR MODELO, y el grande —el primero de la
+    // lista— es el más tacaño de la capa gratuita en los tres sentidos.
+    if (![404, 429, 413].includes(ultimaRespuesta.status)) {
       if (ultimaRespuesta.ok) console.log(`${etiqueta} generado con Groq (${modelo}).`);
       return ultimaRespuesta;
     }
 
-    console.error(
+    const motivo =
       ultimaRespuesta.status === 429
-        ? `El modelo ${modelo} de Groq se quedó sin cuota, probando el siguiente.`
-        : `El modelo ${modelo} no existe en Groq para esta clave, probando el siguiente.`
-    );
+        ? "se quedó sin cuota"
+        : ultimaRespuesta.status === 413
+          ? "no admite una petición tan grande (límite de tokens por minuto)"
+          : "no existe para esta clave";
+    console.error(`El modelo ${modelo} de Groq ${motivo}, probando el siguiente.`);
   }
 
   return ultimaRespuesta;
@@ -264,8 +292,12 @@ function jsonDeGroq(datos, esquema) {
 // merece que se pruebe al otro. Un 400 NO: significa que la petición está mal
 // formada, y mandársela a otro solo escondería el fallo. Se usa igual para
 // los dos proveedores, en los dos sentidos (spec 032).
+//
+// El 413 también merece reserva (spec 049), y no solo dentro de Groq: si están
+// elegidos "Groq primero" en Ajustes y los tres modelos se ahogan por tamaño,
+// Gemini —que tiene mucho más margen— no llegaría a intentarse nunca.
 function estadoMereceReserva(estado) {
-  return estado === 429 || estado === 503 || estado >= 500;
+  return estado === 429 || estado === 503 || estado === 413 || estado >= 500;
 }
 
 // Intenta Gemini e interpreta su propio formato de respuesta. Nunca escribe
