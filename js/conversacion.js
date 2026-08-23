@@ -14,6 +14,9 @@ import {
 
 import { db, auth } from "./firebase-config.js";
 import { hoyISO } from "./fechas.js";
+// El cupo vive en consulta.js porque necesita esRevision(); aquí solo se usa
+// (spec 051). La dependencia va en un solo sentido, para no crear un ciclo.
+import { quedanMensajesHoy } from "./consulta.js";
 import { listarPesajes } from "./pesajes.js";
 import { listarComidas } from "./comidas.js";
 import { listarEjercicios } from "./ejercicios.js";
@@ -21,7 +24,6 @@ import { leerAjustes } from "./ajustes.js";
 import { listarConsejos } from "./consejos.js";
 
 const DIAS_DE_HISTORIAL = 14;
-export const MENSAJES_POR_DIA = 20;
 export const MAXIMO_CARACTERES = 1000;
 const ESPERA_MAXIMA_MS = 55000;
 
@@ -41,20 +43,6 @@ function errorConCodigo(codigo, mensaje) {
 // se crea con el primer mensaje.
 export function hiloDeConversacion(consultas) {
   return consultas.find((consulta) => consulta.modo === "conversacion") || null;
-}
-
-// Cuántos mensajes has enviado hoy. Los mensajes antiguos no llevan fecha, así
-// que cuentan como de otro día y no gastan cupo.
-export function enviadosHoy(hilo) {
-  if (!hilo) return 0;
-  const hoy = hoyISO();
-  return hilo.mensajes.filter(
-    (mensaje) => mensaje.de === "usuario" && mensaje.fecha === hoy
-  ).length;
-}
-
-export function quedanMensajesHoy(hilo) {
-  return Math.max(0, MENSAJES_POR_DIA - enviadosHoy(hilo));
 }
 
 // Los consejos guardan cuándo se pidieron como marca de tiempo del servidor,
@@ -195,8 +183,10 @@ async function turnoDeIa(mensajes, registros, contexto) {
 
 // Añade tu mensaje, pide respuesta y guarda las dos cosas. Si la IA falla, no
 // se escribe nada: el mensaje se queda en el campo para reintentar.
-export async function enviarMensaje(uid, hilo, texto) {
-  if (quedanMensajesHoy(hilo) === 0) {
+export async function enviarMensaje(uid, consultas, hilo, texto) {
+  // El cupo ya no se puede calcular solo con el hilo: desde la spec 051 cuenta
+  // también las revisiones, que viven en otros documentos.
+  if (quedanMensajesHoy(consultas) === 0) {
     throw errorConCodigo("cupo-diario", "Cupo diario de mensajes agotado");
   }
 

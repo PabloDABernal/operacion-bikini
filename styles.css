@@ -854,11 +854,6 @@ button:disabled {
   margin-top: 0;
 }
 
-#estado-consulta {
-  color: var(--tinta-suave);
-  min-height: 1.2rem;
-}
-
 .consejo,
 .plan {
   border: 1px solid var(--borde);
@@ -1244,12 +1239,13 @@ button:disabled {
 
 /* La conversación con el nutricionista (spec 023) */
 
+/* Sin alto fijo ni scroll propio desde la spec 051: el hilo va debajo de la
+   caja y del revés, así que lo último ya está arriba y un scroll interno solo
+   estorbaría. Crece hacia abajo con la página. */
 .hilo {
   display: flex;
   flex-direction: column;
   gap: var(--e2);
-  max-height: 60vh;
-  overflow-y: auto;
   padding: var(--e2) 0;
 }
 

@@ -27,8 +27,6 @@ export const DIAS_ENTRE_REVISIONES = 7;
 // texto dentro del prompt: sin tope, cuatro meses sin consulta harían una
 // petición enorme, con más cuota, más latencia y riesgo de respuesta truncada.
 const MAXIMO_DIAS_DE_REVISION = 30;
-const MAXIMO_CONSULTAS_DIARIAS = 2;
-export const MAXIMO_CARACTERES_RESPUESTA = 1000;
 // Justo por debajo de los 60 s que tiene la función en Vercel: así, cuando
 // algo va mal, llega SU mensaje de error en vez de un corte del navegador que
 // no distingue "la IA está saturada" de "no hay internet".
@@ -50,7 +48,8 @@ const MENSAJES = {
     "La IA está tardando demasiado. Espera un momento y vuelve a intentarlo.",
   "ia-saturada":
     "La IA está saturada ahora mismo. Espera un minuto y vuelve a intentarlo.",
-  "limite-diario": "Ya has pasado consulta 2 veces hoy. Vuelve mañana.",
+  "limite-diario": "Te has quedado sin mensajes por hoy. Vuelve mañana.",
+  "cupo-diario": "Te has quedado sin mensajes por hoy. Vuelve mañana.",
   "cuota-agotada": "La IA ha alcanzado su límite diario gratuito. Prueba mañana.",
   "respuesta-ilegible": "La IA no ha sabido responder. Inténtalo de nuevo."
 };
@@ -161,6 +160,55 @@ export function esRevision(consulta) {
   );
 }
 
+// El cupo de mensajes al día (spec 051). Vive aquí y no en conversacion.js
+// porque necesita esRevision(), que es de este módulo: al revés habría un ciclo
+// de imports, porque empezarConsulta() también necesita el cupo.
+export const MENSAJES_POR_DIA = 20;
+
+// Desde la spec 051 el cupo es UNO solo y cuenta todo lo que le cuesta a la IA:
+// lo que escribes en la conversación, lo que le contestas a una revisión, y un
+// mensaje más por cada revisión que arrancas (empezarla es la llamada más
+// cara, y sin eso nada impediría pedir diez en una tarde).
+//
+// Ojo: los mensajes de una revisión NO llevan fecha propia —solo los de la
+// conversación la llevan, desde la spec 023—, así que se cuentan los de las
+// revisiones creadas hoy. Contestar hoy a una revisión de ayer no gasta: es
+// una imprecisión conocida, a favor del usuario, y evita ponerle fecha a unos
+// mensajes que nunca la tuvieron.
+export function enviadosHoy(consultas = []) {
+  const hoy = hoyISO();
+
+  const mios = (consulta) =>
+    (consulta.mensajes || []).filter(
+      (mensaje) => mensaje.de === "usuario" && mensaje.fecha === hoy
+    ).length;
+
+  return consultas.reduce((total, consulta) => {
+    if (consulta.modo === "conversacion") return total + mios(consulta);
+    if (!esRevision(consulta)) return total;
+    if (!esDeHoy(consulta.creadaEn)) return total;
+
+    // La que arranca cuenta 1, más lo que le hayas contestado. Sus mensajes no
+    // llevan fecha, así que se cuentan todos los tuyos: la revisión es de hoy.
+    const contestados = (consulta.mensajes || []).filter(
+      (mensaje) => mensaje.de === "usuario"
+    ).length;
+    return total + 1 + contestados;
+  }, 0);
+}
+
+function esDeHoy(marca) {
+  if (!marca || !marca.toDate) return false;
+  const fecha = marca.toDate();
+  const mes = String(fecha.getMonth() + 1).padStart(2, "0");
+  const dia = String(fecha.getDate()).padStart(2, "0");
+  return `${fecha.getFullYear()}-${mes}-${dia}` === hoyISO();
+}
+
+export function quedanMensajesHoy(consultas) {
+  return Math.max(0, MENSAJES_POR_DIA - enviadosHoy(consultas));
+}
+
 // La última revisión terminada, o null si aún no hay ninguna en esta operación.
 // Las de operaciones anteriores no están: archivar() las mueve fuera al cerrar.
 export function ultimaRevision(consultas) {
@@ -188,27 +236,6 @@ export function diasDesde(marca) {
   const hoy = new Date();
   hoy.setHours(0, 0, 0, 0);
   return Math.round((hoy - desde) / 86400000);
-}
-
-// Las consultas abandonadas también cuentan: si no, se podría reiniciar sin fin.
-//
-// La conversación NO cuenta: es un solo hilo que dura toda la operación y
-// tiene su propio cupo de mensajes (spec 023). Si contara, el primer mensaje
-// del día se comería una de las dos plazas de la entrevista y los planes.
-export function empezadasHoy(consultas) {
-  const hoy = hoyISO();
-  return consultas.filter((consulta) => {
-    if (consulta.modo === "conversacion") return false;
-    if (!consulta.creadaEn) return true;
-    const fecha = consulta.creadaEn.toDate();
-    const mes = String(fecha.getMonth() + 1).padStart(2, "0");
-    const dia = String(fecha.getDate()).padStart(2, "0");
-    return `${fecha.getFullYear()}-${mes}-${dia}` === hoy;
-  }).length;
-}
-
-export function quedanConsultasHoy(consultas) {
-  return empezadasHoy(consultas) < MAXIMO_CONSULTAS_DIARIAS;
 }
 
 function errorConCodigo(codigo, mensaje) {
@@ -309,8 +336,9 @@ function periodoDeRevision(consultas, operacionActiva) {
 }
 
 export async function empezarConsulta(uid, consultas) {
-  if (!quedanConsultasHoy(consultas)) {
-    throw errorConCodigo("limite-diario", "Límite diario de consultas alcanzado");
+  // Desde la spec 051 hay un solo cupo y empezar una revisión gasta un mensaje.
+  if (quedanMensajesHoy(consultas) === 0) {
+    throw errorConCodigo("limite-diario", "Cupo diario de mensajes agotado");
   }
 
   const [contexto, operaciones] = await Promise.all([
@@ -346,7 +374,14 @@ export async function empezarConsulta(uid, consultas) {
 
 // Añade la respuesta del usuario y el siguiente turno de la IA. Si la IA cierra
 // la consulta, el cierre se guarda como último mensaje del hilo (spec 044).
-export async function responder(uid, consulta, texto) {
+export async function responder(uid, consultas, consulta, texto) {
+  // La caja ya se deshabilita sin cupo, pero esto es la misma defensa que ya
+  // tenía enviarMensaje(): con dos pestañas abiertas la pantalla puede ir
+  // retrasada.
+  if (quedanMensajesHoy(consultas) === 0) {
+    throw errorConCodigo("limite-diario", "Cupo diario de mensajes agotado");
+  }
+
   // El mismo periodo con el que se empezó, para que la IA no vea una ventana
   // distinta a mitad de conversación (spec 045).
   const desde = consulta.desde || null;

@@ -488,23 +488,16 @@
         <div id="propuestas-consulta" class="oculta"></div>
         <p id="error-propuesta" class="error" role="alert"></p>
 
-        <form id="form-respuesta" class="oculta">
-          <label for="respuesta-texto">Tu respuesta</label>
-          <textarea id="respuesta-texto" rows="3"></textarea>
-          <button type="submit" id="btn-responder">Responder</button>
-        </form>
-
-        <p id="estado-consulta"></p>
-        <p id="error-consulta" class="error" role="alert"></p>
       </div>
 
-      <!-- La conversación que dura -->
+      <!-- La conversación que dura. Desde la spec 051 la caja va ARRIBA del
+           hilo y el hilo se pinta del revés (lo último primero): antes había
+           que recorrer meses de conversación solo para escribir. -->
       <div id="bloque-conversacion" class="oculta">
         <h3>Habla con tu nutricionista</h3>
-        <div id="hilo-conversacion" class="hilo"></div>
 
         <form id="form-conversacion">
-          <label for="conversacion-texto">Cuéntale cómo vas</label>
+          <label for="conversacion-texto" id="etiqueta-conversacion">Cuéntale cómo vas</label>
           <textarea id="conversacion-texto" rows="3"
             placeholder="esta semana he picado más de la cuenta"></textarea>
           <button type="submit" id="btn-enviar-conversacion">Enviar</button>
@@ -513,6 +506,8 @@
         <p id="cupo-conversacion" class="explicacion"></p>
         <p id="estado-conversacion"></p>
         <p id="error-conversacion" class="error" role="alert"></p>
+
+        <div id="hilo-conversacion" class="hilo"></div>
       </div>
     </div>
 

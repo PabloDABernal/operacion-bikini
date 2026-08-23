@@ -2,7 +2,7 @@
 
 Documento para retomar el trabajo en frío. Se actualiza al terminar cada spec.
 
-**Última actualización:** 22 de agosto de 2026 (specs 041-045 completadas; **las 046 a 050 desplegadas y pendientes de probar**; arranca la v6)
+**Última actualización:** 22 de agosto de 2026 (specs 041-045 completadas; **las 046 a 051 desplegadas y pendientes de probar**; arranca la v6)
 
 ## Dónde estamos
 
@@ -78,7 +78,7 @@ El 20 de agosto arrancó la **v4**, que sale de una auditoría de usabilidad hec
 | 048 | Los flecos que dejó la v5 (auditoría del 23 de agosto) | 🧪 implementada, pendiente de que el usuario la pruebe |
 | 049 | El 413 de Groq y el prompt acotado | 🧪 implementada, pendiente de que el usuario la pruebe |
 | 050 | Un solo hilo: ver la conversación y las revisiones juntas (v6) | 🧪 implementada, pendiente de que el usuario la pruebe |
-| 051 | Una sola caja de texto y un solo cupo (v6) | 📝 spec escrita, sin implementar |
+| 051 | Una caja arriba, el hilo del revés, y un solo cupo (v6) | 🧪 implementada, pendiente de que el usuario la pruebe |
 | 052 | La entrevista de alta, también en el hilo (v6) | 📝 spec escrita, sin implementar |
 
 ## Qué toca ahora
@@ -128,7 +128,7 @@ hilos, dos cajas de texto y dos cupos en la misma pantalla. Está en
 | Spec | Qué | Estado |
 |---|---|---|
 | 050 | Ver la conversación y las revisiones en un solo hilo | 🧪 desplegada |
-| 051 | Una sola caja de texto y un solo cupo | 📝 escrita |
+| 051 | Una caja arriba, el hilo del revés, y un solo cupo | 🧪 desplegada |
 | 052 | La entrevista de alta, también en el hilo | 📝 escrita |
 
 **Se partió en tres ANTES de escribir código**, cuando `revisor-specs` avisó de
@@ -147,6 +147,17 @@ escriban mensajes sintéticos: uno falso de usuario saldría pintado en el hilo.
 de alta también irá al hilo. Se recomendó dejarla aparte por riesgo —es el
 código que rellena Ajustes y crea la operación—, y él decidió que entre. Por eso
 va sola en su spec: si rompe algo, se revierte solo eso.
+
+**`node --check` NO vale para estos módulos, y me ha mordido dos veces el mismo
+día.** `node --check fichero.js` lo trata como CommonJS: da **exit 0 con código
+que es sintácticamente inválido como módulo ES**, que es como los sirve el
+navegador (`<script type="module">`). Al implementar la 051 quedó un bloque
+huérfano con su `});` suelto y `node --check` no dijo nada; lo cazó
+`revisor-codigo`. La comprobación buena es:
+
+```
+node --input-type=module --check < js/app.js
+```
 
 **El fallo del 23 de agosto que dejó la app en "Cargando…", y la lección que
 más vale tener presente:** al implementar la 050 se añadió `esRevision` al

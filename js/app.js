@@ -116,25 +116,23 @@ import {
 } from "./ejercicios.js";
 
 import {
-  MENSAJES_POR_DIA,
   MAXIMO_CARACTERES,
   hiloDeConversacion,
-  quedanMensajesHoy,
   hiloCompleto,
   enviarMensaje,
   consejosAntiguos
 } from "./conversacion.js";
 
 import {
-  MAXIMO_CARACTERES_RESPUESTA,
   listarConsultas,
   listarPlanes,
   consultaEnCurso,
   esRevision,
+  MENSAJES_POR_DIA,
+  quedanMensajesHoy,
   DIAS_ENTRE_REVISIONES,
   diasDesde,
   ultimaRevision,
-  quedanConsultasHoy,
   empezarConsulta,
   responder,
   TIPOS_ESPECIALIZADOS,
@@ -2717,7 +2715,10 @@ function pintarConversacion() {
   const mensajes = hiloCompleto(hiloAbierto, consejosDeAntes, revisiones);
 
   contenedor.innerHTML = "";
-  mensajes.forEach((mensaje) => {
+  // Del revés (spec 051): lo último arriba, pegado a la caja, y lo antiguo
+  // hacia abajo. Se invierte al PINTAR, no al ordenar: darle la vuelta al dato
+  // haría que el separador de revisión se calculara al revés.
+  [...mensajes].reverse().forEach((mensaje) => {
     // El separador no es un mensaje: es una marca del hilo que dice dónde
     // empezó una revisión, para distinguirla de la charla del día a día.
     if (mensaje.empiezaRevision) {
@@ -2734,24 +2735,23 @@ function pintarConversacion() {
     contenedor.appendChild(vacio);
   }
 
-  const quedan = quedanMensajesHoy(hiloAbierto);
+  const quedan = quedanMensajesHoy(consultasCargadas);
   id("cupo-conversacion").textContent = quedan
     ? `Te quedan ${quedan} ${quedan === 1 ? "mensaje" : "mensajes"} hoy.`
     : `Has gastado tus ${MENSAJES_POR_DIA} mensajes de hoy. Vuelve mañana.`;
 
   id("conversacion-texto").disabled = quedan === 0;
   id("btn-enviar-conversacion").disabled = quedan === 0;
-
-  // Lo último dicho es lo que interesa ver.
-  contenedor.scrollTop = contenedor.scrollHeight;
 }
 
+// Un solo envío con dos destinos (spec 051): si hay una revisión en marcha, lo
+// que escribes le contesta a ella; si no, es una pregunta normal. Antes eran
+// dos formularios distintos, cada uno con su caja, su estado y su error.
 id("form-conversacion").addEventListener("submit", async (evento) => {
   evento.preventDefault();
 
   const campo = id("conversacion-texto");
   const error = id("error-conversacion");
-  const estado = id("estado-conversacion");
   const texto = campo.value.trim();
 
   error.textContent = "";
@@ -2762,11 +2762,17 @@ id("form-conversacion").addEventListener("submit", async (evento) => {
     return;
   }
 
+  if (consultaAbierta) {
+    await contestarALaRevision(campo, texto);
+    return;
+  }
+
+  const estado = id("estado-conversacion");
   estado.textContent = "Pensando…";
   id("btn-enviar-conversacion").disabled = true;
 
   try {
-    await enviarMensaje(uidActual, hiloAbierto, texto);
+    await enviarMensaje(uidActual, consultasCargadas, hiloAbierto, texto);
     // El mensaje solo se borra del campo si ha llegado: si falla, se reintenta
     // sin volver a escribirlo.
     campo.value = "";
@@ -2778,6 +2784,36 @@ id("form-conversacion").addEventListener("submit", async (evento) => {
     id("btn-enviar-conversacion").disabled = false;
   }
 });
+
+async function contestarALaRevision(campo, texto) {
+  // La respuesta solo se borra si se ha enviado bien: si falla, se reintenta.
+  const idDeLaConsulta = consultaAbierta.id;
+  let termino = false;
+  let inicial = false;
+
+  const fueBien = await conEspera(async () => {
+    ({ termino, inicial } = await responder(
+      uidActual,
+      consultasCargadas,
+      consultaAbierta,
+      texto
+    ));
+  });
+
+  if (!fueBien) return;
+
+  campo.value = "";
+  if (termino) consultaReciénTerminada = idDeLaConsulta;
+  await refrescarConsulta();
+
+  // La entrevista de bienvenida ha dejado ajustes y perfil guardados: hay que
+  // releerlos para que la cabecera y el formulario los enseñen.
+  if (termino && inicial) {
+    await refrescarAjustes();
+    // La entrevista ha creado la operación: hasta ahora no se podía apuntar.
+    await refrescarOperaciones();
+  }
+}
 
 // --- Consulta ------------------------------------------------------------
 
@@ -2857,7 +2893,7 @@ async function aceptarPropuesta(propuesta, instrucciones, boton) {
   const error = id("error-propuesta");
   error.textContent = "";
   boton.disabled = true;
-  id("estado-consulta").textContent = "Pensando…";
+  id("estado-conversacion").textContent = "Pensando…";
 
   try {
     // El mismo camino que "Pedírsela a la IA" de Comidas y Ejercicio: un solo
@@ -2873,7 +2909,7 @@ async function aceptarPropuesta(propuesta, instrucciones, boton) {
   } catch (fallo) {
     error.textContent = mensajeDeErrorDeConsulta(fallo.codigo);
   } finally {
-    id("estado-consulta").textContent = "";
+    id("estado-conversacion").textContent = "";
     // Siempre, también tras cancelar: un botón que se queda muerto no se
     // recupera hasta el siguiente repintado, y tras cancelar no hay ninguno.
     boton.disabled = false;
@@ -2906,7 +2942,8 @@ function textoDeUltimaRevision(dias) {
 // sin consulta (con o sin cupo para hoy).
 function pintarEstadoConsulta() {
   const enCurso = Boolean(consultaAbierta);
-  const quedanHoy = quedanConsultasHoy(consultasCargadas);
+  // Un solo cupo desde la spec 051: empezar una revisión gasta un mensaje.
+  const quedanHoy = quedanMensajesHoy(consultasCargadas) > 0;
   const terminada = enCurso
     ? null
     : consultasCargadas.find((consulta) => consulta.id === consultaReciénTerminada);
@@ -2918,8 +2955,11 @@ function pintarEstadoConsulta() {
   // Con una consulta a medias no hay nada que contar de la anterior.
   if (enCurso) id("ultima-revision").classList.add("oculta");
 
-  id("form-respuesta").classList.toggle("oculta", !enCurso);
   id("btn-empezar-consulta").classList.toggle("oculta", enCurso);
+  // La caja es la misma; lo que cambia es a quién le hablas (spec 051).
+  id("etiqueta-conversacion").textContent = enCurso
+    ? "Tu respuesta"
+    : "Cuéntale cómo vas";
 
   // La explicación de la entrevista de alta solo aplica sin operación: con una
   // en marcha, pasar consulta es una revisión, no un alta.
@@ -2968,9 +3008,9 @@ function pintarEstadoConsulta() {
           : "Pasar consulta";
     id("aviso-consulta").textContent = quedanHoy
       ? terminada
-        ? "Consulta terminada. Lo que te ha dicho está al final de la conversación."
+        ? "Consulta terminada. Lo que te ha dicho está arriba del todo."
         : ""
-      : "Ya has pasado consulta 2 veces hoy.";
+      : "Te has quedado sin mensajes por hoy.";
   }
 
   // Las revisiones ya no se pintan aquí: desde la spec 050 van dentro del hilo
@@ -3091,7 +3131,7 @@ async function refrescarConsulta() {
     // repintar el bloque de gamificación cuando esta llegue.
     refrescarHoy();
   } catch {
-    id("error-consulta").textContent =
+    id("error-conversacion").textContent =
       "No se ha podido cargar tu consulta. Comprueba tu conexión.";
   }
 }
@@ -3099,11 +3139,13 @@ async function refrescarConsulta() {
 // Envuelve las llamadas a la IA: bloquea la pantalla, muestra "Pensando…" y
 // traduce el error. Devuelve true si fue bien.
 async function conEspera(accion) {
-  const error = id("error-consulta");
+  // Un solo sitio para "Pensando…" y para los errores desde la spec 051: van
+  // pegados a la caja, que es donde se mira después de enviar.
+  const error = id("error-conversacion");
   error.textContent = "";
-  id("estado-consulta").textContent = "Pensando…";
+  id("estado-conversacion").textContent = "Pensando…";
   id("btn-empezar-consulta").disabled = true;
-  id("btn-responder").disabled = true;
+  id("btn-enviar-conversacion").disabled = true;
 
   try {
     await accion();
@@ -3112,8 +3154,8 @@ async function conEspera(accion) {
     error.textContent = mensajeDeErrorDeConsulta(fallo.codigo);
     return false;
   } finally {
-    id("estado-consulta").textContent = "";
-    id("btn-responder").disabled = false;
+    id("estado-conversacion").textContent = "";
+    id("btn-enviar-conversacion").disabled = false;
     id("btn-empezar-consulta").disabled = false;
   }
 }
@@ -3123,44 +3165,6 @@ id("btn-empezar-consulta").addEventListener("click", async () => {
   const fueBien = await conEspera(() => empezarConsulta(uidActual, consultasCargadas));
   if (fueBien) await refrescarConsulta();
   else pintarEstadoConsulta();
-});
-
-id("form-respuesta").addEventListener("submit", async (evento) => {
-  evento.preventDefault();
-  const campo = id("respuesta-texto");
-  const error = id("error-consulta");
-  const texto = campo.value.trim();
-
-  if (!texto) {
-    error.textContent = "Escribe una respuesta.";
-    return;
-  }
-  if (texto.length > MAXIMO_CARACTERES_RESPUESTA) {
-    error.textContent = `Máximo ${MAXIMO_CARACTERES_RESPUESTA} caracteres.`;
-    return;
-  }
-
-  // La respuesta solo se borra si se ha enviado bien: si falla, se reintenta.
-  const idDeLaConsulta = consultaAbierta.id;
-  let termino = false;
-  let inicial = false;
-
-  const fueBien = await conEspera(async () => {
-    ({ termino, inicial } = await responder(uidActual, consultaAbierta, texto));
-  });
-
-  if (fueBien) {
-    campo.value = "";
-    if (termino) consultaReciénTerminada = idDeLaConsulta;
-    await refrescarConsulta();
-    // La entrevista de bienvenida ha dejado ajustes y perfil guardados: hay
-    // que releerlos para que la cabecera y el formulario los enseñen.
-    if (termino && inicial) {
-      await refrescarAjustes();
-      // La entrevista ha creado la operación: hasta ahora no se podía apuntar.
-      await refrescarOperaciones();
-    }
-  }
 });
 
 // --- Fotos ---------------------------------------------------------------
@@ -3860,7 +3864,6 @@ function limpiarFormularios() {
     "error-pesaje",
     "error-comida",
     "error-ejercicio",
-    "error-consulta",
     "error-conversacion",
     "error-foto",
     "error-ajustes",
@@ -3871,10 +3874,9 @@ function limpiarFormularios() {
   ].forEach((campo) => {
     id(campo).textContent = "";
   });
-  id("estado-consulta").textContent = "";
+  id("estado-conversacion").textContent = "";
   id("estado-foto").textContent = "";
   cerrarVisor();
-  id("respuesta-texto").value = "";
   consultaReciénTerminada = null;
 }
 

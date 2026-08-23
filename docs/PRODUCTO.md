@@ -199,9 +199,13 @@ nutricionista de verdad no tiene dos libretas.
   sitio y en orden: las dudas del día a día y las revisiones periódicas. Al
   pasar consulta ves lo que ya habíais hablado, que es justo el contexto que
   hace falta para entender lo que te dice.
-- **Una sola caja de texto.** Escribes en el mismo sitio siempre. Si hay una
-  revisión en marcha, lo que escribes le contesta a ella; si no, es una pregunta
-  normal.
+- **Una sola caja de texto, arriba del todo.** Escribes en el mismo sitio
+  siempre. Si hay una revisión en marcha, lo que escribes le contesta a ella; si
+  no, es una pregunta normal.
+- **Lo último, lo primero que se ve.** El hilo va debajo de la caja y **del
+  revés**: lo más reciente arriba, lo más antiguo hacia abajo. No hay que
+  recorrer meses de conversación para escribir ni para leer lo último; se baja
+  solo si se quiere ver cómo empezó.
 - **Un solo cupo: 20 mensajes al día.** Desaparece el cupo aparte de consultas.
   Empezar una revisión cuenta como un mensaje, que es lo que la mantiene
   acotada sin necesidad de un segundo número que explicar.
