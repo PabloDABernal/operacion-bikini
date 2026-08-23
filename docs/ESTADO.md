@@ -148,6 +148,24 @@ de alta también irá al hilo. Se recomendó dejarla aparte por riesgo —es el
 código que rellena Ajustes y crea la operación—, y él decidió que entre. Por eso
 va sola en su spec: si rompe algo, se revierte solo eso.
 
+**El fallo del 23 de agosto que dejó la app en "Cargando…", y la lección que
+más vale tener presente:** al implementar la 050 se añadió `esRevision` al
+bloque de importación de `./conversacion.js`, cuando la exporta
+`./consulta.js`. Un import nombrado que no existe **tumba el módulo entero**:
+la app se quedaba en la pantalla de carga, sin más pista. Lo grave es lo que
+NO lo detectó: `node --check` solo valida sintaxis de un archivo, no resuelve
+imports, y `revisor-codigo` tampoco lo vio. **Antes de dar por buena cualquier
+spec que toque imports, comprobar el grafo de módulos**, por ejemplo con este
+recorrido de `js/` que verifica que cada import nombrado existe de verdad en el
+archivo del que se pide:
+
+```
+node --input-type=module -e "const fs=await import('node:fs'); /* recorre js/, saca los export de cada archivo y comprueba cada import nombrado */"
+```
+
+Está en el historial del commit que lo arregló. Con 214 imports en `js/`, esto
+no se ve a ojo.
+
 **El fallo que destapó la 047, y la lección:** con una operación en marcha
 **no había forma de empezar una consulta**. `#btn-empezar-consulta` vivía
 dentro de `#bloque-entrevista`, que `pintarEstadoConsulta()` escondía con

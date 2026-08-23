@@ -120,7 +120,6 @@ import {
   MAXIMO_CARACTERES,
   hiloDeConversacion,
   quedanMensajesHoy,
-  esRevision,
   hiloCompleto,
   enviarMensaje,
   consejosAntiguos
@@ -131,6 +130,7 @@ import {
   listarConsultas,
   listarPlanes,
   consultaEnCurso,
+  esRevision,
   DIAS_ENTRE_REVISIONES,
   diasDesde,
   ultimaRevision,
