@@ -370,7 +370,13 @@ export async function responder(uid, consulta, texto) {
     await updateDoc(referencia, {
       mensajes: [...mensajes, { de: "ia", texto: respuesta.cierre }],
       estado: "terminada",
-      terminadaEn: serverTimestamp()
+      terminadaEn: serverTimestamp(),
+      // Instrucciones para pedir una semana nueva, si la IA lo ha propuesto
+      // (spec 046). Vacío = sin propuesta. En el documento llevan nombre
+      // propio: los "nutricion"/"ejercicio" del esquema de la IA ya engañaron
+      // una vez y no hay razón para arrastrarlos hasta aquí.
+      propuestaDieta: respuesta.nutricion || "",
+      propuestaTabla: respuesta.ejercicio || ""
     });
 
     // La entrevista de bienvenida deja los ajustes rellenos y el perfil

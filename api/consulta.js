@@ -100,7 +100,13 @@ Formato de respuesta (JSON). Devuelve SIEMPRE todos los campos, sin excepción:
 Sobre el cierre:
 - "cierre": el resumen de la revisión. Cómo ha ido el periodo, qué le conviene priorizar y qué toca hacer hasta la próxima. En prosa, hablándole de tú. Máximo 200 palabras.
 - NO hagas un menú comida a comida ni una rutina día a día: esta persona ya tiene en la app una dieta semanal y una tabla de ejercicio para eso. Habla de pautas y de actitud, no de listas.
-- "nutricion" y "ejercicio" van SIEMPRE vacíos. Existen por compatibilidad y no se usan.`;
+
+Sobre proponerle cambiar la dieta o la tabla ("nutricion" y "ejercicio"):
+- Esta persona tiene en la app una dieta semanal y una tabla de ejercicio. Si de la revisión sale que le conviene cambiar alguna, puedes proponérselo, y ella decide.
+- LO NORMAL ES NO PROPONER NADA. Solo propón si hay un motivo claro en los datos: lleva semanas estancada, se aburre de lo mismo, ha cambiado su disponibilidad o su material, se ha lesionado, o te ha dicho que no puede seguirla. Si la cosa va bien, no toques lo que funciona.
+- "nutricion": si le propones dieta nueva, aquí van las INSTRUCCIONES para hacérsela, no la dieta. Qué tener en cuenta, qué priorizar, qué evitar, según lo que acabáis de hablar. Máximo 100 palabras. Si no le propones dieta, vacío.
+- "ejercicio": lo mismo para la tabla de ejercicio. Máximo 100 palabras. Si no le propones tabla, vacío.
+- Si propones algo, DILO también dentro de "cierre", con tus palabras, para que sepa de qué va lo que le estás ofreciendo.`;
 
 // La conversación que dura (spec 023): aquí la IA no entrevista, charla. El
 // texto de su respuesta viaja en el campo "pregunta", que en este modo es
@@ -125,9 +131,12 @@ En "pregunta" va tu respuesta entera. Los demás campos, vacíos.`;
 // Gemini se lo saltaba y llegaban planes sin rutina. Los que no aplican en
 // cada turno vienen como cadena vacía.
 //
-// "nutricion" y "ejercicio" ya no se usan (spec 044): siguen aquí, vacíos,
-// porque la spec 046 va a volver a mover este esquema para meter las
-// propuestas de dieta y de tabla, y no vale la pena tocarlo dos veces.
+// "nutricion" y "ejercicio" ya no son un plan (eso se retiró en la spec 044):
+// desde la 046 son las INSTRUCCIONES para pedir una dieta o una tabla nuevas
+// cuando la revisión concluye que conviene cambiarlas. Vacíos = sin propuesta.
+// Se reaprovecharon los dos campos en vez de añadir otros para no volver a
+// mover el esquema. En el documento guardado sí llevan nombre propio
+// (propuestaDieta / propuestaTabla).
 const ESQUEMA = {
   type: "OBJECT",
   properties: {
@@ -261,6 +270,11 @@ module.exports = async (req, res) => {
     return res.status(200).json({
       tipo: "cierre",
       cierre: respuesta.cierre,
+      // Instrucciones para pedir una semana nueva, si la IA lo ha propuesto
+      // (spec 046). Vacías = sin propuesta. Solo en la revisión: la entrevista
+      // de bienvenida no propone nada, que para eso acaba de conocerte.
+      nutricion: inicial ? "" : respuesta.nutricion || "",
+      ejercicio: inicial ? "" : respuesta.ejercicio || "",
       // Solo la entrevista de bienvenida trae datos personales; en el resto
       // vienen vacíos y el navegador no guarda nada.
       nombre: inicial ? respuesta.nombre : "",

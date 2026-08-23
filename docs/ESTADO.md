@@ -2,7 +2,7 @@
 
 Documento para retomar el trabajo en frío. Se actualiza al terminar cada spec.
 
-**Última actualización:** 22 de agosto de 2026 (specs 041-045 completadas; v5 en marcha: solo queda la 046)
+**Última actualización:** 22 de agosto de 2026 (specs 041-045 completadas; **la 046 desplegada y pendiente de probar** cierra la v5)
 
 ## Dónde estamos
 
@@ -73,7 +73,7 @@ El 20 de agosto arrancó la **v4**, que sale de una auditoría de usabilidad hec
 | 043 | Las filas del diario, en dos líneas y con iconos | ✅ completada |
 | 044 | Fuera los planes y fuera "Abandonar consulta" (v5) | ✅ completada |
 | 045 | La consulta, como revisión de lo hecho desde la anterior (v5) | ✅ completada |
-| 046 | La consulta propone dieta o tabla, y tú aceptas (v5) | 📝 spec escrita, sin implementar |
+| 046 | La consulta propone dieta o tabla, y tú aceptas (v5) | 🧪 implementada, pendiente de que el usuario la pruebe |
 
 ## Qué toca ahora
 
@@ -110,7 +110,15 @@ principio** en tres specs (no se parten a posteriori):
 |---|---|---|
 | 044 | Fuera los planes y fuera "Abandonar consulta" | ✅ completada |
 | 045 | La consulta, como revisión de lo hecho desde la anterior | ✅ completada |
-| 046 | La consulta propone dieta o tabla, y tú aceptas | 📝 escrita |
+| 046 | La consulta propone dieta o tabla, y tú aceptas | 🧪 desplegada, pendiente de probar |
+
+**Lo que salió a la luz en la 046:** el hilo de una consulta terminada **solo
+se veía mientras no recargaras**. Dependía de `consultaReciénTerminada`, una
+variable en memoria, así que el cierre que la spec 044 prometía "al final de la
+conversación" se esfumaba con un F5. Se arregló dentro de la 046 porque sin eso
+la propuesta tampoco sobrevivía. Ahora el hilo sale de `ultimaRevision()`, que
+se lee de Firestore; `consultaReciénTerminada` sigue viva, pero solo para el
+mensaje y el texto del botón.
 
 **La trampa de la 045:** `INSTRUCCIONES` en `api/consulta.js` **no era "el modo
 normal"**: era la base de la entrevista, y `INSTRUCCIONES_INICIAL` e

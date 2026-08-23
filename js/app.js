@@ -1794,7 +1794,10 @@ async function generarDieta(instrucciones) {
     throw Object.assign(new Error("Sin cupo"), { codigo: "limite-planes" });
   }
 
-  if (dietaActiva && !confirm("Ya tienes una dieta. ¿La sustituyo?")) return;
+  // Devuelve false si el usuario cancela: quien llama necesita distinguir
+  // "cancelado" de "generado" para no dar por hecha una semana que no existe
+  // (spec 046).
+  if (dietaActiva && !confirm("Ya tienes una dieta. ¿La sustituyo?")) return false;
 
   const [registros, ajustes] = await Promise.all([
     registrosRecientes(),
@@ -1832,6 +1835,7 @@ async function generarDieta(instrucciones) {
   await refrescarDieta();
   await refrescarConsulta();
   id("aviso-dieta").textContent = respuesta.aviso || "";
+  return true;
 }
 
 // Los registros de los últimos 14 días, que es lo que mira la IA.
@@ -2363,6 +2367,7 @@ async function generarTabla(instrucciones) {
   await refrescarTabla();
   await refrescarConsulta();
   id("aviso-tabla").textContent = respuesta.aviso || "";
+  return true;
 }
 
 async function refrescarTabla() {
@@ -2759,9 +2764,11 @@ let planesCargados = [];
 let consultaAbierta = null;
 
 // Id de la consulta que se acaba de terminar en esta sesión. Sirve para el
-// tercer estado de la pantalla: hilo completo a la vista y botón "Empezar
-// otra consulta". Se pierde al recargar, y entonces la pestaña vuelve al
-// estado inicial con el plan ya en el historial.
+// tercer estado de la pantalla: el mensaje "Consulta terminada…" y el botón
+// "Empezar otra consulta", en vez del contador de "hace N días" (spec 045).
+// Se pierde al recargar, y está bien que así sea: "recién terminada" es un
+// estado de sesión. El HILO ya no depende de ella desde la spec 046 — ese se
+// lee de Firestore y sobrevive a un F5.
 let consultaReciénTerminada = null;
 
 function pintarHilo(consulta) {
@@ -2775,6 +2782,93 @@ function pintarHilo(consulta) {
     burbuja.textContent = mensaje.texto;
     hilo.appendChild(burbuja);
   });
+}
+
+// Lo que la consulta te propuso al cerrarse (spec 046). Propone, no sustituye:
+// hasta que no tocas el botón, tu dieta y tu tabla siguen intactas.
+const PROPUESTAS = [
+  {
+    campo: "propuestaDieta",
+    tipo: "dieta",
+    etiqueta: "Pedir esa dieta",
+    seccion: "comidas",
+    subseccion: "dieta"
+  },
+  {
+    campo: "propuestaTabla",
+    tipo: "ejercicio",
+    etiqueta: "Pedir esa tabla",
+    seccion: "ejercicio",
+    subseccion: "tabla"
+  }
+];
+
+// Se le pasa null con una consulta en curso: mientras hablas no hay nada
+// cerrado que proponer.
+function pintarPropuestas(consulta) {
+  const caja = id("propuestas-consulta");
+  caja.innerHTML = "";
+  id("error-propuesta").textContent = "";
+
+  const pendientes = consulta
+    ? PROPUESTAS.filter((propuesta) => consulta[propuesta.campo])
+    : [];
+
+  caja.classList.toggle("oculta", pendientes.length === 0);
+
+  pendientes.forEach((propuesta) => {
+    const quedan = quedanPlanesHoy(planesCargados, propuesta.tipo);
+    const boton = botonDeFila(propuesta.etiqueta, () =>
+      aceptarPropuesta(propuesta, consulta[propuesta.campo], boton)
+    );
+    boton.className = "accion-principal";
+    // Sin cupo o sin operación no se puede pedir. generarDieta()/generarTabla()
+    // comprueban el cupo pero NO la operación: eso lo hace hoy quien pinta el
+    // botón, y aquí el que lo pinta es este.
+    boton.disabled = quedan === 0 || !hayOperacion;
+    caja.appendChild(boton);
+
+    const motivo = !hayOperacion
+      ? "No hay ninguna operación en marcha."
+      : quedan === 0
+        ? `Ya has pedido 2 ${TIPOS_ESPECIALIZADOS[propuesta.tipo].plural} hoy. ` +
+          "La propuesta sigue aquí mañana."
+        : "";
+
+    if (motivo) {
+      const explicacion = document.createElement("p");
+      explicacion.className = "explicacion";
+      explicacion.textContent = motivo;
+      caja.appendChild(explicacion);
+    }
+  });
+}
+
+async function aceptarPropuesta(propuesta, instrucciones, boton) {
+  const error = id("error-propuesta");
+  error.textContent = "";
+  boton.disabled = true;
+  id("estado-consulta").textContent = "Pensando…";
+
+  try {
+    // El mismo camino que "Pedírsela a la IA" de Comidas y Ejercicio: un solo
+    // sitio donde se generan semanas, con su cupo y su marca.
+    const generada =
+      propuesta.tipo === "dieta"
+        ? await generarDieta(instrucciones)
+        : await generarTabla(instrucciones);
+
+    // Cancelar el "¿la sustituyo?" no es un fallo, pero tampoco es un éxito:
+    // no hay semana nueva que enseñar, así que no se navega a ninguna parte.
+    if (generada) abrirPestana(propuesta.seccion, propuesta.subseccion);
+  } catch (fallo) {
+    error.textContent = mensajeDeErrorDeConsulta(fallo.codigo);
+  } finally {
+    id("estado-consulta").textContent = "";
+    // Siempre, también tras cancelar: un botón que se queda muerto no se
+    // recupera hasta el siguiente repintado, y tras cancelar no hay ninguno.
+    boton.disabled = false;
+  }
 }
 
 // -1 significa "aún no ha habido ninguna revisión en esta operación"; null,
@@ -2855,7 +2949,14 @@ function pintarEstadoConsulta() {
       : "Ya has pasado consulta 2 veces hoy.";
   }
 
-  pintarHilo(consultaAbierta || terminada);
+  // El hilo que se pinta NO depende de consultaReciénTerminada (spec 046): esa
+  // vive en memoria y se perdía al recargar, así que el cierre que la spec 044
+  // dejó "al final de la conversación" se esfumaba con un F5. Se pinta el de la
+  // última consulta terminada, que se lee de Firestore como todo lo demás.
+  // consultaReciénTerminada sigue viva, pero solo para el mensaje y el botón.
+  const aPintar = consultaAbierta || ultimaRevision(consultasCargadas);
+  pintarHilo(aPintar);
+  pintarPropuestas(consultaAbierta ? null : aPintar);
 }
 
 // --- Dietas y tablas de ejercicio (specs 024 y 027) ----------------------
