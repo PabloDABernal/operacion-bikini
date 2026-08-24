@@ -1,6 +1,6 @@
 # 051 — Una sola caja arriba, el hilo del revés, y un solo cupo
 
-- **Estado:** 🧪 implementada y desplegada el 2026-08-23; pendiente de que el usuario la pruebe.
+- **Estado:** ✅ completada. Probada y confirmada por el usuario el 24 de agosto de 2026.
 - **Fecha:** 2026-08-23
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (v6…)", puntos **"Una sola caja de texto, arriba del todo"**, **"Lo último, lo primero que se ve"** y **"Un solo cupo: 20 mensajes al día"**.
 - **Segunda de tres.** Va después de la 050 (que ya junta el hilo a la vista) y antes de la 052.

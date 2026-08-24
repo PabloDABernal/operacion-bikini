@@ -2,7 +2,7 @@
 
 Documento para retomar el trabajo en frío. Se actualiza al terminar cada spec.
 
-**Última actualización:** 23 de agosto de 2026 (sesión en el PC; sigue en remoto) (specs 041-045 completadas; **las 046 a 051 desplegadas y pendientes de probar**; arranca la v6)
+**Última actualización:** 24 de agosto de 2026 (sesión en remoto) (specs 041-051 completadas y confirmadas por el usuario; **toca implementar la 052**, que cierra la v6)
 
 ## Dónde estamos
 
@@ -73,12 +73,12 @@ El 20 de agosto arrancó la **v4**, que sale de una auditoría de usabilidad hec
 | 043 | Las filas del diario, en dos líneas y con iconos | ✅ completada |
 | 044 | Fuera los planes y fuera "Abandonar consulta" (v5) | ✅ completada |
 | 045 | La consulta, como revisión de lo hecho desde la anterior (v5) | ✅ completada |
-| 046 | La consulta propone dieta o tabla, y tú aceptas (v5) | 🧪 implementada, pendiente de que el usuario la pruebe |
-| 047 | La revisión se puede empezar de verdad (arreglo de la v5) | 🧪 implementada, pendiente de que el usuario la pruebe |
-| 048 | Los flecos que dejó la v5 (auditoría del 23 de agosto) | 🧪 implementada, pendiente de que el usuario la pruebe |
-| 049 | El 413 de Groq y el prompt acotado | 🧪 implementada, pendiente de que el usuario la pruebe |
-| 050 | Un solo hilo: ver la conversación y las revisiones juntas (v6) | 🧪 implementada, pendiente de que el usuario la pruebe |
-| 051 | Una caja arriba, el hilo del revés, y un solo cupo (v6) | 🧪 implementada, pendiente de que el usuario la pruebe |
+| 046 | La consulta propone dieta o tabla, y tú aceptas (v5) | ✅ completada |
+| 047 | La revisión se puede empezar de verdad (arreglo de la v5) | ✅ completada |
+| 048 | Los flecos que dejó la v5 (auditoría del 23 de agosto) | ✅ completada |
+| 049 | El 413 de Groq y el prompt acotado | ✅ completada |
+| 050 | Un solo hilo: ver la conversación y las revisiones juntas (v6) | ✅ completada |
+| 051 | Una caja arriba, el hilo del revés, y un solo cupo (v6) | ✅ completada |
 | 052 | La entrevista de alta, también en el hilo (v6) | 📝 spec escrita, sin implementar |
 
 ## Qué toca ahora
@@ -101,26 +101,20 @@ El 20 de agosto arrancó la **v4**, que sale de una auditoría de usabilidad hec
 > trabajo y no queda ninguna regla de Firestore por publicar, así que la falta
 > de `firebase login` en el contenedor remoto **no bloquea nada**.
 >
+> **Traspaso del 24 de agosto de 2026.** El usuario probó las seis specs
+> pendientes (046 a 051): **todo funciona bien**, y confirmó explícitamente que
+> el separador de revisión debajo de sus mensajes (spec 051) también le parece
+> bien tal cual. Las seis quedan `✅ completada` en la tabla de specs y en cada
+> spec. No hay más deuda pendiente de probar.
+>
 > **Lo que toca, por orden:**
 >
-> 1. **El usuario tiene seis specs desplegadas y sin probar: de la 046 a la
->    051.** Ninguna se marca como completada hasta que él lo confirme. Sus
->    guiones de prueba están al final de cada spec. Si vuelve diciendo que algo
->    falla, es de ahí.
-> 2. **Implementar la spec 052**, que cierra la v6 y ya está escrita y
->    pendiente de pasar por `revisor-specs`. Es la más delicada de las tres: la
->    entrevista de alta es el código que rellena Ajustes y crea la operación.
-> 3. Con la v6 cerrada, volver a `docs/BACKLOG.md`, que es de donde se tiraba
+> 1. **Implementar la spec 052**, que cierra la v6: la entrevista de alta,
+>    también en el hilo. Ya está escrita en `docs/specs/052-la-entrevista-en-el-hilo.md`.
+>    Pasa primero por `revisor-specs` antes de tocar código (regla 2). Es la
+>    más delicada: toca el código que rellena Ajustes y crea la operación.
+> 2. Con la v6 cerrada, volver a `docs/BACKLOG.md`, que es de donde se tiraba
 >    antes por decisión delegada del usuario.
->
-> **Dos cosas que él dejó pendientes de contestar** y conviene recordarle:
->
-> - Con el hilo del revés (spec 051), **el separador de una revisión queda
->   debajo de sus mensajes**. Lo aceptó al decidirlo, pero pidió verlo. Si le
->   chirría, la alternativa está descrita en la sección 8 de la 051 y es un
->   cambio pequeño.
-> - Si con todo junto **se distingue bien** lo que fue revisión de lo que fue
->   charla (spec 050, paso 12 de su guion).
 
 **1. Reglas de Firestore: ya está hecho.** El 22 de agosto se publicaron
 con `npx --yes firebase-tools deploy --only firestore:rules` desde el PC
@@ -143,15 +137,15 @@ principio** en tres specs (no se parten a posteriori):
 |---|---|---|
 | 044 | Fuera los planes y fuera "Abandonar consulta" | ✅ completada |
 | 045 | La consulta, como revisión de lo hecho desde la anterior | ✅ completada |
-| 046 | La consulta propone dieta o tabla, y tú aceptas | 🧪 desplegada, pendiente de probar |
+| 046 | La consulta propone dieta o tabla, y tú aceptas | ✅ completada |
 
 Y después de la v5, tres arreglos que salieron de probarla y de la auditoría:
 
 | Spec | Qué | Estado |
 |---|---|---|
-| 047 | La revisión se podía empezar de verdad | 🧪 desplegada |
-| 048 | Los flecos de "planes" que dejó la v5 | 🧪 desplegada |
-| 049 | El 413 de Groq y el prompt acotado | 🧪 desplegada |
+| 047 | La revisión se podía empezar de verdad | ✅ completada |
+| 048 | Los flecos de "planes" que dejó la v5 | ✅ completada |
+| 049 | El 413 de Groq y el prompt acotado | ✅ completada |
 
 **Arranca la v6 (23 de agosto).** El usuario probó la v5 y dijo: *"es un poco
 lío lo de la conversación más la consulta, igual mejor que sea todo uno, que
@@ -162,8 +156,8 @@ hilos, dos cajas de texto y dos cupos en la misma pantalla. Está en
 
 | Spec | Qué | Estado |
 |---|---|---|
-| 050 | Ver la conversación y las revisiones en un solo hilo | 🧪 desplegada |
-| 051 | Una caja arriba, el hilo del revés, y un solo cupo | 🧪 desplegada |
+| 050 | Ver la conversación y las revisiones en un solo hilo | ✅ completada |
+| 051 | Una caja arriba, el hilo del revés, y un solo cupo | ✅ completada |
 | 052 | La entrevista de alta, también en el hilo | 📝 escrita |
 
 **Se partió en tres ANTES de escribir código**, cuando `revisor-specs` avisó de

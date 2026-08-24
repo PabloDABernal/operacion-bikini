@@ -1,6 +1,6 @@
 # 050 — Un solo hilo: ver la conversación y las revisiones juntas
 
-- **Estado:** 🧪 implementada y desplegada el 2026-08-23; pendiente de que el usuario la pruebe.
+- **Estado:** ✅ completada. Probada y confirmada por el usuario el 24 de agosto de 2026.
 - **Fecha:** 2026-08-23
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (v6: un solo hilo, decidida el 23 de agosto de 2026)", punto **"Un solo hilo con tu nutricionista"**.
 - **Primera de tres.** La v6 va en 050 (esta: verlo todo en un hilo), 051 (una sola caja de texto y un solo cupo) y 052 (la entrevista de alta, también en el hilo). Se partió en tres **antes de escribir código**, cuando `revisor-specs` avisó de que juntarlo todo pasaba de 300 líneas.
