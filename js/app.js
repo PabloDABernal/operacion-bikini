@@ -127,7 +127,6 @@ import {
   listarConsultas,
   listarPlanes,
   consultaEnCurso,
-  esRevision,
   MENSAJES_POR_DIA,
   quedanMensajesHoy,
   DIAS_ENTRE_REVISIONES,
@@ -2699,19 +2698,31 @@ function pintarBurbuja(mensaje) {
 // Un solo hilo (spec 050): la conversación, los consejos viejos y las
 // revisiones, por fecha. Antes las revisiones se pintaban aparte en
 // #hilo-consulta y había que mirar a dos sitios para seguir una misma charla.
-function separadorDeRevision(fecha) {
+// Desde la spec 052 también entran las entrevistas (`inicial`/`reinicio`),
+// así que el separador distingue las tres por su `modo`.
+const ETIQUETAS_SEPARADOR = {
+  inicial: "Entrevista de bienvenida",
+  reinicio: "Entrevista de una etapa nueva"
+};
+
+function separadorDeRevision({ fecha, modo }) {
   const marca = document.createElement("p");
   marca.className = "separador-revision";
+  const etiqueta = ETIQUETAS_SEPARADOR[modo] || "Revisión";
   marca.textContent =
     typeof fecha === "string" && fecha
-      ? `Revisión · ${formatearFecha(fecha)}`
-      : "Revisión";
+      ? `${etiqueta} · ${formatearFecha(fecha)}`
+      : etiqueta;
   return marca;
 }
 
 function pintarConversacion() {
   const contenedor = id("hilo-conversacion");
-  const revisiones = consultasCargadas.filter(esRevision);
+  // Todo lo que no sea la conversación libre: revisiones y, desde la spec
+  // 052, también las entrevistas que abren o reabren la operación.
+  const revisiones = consultasCargadas.filter(
+    (consulta) => consulta.modo !== "conversacion"
+  );
   const mensajes = hiloCompleto(hiloAbierto, consejosDeAntes, revisiones);
 
   contenedor.innerHTML = "";
@@ -2977,10 +2988,13 @@ function pintarEstadoConsulta() {
   // hay nada anterior que revisar.
   id("titulo-revision").classList.toggle("oculta", !hayOperacion);
 
-  // Mientras la consulta está a medias, la conversación se esconde: dos cajas
-  // de texto hablando con la misma IA por caminos distintos y con cupos
-  // distintos es la forma más segura de escribir en la que no querías.
-  id("bloque-conversacion").classList.toggle("oculta", !hayOperacion || enCurso);
+  // La caja única (spec 051) es donde se contesta a todo: la conversación
+  // libre, una revisión en marcha y, desde la spec 052, la entrevista que abre
+  // o reabre la operación. Solo se esconde si no hay nada que hacer con ella:
+  // sin operación y sin nada en curso. Con `enCurso` en el OR de antes, se
+  // escondía justo cuando hacía falta para contestar (el mismo fallo que
+  // arregló la spec 047 con el botón de empezar).
+  id("bloque-conversacion").classList.toggle("oculta", !hayOperacion && !enCurso);
 
   if (enCurso) {
     id("aviso-consulta").textContent = "";

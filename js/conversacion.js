@@ -86,8 +86,10 @@ export function hiloCompleto(hilo, consejos, revisiones = []) {
     return (revision.mensajes || []).map((mensaje, indice) => ({
       ...mensaje,
       fecha,
-      // Solo el primero: es donde va el separador que marca dónde empezó.
-      empiezaRevision: indice === 0 ? fecha || true : undefined
+      // Solo el primero: es donde va el separador que marca dónde empezó. El
+      // modo viaja con él (spec 052) para que el separador distinga una
+      // revisión de la entrevista que abre o reabre la operación.
+      empiezaRevision: indice === 0 ? { fecha, modo: revision.modo } : undefined
     }));
   });
 
