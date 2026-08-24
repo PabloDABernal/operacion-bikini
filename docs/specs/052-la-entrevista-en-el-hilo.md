@@ -1,6 +1,6 @@
 # 052 — La entrevista de alta, también en el hilo
 
-- **Estado:** 📝 pendiente de implementar (después de la 050 y la 051).
+- **Estado:** 🧪 implementada y desplegada el 2026-08-24; pendiente de que el usuario la pruebe.
 - **Fecha:** 2026-08-23
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (v6…)", punto **"La entrevista que abre una operación también vive ahí"**.
 - **Tercera de tres.** Cierra la v6.
@@ -32,8 +32,11 @@ entrevista con la que empezó.
    sepa qué fue: **"Entrevista de bienvenida · 12 de junio"**.
 6. Al **reabrir** una operación (modo `reinicio`), su entrevista abre el hilo
    nuevo de esa etapa.
-7. El cupo sigue siendo uno: 20 mensajes al día, y empezar la entrevista gasta
-   uno, igual que empezar una revisión (spec 051).
+7. El cupo diario sigue como está: la entrevista **no gasta mensajes**
+   (`enviadosHoy()` en `js/consulta.js` excluye los modos `inicial` y
+   `reinicio`, y así se queda), pero **no se puede empezar** si el cupo ya está
+   agotado por conversaciones o revisiones. Decisión del usuario del 24 de
+   agosto: es el comportamiento que ya hay y no se toca.
 8. Las operaciones anteriores no se mezclan: el hilo es el de la etapa en curso.
 
 ## 3. Alcance
@@ -60,15 +63,29 @@ entrevista con la que empezó.
 
 ### El hilo (`js/conversacion.js`)
 
-El filtro de `hiloCompleto()` deja de excluir `inicial` y `reinicio`: pasan a
-mezclarse como una revisión más, con la fecha de su consulta y su marca de
-inicio. Lo que cambia es la etiqueta del separador, que sale del `modo`:
+Ojo con dónde está el filtro: **`hiloCompleto()` no filtra nada**, recibe ya
+filtrado el array `revisiones` que le pasa quien la llama. El filtro real vive
+en `js/app.js` (`consultasCargadas.filter(esRevision)`), y `esRevision()`
+excluye a propósito `inicial` y `reinicio`. Lo que cambia es **ese filtro de
+`app.js`**, que pasa a quedarse con todo lo que no sea `conversacion`.
+
+`esRevision()` **no se toca**: la usa también `js/gamificacion.js` para el
+emblema "Primera consulta", y cambiar qué cuenta como revisión lo movería de
+rebote.
+
+Con eso, las entrevistas se mezclan en el hilo como una revisión más, con la
+fecha de su consulta y su marca de inicio. Lo que cambia es la etiqueta del
+separador, que sale del `modo`:
 
 | `modo` | Separador |
 |---|---|
 | `inicial` | Entrevista de bienvenida |
 | `reinicio` | Entrevista de una etapa nueva |
 | `normal` | Revisión |
+
+El texto se pinta en `separadorDeRevision()` (`js/app.js`), hoy con "Revisión"
+a pelo. Para elegir etiqueta necesita el `modo`, así que `hiloCompleto()` tiene
+que empezar a llevarlo en el objeto del mensaje de inicio.
 
 ### La pantalla (`js/app.js`)
 
@@ -111,12 +128,13 @@ Sin cambios. No se toca Firestore ni `firestore.rules`.
 
 | Archivo | Qué cambia |
 |---|---|
-| `js/conversacion.js` | `hiloCompleto()` deja de excluir las entrevistas y decide su separador. |
-| `js/app.js` | El hilo se pinta también sin operación en marcha. |
+| `js/conversacion.js` | `hiloCompleto()` lleva el `modo` en el mensaje de inicio, para que el separador pueda elegir etiqueta. |
+| `js/app.js` | El filtro `filter(esRevision)` deja de excluir las entrevistas; `separadorDeRevision()` elige etiqueta según el `modo`; el hilo se pinta también sin operación en marcha. |
 | `docs/PRODUCTO.md` | Ya actualizado (apartado v6). |
 
 No se toca `api/`, ni `firestore.rules`, ni `guardarLoAveriguado()`, ni
-`crearOperacion()`.
+`crearOperacion()`, ni `js/consulta.js` (`esRevision()` y `enviadosHoy()` se
+quedan como están: ver el criterio 7).
 
 Tamaño estimado: ~90 líneas.
 
@@ -129,6 +147,11 @@ Tamaño estimado: ~90 líneas.
 - **Va en su propia spec.** Justo por ese riesgo: si algo sale mal, se sabe qué
   cambio lo rompió y se revierte solo esto.
 - **No se toca nada de lo que la entrevista guarda.** Solo dónde se pinta.
+- **La entrevista sigue sin gastar cupo.** Decisión del usuario el 24 de agosto,
+  al descubrirse en la revisión de la spec que el criterio 7 daba por hecho lo
+  contrario. Hacerla gastar obligaba a tocar `esRevision()`, que también manda
+  en el emblema "Primera consulta" de `js/gamificacion.js`: cambio de rebote a
+  cambio de una spec que ya es la delicada de las tres.
 
 ## 9. Fuera de spec: ideas apuntadas
 

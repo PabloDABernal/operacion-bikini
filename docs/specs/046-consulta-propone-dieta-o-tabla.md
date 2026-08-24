@@ -1,6 +1,6 @@
 # 046 — La consulta propone dieta o tabla, y tú aceptas
 
-- **Estado:** 🧪 implementada y desplegada el 2026-08-23; pendiente de que el usuario la pruebe.
+- **Estado:** ✅ completada. Implementada y desplegada el 2026-08-23; probada y confirmada por el usuario el 2026-08-24.
 - **Fecha:** 2026-08-23
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (v5…)", punto **"La consulta puede proponerte dieta o tabla nuevas"**.
 - **Tercera de tres.** Cierra la v5.

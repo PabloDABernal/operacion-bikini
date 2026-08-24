@@ -127,7 +127,6 @@ import {
   listarConsultas,
   listarPlanes,
   consultaEnCurso,
-  esRevision,
   MENSAJES_POR_DIA,
   quedanMensajesHoy,
   DIAS_ENTRE_REVISIONES,
@@ -2699,19 +2698,36 @@ function pintarBurbuja(mensaje) {
 // Un solo hilo (spec 050): la conversación, los consejos viejos y las
 // revisiones, por fecha. Antes las revisiones se pintaban aparte en
 // #hilo-consulta y había que mirar a dos sitios para seguir una misma charla.
-function separadorDeRevision(fecha) {
+//
+// Desde la spec 052 el hilo también empieza por la entrevista que abrió la
+// operación, así que el separador dice de qué fue: llamar "Revisión" a la
+// entrevista de alta sería mentir, porque no repasa nada.
+const TITULO_DE_CONSULTA = {
+  inicial: "Entrevista de bienvenida",
+  reinicio: "Entrevista de una etapa nueva"
+};
+
+function separadorDeRevision(fecha, modo) {
   const marca = document.createElement("p");
   marca.className = "separador-revision";
+  const titulo = TITULO_DE_CONSULTA[modo] || "Revisión";
   marca.textContent =
     typeof fecha === "string" && fecha
-      ? `Revisión · ${formatearFecha(fecha)}`
-      : "Revisión";
+      ? `${titulo} · ${formatearFecha(fecha)}`
+      : titulo;
   return marca;
 }
 
 function pintarConversacion() {
   const contenedor = id("hilo-conversacion");
-  const revisiones = consultasCargadas.filter(esRevision);
+  // Todo lo que no sea la conversación entra en el hilo: las revisiones y,
+  // desde la spec 052, también las entrevistas de alta (`inicial` y
+  // `reinicio`). No se usa esRevision() a propósito: esa función excluye las
+  // entrevistas por diseño y la comparte js/gamificacion.js para el emblema
+  // "Primera consulta". Tocarla movería ese emblema de rebote.
+  const revisiones = consultasCargadas.filter(
+    (consulta) => consulta.modo !== "conversacion"
+  );
   const mensajes = hiloCompleto(hiloAbierto, consejosDeAntes, revisiones);
 
   contenedor.innerHTML = "";
@@ -2722,7 +2738,9 @@ function pintarConversacion() {
     // El separador no es un mensaje: es una marca del hilo que dice dónde
     // empezó una revisión, para distinguirla de la charla del día a día.
     if (mensaje.empiezaRevision) {
-      contenedor.appendChild(separadorDeRevision(mensaje.empiezaRevision));
+      contenedor.appendChild(
+        separadorDeRevision(mensaje.empiezaRevision, mensaje.modoDeLaConsulta)
+      );
     }
     contenedor.appendChild(pintarBurbuja(mensaje));
   });
@@ -2730,8 +2748,9 @@ function pintarConversacion() {
   if (!mensajes.length) {
     const vacio = document.createElement("p");
     vacio.className = "explicacion";
-    vacio.textContent =
-      "Cuéntale cómo vas y te responderá con lo que vea en tus registros.";
+    vacio.textContent = hayOperacion
+      ? "Cuéntale cómo vas y te responderá con lo que vea en tus registros."
+      : "Aquí saldrá tu entrevista de bienvenida en cuanto la empieces.";
     contenedor.appendChild(vacio);
   }
 
@@ -2740,8 +2759,14 @@ function pintarConversacion() {
     ? `Te quedan ${quedan} ${quedan === 1 ? "mensaje" : "mensajes"} hoy.`
     : `Has gastado tus ${MENSAJES_POR_DIA} mensajes de hoy. Vuelve mañana.`;
 
-  id("conversacion-texto").disabled = quedan === 0;
-  id("btn-enviar-conversacion").disabled = quedan === 0;
+  // Sin operación no se charla: lo único que se puede hacer es contestar a la
+  // entrevista que abre una (spec 052). Escribir suelto ahí crearía un hilo de
+  // conversación antes de que exista la operación a la que pertenece.
+  const puedeEscribir =
+    quedan > 0 && (hayOperacion || Boolean(consultaAbierta));
+
+  id("conversacion-texto").disabled = !puedeEscribir;
+  id("btn-enviar-conversacion").disabled = !puedeEscribir;
 }
 
 // Un solo envío con dos destinos (spec 051): si hay una revisión en marcha, lo
@@ -2977,10 +3002,20 @@ function pintarEstadoConsulta() {
   // hay nada anterior que revisar.
   id("titulo-revision").classList.toggle("oculta", !hayOperacion);
 
-  // Mientras la consulta está a medias, la conversación se esconde: dos cajas
-  // de texto hablando con la misma IA por caminos distintos y con cupos
-  // distintos es la forma más segura de escribir en la que no querías.
-  id("bloque-conversacion").classList.toggle("oculta", !hayOperacion || enCurso);
+  // El hilo y su caja se ven SIEMPRE (spec 052).
+  //
+  // Esta línea escondía el bloque con `!hayOperacion || enCurso`, y era un
+  // resto de cuando había dos cajas de texto: entonces tenía sentido esconder
+  // la de la conversación mientras una consulta estaba a medias. Desde la 051
+  // la caja es una sola y manda a `responder()` si hay consulta en curso, así
+  // que esconderla dejaba sin sitio donde contestar. Y sin operación es donde
+  // ahora vive la entrevista de alta.
+  id("bloque-conversacion").classList.remove("oculta");
+
+  // El título sí cambia: sin operación, lo que hay ahí es la entrevista.
+  id("titulo-conversacion").textContent = primeraVez
+    ? "Tu entrevista de bienvenida"
+    : "Habla con tu nutricionista";
 
   if (enCurso) {
     id("aviso-consulta").textContent = "";
@@ -3528,6 +3563,15 @@ async function abrirArchivo(operacion) {
       } en esta operación.`;
       contenido.appendChild(nota);
     }
+
+    // Una operación sin nada que enseñar se quedaba en título y "Volver", una
+    // pantalla muda (spec 053). Se mira lo que se ha llegado a pintar, y no
+    // qué colecciones venían vacías: los bloques de aquí arriba han cambiado
+    // ya un par de veces, y una lista paralela se habría quedado desfasada.
+    if (!contenido.childElementCount && !grafica.childElementCount) {
+      id("archivo-estado").textContent =
+        "Esta operación no tiene ningún registro archivado.";
+    }
   } catch {
     id("archivo-estado").textContent =
       "No se ha podido cargar el archivo. Comprueba tu conexión.";
@@ -3633,7 +3677,14 @@ async function refrescarOperaciones() {
   // La pantalla de Consulta depende de si hay operación: sin esto, al terminar
   // la entrevista de bienvenida seguía enseñando el botón de empezarla en vez
   // de abrir la conversación, hasta recargar la página.
-  if (consultasCargadas.length) pintarEstadoConsulta();
+  //
+  // Desde la spec 052 hay que repintar también el hilo: su caja y su título
+  // dependen de `hayOperacion`, y al terminar la entrevista esto corre DESPUÉS
+  // de refrescarConsulta(), que lo pintó cuando todavía no había operación.
+  if (consultasCargadas.length) {
+    pintarEstadoConsulta();
+    pintarConversacion();
+  }
 }
 
 // --- Ajustes -------------------------------------------------------------
@@ -3815,6 +3866,14 @@ id("btn-borrar-definitivo").addEventListener("click", async () => {
     await borrarSeleccion(uidActual, seleccion);
     estado.textContent = "Datos borrados.";
     await refrescarRecuentos();
+    // El histórico se pinta desde `operacionesCargadas`, la copia en memoria:
+    // sin esto seguía enseñando la tarjeta de una operación ya borrada, y al
+    // pulsar "Ver" se abría vacía (spec 053). Se llama siempre, sin mirar si
+    // la selección incluía "operaciones": cuesta una lectura y evita que otra
+    // casilla que algún día toque operaciones repita el fallo. Va antes de
+    // refrescarTodo() porque fija `hayOperacion`, del que dependen varias de
+    // las pantallas que aquel refresca.
+    await refrescarOperaciones();
     await refrescarTodo();
   } catch {
     // Las casillas y la palabra se quedan como están, para reintentar de un

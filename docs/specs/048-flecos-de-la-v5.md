@@ -1,6 +1,6 @@
 # 048 — Los flecos que dejó la v5
 
-- **Estado:** 🧪 implementada y desplegada el 2026-08-23; pendiente de que el usuario la pruebe.
+- **Estado:** ✅ completada. Implementada y desplegada el 2026-08-23; probada y confirmada por el usuario el 2026-08-24.
 - **Fecha:** 2026-08-23
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (v5…)", punto **"Los planes desaparecen como concepto"**. No hay cambio de producto: PRODUCTO.md ya dice lo que debe pasar y el código no lo cumple en dos sitios.
 

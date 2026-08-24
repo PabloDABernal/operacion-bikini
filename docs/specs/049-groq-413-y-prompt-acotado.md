@@ -1,6 +1,6 @@
 # 049 — La reserva de Groq se rendía ante un 413, y el prompt crecía sin freno
 
-- **Estado:** 🧪 implementada y desplegada el 2026-08-23; pendiente de que el usuario la pruebe.
+- **Estado:** ✅ completada. Implementada y desplegada el 2026-08-23; probada y confirmada por el usuario el 2026-08-24.
 - **Fecha:** 2026-08-23
 - **Referencia en PRODUCTO.md:** apartado "Qué explícitamente NO hace" y la nota de la v2 sobre Groq como reserva automática. No hay cambio de producto: es un arreglo para que la reserva cumpla lo que ya se prometía.
 

@@ -87,7 +87,11 @@ export function hiloCompleto(hilo, consejos, revisiones = []) {
       ...mensaje,
       fecha,
       // Solo el primero: es donde va el separador que marca dónde empezó.
-      empiezaRevision: indice === 0 ? fecha || true : undefined
+      empiezaRevision: indice === 0 ? fecha || true : undefined,
+      // Desde la spec 052 aquí también entran las entrevistas de alta, y el
+      // separador tiene que poder decir cuál es cuál. El texto se decide en
+      // separadorDeRevision() (js/app.js); aquí solo viaja el dato.
+      modoDeLaConsulta: indice === 0 ? revision.modo : undefined
     }));
   });
 
