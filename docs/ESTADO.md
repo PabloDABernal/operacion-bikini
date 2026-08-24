@@ -117,8 +117,18 @@ El 20 de agosto arrancó la **v4**, que sale de una auditoría de usabilidad hec
 > 1. **Que el usuario pruebe la spec 052** en producción con el guion que
 >    está al final de `docs/specs/052-la-entrevista-en-el-hilo.md`. Solo
 >    entonces se marca como completada y se cierra la v6.
-> 2. Con la v6 cerrada, volver a `docs/BACKLOG.md`, que es de donde se tiraba
->    antes por decisión delegada del usuario.
+> 2. **Pedido nuevo del usuario, 24 de agosto: "Reiniciar datos" (Zona de
+>    peligro) debería poder borrar también el objetivo/perfil**, no solo el
+>    diario y los planes. Hoy no lo toca a propósito (ver comentario en
+>    `js/reinicio.js`). Es un cambio de producto, no un bug: **PARAR y
+>    preguntarle cómo lo quiere** (¿casilla nueva en la lista existente, o
+>    botón aparte más destructivo con su propia confirmación?) y actualizar
+>    `docs/PRODUCTO.md` antes de escribir la spec. Detalle completo en
+>    `docs/BACKLOG.md`, apartado "Pedido por el usuario el 24 de agosto de
+>    2026". Mientras tanto, si solo quiere reiniciar sus propios datos de
+>    prueba, puede hacerlo a mano desde Ajustes → Perfil.
+> 3. Con la v6 cerrada, volver a `docs/BACKLOG.md`, que es de donde se tiraba
+>    antes por decisión delegada del usuario (este pedido nuevo incluido).
 
 **1. Reglas de Firestore: ya está hecho.** El 22 de agosto se publicaron
 con `npx --yes firebase-tools deploy --only firestore:rules` desde el PC

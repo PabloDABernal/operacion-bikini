@@ -66,3 +66,22 @@ Ideas surgidas durante la implementación, no implementadas. Una línea cada una
 - Resumir los registros por día ("3 comidas, 45 min de bici") en vez de
   listarlos uno a uno cuando el periodo es largo: diría más con menos texto,
   pero cambia lo que la IA ve.
+
+## Pedido por el usuario el 24 de agosto de 2026
+
+- **"Reiniciar datos" (Zona de peligro) no borra el objetivo/perfil, y el
+  usuario piensa que debería poder hacerlo.** Hoy, por diseño (comentario en
+  `js/reinicio.js`: "el documento de ajustes del usuario NO está en esta
+  lista a propósito: reiniciar es empezar de cero con el mismo objetivo, no
+  olvidar quién eres"), ninguna de las casillas de Ajustes → Zona de peligro
+  toca el documento de ajustes (nombre, altura, peso objetivo, fecha
+  objetivo, perfil que usa la IA, etc.). El usuario, tras hacer pruebas en la
+  app, quiere una forma de borrar también eso — un reinicio de verdad "de
+  cero", no solo del diario y los planes. Es un cambio de producto (contradice
+  la decisión documentada en el comentario de `reinicio.js` y probablemente en
+  `docs/PRODUCTO.md`), así que antes de tocar código hay que decidir con él
+  **cómo** quiere que funcione: ¿una casilla más en la lista existente
+  ("objetivo y perfil"), o un botón aparte tipo "borrar todo, incluido quién
+  eres" con su propia confirmación por ser el más destructivo de todos? Ver
+  regla 1 del proyecto: PARAR y actualizar `docs/PRODUCTO.md` antes de
+  implementar.
