@@ -2,7 +2,7 @@
 
 Documento para retomar el trabajo en frío. Se actualiza al terminar cada spec.
 
-**Última actualización:** 24 de agosto de 2026 (sesión en remoto) (specs 041-051 completadas y confirmadas por el usuario; **toca implementar la 052**, que cierra la v6)
+**Última actualización:** 24 de agosto de 2026 (sesión en remoto) (specs 041-051 completadas y confirmadas por el usuario; **la 052 ya está implementada y revisada, pendiente de que el usuario la pruebe** — cierra la v6)
 
 ## Dónde estamos
 
@@ -79,7 +79,7 @@ El 20 de agosto arrancó la **v4**, que sale de una auditoría de usabilidad hec
 | 049 | El 413 de Groq y el prompt acotado | ✅ completada |
 | 050 | Un solo hilo: ver la conversación y las revisiones juntas (v6) | ✅ completada |
 | 051 | Una caja arriba, el hilo del revés, y un solo cupo (v6) | ✅ completada |
-| 052 | La entrevista de alta, también en el hilo (v6) | 📝 spec escrita, sin implementar |
+| 052 | La entrevista de alta, también en el hilo (v6) | 🧪 implementada y revisada; pendiente de que el usuario la pruebe |
 
 ## Qué toca ahora
 
@@ -107,12 +107,16 @@ El 20 de agosto arrancó la **v4**, que sale de una auditoría de usabilidad hec
 > bien tal cual. Las seis quedan `✅ completada` en la tabla de specs y en cada
 > spec. No hay más deuda pendiente de probar.
 >
+> **La spec 052 ya está implementada y revisada** (`revisor-specs` antes de
+> tocar código, `revisor-codigo` después: veredicto CUMPLE, y `qa-manual`
+> escribió el guion de prueba, ya en la propia spec). Commiteada y subida a
+> `claude/project-status-update-olfhys`.
+>
 > **Lo que toca, por orden:**
 >
-> 1. **Implementar la spec 052**, que cierra la v6: la entrevista de alta,
->    también en el hilo. Ya está escrita en `docs/specs/052-la-entrevista-en-el-hilo.md`.
->    Pasa primero por `revisor-specs` antes de tocar código (regla 2). Es la
->    más delicada: toca el código que rellena Ajustes y crea la operación.
+> 1. **Que el usuario pruebe la spec 052** en producción con el guion que
+>    está al final de `docs/specs/052-la-entrevista-en-el-hilo.md`. Solo
+>    entonces se marca como completada y se cierra la v6.
 > 2. Con la v6 cerrada, volver a `docs/BACKLOG.md`, que es de donde se tiraba
 >    antes por decisión delegada del usuario.
 
@@ -158,7 +162,7 @@ hilos, dos cajas de texto y dos cupos en la misma pantalla. Está en
 |---|---|---|
 | 050 | Ver la conversación y las revisiones en un solo hilo | ✅ completada |
 | 051 | Una caja arriba, el hilo del revés, y un solo cupo | ✅ completada |
-| 052 | La entrevista de alta, también en el hilo | 📝 escrita |
+| 052 | La entrevista de alta, también en el hilo | 🧪 implementada, revisada, pendiente de probar |
 
 **Se partió en tres ANTES de escribir código**, cuando `revisor-specs` avisó de
 que junto pasaba de 300 líneas (regla 4). El proyecto ya decidió no partir
@@ -270,6 +274,16 @@ de vista si algún día se tocan la cabecera o la gráfica de peso:
   pintar la sección, no al redimensionar). Anotado en `docs/BACKLOG.md`.
 
 ## Deuda conocida
+
+- **Posible fleco de la spec 051, detectado por `revisor-codigo` al revisar la
+  052 (24 de agosto), sin confirmar todavía.** `enviadosHoy()` en
+  `js/consulta.js` excluye del recuento `modo === "inicial"` y `modo ===
+  "reinicio"` vía `esRevision()`, así que los mensajes de una entrevista
+  podrían no descontar del cupo diario una vez creada la consulta — solo se
+  comprueba el cupo *antes* de crearla, en `empezarConsulta()`. El guion de
+  prueba de la 052 (apartado "Aparte, no bloquea la spec") le pide al usuario
+  que lo compruebe a mano. Si se confirma, el arreglo es de la 051 (tocaría
+  que `enviadosHoy()` cuente también `inicial`/`reinicio`), no de la 052.
 
 - **Fixes del 21 de agosto, al probar la spec 036 en el navegador**: el usuario vio barras de scroll feas en las columnas de Comidas en escritorio. Causa: `.registro-texto` y `.receta-nombre` son `flex: 1` con recorte por `text-overflow: ellipsis`, pero sin `min-width: 0` un flex item nunca se encoge por debajo del ancho de su contenido, así que el recorte no llegaba a aplicarse y una comida con texto largo ensanchaba toda la columna. Además los `grid-template-columns` de las cuatro rejillas de escritorio iban con `1fr` a secas, que lleva el mismo mínimo implícito a nivel de rejilla; ahora son `minmax(0, …)`. De paso, tres retoques pedidos en la misma sesión: "Pedírsela a la IA" (dieta y tabla) se ha subido junto a "Empezar una semana en blanco"/"Vaciar y empezar de nuevo" en vez de quedar al final de la columna, pareciendo una sección escondida; los botones "Ver menos" de listas largas (comidas, ejercicios, pesajes, recetas, catálogo) hacen scroll hasta sí mismos al recogerse, para no dejar la ventana mirando un hueco en blanco; y apuntar automáticamente desde la dieta/tabla o desde "Lo de siempre" ya guarda la hora actual (antes se guardaba sin hora). Confirmado por el usuario el 21 de agosto.
 - **Trampa de CSS de la spec 036, ya resuelta pero fácil de romper otra vez**: las reglas de rejilla del `@media` de 64 rem llevan `:not(.oculta)` a propósito. Sin él ganan en especificidad a la clase `.oculta` con la que `js/app.js` esconde `#bloque-hoy` y `.contenido-operacion` cuando no hay operación en marcha, y **todos los formularios reaparecen en escritorio justo cuando no deben verse**. Si alguien "limpia" esos `:not(.oculta)`, vuelve el fallo. Está comentado en `styles.css`.

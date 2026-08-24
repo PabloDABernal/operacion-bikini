@@ -180,4 +180,44 @@ Tamaño estimado: ~90 líneas.
 
 ## ✅ Para probar a mano
 
-Lo escribe el agente `qa-manual` cuando la implementación esté revisada.
+En https://operacion-bikini.vercel.app, con una sesión iniciada. **Esta spec solo cambia dónde se pinta la entrevista: debe estar dentro del hilo, no aparte.** El cupo de mensajes, el hilo invertido (051) y lo que la entrevista pregunta/guarda (no entra en alcance) son de antes.
+
+### Preparación
+- Crea una cuenta de prueba o usa una sin operación en marcha.
+- Apunta tu cupo actual de mensajes ("Te quedan N mensajes hoy") o cierra sesión y vuelve a entrar para verlo desde cero.
+
+### Camino feliz: una entrevista entera desde cero
+
+1. **Entra en Consulta sin operación activa.** Deberías ver el botón **"Iniciar operación bikini"** con su explicación, y **debajo una caja de texto que dice "Cuéntale cómo vas"**. Esta caja no estaba visible en consultas sin operación; es corrección de la 052.
+
+2. **Pulsa "Iniciar operación bikini".** Debajo de la caja aparece el **hilo con un separador centrado que pone "Entrevista de bienvenida · [fecha de hoy]"**, distinto al de "Revisión". A continuación, el primer mensaje de la entrevista (algo como "Hola, me encantaría ayudarte...").
+
+3. **Responde la primera pregunta** (nombre) usando la caja de texto **"Tu respuesta"** (la etiqueta cambió al empezar la entrevista). Escribe tu nombre y pulsa enviar. Tu respuesta aparece **arriba del hilo** (porque el hilo está invertido desde la 051), y el contador baja 1.
+
+4. **Sigue respondiendo las preguntas de la entrevista:** altura, peso actual, peso objetivo, fecha objetivo. Cada respuesta aparece arriba, dentro del mismo hilo, debajo de "Entrevista de bienvenida · [fecha]".
+
+5. **Completa la entrevista:** la app te muestra un resumen y crea la operación. Espera 1-2 segundos. Los **ajustes deben rellenarse**: en Estadísticas deberías ver tu nombre, altura, peso objetivo, fecha objetivo. **Vuelve a Consulta.**
+
+6. **Verifica el hilo:** bajando del todo debería haber un separador **"Entrevista de bienvenida · [fecha]"** (abajo, porque es lo más antiguo), y encima todos los mensajes de la entrevista que ya respondiste. Si tienes conversación anterior, está más arriba. **El separador de la entrevista es diferente al de una revisión** (que sería "Revisión · fecha").
+
+### Casos límite
+
+7. **Entrevista a medias y recarga.** Sin terminar la entrevista, recarga la página o cierra sesión y vuelve a entrar. **La entrevista debe retomarse:** el hilo sigue ahí con lo que respondiste, la caja vuelve a decir "Tu respuesta", y puedes seguir respondiendo las preguntas que quedan.
+
+8. **Entrevista abandonada.** Empieza una nueva entrevista pero **no la completes**: responde 2-3 preguntas. Los mensajes se quedan en el hilo aunque nunca termines ni abras la operación (compruébalo recargando).
+
+9. **Segunda operación (reinicio).** Con una operación ya archivada, empieza una nueva entrevista de reinicio. **El separador debe decir "Entrevista de una etapa nueva · [fecha de hoy]"** (distinto al de "bienvenida"). Termina la entrevista. **En el hilo de esta operación NO debe haber ningún mensaje de la operación anterior:** solo los de esta entrevista nueva. Verifica que los ajustes se actualizaron con los datos de esta segunda entrevista.
+
+10. **Sin cupo de mensajes.** Gasta todos tus mensajes del día (20) con mensajes normales o revisiones. Luego intenta pulsar "Iniciar operación bikini". Debe verse un aviso claro de que es el cupo diario ("vuelve mañana"), no algo que parezca un error de la app.
+
+### Regresión (features anteriores que no se deben romper)
+
+11. **La caja de texto sin operación activa.** Comprueba en el paso 1 que la caja "Cuéntale cómo vas" es visible sin operación, y en el paso 2 que sigue visible una vez empieza la entrevista. Antes de esta spec, se ocultaba justo cuando hacía falta.
+
+12. **Responder a una revisión normal sigue funcionando.** En la operación que creaste, pasa una consulta (revisión). Contéstala desde la misma caja. El separador debe decir **"Revisión · [fecha]"**, no "Entrevista".
+
+13. **Mensajes de conversación normal siguen contando.** Después de terminar la entrevista, manda un mensaje normal de conversación (sin ninguna consulta en curso). El contador de mensajes debe bajar igual que siempre.
+
+### Aparte, no bloquea la spec
+
+**Vigilar el cupo de la entrevista.** Hay un riesgo detectado por `revisor-codigo`, pre-existente de la spec 051 y fuera del alcance de la 052: los mensajes de la entrevista podrían no descontar del cupo diario una vez creada la consulta (solo se comprueba el cupo *antes* de crearla). Si al hacer el paso 3 el contador de mensajes no baja al responder dentro de la entrevista, o si completar una entrevista entera (6 mensajes: 1 por empezarla + 5 respuestas) no descuenta esos 6 del total, avísalo — es un fleco de la 051, no motivo para rechazar la 052, pero conviene anotarlo en el backlog.
