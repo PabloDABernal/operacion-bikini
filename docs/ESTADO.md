@@ -81,6 +81,7 @@ El 20 de agosto arrancó la **v4**, que sale de una auditoría de usabilidad hec
 | 051 | Una caja arriba, el hilo del revés, y un solo cupo (v6) | ✅ completada |
 | 052 | La entrevista de alta, también en el hilo (v6) | 🧪 implementada, pendiente de que el usuario la pruebe |
 | 053 | El histórico fantasma y el archivo mudo | 🧪 implementada, pendiente de que el usuario la pruebe |
+| 054 | La caja deja de hablar de más durante una consulta | 🧪 implementada, pendiente de que el usuario la pruebe |
 
 ## Qué toca ahora
 
@@ -111,7 +112,12 @@ El 20 de agosto arrancó la **v4**, que sale de una auditoría de usabilidad hec
 > 3. **Spec 052** revisada (tenía un bloqueante), corregida e implementada. Con
 >    ella la v6 queda cerrada.
 >
-> **Lo que toca:** que el usuario pruebe la 052 y la 053. Con eso cerrado,
+> 4. **Spec 054**, salida de probar la 052: durante una entrevista o una
+>    revisión la caja seguía enseñando el placeholder de charlar y la línea
+>    "Te quedan N mensajes hoy", que en la entrevista miente porque no gasta
+>    cupo. Ahora la caja va desnuda mientras hay una consulta en curso.
+>
+> **Lo que toca:** que el usuario pruebe la 052, la 053 y la 054. Con eso cerrado,
 > volver a `docs/BACKLOG.md`, que es de donde se tiraba por decisión delegada.
 >
 > **Tres trampas que salieron y conviene no olvidar:**

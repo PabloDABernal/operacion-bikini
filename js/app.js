@@ -2718,6 +2718,10 @@ function separadorDeRevision(fecha, modo) {
   return marca;
 }
 
+// Vive aquí y no en el atributo del HTML porque hay que poder quitarlo y
+// devolverlo según se esté charlando o contestando a una consulta (spec 054).
+const PLACEHOLDER_CHARLA = "esta semana he picado más de la cuenta";
+
 function pintarConversacion() {
   const contenedor = id("hilo-conversacion");
   // Todo lo que no sea la conversación entra en el hilo: las revisiones y,
@@ -2758,6 +2762,14 @@ function pintarConversacion() {
   id("cupo-conversacion").textContent = quedan
     ? `Te quedan ${quedan} ${quedan === 1 ? "mensaje" : "mensajes"} hoy.`
     : `Has gastado tus ${MENSAJES_POR_DIA} mensajes de hoy. Vuelve mañana.`;
+
+  // Mientras contestas a una consulta, la caja va desnuda (spec 054): ni la
+  // sugerencia de charlar, que no viene a cuento cuando lo que hay arriba es
+  // "¿Cómo prefieres que te llame?", ni el contador, que en la entrevista
+  // además miente —no gasta cupo, así que ese número no se mueve—. Se esconde,
+  // no se vacía: así vuelve solo al cerrarse la consulta.
+  id("conversacion-texto").placeholder = consultaAbierta ? "" : PLACEHOLDER_CHARLA;
+  id("cupo-conversacion").classList.toggle("oculta", Boolean(consultaAbierta));
 
   // Sin operación no se charla: lo único que se puede hacer es contestar a la
   // entrevista que abre una (spec 052). Escribir suelto ahí crearía un hilo de

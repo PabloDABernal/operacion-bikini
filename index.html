@@ -498,8 +498,11 @@
 
         <form id="form-conversacion">
           <label for="conversacion-texto" id="etiqueta-conversacion">Cuéntale cómo vas</label>
-          <textarea id="conversacion-texto" rows="3"
-            placeholder="esta semana he picado más de la cuenta"></textarea>
+          <!-- Sin placeholder aquí: lo pone pintarConversacion(), que es quien
+               sabe si estás charlando o contestando a una consulta (spec 054).
+               Puesto en el HTML parpadearía el texto de charlar antes del
+               primer pintado. -->
+          <textarea id="conversacion-texto" rows="3" placeholder=""></textarea>
           <button type="submit" id="btn-enviar-conversacion">Enviar</button>
         </form>
 
