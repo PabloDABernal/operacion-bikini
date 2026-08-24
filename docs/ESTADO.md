@@ -2,7 +2,7 @@
 
 Documento para retomar el trabajo en frío. Se actualiza al terminar cada spec.
 
-**Última actualización:** 22 de agosto de 2026 (specs 041-045 completadas; **las 046 a 051 desplegadas y pendientes de probar**; arranca la v6)
+**Última actualización:** 23 de agosto de 2026 (sesión en el PC; sigue en remoto) (specs 041-045 completadas; **las 046 a 051 desplegadas y pendientes de probar**; arranca la v6)
 
 ## Dónde estamos
 
@@ -95,6 +95,33 @@ El 20 de agosto arrancó la **v4**, que sale de una auditoría de usabilidad hec
 
 ### Lo primero al retomar
 
+> **Traspaso del 23 de agosto de 2026.** La sesión del PC se cerró aquí y el
+> trabajo sigue en remoto. **Todo está commiteado y subido a `main`**; el
+> último commit es `3c8ed5c` (spec 051). No hay nada a medias en el árbol de
+> trabajo y no queda ninguna regla de Firestore por publicar, así que la falta
+> de `firebase login` en el contenedor remoto **no bloquea nada**.
+>
+> **Lo que toca, por orden:**
+>
+> 1. **El usuario tiene seis specs desplegadas y sin probar: de la 046 a la
+>    051.** Ninguna se marca como completada hasta que él lo confirme. Sus
+>    guiones de prueba están al final de cada spec. Si vuelve diciendo que algo
+>    falla, es de ahí.
+> 2. **Implementar la spec 052**, que cierra la v6 y ya está escrita y
+>    pendiente de pasar por `revisor-specs`. Es la más delicada de las tres: la
+>    entrevista de alta es el código que rellena Ajustes y crea la operación.
+> 3. Con la v6 cerrada, volver a `docs/BACKLOG.md`, que es de donde se tiraba
+>    antes por decisión delegada del usuario.
+>
+> **Dos cosas que él dejó pendientes de contestar** y conviene recordarle:
+>
+> - Con el hilo del revés (spec 051), **el separador de una revisión queda
+>   debajo de sus mensajes**. Lo aceptó al decidirlo, pero pidió verlo. Si le
+>   chirría, la alternativa está descrita en la sección 8 de la 051 y es un
+>   cambio pequeño.
+> - Si con todo junto **se distingue bien** lo que fue revisión de lo que fue
+>   charla (spec 050, paso 12 de su guion).
+
 **1. Reglas de Firestore: ya está hecho.** El 22 de agosto se publicaron
 con `npx --yes firebase-tools deploy --only firestore:rules` desde el PC
 (la sesión remota del 21 no tenía `firebase login` guardado). El tercer
@@ -118,6 +145,14 @@ principio** en tres specs (no se parten a posteriori):
 | 045 | La consulta, como revisión de lo hecho desde la anterior | ✅ completada |
 | 046 | La consulta propone dieta o tabla, y tú aceptas | 🧪 desplegada, pendiente de probar |
 
+Y después de la v5, tres arreglos que salieron de probarla y de la auditoría:
+
+| Spec | Qué | Estado |
+|---|---|---|
+| 047 | La revisión se podía empezar de verdad | 🧪 desplegada |
+| 048 | Los flecos de "planes" que dejó la v5 | 🧪 desplegada |
+| 049 | El 413 de Groq y el prompt acotado | 🧪 desplegada |
+
 **Arranca la v6 (23 de agosto).** El usuario probó la v5 y dijo: *"es un poco
 lío lo de la conversación más la consulta, igual mejor que sea todo uno, que
 cuando pases consulta puedas ver el histórico de conversación"*. Tiene razón:
@@ -135,13 +170,18 @@ hilos, dos cajas de texto y dos cupos en la misma pantalla. Está en
 que junto pasaba de 300 líneas (regla 4). El proyecto ya decidió no partir
 specs a posteriori.
 
-**El agujero que encontró `revisor-specs` en la 051, y que hay que respetar al
-implementarla:** `enviadosHoy()` cuenta solo los mensajes `de: "usuario"` con
-fecha de hoy **dentro del documento de la conversación**. Las revisiones viven
-en otro documento y su mensaje de apertura es de la IA, así que "empezar una
-revisión gasta un mensaje" no funciona escribiendo nada ahí. La solución
-escrita en la spec es que el contador mire **todas** las consultas, no que se
-escriban mensajes sintéticos: uno falso de usuario saldría pintado en el hilo.
+**Dónde vive el cupo desde la 051, y por qué:** `MENSAJES_POR_DIA`,
+`enviadosHoy()` y `quedanMensajesHoy()` se mudaron de `js/conversacion.js` a
+`js/consulta.js`. El contador necesita `esRevision()`, que es de `consulta.js`,
+y `empezarConsulta()` necesita el contador: dejarlo donde estaba habría creado
+un **ciclo de imports**. Ahora `conversacion.js` importa de `consulta.js` y no
+al revés. **No devolverlo a su sitio "por orden".**
+
+Y cuenta mirando **todas** las consultas, no escribiendo mensajes: la primera
+versión de la spec decía que empezar una revisión escribiera un mensaje con la
+fecha de hoy, y eso no habría funcionado (ni el documento ni el autor
+correctos), y un mensaje sintético de usuario **habría salido pintado en el
+hilo**.
 
 **Decisión del usuario en contra de la recomendación (spec 052):** la entrevista
 de alta también irá al hilo. Se recomendó dejarla aparte por riesgo —es el
