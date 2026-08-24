@@ -12,6 +12,11 @@ const { peticionAutorizada, describirRegistros, generarJson } = require("./_ia")
 
 const MAXIMO_PREGUNTAS = 25;
 
+// Y el suelo de la entrevista de bienvenida (spec 055). Ocho y no diez, que son
+// los datos obligatorios de la lista, porque una sola respuesta puede traer
+// varios ("mido 176 y peso 81").
+const MINIMO_PREGUNTAS = 8;
+
 // OJO: esta constante NO es "el modo normal". Es la base de la ENTREVISTA, y
 // INSTRUCCIONES_INICIAL e INSTRUCCIONES_REINICIO se construyen encima de ella
 // con template strings. Reescribirla aquí para hablar de revisiones le metería
@@ -55,7 +60,9 @@ Cuando cierres la consulta, rellena también estos campos:
 - "alturaCm": solo el número en centímetros, por ejemplo "176". Vacío si no lo ha dicho.
 - "pesoObjetivoKg": solo el número en kilos, por ejemplo "78.5". Vacío si no lo ha dicho.
 - "fechaObjetivo": en formato AAAA-MM-DD. Vacío si no ha dado plazo.
-- "perfil": un retrato en prosa de esta persona para que otro nutricionista pueda aconsejarla sin volver a entrevistarla: gustos, aversiones, alergias, ejercicio que disfruta, material, limitaciones y horarios. Máximo 200 palabras.`;
+- "perfil": un retrato en prosa de esta persona para que otro nutricionista pueda aconsejarla sin volver a entrevistarla: gustos, aversiones, alergias, ejercicio que disfruta, material, limitaciones y horarios. Máximo 200 palabras.
+
+NO SABES NADA de esta persona: es la primera vez que habláis. No des por hecho ningún dato —ni peso, ni objetivo, ni deporte, ni material— que no te haya dicho en ESTA conversación. Y no cierres la entrevista hasta haber averiguado todo lo de la lista de arriba: contestar solo el nombre no es información suficiente.`;
 
 // A partir de la segunda operación (spec 018) la IA ya conoce a la persona:
 // no hace falta volver a preguntárselo todo, solo lo que cambia de un ciclo al
@@ -194,6 +201,10 @@ module.exports = async (req, res) => {
   const conversacion = cuerpo.modo === "conversacion";
   const reinicio = cuerpo.modo === "reinicio";
   const inicial = cuerpo.modo === "inicial" || reinicio;
+  // OJO con los nombres: `inicial` de arriba significa "cualquiera de las dos
+  // bienvenidas", y de ahí cuelga qué campos personales se devuelven. Esta es
+  // la bienvenida de verdad, la primera vez que hablan (spec 055).
+  const primeraVez = cuerpo.modo === "inicial";
 
   const instrucciones = conversacion
     ? INSTRUCCIONES_CONVERSACION
@@ -207,6 +218,12 @@ module.exports = async (req, res) => {
   // La conversación no se cierra nunca: lo de cortar por número de preguntas
   // es cosa de la entrevista, que sí tiene que acabar cerrándose.
   const debeCerrar = !conversacion && preguntasHechas >= MAXIMO_PREGUNTAS;
+  // Y el suelo, que es lo contrario (spec 055): la entrevista de bienvenida no
+  // puede cerrarse antes de haber preguntado lo suyo. MAXIMO_PREGUNTAS es un
+  // tope por arriba y no había ninguno por abajo, así que nada impedía cerrar
+  // en la primera. Solo en la bienvenida de verdad: el modo `reinicio` ya sabe
+  // quién eres y cerrar pronto es lo correcto.
+  const puedeCerrar = !primeraVez || preguntasHechas >= MINIMO_PREGUNTAS;
 
   // El hilo se manda como conversación real para que la IA tenga memoria.
   const contents = [
@@ -217,7 +234,14 @@ module.exports = async (req, res) => {
           text:
             encabezadoDeRegistros(cuerpo.desde) +
             describirRegistros(registros) +
-            contexto(cuerpo.nombre, cuerpo.perfil) +
+            // La entrevista de bienvenida NO recibe el perfil (spec 055).
+            // El documento de ajustes sobrevive a un borrado de datos, así que
+            // se lo estábamos pasando a una entrevista que por definición no
+            // conoce a nadie: la IA veía la ficha entera, daba por hecho que
+            // ya lo sabía todo y cerraba a la primera hablando de datos que el
+            // usuario no le había contado. El corte va aquí, en el proxy, que
+            // es donde se arma el prompt.
+            (primeraVez ? "" : contexto(cuerpo.nombre, cuerpo.perfil)) +
             (mensajes.length || conversacion
               ? ""
               : "\n\nEmpieza la entrevista con tu primera pregunta.")
@@ -243,22 +267,57 @@ module.exports = async (req, res) => {
     });
   }
 
-  const respuesta = await generarJson(
-    res,
-    {
-      systemInstruction: { parts: [{ text: instrucciones }] },
-      contents,
-      generationConfig: {
-        responseMimeType: "application/json",
-        responseSchema: ESQUEMA
-      }
-    },
-    debeCerrar ? "Cierre de consulta" : "Turno de consulta",
-    cuerpo.proveedor
+  const pedirTurno = (partes, etiqueta) =>
+    generarJson(
+      res,
+      {
+        systemInstruction: { parts: [{ text: instrucciones }] },
+        contents: partes,
+        generationConfig: {
+          responseMimeType: "application/json",
+          responseSchema: ESQUEMA
+        }
+      },
+      etiqueta,
+      cuerpo.proveedor
+    );
+
+  let respuesta = await pedirTurno(
+    contents,
+    debeCerrar ? "Cierre de consulta" : "Turno de consulta"
   );
 
   // generarJson ya ha respondido si algo falló.
   if (!respuesta) return;
+
+  // El suelo de la bienvenida (spec 055): si cierra antes de tiempo, se le pide
+  // otro turno insistiendo en que pregunte. No se inventa la pregunta desde el
+  // código, que sonaría a otra voz. UN solo reintento: pelearse en bucle con el
+  // modelo gasta cuota y deja al usuario esperando.
+  if (respuesta.tipo === "cierre" && !puedeCerrar) {
+    const insistiendo = [
+      ...contents,
+      { role: "model", parts: [{ text: JSON.stringify(respuesta) }] },
+      {
+        role: "user",
+        parts: [
+          {
+            text:
+              "Todavía te falta información: aún no me has preguntado todo lo " +
+              "que tienes que averiguar. NO cierres la entrevista. Haz la " +
+              "siguiente pregunta que necesites de la lista de datos " +
+              "obligatorios."
+          }
+        ]
+      }
+    ];
+
+    const segundoIntento = await pedirTurno(insistiendo, "Turno de consulta");
+    // Si el reintento falla, generarJson ya ha respondido con su error.
+    if (!segundoIntento) return;
+    // Si insiste en cerrar, se pasa el cierre: mejor eso que dejarle colgado.
+    respuesta = segundoIntento;
+  }
 
   // Si la IA manda cierre y pregunta a la vez, manda el cierre.
   //

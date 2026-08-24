@@ -66,3 +66,8 @@ Ideas surgidas durante la implementación, no implementadas. Una línea cada una
 - Resumir los registros por día ("3 comidas, 45 min de bici") en vez de
   listarlos uno a uno cuando el periodo es largo: diría más con menos texto,
   pero cambia lo que la IA ve.
+- El cierre de la entrevista de bienvenida da por hecho que ya tienes dieta y
+  tabla en la app ("Ya tienes tu plan y tabla listos"): se lo dice el prompt,
+  que asume que existen. Tras un borrado de datos no existen, así que el cierre
+  promete algo que no está. Detectado al probar la spec 052 el 24 de agosto y
+  aparcado en la 055 por ser lo menos grave de los tres fallos de esa tanda.

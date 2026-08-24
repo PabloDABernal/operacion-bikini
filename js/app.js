@@ -3886,6 +3886,10 @@ id("btn-borrar-definitivo").addEventListener("click", async () => {
     // refrescarTodo() porque fija `hayOperacion`, del que dependen varias de
     // las pantallas que aquel refresca.
     await refrescarOperaciones();
+    // Y los ajustes, por lo mismo (spec 055): la casilla "lo que la IA sabe de
+    // mí" vacía nombre, altura y objetivo, y sin releerlos la cabecera seguiría
+    // saludándote por un nombre que ya no está guardado.
+    await refrescarAjustes();
     await refrescarTodo();
   } catch {
     // Las casillas y la palabra se quedan como están, para reintentar de un

@@ -2,9 +2,14 @@
 //
 // Operación irreversible y sin papelera. Todo lo de aquí está escrito para que
 // nunca borre más de lo que se le ha pedido: cada tipo de dato conoce sus
-// colecciones y no toca ninguna otra. El documento de ajustes del usuario NO
-// está en esta lista a propósito: reiniciar es empezar de cero con el mismo
-// objetivo, no olvidar quién eres.
+// colecciones y no toca ninguna otra.
+//
+// El documento de ajustes tampoco se borra: lo que hace la casilla "lo que la
+// IA sabe de mí" (spec 055) es vaciar cinco campos suyos, no el documento. La
+// regla vieja era que reiniciar es "empezar de cero con el mismo objetivo, no
+// olvidar quién eres"; sigue siendo el comportamiento por defecto, pero ahora
+// hay una casilla aparte para olvidar también eso, porque sin ella una
+// entrevista de bienvenida arrancaba con el perfil de la etapa anterior.
 
 import {
   collection,
@@ -16,6 +21,7 @@ import {
 
 import { db } from "./firebase-config.js";
 import { borrarFoto, borrarDeCloudinary } from "./fotos.js";
+import { leerAjustes, guardarAjustes } from "./ajustes.js";
 import { COLECCIONES } from "./operaciones.js";
 
 // Un lote de Firestore admite 500 operaciones. Con dos usuarios no se llegará,
@@ -56,7 +62,23 @@ export const TIPOS = [
   },
   // El histórico va aparte: no es una colección del día a día, sino las
   // operaciones archivadas con todo lo que llevan dentro (spec 019).
-  { clave: "operaciones", etiqueta: "operaciones", colecciones: [] }
+  { clave: "operaciones", etiqueta: "operaciones", colecciones: [] },
+  // Lo que la IA sabe de ti (spec 055). Tampoco es una colección: son campos
+  // sueltos del documento de ajustes, que hasta ahora no se podía vaciar por
+  // ninguna vía. Eso hacía que una entrevista de bienvenida arrancara con el
+  // perfil de la etapa anterior delante y cerrara a la primera dando por
+  // sabido lo que el usuario no había contado.
+  { clave: "perfil", etiqueta: "lo que la IA sabe de mí", colecciones: [] }
+];
+
+// Los campos del documento de ajustes que forman ese retrato. `proveedorIa` NO
+// está: es una preferencia de la app, no algo que la IA sepa de ti.
+const CAMPOS_DEL_PERFIL = [
+  "nombre",
+  "perfil",
+  "alturaCm",
+  "pesoObjetivoKg",
+  "fechaObjetivo"
 ];
 
 async function documentosDe(uid, nombreColeccion) {
@@ -72,6 +94,25 @@ async function operacionesArchivadas(uid) {
   return documentos.filter((documento) => documento.data().estado === "archivada");
 }
 
+// Cuántos de los campos del retrato tienen algo. Se cuentan uno a uno para que
+// el número diga cuánto hay que perder, y salga (0) cuando ya no queda nada.
+async function camposDelPerfilConAlgo(uid) {
+  const ajustes = await leerAjustes(uid);
+  return CAMPOS_DEL_PERFIL.filter((campo) => {
+    const valor = ajustes[campo];
+    return valor !== null && valor !== undefined && valor !== "";
+  }).length;
+}
+
+// Vacía el retrato sin borrar el documento: dentro vive también proveedorIa,
+// que no se toca. `null` es lo que leerAjustes() ya devuelve cuando no hay nada.
+async function borrarPerfil(uid) {
+  await guardarAjustes(
+    uid,
+    Object.fromEntries(CAMPOS_DEL_PERFIL.map((campo) => [campo, null]))
+  );
+}
+
 // Cuántos registros hay de cada tipo, para enseñarlo antes de borrar.
 export async function contarTodo(uid) {
   const recuentos = {};
@@ -80,6 +121,11 @@ export async function contarTodo(uid) {
     TIPOS.map(async (tipo) => {
       if (tipo.clave === "operaciones") {
         recuentos[tipo.clave] = (await operacionesArchivadas(uid)).length;
+        return;
+      }
+
+      if (tipo.clave === "perfil") {
+        recuentos[tipo.clave] = await camposDelPerfilConAlgo(uid);
         return;
       }
 
@@ -186,6 +232,11 @@ export async function borrarSeleccion(uid, clavesSeleccionadas) {
 
     if (tipo.clave === "operaciones") {
       await borrarHistorico(uid);
+      continue;
+    }
+
+    if (tipo.clave === "perfil") {
+      await borrarPerfil(uid);
       continue;
     }
 

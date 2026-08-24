@@ -82,6 +82,7 @@ El 20 de agosto arrancó la **v4**, que sale de una auditoría de usabilidad hec
 | 052 | La entrevista de alta, también en el hilo (v6) | 🧪 implementada, pendiente de que el usuario la pruebe |
 | 053 | El histórico fantasma y el archivo mudo | 🧪 implementada, pendiente de que el usuario la pruebe |
 | 054 | La caja deja de hablar de más durante una consulta | 🧪 implementada, pendiente de que el usuario la pruebe |
+| 055 | La entrevista de bienvenida empieza de cero de verdad | 🧪 implementada, pendiente de que el usuario la pruebe |
 
 ## Qué toca ahora
 
@@ -117,7 +118,16 @@ El 20 de agosto arrancó la **v4**, que sale de una auditoría de usabilidad hec
 >    "Te quedan N mensajes hoy", que en la entrevista miente porque no gasta
 >    cupo. Ahora la caja va desnuda mientras hay una consulta en curso.
 >
-> **Lo que toca:** que el usuario pruebe la 052, la 053 y la 054. Con eso cerrado,
+> 5. **Spec 055**, el fallo gordo de la tanda. El usuario borró sus datos, hizo
+>    la entrevista de bienvenida, contestó solo su nombre y la IA cerró de
+>    golpe hablándole de su peso objetivo de antes, de su pádel y de sus
+>    mancuernas. No lo inventó: el documento de ajustes sobrevive al borrado
+>    por diseño, y `contexto()` en `api/consulta.js` se lo metía en el prompt
+>    **también en modo `inicial`**. Tres arreglos: la bienvenida ya no recibe
+>    perfil, no puede cerrarse antes de 8 preguntas, y hay casilla nueva en la
+>    Zona de peligro para borrar lo que la IA sabe de ti.
+>
+> **Lo que toca:** que el usuario pruebe de la 052 a la 055. Con eso cerrado,
 > volver a `docs/BACKLOG.md`, que es de donde se tiraba por decisión delegada.
 >
 > **Tres trampas que salieron y conviene no olvidar:**
