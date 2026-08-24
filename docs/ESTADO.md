@@ -129,15 +129,10 @@ El 20 de agosto arrancó la **v4**, que sale de una auditoría de usabilidad hec
 >   Con una sola caja eso dejaba sin sitio donde contestar a una consulta en
 >   curso. Arreglado dentro de la 052, que lo necesitaba.
 >
-> **Dos cosas que el usuario dejó pendientes de contestar** de la v6, y conviene
-> recordarle al probar:
->
-> - Con el hilo del revés (spec 051), **el separador de una revisión queda
->   debajo de sus mensajes**. Lo aceptó al decidirlo, pero pidió verlo. Si le
->   chirría, la alternativa está descrita en la sección 8 de la 051 y es un
->   cambio pequeño.
-> - Si con todo junto **se distingue bien** lo que fue revisión de lo que fue
->   charla (spec 050, paso 12 de su guion).
+> **Cerrado el 24 de agosto:** el usuario confirmó que **el hilo del revés está
+> bien tal como quedó**, con el separador de la revisión debajo de sus mensajes.
+> No hay que tocarlo. La alternativa de la sección 8 de la spec 051 queda
+> descartada.
 
 **1. Reglas de Firestore: ya está hecho.** El 22 de agosto se publicaron
 con `npx --yes firebase-tools deploy --only firestore:rules` desde el PC

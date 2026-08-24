@@ -236,8 +236,9 @@ Tamaño estimado: ~220 líneas. Sigue por debajo de las 300.
   inicio de la conversación"*. Se le planteó la alternativa de dejar el hilo en
   orden natural con scroll propio, ya colocado al final, y eligió la inversión
   completa sabiendo que un intercambio se lee del revés y que el separador de
-  revisión queda debajo de sus mensajes. **Si al usarlo resulta confuso, la
-  alternativa está descrita aquí y es un cambio pequeño.**
+  revisión queda debajo de sus mensajes. **Confirmado el 24 de agosto tras
+  probarlo: se queda así.** La alternativa del hilo en orden natural con scroll
+  propio queda descartada.
 
 ## 9. Fuera de spec: ideas apuntadas
 
