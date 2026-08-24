@@ -60,8 +60,9 @@ export const TIPOS = [
     etiqueta: "catálogo de ejercicios y tabla",
     colecciones: ["ejerciciosCatalogo", "tablas"]
   },
-  // El histórico va aparte: no es una colección del día a día, sino las
-  // operaciones archivadas con todo lo que llevan dentro (spec 019).
+  // Las operaciones van aparte: no son una colección del día a día, sino los
+  // ciclos con todo lo que llevan dentro (spec 019). Desde la spec 056 incluye
+  // también la que esté en marcha, que se tira sin archivar.
   { clave: "operaciones", etiqueta: "operaciones", colecciones: [] },
   // Lo que la IA sabe de ti (spec 055). Tampoco es una colección: son campos
   // sueltos del documento de ajustes, que hasta ahora no se podía vaciar por
@@ -86,12 +87,17 @@ async function documentosDe(uid, nombreColeccion) {
   return instantanea.docs;
 }
 
-// La operación en curso NUNCA se borra por esta vía: para cerrarla está
-// "Finalizar operación bikini", y llevársela por delante al marcar una casilla
-// sería una trampa.
-async function operacionesArchivadas(uid) {
-  const documentos = await documentosDe(uid, "operaciones");
-  return documentos.filter((documento) => documento.data().estado === "archivada");
+// Todas: las archivadas y la que esté en marcha (spec 056).
+//
+// Antes esto filtraba por `estado === "archivada"`, con el argumento de que
+// llevarse la operación en curso al marcar una casilla sería una trampa y que
+// para cerrarla está "Finalizar operación bikini". La trampa resultó ser la
+// contraria: la casilla "Consultas y planes" SÍ borra la entrevista que abre
+// una operación, así que se podía dejar un ciclo en marcha sin principio, con
+// la app tratándote como si estuvieras dentro y sin más salida que archivar
+// una operación que nunca existió. Ahora "operaciones" son todas.
+async function todasLasOperaciones(uid) {
+  return documentosDe(uid, "operaciones");
 }
 
 // Cuántos de los campos del retrato tienen algo. Se cuentan uno a uno para que
@@ -120,7 +126,7 @@ export async function contarTodo(uid) {
   await Promise.all(
     TIPOS.map(async (tipo) => {
       if (tipo.clave === "operaciones") {
-        recuentos[tipo.clave] = (await operacionesArchivadas(uid)).length;
+        recuentos[tipo.clave] = (await todasLasOperaciones(uid)).length;
         return;
       }
 
@@ -172,9 +178,13 @@ async function borrarFotos(uid) {
   }
 }
 
-// Borra una operación archivada entera: todas sus subcolecciones y luego su
-// documento. Las fotos van primero a Cloudinary, o quedarían archivos gastando
-// cuota que ya no se pueden alcanzar desde ninguna pantalla.
+// Borra una operación entera: todas sus subcolecciones y luego su documento.
+// Las fotos van primero a Cloudinary, o quedarían archivos gastando cuota que
+// ya no se pueden alcanzar desde ninguna pantalla.
+//
+// Sirve igual para una operación en curso (spec 056): sus subcolecciones están
+// vacías, porque sus registros viven en las colecciones del día a día hasta que
+// se archiva. Por eso no hace falta un camino aparte para ella.
 async function borrarOperacion(uid, operacionId) {
   for (const nombre of COLECCIONES) {
     const ruta = collection(
@@ -212,8 +222,8 @@ async function borrarOperacion(uid, operacionId) {
   await deleteDoc(doc(db, "usuarios", uid, "operaciones", operacionId));
 }
 
-async function borrarHistorico(uid) {
-  for (const documento of await operacionesArchivadas(uid)) {
+async function borrarOperaciones(uid) {
+  for (const documento of await todasLasOperaciones(uid)) {
     await borrarOperacion(uid, documento.id);
   }
 }
@@ -231,7 +241,7 @@ export async function borrarSeleccion(uid, clavesSeleccionadas) {
     }
 
     if (tipo.clave === "operaciones") {
-      await borrarHistorico(uid);
+      await borrarOperaciones(uid);
       continue;
     }
 

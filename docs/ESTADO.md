@@ -83,6 +83,7 @@ El 20 de agosto arrancó la **v4**, que sale de una auditoría de usabilidad hec
 | 053 | El histórico fantasma y el archivo mudo | 🧪 implementada, pendiente de que el usuario la pruebe |
 | 054 | La caja deja de hablar de más durante una consulta | 🧪 implementada, pendiente de que el usuario la pruebe |
 | 055 | La entrevista de bienvenida empieza de cero de verdad | 🧪 implementada, pendiente de que el usuario la pruebe |
+| 056 | La casilla "Operaciones" borra también la que está en marcha | 🧪 implementada, pendiente de que el usuario la pruebe |
 
 ## Qué toca ahora
 
@@ -127,7 +128,14 @@ El 20 de agosto arrancó la **v4**, que sale de una auditoría de usabilidad hec
 >    perfil, no puede cerrarse antes de 8 preguntas, y hay casilla nueva en la
 >    Zona de peligro para borrar lo que la IA sabe de ti.
 >
-> **Lo que toca:** que el usuario pruebe de la 052 a la 055. Con eso cerrado,
+> 6. **Spec 056**, el segundo agujero del mismo día. Tras la entrevista
+>    fantasma, el usuario se quedó con una **operación en marcha vacía**: la
+>    casilla "Consultas y planes" se llevó la entrevista que la abrió, pero
+>    "Operaciones" solo borraba las archivadas, así que quedó un ciclo sin
+>    principio y sin más salida que archivarlo. Ahora "Operaciones" son todas,
+>    incluida la que esté en marcha, que se tira sin archivar.
+>
+> **Lo que toca:** que el usuario pruebe de la 052 a la 056. Con eso cerrado,
 > volver a `docs/BACKLOG.md`, que es de donde se tiraba por decisión delegada.
 >
 > **Tres trampas que salieron y conviene no olvidar:**
