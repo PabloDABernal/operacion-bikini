@@ -1,7 +1,7 @@
 # 057 — El comité de bienvenida
 
-- **Estado:** ✅ revisada por `revisor-specs` (25 de agosto); lista para
-  implementar.
+- **Estado:** 🧪 implementada y desplegada el 2026-08-25; pendiente de que el
+  usuario la pruebe.
 - **Fecha:** 2026-08-25
 - **Referencia en PRODUCTO.md:** apartado **"Qué hará (v7: el comité de
   bienvenida)"**, añadido el 25 de agosto (el texto está también en el anexo).
@@ -244,9 +244,20 @@ pesaje si lo hay) y los de texto se dejan vacíos con un aviso encima:
 Sin colecciones nuevas ni campos nuevos.
 
 La consulta de alta se guarda como hasta ahora (`modo: "inicial"` o
-`"reinicio"`, `estado`, `mensajes`, `creadaEn`, `terminadaEn`). Lo único que
-cambia es que su **primer mensaje es del usuario**, no de la IA — hasta ahora
-todas las consultas empezaban con una pregunta de la IA.
+`"reinicio"`, `estado`, `mensajes`, `creadaEn`, `terminadaEn`), con dos cambios:
+
+- Su **primer mensaje es del usuario**, no de la IA — hasta ahora todas las
+  consultas empezaban con una pregunta de la IA.
+- Gana un campo **`ficha`** con lo que se tecleó en el formulario (los cuatro
+  duros, el peso actual y las dos casillas). **Es obligatorio, no un extra**: si
+  la IA repregunta y el usuario recarga la página, el formulario ya no está en
+  pantalla, y `responder()` necesita esos campos para poder cerrar el alta con
+  los valores del usuario en vez de con los que devuelva la IA. Sin guardarlo,
+  el caso límite de "recargar con el alta a medias" perdería el criterio 3.
+
+Las consultas de alta anteriores a la v7 no tienen `ficha`. Para esas se cae al
+comportamiento de antes (leer los campos de la respuesta de la IA), así que no
+hay que migrar nada.
 
 **Comprobado en la revisión del 25 de agosto, y no rompe nada:** `enviadosHoy()`
 descarta los modos `inicial` y `reinicio` vía `esRevision()`, así que un mensaje
@@ -297,7 +308,8 @@ No hacen falta reglas nuevas de Firestore.
 | `docs/PRODUCTO.md` | El apartado v7 del anexo. **Antes de implementar.** |
 | `docs/ESTADO.md` | Al terminar. |
 
-Tamaño estimado: **300-350 líneas**.
+Tamaño estimado: **300-350 líneas**. Real al implementarla: **~500**. El aviso
+de la regla 4 se dio y el usuario eligió no partirla (sección 10).
 
 ## 8. Decisiones tomadas
 

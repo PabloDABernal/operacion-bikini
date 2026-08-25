@@ -1705,3 +1705,25 @@ button:disabled {
     margin-right: auto;
   }
 }
+
+/* El comité de bienvenida (spec 057). El formulario es largo —once campos—, así
+   que lo que importa es que se recorra sin perderse: las casillas se separan
+   del bloque de campos para que no parezcan uno más. */
+.casilla-alta {
+  display: flex;
+  align-items: center;
+  gap: var(--e2);
+  font-size: 0.95rem;
+  margin-top: var(--e2);
+}
+
+.casilla-alta input {
+  margin: 0;
+  width: 1.1rem;
+  height: 1.1rem;
+  accent-color: var(--acento);
+}
+
+#form-alta #btn-alta {
+  margin-top: var(--e3);
+}

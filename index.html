@@ -46,9 +46,9 @@
       <div id="bloque-iniciar" class="oculta">
         <h2>Operación bikini</h2>
         <p class="explicacion">
-          Empieza con una entrevista: la IA te conocerá y dejará tus ajustes
-          listos. A partir de ahí ya podrás apuntar, y pedirle tu dieta y tu
-          tabla de ejercicio cuando quieras.
+          Empieza rellenando tu ficha: con eso la IA te conoce, te deja los
+          ajustes listos y te da sus primeros consejos. A partir de ahí ya
+          podrás apuntar.
         </p>
         <button type="button" id="btn-iniciar-operacion">Iniciar operación bikini</button>
         <p id="aviso-archivado-pendiente" class="advertencia oculta">
@@ -462,14 +462,74 @@
            operación: el botón de empezar vive fuera, porque con una operación
            en marcha también se pasa consulta (spec 047). -->
       <p id="explicacion-entrevista" class="explicacion">
-        La IA te entrevista como haría un nutricionista: te pregunta por tus
-        medidas, tus gustos y tu rutina, y con eso abre tu operación bikini.
+        Tu comité de bienvenida: cuéntale de una vez quién eres y qué quieres, y
+        con eso abre tu operación bikini.
       </p>
       <p id="explicacion-inicial" class="explicacion oculta">
-        Es la entrevista de bienvenida: te preguntará cómo quieres que te llame,
-        tus medidas y tus gustos, y dejará tus ajustes rellenos para que la IA
-        te conozca a partir de ahora.
+        Rellena tu ficha y ya está: con eso te abre la operación, te da sus
+        primeros consejos y, si lo pides, te deja montadas la dieta de la semana
+        y la tabla de ejercicio. Solo te preguntará algo si le falta.
       </p>
+
+      <!-- El comité de bienvenida (spec 057). Sustituye a la entrevista de diez
+           preguntas: los datos que caben en un formulario se teclean, y a la IA
+           solo se le deja lo que de verdad hay que hablar. Solo se ve sin
+           operación en marcha. -->
+      <form id="form-alta" class="oculta">
+        <p id="aviso-alta" class="explicacion oculta"></p>
+
+        <label for="alta-nombre">Cómo quieres que te llame</label>
+        <input type="text" id="alta-nombre" maxlength="40" placeholder="Pau">
+
+        <label for="alta-altura">Altura (cm)</label>
+        <input type="text" id="alta-altura" inputmode="numeric" placeholder="176">
+
+        <label for="alta-peso">Peso actual (kg)</label>
+        <input type="text" id="alta-peso" inputmode="decimal" placeholder="81,4">
+
+        <label for="alta-objetivo">Peso objetivo (kg)</label>
+        <input type="text" id="alta-objetivo" inputmode="decimal" placeholder="72">
+
+        <label for="alta-fecha">Para cuándo (opcional)</label>
+        <input type="date" id="alta-fecha">
+
+        <label for="alta-gustos">Comidas que te gustan</label>
+        <textarea id="alta-gustos" rows="2"
+          placeholder="cremas, purés, pasta, pollo a la plancha"></textarea>
+
+        <label for="alta-aversiones">Comidas que no soportas</label>
+        <textarea id="alta-aversiones" rows="2"
+          placeholder="pescado azul, casquería"></textarea>
+
+        <label for="alta-alergias">Alergias e intolerancias</label>
+        <textarea id="alta-alergias" rows="2"
+          placeholder="intolerante a la lactosa"></textarea>
+
+        <label for="alta-ejercicio">Ejercicio que disfrutas</label>
+        <textarea id="alta-ejercicio" rows="2"
+          placeholder="caminar, pádel los jueves"></textarea>
+
+        <label for="alta-material">Material con el que cuentas</label>
+        <textarea id="alta-material" rows="2"
+          placeholder="mancuernas en casa, sin gimnasio"></textarea>
+
+        <label for="alta-limitaciones">Lesiones o limitaciones</label>
+        <textarea id="alta-limitaciones" rows="2"
+          placeholder="la rodilla derecha, nada de impacto"></textarea>
+
+        <label class="casilla-alta">
+          <input type="checkbox" id="alta-quiere-dieta" checked>
+          <span>Créame ya una dieta de la semana</span>
+        </label>
+        <label class="casilla-alta">
+          <input type="checkbox" id="alta-quiere-tabla" checked>
+          <span>Créame ya una tabla de ejercicio</span>
+        </label>
+
+        <button type="submit" id="btn-alta">Empezar mi operación bikini</button>
+        <p id="estado-alta"></p>
+        <p id="error-alta" class="error" role="alert"></p>
+      </form>
 
       <!-- La revisión periódica (specs 045-047). Este bloque NO se esconde
            nunca: lo que cambia es si dentro hay un botón para empezar o un

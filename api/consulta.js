@@ -12,10 +12,16 @@ const { peticionAutorizada, describirRegistros, generarJson } = require("./_ia")
 
 const MAXIMO_PREGUNTAS = 25;
 
-// Y el suelo de la entrevista de bienvenida (spec 055). Ocho y no diez, que son
-// los datos obligatorios de la lista, porque una sola respuesta puede traer
-// varios ("mido 176 y peso 81").
-const MINIMO_PREGUNTAS = 8;
+// Cuántas veces puede repreguntar el alta antes de tener que cerrar (spec 057).
+// El comité de bienvenida recibe la ficha entera de golpe, así que preguntar es
+// la excepción: si falta algo, tres tirones y a cerrar con lo que haya. Sin
+// tope se vuelve a la entrevista larga de diez preguntas que la v7 vino a
+// quitar.
+//
+// Aquí murió el suelo de 8 preguntas de la spec 055: existía porque la
+// entrevista tenía que sacar los datos preguntando, y ahora los recibe escritos.
+// Cerrar sin preguntar nada pasó de ser un fallo a ser el caso bueno.
+const MAXIMO_REPREGUNTAS_ALTA = 3;
 
 // OJO: esta constante NO es "el modo normal". Es la base de la ENTREVISTA, y
 // INSTRUCCIONES_INICIAL e INSTRUCCIONES_REINICIO se construyen encima de ella
@@ -50,10 +56,12 @@ Sobre el cierre:
 // van a Ajustes y un retrato de la persona que la IA reutilizará después.
 const INSTRUCCIONES_INICIAL = `${INSTRUCCIONES_ENTREVISTA}
 
-ESTA ES LA ENTREVISTA DE BIENVENIDA. Además de lo anterior:
-- Tu PRIMERA pregunta es cómo quiere que le llames. Nada más.
-- A lo largo de la conversación tienes que averiguar sí o sí: altura en centímetros, peso actual, peso objetivo, para cuándo, qué comidas le gustan y cuáles no soporta, alergias e intolerancias, qué ejercicio disfruta, con qué material cuenta (gimnasio, pesas en casa, nada) y si tiene lesiones o limitaciones.
-- Sigue siendo UNA pregunta por turno.
+ESTA ES SU ALTA. Acaba de rellenar su ficha y te la ha mandado entera de una vez. Además de lo anterior:
+- NO la entrevistes desde cero: lo que ves en su primer mensaje ya te lo ha contado ella.
+- Si NO te falta nada importante, NO preguntes: cierra directamente con tus primeros consejos. Es el caso normal y el que ella espera.
+- Solo preguntas si de verdad te falta algo para poder aconsejarla —gustos, aversiones, alergias, qué ejercicio disfruta, con qué material cuenta o si tiene lesiones—, o si algo de lo que ha escrito no cuadra (un objetivo imposible en el plazo que dice). Entonces sí: UNA cosa por turno.
+- Si algo no te lo ha dicho, pregúntalo abierto ("¿hay alguna comida que no soportes?"), no des por hecho que no tiene nada.
+- Si en su ficha dice que se le van a crear una dieta y una tabla, MENCIÓNALO en el cierre: dile que se las dejas preparadas.
 
 Cuando cierres la consulta, rellena también estos campos:
 - "nombre": cómo quiere que le llamen.
@@ -69,11 +77,11 @@ NO SABES NADA de esta persona: es la primera vez que habláis. No des por hecho 
 // siguiente.
 const INSTRUCCIONES_REINICIO = `${INSTRUCCIONES_ENTREVISTA}
 
-ESTA PERSONA YA HIZO LA ENTREVISTA ANTES Y EMPIEZA UNA ETAPA NUEVA. Además de lo anterior:
-- NO vuelvas a preguntarle lo que ya sabes de ella (gustos, aversiones, alergias, material, limitaciones): lo tienes en el contexto.
-- Pregunta solo lo que cambia entre una etapa y otra: peso actual, nuevo objetivo, para cuándo, y qué ha cambiado desde la última vez (horarios, lesiones, material, motivación).
-- Sé breve: con cuatro o cinco preguntas deberías tener bastante.
-- Sigue siendo UNA pregunta por turno.
+ESTA PERSONA YA HIZO SU ALTA ANTES Y EMPIEZA UNA ETAPA NUEVA. Acaba de mandarte su ficha actualizada de una vez. Además de lo anterior:
+- NO vuelvas a preguntarle lo que ya sabes de ella (gustos, aversiones, alergias, material, limitaciones): lo tienes en el contexto y en su ficha.
+- Si la ficha te basta, NO preguntes: cierra con tus primeros consejos de esta etapa. Es el caso normal.
+- Solo preguntas si algo importante ha cambiado y no te lo ha dicho, o si algo no cuadra. UNA cosa por turno.
+- Si en su ficha dice que se le van a crear una dieta y una tabla, MENCIÓNALO en el cierre.
 
 Cuando cierres la consulta, rellena también estos campos:
 - "nombre": cómo quiere que le llamen (el que ya usabas, salvo que pida otro).
@@ -217,13 +225,13 @@ module.exports = async (req, res) => {
   const preguntasHechas = mensajes.filter((mensaje) => mensaje.de === "ia").length;
   // La conversación no se cierra nunca: lo de cortar por número de preguntas
   // es cosa de la entrevista, que sí tiene que acabar cerrándose.
-  const debeCerrar = !conversacion && preguntasHechas >= MAXIMO_PREGUNTAS;
-  // Y el suelo, que es lo contrario (spec 055): la entrevista de bienvenida no
-  // puede cerrarse antes de haber preguntado lo suyo. MAXIMO_PREGUNTAS es un
-  // tope por arriba y no había ninguno por abajo, así que nada impedía cerrar
-  // en la primera. Solo en la bienvenida de verdad: el modo `reinicio` ya sabe
-  // quién eres y cerrar pronto es lo correcto.
-  const puedeCerrar = !primeraVez || preguntasHechas >= MINIMO_PREGUNTAS;
+  //
+  // El alta tiene su propio tope, mucho más bajo (spec 057): recibe la ficha
+  // entera de golpe, así que tres repreguntas son de sobra y a la cuarta se le
+  // fuerza el cierre por el mismo camino de siempre.
+  const debeCerrar =
+    !conversacion &&
+    preguntasHechas >= (inicial ? MAXIMO_REPREGUNTAS_ALTA : MAXIMO_PREGUNTAS);
 
   // El hilo se manda como conversación real para que la IA tenga memoria.
   const contents = [
@@ -282,42 +290,13 @@ module.exports = async (req, res) => {
       cuerpo.proveedor
     );
 
-  let respuesta = await pedirTurno(
+  const respuesta = await pedirTurno(
     contents,
     debeCerrar ? "Cierre de consulta" : "Turno de consulta"
   );
 
   // generarJson ya ha respondido si algo falló.
   if (!respuesta) return;
-
-  // El suelo de la bienvenida (spec 055): si cierra antes de tiempo, se le pide
-  // otro turno insistiendo en que pregunte. No se inventa la pregunta desde el
-  // código, que sonaría a otra voz. UN solo reintento: pelearse en bucle con el
-  // modelo gasta cuota y deja al usuario esperando.
-  if (respuesta.tipo === "cierre" && !puedeCerrar) {
-    const insistiendo = [
-      ...contents,
-      { role: "model", parts: [{ text: JSON.stringify(respuesta) }] },
-      {
-        role: "user",
-        parts: [
-          {
-            text:
-              "Todavía te falta información: aún no me has preguntado todo lo " +
-              "que tienes que averiguar. NO cierres la entrevista. Haz la " +
-              "siguiente pregunta que necesites de la lista de datos " +
-              "obligatorios."
-          }
-        ]
-      }
-    ];
-
-    const segundoIntento = await pedirTurno(insistiendo, "Turno de consulta");
-    // Si el reintento falla, generarJson ya ha respondido con su error.
-    if (!segundoIntento) return;
-    // Si insiste en cerrar, se pasa el cierre: mejor eso que dejarle colgado.
-    respuesta = segundoIntento;
-  }
 
   // Si la IA manda cierre y pregunta a la vez, manda el cierre.
   //

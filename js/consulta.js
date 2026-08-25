@@ -16,7 +16,7 @@ import { hoyISO, sumarDias } from "./fechas.js";
 import { listarPesajes } from "./pesajes.js";
 import { listarComidas } from "./comidas.js";
 import { listarEjercicios } from "./ejercicios.js";
-import { leerAjustes, guardarLoAveriguado } from "./ajustes.js";
+import { leerAjustes, guardarAjustes, guardarLoAveriguado } from "./ajustes.js";
 import { listarOperaciones, crearOperacion } from "./operaciones.js";
 
 const DIAS_DE_HISTORIAL = 14;
@@ -49,6 +49,8 @@ const MENSAJES = {
   "ia-saturada":
     "La IA está saturada ahora mismo. Espera un minuto y vuelve a intentarlo.",
   "limite-diario": "Te has quedado sin mensajes por hoy. Vuelve mañana.",
+  "ya-hay-operacion":
+    "Ya tienes una operación en marcha. Recarga la página para verla.",
   "cupo-diario": "Te has quedado sin mensajes por hoy. Vuelve mañana.",
   "cuota-agotada": "La IA ha alcanzado su límite diario gratuito. Prueba mañana.",
   "respuesta-ilegible": "La IA no ha sabido responder. Inténtalo de nuevo."
@@ -315,6 +317,143 @@ async function contextoDelUsuario(uid) {
   }
 }
 
+// El comité de bienvenida (spec 057): la ficha que rellena el usuario se manda
+// como UN mensaje suyo en prosa, no como campos sueltos del cuerpo.
+//
+// En prosa y no en JSON porque el hilo la enseña tal cual (spec 052): lo que se
+// lee al fondo de tu operación es lo que le contaste, con tus palabras.
+//
+// Los campos vacíos SE OMITEN. Escribir "Alergias: (nada)" le impediría a la IA
+// distinguir "no tengo alergias" de "no lo he dicho", que es justo lo único que
+// tiene que repreguntar.
+export function fichaEnProsa(ficha, extras = {}) {
+  const partes = [];
+
+  if (ficha.nombre) partes.push(`Me llamo ${ficha.nombre}.`);
+  if (ficha.alturaCm) partes.push(`Mido ${ficha.alturaCm} cm.`);
+  if (ficha.pesoActualKg) partes.push(`Ahora mismo peso ${ficha.pesoActualKg} kg.`);
+  if (ficha.pesoObjetivoKg) {
+    partes.push(
+      `Quiero llegar a ${ficha.pesoObjetivoKg} kg` +
+        (ficha.fechaObjetivo ? ` para el ${ficha.fechaObjetivo}.` : ".")
+    );
+  }
+  if (ficha.gustos) partes.push(`Comidas que me gustan: ${ficha.gustos}.`);
+  if (ficha.aversiones) partes.push(`Comidas que no soporto: ${ficha.aversiones}.`);
+  if (ficha.alergias) partes.push(`Alergias e intolerancias: ${ficha.alergias}.`);
+  if (ficha.ejercicio) partes.push(`Ejercicio que disfruto: ${ficha.ejercicio}.`);
+  if (ficha.material) partes.push(`Material con el que cuento: ${ficha.material}.`);
+  if (ficha.limitaciones) partes.push(`Lesiones o limitaciones: ${ficha.limitaciones}.`);
+
+  // Para que el cierre pueda mencionarlas (criterio 6 de la spec). Va dentro de
+  // la ficha y no en un campo nuevo del proxy: es un dato más de lo que pido.
+  const creando = [];
+  if (extras.dieta) creando.push("una dieta de la semana");
+  if (extras.tabla) creando.push("una tabla de ejercicio");
+  if (creando.length) {
+    partes.push(`Al terminar esta alta se me van a crear ${creando.join(" y ")}.`);
+  }
+
+  return partes.join(" ");
+}
+
+// Guarda lo que sale de un alta que se cierra. Lo llaman los DOS caminos: el
+// alta que cierra a la primera (empezarAlta) y la que cierra tras repreguntar
+// (responder).
+//
+// OJO con de dónde sale cada dato, que es el corazón de la spec 057:
+//
+// - Los cuatro campos duros salen de la FICHA, no de lo que devuelva la IA. El
+//   navegador ya los tiene tecleados y validados; hacerlos ir y volver por la
+//   IA solo puede estropearlos (reescribir 164 como 163, reformatear la fecha),
+//   y guardarLoAveriguado() descarta en silencio lo que no le cuadra, así que
+//   un dato bien escrito podría no llegar nunca a Ajustes.
+// - El perfil sale de la IA, que es lo único que ella sabe escribir.
+async function cerrarAlta(uid, ficha, respuesta) {
+  const duros = {};
+  if (ficha.nombre) duros.nombre = ficha.nombre;
+  if (ficha.alturaCm) duros.alturaCm = ficha.alturaCm;
+  if (ficha.pesoObjetivoKg) duros.pesoObjetivoKg = ficha.pesoObjetivoKg;
+  if (ficha.fechaObjetivo) duros.fechaObjetivo = ficha.fechaObjetivo;
+  if (Object.keys(duros).length) await guardarAjustes(uid, duros);
+
+  // Solo el perfil: los demás campos van vacíos y validarAjustes() los ignora.
+  await guardarLoAveriguado(uid, { perfil: respuesta.perfil });
+
+  const operaciones = await listarOperaciones(uid);
+  if (!operaciones.some((operacion) => operacion.estado === "activa")) {
+    await crearOperacion(uid, operaciones);
+  }
+}
+
+// Manda la ficha entera y crea la consulta del alta con lo que conteste la IA.
+//
+// Puede terminar de dos maneras, y las dos son normales:
+// - `termino: true`  -> la ficha bastaba y ya te ha dado sus primeros consejos.
+// - `termino: false` -> le falta algo y ha preguntado; se contesta en el hilo.
+export async function empezarAlta(uid, consultas, ficha, extras = {}) {
+  // El alta no gasta cupo (spec 055), pero sin cupo no se puede empezar: es la
+  // misma defensa que ya tenía empezarConsulta().
+  if (quedanMensajesHoy(consultas) === 0) {
+    throw errorConCodigo("limite-diario", "Cupo diario de mensajes agotado");
+  }
+
+  const [contexto, operaciones] = await Promise.all([
+    contextoDelUsuario(uid),
+    listarOperaciones(uid)
+  ]);
+
+  // Con dos pestañas abiertas la pantalla puede ir retrasada, y dos altas a la
+  // vez crearían dos operaciones.
+  if (operaciones.some((operacion) => operacion.estado === "activa")) {
+    throw errorConCodigo("ya-hay-operacion", "Ya hay una operación en marcha");
+  }
+
+  const modo = modoDeBienvenida(operaciones);
+  const registros = await recogerRegistros(uid, null);
+  const mio = { de: "usuario", texto: fichaEnProsa(ficha, extras) };
+
+  // Nada se escribe en Firestore hasta tener respuesta: si la red se corta a
+  // mitad, no queda una consulta a medias y se reintenta con el formulario tal
+  // como lo dejaste.
+  const respuesta = await turnoDeIa([mio], registros, { ...contexto, modo });
+
+  const comun = {
+    modo,
+    desde: null,
+    // La ficha se guarda EN la consulta a propósito: si la IA repregunta y el
+    // usuario recarga la página, el formulario ya no está y `responder()`
+    // necesita los campos duros para poder cerrar el alta.
+    ficha: { ...ficha, ...extras },
+    creadaEn: serverTimestamp()
+  };
+
+  if (respuesta.tipo === "cierre") {
+    await addDoc(consultasDe(uid), {
+      ...comun,
+      estado: "terminada",
+      mensajes: [mio, { de: "ia", texto: respuesta.cierre }],
+      terminadaEn: serverTimestamp(),
+      propuestaDieta: "",
+      propuestaTabla: ""
+    });
+    await cerrarAlta(uid, ficha, respuesta);
+    return { termino: true };
+  }
+
+  if (respuesta.tipo !== "pregunta") {
+    throw errorConCodigo("respuesta-ilegible", "La IA no contestó a la ficha");
+  }
+
+  await addDoc(consultasDe(uid), {
+    ...comun,
+    estado: "en-curso",
+    mensajes: [mio, { de: "ia", texto: respuesta.pregunta }],
+    terminadaEn: null
+  });
+  return { termino: false };
+}
+
 // Crea la consulta con la primera pregunta ya dentro.
 // Desde cuándo mira la IA en una revisión: desde la última consulta, o desde
 // que empezó la operación si aún no ha habido ninguna. Con tope de 30 días.
@@ -414,19 +553,17 @@ export async function responder(uid, consultas, consulta, texto) {
       propuestaTabla: respuesta.ejercicio || ""
     });
 
-    // La entrevista de bienvenida deja los ajustes rellenos y el perfil
-    // guardado, sin que el usuario tenga que copiarlos a mano, y arranca la
+    // El alta deja los ajustes rellenos y el perfil guardado, y arranca la
     // operación: hasta aquí no había ninguna, y por eso no se podía apuntar.
     const bienvenida = consulta.modo === "inicial" || consulta.modo === "reinicio";
     if (bienvenida) {
-      await guardarLoAveriguado(uid, respuesta);
-      const operaciones = await listarOperaciones(uid);
-      if (!operaciones.some((operacion) => operacion.estado === "activa")) {
-        await crearOperacion(uid, operaciones);
-      }
+      // La ficha del formulario (spec 057), guardada en la consulta para
+      // sobrevivir a una recarga. Las altas anteriores a la v7 no la tienen:
+      // para esas se cae a lo que devuelva la IA, que es como se hacía antes.
+      await cerrarAlta(uid, consulta.ficha || respuesta, respuesta);
     }
 
-    return { termino: true, inicial: bienvenida };
+    return { termino: true, inicial: bienvenida, ficha: consulta.ficha || null };
   }
 
   await updateDoc(referencia, {

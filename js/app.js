@@ -133,6 +133,7 @@ import {
   diasDesde,
   ultimaRevision,
   empezarConsulta,
+  empezarAlta,
   responder,
   TIPOS_ESPECIALIZADOS,
   guardarMarcaDePlan,
@@ -2828,8 +2829,10 @@ async function contestarALaRevision(campo, texto) {
   let termino = false;
   let inicial = false;
 
+  let ficha = null;
+
   const fueBien = await conEspera(async () => {
-    ({ termino, inicial } = await responder(
+    ({ termino, inicial, ficha } = await responder(
       uidActual,
       consultasCargadas,
       consultaAbierta,
@@ -2843,12 +2846,17 @@ async function contestarALaRevision(campo, texto) {
   if (termino) consultaReciénTerminada = idDeLaConsulta;
   await refrescarConsulta();
 
-  // La entrevista de bienvenida ha dejado ajustes y perfil guardados: hay que
-  // releerlos para que la cabecera y el formulario los enseñen.
+  // El alta ha dejado ajustes y perfil guardados y ha creado la operación: hay
+  // que releerlo todo, apuntar el peso de la ficha y montar lo que pidiera
+  // (spec 057). Es el mismo remate que cuando el alta cierra a la primera.
   if (termino && inicial) {
-    await refrescarAjustes();
-    // La entrevista ha creado la operación: hasta ahora no se podía apuntar.
-    await refrescarOperaciones();
+    if (ficha) {
+      await rematarAlta(ficha, { dieta: ficha.dieta, tabla: ficha.tabla });
+    } else {
+      // Altas anteriores a la v7: no llevan ficha, así que solo se releen.
+      await refrescarAjustes();
+      await refrescarOperaciones();
+    }
   }
 }
 
@@ -2992,7 +3000,9 @@ function pintarEstadoConsulta() {
   // Con una consulta a medias no hay nada que contar de la anterior.
   if (enCurso) id("ultima-revision").classList.add("oculta");
 
-  id("btn-empezar-consulta").classList.toggle("oculta", enCurso);
+  // Sin operación en marcha, el botón lo sustituye el formulario de alta
+  // (spec 057): ya no se "empieza una entrevista", se manda una ficha.
+  id("btn-empezar-consulta").classList.toggle("oculta", enCurso || primeraVez);
   // La caja es la misma; lo que cambia es a quién le hablas (spec 051).
   id("etiqueta-conversacion").textContent = enCurso
     ? "Tu respuesta"
@@ -3068,6 +3078,234 @@ function pintarEstadoConsulta() {
   // perdía al recargar. Sale de la última consulta terminada, leída de
   // Firestore como todo lo demás.
   pintarPropuestas(consultaAbierta ? null : ultimaRevision(consultasCargadas));
+
+  pintarFormularioDeAlta();
+}
+
+// --- El comité de bienvenida (spec 057) -----------------------------------
+//
+// Abrir una operación era un chat de diez preguntas, una por viaje al proxy,
+// para datos que caben en un formulario. Ahora se teclean todos de golpe y a la
+// IA solo se le deja lo que de verdad hay que hablar.
+
+// Los campos de texto largo, que van tal cual a la ficha.
+const CAMPOS_LIBRES_DEL_ALTA = [
+  "gustos",
+  "aversiones",
+  "alergias",
+  "ejercicio",
+  "material",
+  "limitaciones"
+];
+
+function pintarFormularioDeAlta() {
+  const visible = !hayOperacion && !consultaAbierta;
+  id("form-alta").classList.toggle("oculta", !visible);
+  if (!visible) return;
+
+  // A partir de la segunda operación la IA ya te conoce: los campos duros se
+  // prerrellenan con lo que hay en Ajustes y con tu último pesaje. Los de texto
+  // largo NO se pueden prerrellenar —el perfil es un retrato en prosa, no
+  // campos sueltos—, así que se avisa en vez de dejar huecos que parezcan
+  // olvidos.
+  const repite = Boolean(ajustesActuales && ajustesActuales.perfil);
+  const aviso = id("aviso-alta");
+  aviso.classList.toggle("oculta", !repite);
+  aviso.textContent = repite
+    ? "Ya sabe lo que le contaste la última vez. Rellena solo lo que haya cambiado."
+    : "";
+
+  const quedan = quedanMensajesHoy(consultasCargadas);
+  id("btn-alta").disabled = quedan === 0;
+  id("error-alta").textContent =
+    quedan === 0 ? "Te has quedado sin mensajes por hoy." : "";
+}
+
+// Se rellenan una sola vez, al cargar los ajustes: si se hiciera en cada
+// pintado, escribir en un campo y que algo repintara te borraría lo tecleado.
+function prerrellenarAlta(ajustes) {
+  if (id("alta-nombre").value || id("alta-altura").value) return;
+
+  id("alta-nombre").value = ajustes.nombre || "";
+  id("alta-altura").value = ajustes.alturaCm == null ? "" : ajustes.alturaCm;
+  id("alta-objetivo").value =
+    ajustes.pesoObjetivoKg == null
+      ? ""
+      : String(ajustes.pesoObjetivoKg).replace(".", ",");
+  id("alta-fecha").value = ajustes.fechaObjetivo || "";
+
+  // El peso actual sale del último pesaje, no de los ajustes: ahí no vive.
+  const pesajes = listaPeso.obtenerRegistros();
+  const ultimo = [...pesajes].sort(compararPorFechaYCreacion).pop();
+  if (ultimo) id("alta-peso").value = String(ultimo.pesoKg).replace(".", ",");
+}
+
+// Valida con las funciones de siempre y devuelve la ficha ya limpia, o el
+// mensaje de error. Se valida ANTES de llamar a la IA: que ella repregunte es
+// para lo que un número no puede decidir (un objetivo imposible en el plazo),
+// no para una altura de 900 cm.
+//
+// Ojo: la validación vive en DOS sitios. validarAjustes() no conoce el peso
+// actual —ese campo no existe ahí—, y su equivalente es validarPesaje(). Que
+// ambos usen 20-300 kg es casualidad, no diseño.
+function leerFichaDelFormulario() {
+  const nombre = id("alta-nombre").value.trim();
+  if (!nombre) return { error: "Dinos cómo quieres que te llame." };
+
+  const pesoActual = validarPesaje(id("alta-peso").value, hoyISO(), "");
+  if (pesoActual.error) return { error: pesoActual.error };
+
+  const ajustes = validarAjustes(
+    id("alta-objetivo").value,
+    id("alta-altura").value,
+    id("alta-fecha").value,
+    nombre,
+    ""
+  );
+  if (ajustes.error) return { error: ajustes.error };
+  if (ajustes.alturaCm == null) return { error: "Necesitamos tu altura." };
+  if (ajustes.pesoObjetivoKg == null) {
+    return { error: "Necesitamos tu peso objetivo." };
+  }
+
+  const ficha = {
+    nombre: ajustes.nombre,
+    alturaCm: ajustes.alturaCm,
+    pesoActualKg: pesoActual.pesoKg,
+    pesoObjetivoKg: ajustes.pesoObjetivoKg,
+    fechaObjetivo: ajustes.fechaObjetivo || ""
+  };
+  CAMPOS_LIBRES_DEL_ALTA.forEach((campo) => {
+    ficha[campo] = id(`alta-${campo}`).value.trim();
+  });
+
+  return { ficha };
+}
+
+id("form-alta").addEventListener("submit", async (evento) => {
+  evento.preventDefault();
+
+  const error = id("error-alta");
+  const estado = id("estado-alta");
+  error.textContent = "";
+
+  const leida = leerFichaDelFormulario();
+  if (leida.error) {
+    error.textContent = leida.error;
+    return;
+  }
+
+  const extras = {
+    dieta: id("alta-quiere-dieta").checked,
+    tabla: id("alta-quiere-tabla").checked
+  };
+
+  estado.textContent = "Mandándole tu ficha…";
+  id("btn-alta").disabled = true;
+
+  let resultado;
+  try {
+    resultado = await empezarAlta(uidActual, consultasCargadas, leida.ficha, extras);
+  } catch (fallo) {
+    // El formulario se queda tal cual para reintentar de un clic: nada se ha
+    // escrito en Firestore si esto ha fallado.
+    error.textContent = mensajeDeErrorDeConsulta(fallo.codigo);
+    estado.textContent = "";
+    id("btn-alta").disabled = false;
+    return;
+  }
+
+  estado.textContent = "";
+  id("btn-alta").disabled = false;
+  await refrescarConsulta();
+
+  // Si la IA ha preguntado, el alta sigue en el hilo y aquí no hay nada más que
+  // hacer: se contesta con la caja de siempre y será responder() quien la
+  // cierre. Solo se remata cuando ha cerrado a la primera.
+  if (resultado.termino) await rematarAlta(leida.ficha, extras);
+});
+
+// Lo que va DESPUÉS de que el alta se cierre: el pesaje inicial y, si se
+// pidieron, la dieta y la tabla. Se llama desde los dos caminos, cierre directo
+// y cierre tras repreguntar.
+//
+// El orden importa: la operación ya está creada por cerrarAlta(), y el pesaje
+// tiene que ir después a la fuerza — sin operación en marcha la app no deja
+// apuntar nada, y escribirlo antes dejaría un registro fuera de ciclo.
+async function rematarAlta(ficha, extras) {
+  await refrescarAjustes();
+  await refrescarOperaciones();
+
+  if (ficha.pesoActualKg) {
+    try {
+      await guardarPesaje(uidActual, ficha.pesoActualKg, hoyISO(), "");
+      await listaPeso.refrescar();
+      refrescarGrafica();
+    } catch {
+      // Que no se apunte el pesaje no puede tirar un alta que ya está hecha: la
+      // operación existe y los ajustes están guardados.
+      id("error-alta").textContent =
+        "Tu operación está abierta, pero no se ha podido apuntar tu peso de hoy. Apúntalo desde Peso.";
+    }
+  }
+
+  await montarLoDelComite(extras);
+}
+
+// La dieta y la tabla van al final y NO bloquean el alta: si una falla, se
+// avisa y se pide luego desde su sección. Una operación abierta sin dieta es un
+// inconveniente; un alta rota es perder la entrevista entera.
+//
+// Se piden con las mismas funciones que el botón de Comidas y el de Ejercicio,
+// sin instrucciones propias: la IA ya tiene el perfil recién guardado, que es
+// de donde tiene que salir la semana. Gastan del cupo de planes como cualquier
+// otra (PLANES_POR_DIA).
+async function montarLoDelComite(extras) {
+  if (!extras.dieta && !extras.tabla) return;
+
+  const estado = id("estado-conversacion");
+  const fallidas = [];
+  const sinCupo = [];
+
+  // Quedarse sin cupo de planes no es un fallo: es un límite conocido, y
+  // merece un mensaje que no suene a avería.
+  const montar = async (tipo, etiqueta, generar) => {
+    if (quedanPlanesHoy(planesCargados, tipo) === 0) {
+      sinCupo.push(etiqueta);
+      return;
+    }
+    try {
+      await generar("");
+    } catch {
+      fallidas.push(etiqueta);
+    }
+  };
+
+  estado.textContent = "Montando lo que te ha preparado el comité…";
+  try {
+    if (extras.dieta) await montar("dieta", "la dieta", generarDieta);
+    if (extras.tabla) await montar("ejercicio", "la tabla", generarTabla);
+  } finally {
+    estado.textContent = "";
+  }
+
+  const avisos = [];
+  if (fallidas.length) {
+    avisos.push(
+      `no se ha podido crear ${fallidas.join(" ni ")}`
+    );
+  }
+  if (sinCupo.length) {
+    avisos.push(
+      `hoy ya no te queda cupo para ${sinCupo.join(" ni ")}`
+    );
+  }
+
+  if (avisos.length) {
+    id("error-conversacion").textContent =
+      `Tu operación está abierta, pero ${avisos.join(", y ")}. ` +
+      "Puedes pedirlo cuando quieras desde su sección.";
+  }
 }
 
 // --- Dietas y tablas de ejercicio (specs 024 y 027) ----------------------
@@ -3701,9 +3939,15 @@ async function refrescarOperaciones() {
 
 // --- Ajustes -------------------------------------------------------------
 
+// Lo último que se leyó de Ajustes. Lo mira el formulario de alta (spec 057)
+// para saber si esta persona ya hizo el alta antes: si tiene perfil, la IA la
+// conoce y el formulario avisa de que solo hay que cambiar lo que cambie.
+let ajustesActuales = null;
+
 async function refrescarAjustes() {
   try {
     const ajustes = await leerAjustes(uidActual);
+    ajustesActuales = ajustes;
     pesoObjetivoActual = ajustes.pesoObjetivoKg ?? null;
     pintarAvatar(ajustes.fotoPerfil, emailActual);
     id("btn-quitar-foto").classList.toggle("oculta", !ajustes.fotoPerfil);
@@ -3719,6 +3963,8 @@ async function refrescarAjustes() {
     id("fecha-objetivo").value = ajustes.fechaObjetivo || "";
     proveedorIaActual = ajustes.proveedorIa || "automatico";
     id("proveedor-ia").value = proveedorIaActual;
+    prerrellenarAlta(ajustes);
+    if (consultasCargadas.length || !hayOperacion) pintarFormularioDeAlta();
   } catch {
     id("error-ajustes").textContent =
       "No se han podido cargar los ajustes. Comprueba tu conexión.";
