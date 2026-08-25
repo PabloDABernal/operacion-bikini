@@ -218,6 +218,28 @@ nutricionista de verdad no tiene dos libretas.
 - **La entrevista que abre una operación también vive ahí.** Es el principio de
   la conversación con tu nutricionista, no un trámite aparte.
 
+## Qué hará (v7: el comité de bienvenida, decidida el 25 de agosto de 2026)
+
+Sale de hacer la entrevista de bienvenida ya arreglada y ver que preguntar de
+una en una el nombre, la altura, el peso y el objetivo es lento para datos que
+caben en un formulario.
+
+- **Un formulario de alta con todo de serie.** Abrir una operación deja de ser
+  un chat de diez preguntas: se rellena una ficha —nombre, altura, peso actual,
+  peso objetivo, plazo, gustos, aversiones, alergias, ejercicio que disfrutas,
+  material y limitaciones— y se envía de una vez.
+- **La IA solo repregunta si tiene dudas.** Si la ficha está completa, no
+  pregunta nada y contesta directamente con sus primeros consejos. Si falta algo
+  o algo no cuadra, lo pregunta de una en una, hasta tres veces.
+- **El comité te deja la casa montada.** Al terminar el alta, si lo has pedido,
+  ya tienes creadas tu **dieta de la semana** y tu **tabla de ejercicio**, hechas
+  con lo que acabas de contar. El cierre te lo dice.
+- **Tu peso de partida cuenta desde el minuto uno.** El peso que pones en la
+  ficha se apunta como tu primer pesaje, así que la gráfica arranca con un punto
+  en vez de estar vacía.
+- **Las operaciones siguientes usan la misma ficha**, ya rellena con lo que la
+  IA sabía de ti: cambias lo que haya cambiado y envías.
+
 ## Qué explícitamente NO hace
 
 - No sustituye a un profesional médico real: siempre debe recordar (disclaimer) que ante dudas o falta de resultados hay que consultar a un médico.
@@ -252,4 +274,5 @@ nutricionista de verdad no tiene dos libretas.
 - **v4 (desde el 20 de agosto de 2026, sin fecha límite)**: lo descrito en "Qué hará (v4)" y en sus dos ampliaciones, la del 21 y la del 22 de agosto. No añade funciones: reordena lo que ya hay para que se encuentre, y estrena la vista de escritorio. Sale de una auditoría de usabilidad hecha sobre el código el 20 de agosto, y de probar la 036 en producción el 21.
 - **v5 (desde el 22 de agosto de 2026, sin fecha límite)**: lo descrito en "Qué hará (v5)". Sale de usar Consulta con la app ya llena y ver que arrastraba el modelo de antes de que existieran la dieta y la tabla semanales. Se reparte en las specs 044, 045 y 046.
 - **v6 (desde el 23 de agosto de 2026, sin fecha límite)**: lo descrito en "Qué hará (v6)". Sale de usar la v5 y ver que la pantalla de Consulta había acabado con dos hilos y dos cupos. Se reparte en las specs 050 (ver el hilo junto), 051 (una caja y un cupo) y 052 (la entrevista en el hilo).
+- **v7 (desde el 25 de agosto de 2026, sin fecha límite)**: lo descrito en "Qué hará (v7)". Sale de usar la entrevista de bienvenida ya arreglada (specs 052-056) y ver que es lenta para datos que caben en un formulario. Va en la spec 057, sin partir, por decisión del usuario.
 - **Descartado para v2**: notificaciones push (mucho trabajo y acaban silenciadas), integración con básculas o pulseras, y comparativa de fotos lado a lado, que se pospone.
