@@ -2,7 +2,7 @@
 
 Documento para retomar el trabajo en frío. Se actualiza al terminar cada spec.
 
-**Última actualización:** 24 de agosto de 2026 (sesión en el PC) (specs 046-051 **probadas y cerradas**; la **052** cierra la v6 y la **053** arregla dos fallos vistos en producción: las dos desplegadas y pendientes de probar)
+**Última actualización:** 25 de agosto de 2026 (sesión en el PC) (specs 046-056 **probadas y cerradas**; la **v6 está cerrada del todo**; arranca la v7, el comité de bienvenida)
 
 ## Dónde estamos
 
@@ -79,11 +79,11 @@ El 20 de agosto arrancó la **v4**, que sale de una auditoría de usabilidad hec
 | 049 | El 413 de Groq y el prompt acotado | ✅ completada |
 | 050 | Un solo hilo: ver la conversación y las revisiones juntas (v6) | ✅ completada |
 | 051 | Una caja arriba, el hilo del revés, y un solo cupo (v6) | ✅ completada |
-| 052 | La entrevista de alta, también en el hilo (v6) | 🧪 implementada, pendiente de que el usuario la pruebe |
-| 053 | El histórico fantasma y el archivo mudo | 🧪 implementada, pendiente de que el usuario la pruebe |
-| 054 | La caja deja de hablar de más durante una consulta | 🧪 implementada, pendiente de que el usuario la pruebe |
-| 055 | La entrevista de bienvenida empieza de cero de verdad | 🧪 implementada, pendiente de que el usuario la pruebe |
-| 056 | La casilla "Operaciones" borra también la que está en marcha | 🧪 implementada, pendiente de que el usuario la pruebe |
+| 052 | La entrevista de alta, también en el hilo (v6) | ✅ completada |
+| 053 | El histórico fantasma y el archivo mudo | ✅ completada |
+| 054 | La caja deja de hablar de más durante una consulta | ✅ completada |
+| 055 | La entrevista de bienvenida empieza de cero de verdad | ✅ completada |
+| 056 | La casilla "Operaciones" borra también la que está en marcha | ✅ completada |
 
 ## Qué toca ahora
 
@@ -135,7 +135,15 @@ El 20 de agosto arrancó la **v4**, que sale de una auditoría de usabilidad hec
 >    principio y sin más salida que archivarlo. Ahora "Operaciones" son todas,
 >    incluida la que esté en marcha, que se tira sin archivar.
 >
-> **Lo que toca:** que el usuario pruebe de la 052 a la 056. Con eso cerrado,
+> **Todo eso quedó probado y cerrado el 25 de agosto.** Con la 052, la v6 está
+> cerrada del todo.
+>
+> **Lo que toca ahora: la v7, el "comité de bienvenida".** El usuario, al hacer
+> la entrevista limpia, vio que preguntar de una en una el nombre, la altura,
+> el peso y el objetivo es lento para datos que caben en un formulario. La v7
+> los pide todos de golpe en un formulario, y la IA solo repregunta si falta
+> algo o algo no cuadra. Sin dudas, va directa a los primeros consejos y puede
+> dejar ya una dieta y una tabla creadas. Con eso cerrado,
 > volver a `docs/BACKLOG.md`, que es de donde se tiraba por decisión delegada.
 >
 > **Tres trampas que salieron y conviene no olvidar:**
@@ -200,7 +208,10 @@ hilos, dos cajas de texto y dos cupos en la misma pantalla. Está en
 |---|---|---|
 | 050 | Ver la conversación y las revisiones en un solo hilo | ✅ completada |
 | 051 | Una caja arriba, el hilo del revés, y un solo cupo | ✅ completada |
-| 052 | La entrevista de alta, también en el hilo | 📝 escrita |
+| 052 | La entrevista de alta, también en el hilo | ✅ completada |
+
+**La v6 está cerrada del todo** (25 de agosto). Detrás de ella salieron cuatro
+arreglos de cosas que el usuario vio usándola: las specs 053 a 056.
 
 **Se partió en tres ANTES de escribir código**, cuando `revisor-specs` avisó de
 que junto pasaba de 300 líneas (regla 4). El proyecto ya decidió no partir

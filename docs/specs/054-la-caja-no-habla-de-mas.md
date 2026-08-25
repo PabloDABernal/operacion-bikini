@@ -1,6 +1,6 @@
 # 054 — La caja deja de hablar de más durante una consulta
 
-- **Estado:** 🧪 implementada y desplegada el 2026-08-24; pendiente de que el usuario la pruebe.
+- **Estado:** ✅ completada. Implementada y desplegada el 2026-08-24; probada y confirmada por el usuario el 2026-08-25.
 - **Fecha:** 2026-08-24
 - **Referencia en PRODUCTO.md:** no añade nada. Afina la caja única que
   describe el apartado "Qué hará (v6…)", punto **"Una sola caja de texto,

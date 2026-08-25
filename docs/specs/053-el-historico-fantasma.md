@@ -1,6 +1,6 @@
 # 053 — El histórico fantasma y el archivo mudo
 
-- **Estado:** 🧪 implementada y desplegada el 2026-08-24; pendiente de que el usuario la pruebe.
+- **Estado:** ✅ completada. Implementada y desplegada el 2026-08-24; probada y confirmada por el usuario el 2026-08-25.
 - **Fecha:** 2026-08-24
 - **Referencia en PRODUCTO.md:** no añade nada. Arregla dos fallos de lo ya
   descrito: el histórico de operaciones (spec 018) y su borrado desde la Zona de

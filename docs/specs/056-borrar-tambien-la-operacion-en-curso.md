@@ -1,6 +1,6 @@
 # 056 — La casilla "Operaciones" borra también la que está en marcha
 
-- **Estado:** 🧪 implementada y desplegada el 2026-08-24; pendiente de que el usuario la pruebe.
+- **Estado:** ✅ completada. Implementada y desplegada el 2026-08-24; probada y confirmada por el usuario el 2026-08-25.
 - **Fecha:** 2026-08-24
 - **Referencia en PRODUCTO.md:** apartado "Qué hace", puntos **"Reinicio de
   datos"** y **"Operaciones con principio y fin"**.

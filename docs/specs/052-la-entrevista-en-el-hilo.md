@@ -1,6 +1,6 @@
 # 052 — La entrevista de alta, también en el hilo
 
-- **Estado:** 🧪 implementada y desplegada el 2026-08-24; pendiente de que el usuario la pruebe.
+- **Estado:** ✅ completada. Implementada y desplegada el 2026-08-24; probada y confirmada por el usuario el 2026-08-25.
 - **Fecha:** 2026-08-23
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (v6…)", punto **"La entrevista que abre una operación también vive ahí"**.
 - **Tercera de tres.** Cierra la v6.
