@@ -1,7 +1,11 @@
 # Propuesta v2 — Usabilidad, gráficas y gamificación
 
 - **Fecha:** 2026-08-10
-- **Estado:** propuesta para debatir. NO es una spec y no se implementa nada de aquí sin decisión del usuario.
+- **Estado:** ⚠️ **SUPERADA el 25 de agosto de 2026.** Se conserva como historia,
+  no como tarea. Sus cinco decisiones pendientes se resolvieron por el camino en
+  la v2, la v3 y la v4, y desde entonces han pasado la v5, la v6 y la v7. No
+  sacar nada de aquí sin comprobar antes que no está ya hecho.
+- **Estado original:** propuesta para debatir. NO es una spec y no se implementa nada de aquí sin decisión del usuario.
 - **Origen:** ideas planteadas por el usuario (datos de comida más específicos, gráficas de peso, mejor aspecto, logros y puntos).
 
 ---
