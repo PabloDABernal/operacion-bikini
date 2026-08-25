@@ -2,7 +2,7 @@
 
 Documento para retomar el trabajo en frío. Se actualiza al terminar cada spec.
 
-**Última actualización:** 25 de agosto de 2026 (sesión en el PC) (specs 046-056 **probadas y cerradas** y la v6 terminada; la **057** —la v7 entera, el comité de bienvenida— desplegada y pendiente de probar)
+**Última actualización:** 25 de agosto de 2026 (sesión en el PC) (specs 046-057 **probadas y cerradas**; la v6 y la v7 terminadas; toca volver a `docs/BACKLOG.md`)
 
 ## Dónde estamos
 
@@ -84,7 +84,7 @@ El 20 de agosto arrancó la **v4**, que sale de una auditoría de usabilidad hec
 | 054 | La caja deja de hablar de más durante una consulta | ✅ completada |
 | 055 | La entrevista de bienvenida empieza de cero de verdad | ✅ completada |
 | 056 | La casilla "Operaciones" borra también la que está en marcha | ✅ completada |
-| 057 | El comité de bienvenida: la ficha de alta (v7) | 🧪 implementada, pendiente de que el usuario la pruebe |
+| 057 | El comité de bienvenida: la ficha de alta (v7) | ✅ completada |
 
 ## Qué toca ahora
 

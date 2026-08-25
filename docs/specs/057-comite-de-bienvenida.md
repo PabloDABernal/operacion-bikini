@@ -1,7 +1,7 @@
 # 057 — El comité de bienvenida
 
-- **Estado:** 🧪 implementada y desplegada el 2026-08-25; pendiente de que el
-  usuario la pruebe.
+- **Estado:** ✅ completada. Implementada y desplegada el 2026-08-25; probada y
+  confirmada por el usuario el 2026-08-25.
 - **Fecha:** 2026-08-25
 - **Referencia en PRODUCTO.md:** apartado **"Qué hará (v7: el comité de
   bienvenida)"**, añadido el 25 de agosto (el texto está también en el anexo).
@@ -383,6 +383,27 @@ Y en el apartado de fases, al final:
 >   "Qué hará (v7)". Sale de usar la entrevista de bienvenida ya arreglada
 >   (specs 052-056) y ver que es lenta para datos que caben en un formulario. Va
 >   en la spec 057, sin partir, por decisión del usuario.
+
+## Lo que salió al probarla (25 de agosto)
+
+Todo funcionó a la primera —formulario, cierre sin repreguntas, ajustes con los
+valores tecleados, pesaje inicial, tabla creada y el hilo empezando por la
+ficha— **salvo la dieta**, que no se creó dentro del comité. Por su botón de
+Comidas se creó bien justo después, así que no es la dieta lo que falla.
+
+El patrón apunta a **tardanza**: la dieta es la respuesta más pesada de la app
+(7 días × 4 comidas, más hasta ocho recetas) y en el comité le toca ir tercera,
+detrás de la llamada del alta, con `ESPERA_MAXIMA_MS` de 55 s corriendo. La
+tabla fue después y pasó, así que no era cuota ni saturación: eso habría tumbado
+las dos.
+
+De paso salió un fallo propio del comité, ya corregido: `montarLoDelComite()`
+hacía `catch {}` a secas y **se tragaba el motivo**, dejando al usuario con "no
+se ha podido crear la dieta" y sin forma de saber por qué salvo repetir el alta
+entera. Ahora el motivo va en el mensaje y el error completo al console.
+
+Decisión del usuario: cerrar la spec y esperar a que se repita, con el mensaje
+ya arreglado, en vez de tapar el caso a ciegas con un reintento.
 
 ## ✅ Para probar a mano
 
