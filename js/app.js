@@ -3276,8 +3276,13 @@ async function montarLoDelComite(extras) {
     }
     try {
       await generar("");
-    } catch {
-      fallidas.push(etiqueta);
+    } catch (fallo) {
+      // El motivo SE GUARDA. La primera versión de esto hacía `catch {}` a
+      // secas y el usuario se quedó con "no se ha podido crear la dieta" sin
+      // saber si era falta de cuota, la IA saturada o un fallo de verdad —
+      // y sin forma de averiguarlo salvo repetir el alta entera.
+      console.error(`El comité no pudo montar ${etiqueta}:`, fallo);
+      fallidas.push({ etiqueta, motivo: mensajeDeErrorDeConsulta(fallo.codigo) });
     }
   };
 
@@ -3290,20 +3295,16 @@ async function montarLoDelComite(extras) {
   }
 
   const avisos = [];
-  if (fallidas.length) {
-    avisos.push(
-      `no se ha podido crear ${fallidas.join(" ni ")}`
-    );
-  }
+  fallidas.forEach(({ etiqueta, motivo }) => {
+    avisos.push(`no se ha podido crear ${etiqueta} (${motivo})`);
+  });
   if (sinCupo.length) {
-    avisos.push(
-      `hoy ya no te queda cupo para ${sinCupo.join(" ni ")}`
-    );
+    avisos.push(`hoy ya no te queda cupo para ${sinCupo.join(" ni ")}`);
   }
 
   if (avisos.length) {
     id("error-conversacion").textContent =
-      `Tu operación está abierta, pero ${avisos.join(", y ")}. ` +
+      `Tu operación está abierta, pero ${avisos.join("; ")}. ` +
       "Puedes pedirlo cuando quieras desde su sección.";
   }
 }
