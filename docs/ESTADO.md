@@ -2,7 +2,9 @@
 
 Documento para retomar el trabajo en frío. Se actualiza al terminar cada spec.
 
-**Última actualización:** 25 de agosto de 2026 (sesión en el PC) (specs 046-057 **probadas y cerradas**; la v6 y la v7 terminadas; toca volver a `docs/BACKLOG.md`)
+**Última actualización:** 27 de agosto de 2026 (traspaso a Claude Code web) (specs 046-057 **probadas y cerradas**; la v6 y la v7 terminadas; toca volver a `docs/BACKLOG.md`)
+
+> **Traspaso del 27 de agosto de 2026.** Se sigue en remoto desde Claude Code web. Estado al cerrar la sesión del PC: nada a medias, `main` limpio y sincronizado con `origin/main` (último commit `98d7a60`, "docs: limpieza del backlog con la v7 cerrada"). No hay spec abierta ni implementación empezada. **Lo siguiente es elegir idea de `docs/BACKLOG.md`** (recién limpiado y agrupado el 25 de agosto) y crearle su spec con `/nueva-spec` antes de tocar código. Las dos primeras candidatas, por orden de lo que más se nota usando la app: "guardar varias dietas y varias tablas" y "borrar una operación concreta del histórico". En la sección "Cosas que rozan lo roto" del backlog está además el 413 de Groq a medio cerrar (acotar el prompt por caracteres, no solo por número de registros). Antes de nada, leer el apartado "Cosas que hay que saber antes de tocar nada" de más abajo: las trampas del modelo de IA, la publicación de reglas de Firestore y que se prueba SIEMPRE en producción con push.
 
 ## Dónde estamos
 
