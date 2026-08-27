@@ -2,9 +2,9 @@
 
 Documento para retomar el trabajo en frío. Se actualiza al terminar cada spec.
 
-**Última actualización:** 27 de agosto de 2026 (traspaso a Claude Code web) (specs 046-057 **probadas y cerradas**; la v6 y la v7 terminadas; toca volver a `docs/BACKLOG.md`)
+**Última actualización:** 27 de agosto de 2026 (traspaso a Claude Code web, y el backlog vaciado) (specs 001-057 **probadas y cerradas**; de la v1 a la v7 terminadas; lo siguiente son evolutivos nuevos, elegidos de `docs/PRODUCTO.md`)
 
-> **Traspaso del 27 de agosto de 2026.** Se sigue en remoto desde Claude Code web. Estado al cerrar la sesión del PC: nada a medias, `main` limpio y sincronizado con `origin/main` (último commit `98d7a60`, "docs: limpieza del backlog con la v7 cerrada"). No hay spec abierta ni implementación empezada. **Lo siguiente es elegir idea de `docs/BACKLOG.md`** (recién limpiado y agrupado el 25 de agosto) y crearle su spec con `/nueva-spec` antes de tocar código. Las dos primeras candidatas, por orden de lo que más se nota usando la app: "guardar varias dietas y varias tablas" y "borrar una operación concreta del histórico". En la sección "Cosas que rozan lo roto" del backlog está además el 413 de Groq a medio cerrar (acotar el prompt por caracteres, no solo por número de registros). Antes de nada, leer el apartado "Cosas que hay que saber antes de tocar nada" de más abajo: las trampas del modelo de IA, la publicación de reglas de Firestore y que se prueba SIEMPRE en producción con push.
+> **Traspaso del 27 de agosto de 2026.** Se sigue en remoto desde Claude Code web. Estado al cerrar la sesión del PC: nada a medias, `main` limpio y sincronizado con `origin/main`. No hay spec abierta. **`docs/BACKLOG.md` está vacío a propósito desde hoy**: sus veintidós entradas se repartieron entre `docs/PRODUCTO.md` (apartado "Ideas para más adelante", que es de donde se elige la próxima versión), este documento (las trampas, aquí abajo) y el propio backlog (lo cerrado, para que no vuelva a proponerse). **Lo siguiente son evolutivos nuevos**: se elige una idea de `PRODUCTO.md`, se decide si es una versión partida en varias specs, y se escribe con `/nueva-spec` antes de tocar código. Antes de nada, leer "Cosas que hay que saber antes de tocar nada" de más abajo: las trampas del modelo de IA, la publicación de reglas de Firestore y que se prueba SIEMPRE en producción con push.
 
 ## Dónde estamos
 
@@ -89,6 +89,25 @@ El 20 de agosto arrancó la **v4**, que sale de una auditoría de usabilidad hec
 | 057 | El comité de bienvenida: la ficha de alta (v7) | ✅ completada |
 
 ## Qué toca ahora
+
+**Nada empezado, y el backlog vacío a propósito.** Al 27 de agosto de 2026 las
+specs 001 a 057 están implementadas, desplegadas y confirmadas por el usuario, y
+las versiones v1 a v7 están cerradas. La app se usa a diario en producción.
+
+Ese día el usuario dijo "vamos a vaciar ese backlog, cierra lo que tengas que
+cerrar; la aplicación ya está bien, lo próximo serán nuevos evolutivos". Se
+auditaron sus veintidós entradas contra el código y se repartieron: las ideas a
+`docs/PRODUCTO.md` ("Ideas para más adelante"), las trampas a este documento, y
+lo aceptado o descartado se quedó cerrado en `docs/BACKLOG.md`. De paso se
+arregló el único bug de verdad que había dentro (el cierre del alta prometía
+planes que nadie iba a crear) y se borró la herramienta de sembrar datos falsos,
+que seguía viva en producción.
+
+**Lo siguiente**: elegir un evolutivo de la lista de `docs/PRODUCTO.md`, decidir
+si es una versión partida en varias specs o una sola, y escribirla con
+`/nueva-spec` antes de tocar código. Nada de esa lista está decidido.
+
+### Historia: la v4
 
 **La v4, empezada el 20 de agosto, está cerrada del todo.** Aquel "rehacer las pantallas de forma más lógica" que el usuario pidió el 16 de agosto salió de una auditoría de usabilidad sobre el código: Comidas y Ejercicio se habían convertido en páginas de cinco y seis bloques que solo se recorren con scroll ciego, y en un monitor la app era una columna de 512 px con dos desiertos a los lados. Se resolvió en cinco specs, con una ampliación el 21 de agosto tras usar la 036 en producción:
 
@@ -362,7 +381,7 @@ de vista si algún día se tocan la cabecera o la gráfica de peso:
 - **Código muerto de la spec 029 borrado el 19 de agosto**: `pedirPlanEspecializado()` y `URL_PLAN`/`MAXIMO_INSTRUCCIONES` en `js/consulta.js`, y el archivo `api/plan.js` entero (con su entrada en `vercel.json`). Los planes de dieta y tabla ya eran semanas estructuradas desde las specs 028/029; esto solo quitaba el camino viejo que ya no llamaba nadie. `quedanPlanesHoy`, `pedidosHoy` y `guardarMarcaDePlan` siguen vivos, el cupo de planes no cambia.
 - **Spec 031, detectado por `revisor-codigo` y ya corregido**: la entrevista que abre o reabre una operación se guarda en `consultas` con modo `inicial`/`reinicio` antes de crear la operación, así que sin filtrarla el emblema "Primera consulta" salía conseguido desde el segundo cero. `js/gamificacion.js` ya excluye esos dos modos. Si algún día se añade otro modo de entrevista automática a `consultas`, hay que acordarse de excluirlo también.
 - **Fix del 19 de agosto**: los recuentos de "Ajustes → Reiniciar datos" solo se leían una vez, al iniciar sesión, y salían desactualizados hasta recargar la página entera. Se refrescan también al abrir Ajustes, y hay un botón manual (`btn-actualizar-recuentos`) para forzarlo. Detectado al probar la spec 030.
-- **`sembrar.html` y `js/sembrar.js` siguen en el repo.** Son la herramienta temporal para rellenar datos de prueba. Hay que borrarlos cuando dejen de hacer falta.
+- **`sembrar.html` y `js/sembrar.js` fueron la herramienta temporal para rellenar datos de prueba. Borrados el 27 de agosto de 2026**, cuando dejaron de hacer falta.
 - **La reserva de Groq daba 401 el 16 de agosto** y quedó sin explicar (ver más abajo). El 17 la dieta salió adelante, así que o se arregló sola o respondió Gemini. **Sin confirmar.**
 - Las ideas sueltas siguen en `docs/BACKLOG.md`.
 
@@ -382,11 +401,19 @@ de vista si algún día se tocan la cabecera o la gráfica de peso:
 - **Cuota gratuita de Gemini**: se agota depurando a base de despliegues. Pensar antes de probar en producción.
 - **Todo está en Vercel**: web y funciones, mismo dominio. GitHub Pages se descartó y está desactivado.
 - **La lista blanca de emails vive en tres sitios**: `js/firebase-config.js`, `firestore.rules` y `api/_auth.js`. Al añadir a alguien hay que tocar los tres.
+- **El orden de la cascada de modelos de `api/_ia.js`.** Se reordenó el 10 de agosto para que `gemini-flash-latest` vaya primero: con la clave actual, `gemini-2.5-flash` da 404 y gastaba una llamada fallida en cada turno. Si cambia la clave o Google renombra los modelos, hay que revisarlo. (Venía de `docs/BACKLOG.md`, que se vació el 27 de agosto.)
+- **Los emails autorizados están en texto plano en un repo público.** Decisión consciente del usuario el 10 de agosto. Alternativas si algún día molesta: lista blanca por UID o por hash SHA-256.
+- **Si Gemini y Groq se quedan cortos, la salida es un tercer proveedor**, no exprimir más a los dos que hay. La cascada de `api/_ia.js` ya está montada para eso desde la spec 020.
+- **Si vuelve el 413 de Groq, lo que falta es acotar el prompt por caracteres.** La spec 049 puso topes de número de registros (`MAXIMO_PESAJES` 30, `MAXIMO_COMIDAS` 60, `MAXIMO_EJERCICIOS` 30), pero el texto de una comida no tiene límite de longitud: alguien escribiendo párrafos puede volver a inflar la petición. Se cerró el 27 de agosto sin hacerlo porque el 413 no ha vuelto desde el 23 y recortar el texto del usuario pierde información de verdad. Si reaparece, esto es lo primero, y hace falta decidir cuántos caracteres y si el recorte se marca.
+- **Resumir los registros por día en el prompt** ("3 comidas, 45 min de bici") en vez de listarlos uno a uno cuando el periodo es largo (spec 049) diría más con menos texto, pero cambia lo que la IA ve. No es una tarea: es la otra salida al mismo problema que la anterior.
+- **El alta ya no promete planes que no pediste; la revisión todavía sí.** Arreglado el 27 de agosto: `INSTRUCCIONES_ENTREVISTA` (`api/consulta.js`) afirmaba que "esta persona ya tiene en la app una dieta semanal y una tabla de ejercicio", así que con las casillas del comité desmarcadas (spec 057) el cierre del alta te prometía planes que nadie iba a crear. Ahora la frase ya no da nada por hecho, y `fichaEnProsa()` (`js/consulta.js`) **dice en voz alta lo que NO se va a crear**: el silencio no bastaba, porque una casilla desmarcada se leía igual que un campo sin rellenar. **`INSTRUCCIONES_REVISION` sigue afirmando lo mismo** (dos veces, en el cierre y en la propuesta de cambio) y ahí no se tocó: el proxy no sabe si existen la dieta y la tabla, y para saberlo tiene que decírselo el navegador. Eso es una spec, y está anotada en `docs/PRODUCTO.md`.
+- **`sembrar.html` y `js/sembrar.js` ya no existen** (borrados el 27 de agosto). Seguían desplegados y funcionando en producción sin que los enlazara nada. Si algún evolutivo necesita datos de prueba, están en el historial de git.
 - **Los cupos diarios**, tras las specs 023 y 027: **20 mensajes** de conversación, **2 consultas** (la entrevista que abre una operación), **2 dietas** y **2 tablas**. Los de la IA se cuentan sobre los documentos guardados —planes o mensajes del hilo—, así que borrar datos los reinicia. Es conocido y aceptado.
 
 ## Pendiente de decidir por el usuario
 
 - `PRODUCTO.md` llama "collage de evolución" a lo que es una cuadrícula de miniaturas. O se cambia la palabra, o se hace el collage de verdad.
-- **Qué idea de `docs/BACKLOG.md` se aborda a continuación.** La v4 está cerrada del todo (specs 034-038) y su segunda ampliación también (spec 041, 22 de agosto): ya no queda nada pendiente de la auditoría de usabilidad.
+- **Qué evolutivo se aborda a continuación**, de la lista "Ideas para más adelante" de `docs/PRODUCTO.md`. Ya no se elige del backlog: el backlog está vacío desde el 27 de agosto. Nada de esa lista está decidido ni comprometido.
+- **Si la próxima es "guardar varias dietas y varias tablas", hay que partirla desde el inicio.** Cambia el modelo de datos y las reglas de Firestore: no cabe en una spec, y las specs no se parten a posteriori.
 
-El resto de ideas sueltas, en `docs/BACKLOG.md`.
+Las ideas están en `docs/PRODUCTO.md`. `docs/BACKLOG.md` es el buzón de lo que surja a mitad de una spec, y se vuelve a vaciar al cerrar cada versión.

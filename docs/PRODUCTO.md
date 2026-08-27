@@ -240,6 +240,70 @@ caben en un formulario.
 - **Las operaciones siguientes usan la misma ficha**, ya rellena con lo que la
   IA sabía de ti: cambias lo que haya cambiado y envías.
 
+## Ideas para más adelante (27 de agosto de 2026)
+
+El 27 de agosto se vació `docs/BACKLOG.md`: la app está terminada y en uso
+diario, y lo que quedaba dentro no eran tareas pendientes de una versión, sino
+candidatas a la siguiente. Viven aquí, en producto, para que la próxima versión
+se elija de una lista de ideas y no de una lista de deudas.
+
+**Nada de esto está decidido.** Estar en esta lista no es un compromiso: es
+haber sobrevivido a la limpieza. Lo que se decida se escribirá arriba, como un
+apartado "Qué hará (v8…)" con sus specs.
+
+### Huecos que se notan usando la app
+
+- **Guardar varias dietas y varias tablas**, y poder recuperar una anterior. Hoy
+  solo hay una activa de cada (specs 028 y 029): pedir otra pisa la que tenías.
+  Es la más grande de la lista — cambia el modelo de datos y las reglas de
+  Firestore, así que sería una versión partida en varias specs, nunca una sola.
+- **Lista de la compra** de la semana, a partir de la dieta y sus recetas
+  (specs 026 y 028).
+- **Borrar una operación concreta del histórico** desde su tarjeta. La spec 019
+  borra el histórico entero o nada, y la 056 le añadió la operación en curso,
+  pero sigue sin haber un borrado de una sola.
+- **Marcar ejercicios sueltos dentro de una sesión**, en vez de la sesión entera
+  (spec 029).
+- **Registrar los pesos levantados y ver la progresión de cargas** (spec 029).
+  De aquí cuelga el chip de series y repeticiones de la spec 042: sin cargas
+  registradas no hay nada que enseñar.
+- **Que el análisis nutricional del día alimente el contexto de la conversación**
+  (spec 030). Hoy se calcula y no se le cuenta a nadie: la IA no lo ve.
+- **Evolución de los grupos de alimentos a lo largo de la semana** (spec 030:
+  solo el día de hoy, sin histórico).
+- **Que la revisión sepa si de verdad tienes dieta y tabla.** El 27 de agosto se
+  arregló el alta, que prometía planes que nadie iba a crear (ver más abajo,
+  en la limpieza). La revisión periódica arrastra la misma suposición: su prompt
+  afirma que ya tienes dieta semanal y tabla de ejercicio, y con las casillas del
+  comité desmarcadas eso es falso. Arreglarlo de verdad obliga a que el navegador
+  le diga al proxy qué tienes, así que es una spec, no un retoque.
+
+### Pulido visual
+
+Verificado el 27 de agosto contra el código: todo esto sigue pendiente, y todo
+es cosmético.
+
+- Iconos en la barra de navegación inferior (la spec 009 la dejó solo con texto).
+- Llevar el formato de dos líneas con iconos de la spec 043 a las recetas, al
+  catálogo de ejercicios y al histórico de operaciones. La 043 solo cambió las
+  tres listas del diario.
+- Que el chip de ejercicio frecuente enseñe cuántas veces lo has hecho
+  ("bici · 45 min · ×9") (spec 042).
+- Etiquetas de mes encima del calendario de constancia cuando el rango es largo
+  (spec 021).
+- Tocar un mes del mapa de calor para verlo como calendario (spec 025).
+- Elegir el encuadre de la foto de perfil al subirla (la spec 011 recorta
+  centrado, sin editor).
+- El aviso de guardado dura 3 segundos fijos y desaparece solo; valorar si algún
+  caso pide que se quede hasta cerrarlo.
+
+### Con una condición delante
+
+- **Que la semana de dieta y de tabla marquen qué has cumplido hoy.** Se descartó
+  a propósito en la v4 para no chocar con la spec 028. Sigue contradiciendo lo
+  que dice este documento: si algún día se retoma, **hay que cambiar primero el
+  apartado correspondiente de arriba**, y solo entonces escribir la spec.
+
 ## Qué explícitamente NO hace
 
 - No sustituye a un profesional médico real: siempre debe recordar (disclaimer) que ante dudas o falta de resultados hay que consultar a un médico.

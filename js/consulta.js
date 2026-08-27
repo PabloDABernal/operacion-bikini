@@ -347,11 +347,21 @@ export function fichaEnProsa(ficha, extras = {}) {
 
   // Para que el cierre pueda mencionarlas (criterio 6 de la spec). Va dentro de
   // la ficha y no en un campo nuevo del proxy: es un dato más de lo que pido.
+  //
+  // Las casillas SÍ dicen lo que no se va a crear, al revés que el resto de la
+  // ficha. Los campos vacíos se callan porque el usuario puede no haberlos
+  // rellenado, pero una casilla desmarcada no es un hueco: es un "no" que él ha
+  // dejado a propósito. Callándolo, la IA solo veía silencio y cerraba
+  // prometiéndole la dieta que nadie iba a crearle.
   const creando = [];
-  if (extras.dieta) creando.push("una dieta de la semana");
-  if (extras.tabla) creando.push("una tabla de ejercicio");
+  const sinCrear = [];
+  (extras.dieta ? creando : sinCrear).push("una dieta de la semana");
+  (extras.tabla ? creando : sinCrear).push("una tabla de ejercicio");
   if (creando.length) {
     partes.push(`Al terminar esta alta se me van a crear ${creando.join(" y ")}.`);
+  }
+  if (sinCrear.length) {
+    partes.push(`En esta alta NO se me va a crear ${sinCrear.join(" ni ")}, y no lo he pedido.`);
   }
 
   return partes.join(" ");
