@@ -1,6 +1,6 @@
 # 060 — Ver la receta desde la dieta
 
-- **Estado:** decidida el 29 de agosto de 2026 (apartado 5 cerrado con el usuario), lista para implementar
+- **Estado:** implementada y desplegada el 29 de agosto de 2026, revisada por `revisor-codigo` (CUMPLE, sin bloqueantes). **Pendiente de que el usuario la pruebe**; hasta entonces NO es completada.
 - **Fecha:** 2026-08-28
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (v8: la despensa, decidida el 28 de agosto de 2026)", tercera spec.
 - **Depende de:** la spec 059, que crea el cruce despensa/receta y las marcas.
@@ -121,6 +121,22 @@ falta ya está guardado.
 - **Solo una receta abierta a la vez** (Claude, al cerrar la spec): con
   veintiocho comidas en pantalla, varias abiertas hacen la semana ilegible. Mismo
   criterio que el recetario, que ya funciona así.
+
+Y dos cosas que salieron al implementarla, señaladas por `revisor-codigo` como
+código no pedido por esta spec. Se documentan aquí en vez de quitarse, porque
+sin ellas la feature no funciona o miente:
+
+- **`refrescarRecetas()` repinta la semana si hay dieta cargada.** No es una
+  feature: es una carrera. `refrescarTodo()` lanza `refrescarRecetas()` y
+  `refrescarDieta()` a la vez, sin orden garantizado, y un plato solo se puede
+  tocar si su receta está en `recetasCargadas`. Si la dieta llegaba primero, la
+  semana se pintaba con la lista de recetas vacía y **ningún plato salía
+  tocable** hasta el siguiente repintado. El precio es un repintado doble de la
+  semana al arrancar, que no se nota.
+- **`recetaDesplegada()` avisa si la receta ya no existe.** El criterio 7 solo
+  cubría el caso al pintar la fila, y ahí el nombre ni siquiera se vuelve
+  tocable. Este es el cinturón: si la receta se borra desde otra pestaña con la
+  dieta ya abierta, se dice en vez de enseñar un hueco.
 
 ## 9. Fuera de spec: ideas apuntadas
 

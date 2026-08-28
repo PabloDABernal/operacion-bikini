@@ -89,7 +89,7 @@ El 20 de agosto arrancó la **v4**, que sale de una auditoría de usabilidad hec
 | 057 | El comité de bienvenida: la ficha de alta (v7) | ✅ completada |
 | 058 | La despensa: lo que tienes en casa (v8) | ✅ completada |
 | 059 | La dieta aprovecha la despensa (v8) | ✅ completada |
-| 060 | Ver la receta desde la dieta (v8) | 📝 borrador, salió de revisar la 059 |
+| 060 | Ver la receta desde la dieta (v8) | 🚧 implementada y desplegada, **sin probar** |
 
 ## Qué toca ahora
 
