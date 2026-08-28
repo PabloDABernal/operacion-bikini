@@ -45,6 +45,16 @@ export const TIPOS = [
     etiqueta: "análisis nutricionales",
     colecciones: ["analisis"]
   },
+  // El agua del día (spec 061). Casilla propia y OBLIGATORIA: el agua se
+  // archiva con la operación, pero borrarOperacion() solo vacía
+  // operaciones/{id}/{colección} — nunca las colecciones de primer nivel, que
+  // es donde vive todo lo de la operación en curso. Sin esta entrada, el agua
+  // de la operación en marcha no la borraría ninguna casilla y se quedaría
+  // huérfana sin que nadie se entere.
+  //
+  // Propia y no metida en la de comidas: borrar lo que comiste no tiene por qué
+  // borrar lo que bebiste.
+  { clave: "agua", etiqueta: "vasos de agua", colecciones: ["agua"] },
   // Las recetas no se archivan con la operación (spec 026), así que esta
   // casilla es la única forma de borrarlas.
   {

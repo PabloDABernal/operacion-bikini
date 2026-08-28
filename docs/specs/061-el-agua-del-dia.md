@@ -1,6 +1,6 @@
 # 061 — El agua del día
 
-- **Estado:** borrador
+- **Estado:** implementada y desplegada el 29 de agosto de 2026. **Pendiente de que el usuario la pruebe**; hasta entonces NO es completada.
 - **Fecha:** 2026-08-29
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (v9: lo que bebes y lo que acompaña, decidida el 29 de agosto de 2026)", primera spec de las tres.
 
@@ -116,15 +116,61 @@ El objetivo va en el documento de ajustes que ya existe, como un campo más:
 
 **El agua SÍ se archiva con la operación**, al revés que la despensa. Es diario,
 como las comidas y los pesajes: lo que bebiste en tu operación de junio pertenece
-a esa operación. Va a la lista `COLECCIONES` de `js/operaciones.js`.
+a esa operación. Va a `COLECCIONES` **y a `NOMBRES`** en `js/operaciones.js`.
+
+`NOMBRES` tiene fallback (`NOMBRES[nombre] || nombre`), así que sin entrada no se
+rompe nada: solo se lee "Archivando agua…" en vez de un texto cuidado. Se pone
+igualmente, con la etiqueta **"vasos de agua"**.
 
 `firestore.rules`: bloque nuevo para `usuarios/{uid}/agua/{fecha}`, calcado al de
 `analisis`.
 
-`js/reinicio.js`: el agua **no necesita casilla propia**. Se archiva con la
-operación, así que ya se la lleva la casilla "operaciones", igual que las
-comidas. Aun así hay que decidir dónde cuenta en los recuentos — ver el apartado
-de casos límite.
+### El agua SÍ necesita casilla propia en el reinicio
+
+**Corregido el 29 de agosto tras `revisor-specs`.** El borrador decía lo
+contrario —que bastaba con la casilla "operaciones"— y es **falso**. El motivo
+está escrito en el propio `js/reinicio.js`, en el comentario de
+`borrarOperacion()`:
+
+> *"Sirve igual para una operación en curso (spec 056): sus subcolecciones están
+> vacías, porque sus registros viven en las colecciones del día a día hasta que
+> se archiva."*
+
+Es decir: `borrarOperacion()` solo vacía `operaciones/{id}/{colección}` y borra
+el documento de la operación. **Nunca toca las colecciones de primer nivel**, que
+es donde vive todo lo de la operación en curso. Por eso cada colección de
+`COLECCIONES` tiene además su entrada en `TIPOS`.
+
+Sin entrada en `TIPOS`, el agua de la operación en marcha
+(`usuarios/{uid}/agua/{fecha}`) **no la borraría ninguna casilla**, se quedaría
+huérfana en Firestore para siempre, y `contarTodo()` tampoco la contaría: el
+usuario ni se enteraría de que algo no se borró.
+
+Así que entra en `TIPOS` con **casilla propia**, clave `agua` y etiqueta
+**"vasos de agua"**. No se junta con la de comidas ni con ninguna otra: borrar lo
+que comiste no tiene por qué borrar lo que bebiste, y `js/reinicio.js` ya avisa
+en sus propios comentarios de lo que cuesta juntar etiquetas parecidas.
+
+### Por qué el criterio 8 se sostiene solo
+
+Verificado en el código, y conviene que quede escrito porque es la parte de esta
+spec que más fácil sería romper sin darse cuenta:
+
+- `calcularPuntos()` y `recorrerHistoria()` (`js/gamificacion.js`) reciben
+  `pesajes, comidas, ejercicios, fotos` **como parámetros nombrados**. No iteran
+  `COLECCIONES`.
+- `calcularResumen()` (`js/operaciones.js`) también nombra sus cuatro colecciones
+  a mano al calcular "días registrados".
+
+Añadir `agua` a `COLECCIONES` **no puede colarla** en los puntos, la racha, el
+calendario ni el resumen de la operación. Es imposible por construcción, no por
+cuidado.
+
+### El archivado no necesita nada especial
+
+`archivar()` mueve colección a colección y deja anotado lo que queda pendiente,
+así que un archivado cortado a la mitad se reanuda solo. El agua **hereda ese
+mecanismo tal cual**, igual que `analisis`: no hay nada que añadir.
 
 ## 6. Casos límite
 
@@ -143,9 +189,10 @@ de casos límite.
 - **Día sin documento** (nunca bebiste): son 0 vasos, y no se crea documento
   hasta el primer toque.
 - **Restar con 0**: el botón no hace nada y no da error. No hay vasos negativos.
-- **Reiniciar datos**: se lo lleva la casilla "operaciones", que es la que borra
-  las operaciones con todo lo que llevan dentro. Verificar que el recuento de esa
-  casilla sigue cuadrando con el agua incluida.
+- **Reiniciar datos**: casilla propia "vasos de agua", con su recuento. La
+  casilla "operaciones" se lleva el agua ya archivada, dentro de cada operación;
+  la de "vasos de agua" se lleva la de la operación en curso. Es exactamente el
+  mismo reparto que tienen hoy las comidas y los pesajes.
 
 ## 7. Archivos afectados
 
@@ -156,6 +203,7 @@ de casos límite.
 | `js/app.js` | Pintado del bloque, botones y refresco. |
 | `js/ajustes.js` | El campo `vasosObjetivo`. |
 | `js/operaciones.js` | `agua` en `COLECCIONES` y en `NOMBRES`. |
+| `js/reinicio.js` | Casilla propia "vasos de agua" en `TIPOS`. **Obligatoria**, ver apartado 5. |
 | `styles.css` | El bloque, el botón grande y el estado de objetivo cumplido. |
 | `firestore.rules` | Bloque de `agua`. **Publicar con la CLI antes de probar.** |
 
@@ -178,6 +226,20 @@ se pasa de 300, parar y avisar** (regla 4 de `CLAUDE.md`).
   vaso a vaso. Nadie va a mirar a qué hora bebió el tercero.
 - **El agua se archiva con la operación**, al revés que la despensa: es diario,
   como las comidas.
+- **Casilla propia en Reiniciar datos, no mezclada con comidas** (Claude, tras
+  la revisión del 29 de agosto). Es obligatorio que tenga alguna, por lo
+  explicado en el apartado 5; y que sea propia porque borrar lo que comiste no
+  tiene por qué borrar lo que bebiste. Ante la duda, la opción que nunca borra
+  más de lo que se le pide.
+
+## 8 bis. Pruebas
+
+Las funciones puras de `js/agua.js` tienen sus casos en
+`docs/specs/061-agua-casos.mjs`, ejecutables con `node docs/specs/061-agua-casos.mjs`.
+Cubren lo que puede llegar torcido desde Firestore (`null`, texto, decimales,
+negativos, por encima del tope) y la validación del objetivo. Mismo enfoque que
+`059-cruce-casos.mjs`: ejecutan el módulo de verdad, recortándole los imports de
+Firebase.
 
 ## 9. Fuera de spec: ideas apuntadas
 

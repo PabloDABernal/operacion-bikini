@@ -91,6 +91,12 @@ service cloud.firestore {
     // Detalle nutricional del día (spec 030). El id del documento es la fecha,
     // así que hay uno por día. A diferencia del recetario y del catálogo, esto
     // es diario: se archiva con la operación.
+    // El agua del día (spec 061). Como analisis, la fecha es el id: un
+    // documento por día, no uno por vaso.
+    match /usuarios/{uid}/agua/{fecha} {
+      allow read, write: if autorizado() && request.auth.uid == uid;
+    }
+
     match /usuarios/{uid}/analisis/{fecha} {
       allow read, write: if autorizado() && request.auth.uid == uid;
     }

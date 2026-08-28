@@ -36,7 +36,10 @@ export const COLECCIONES = [
   "consultas",
   "planes",
   "fotos",
-  "analisis"
+  "analisis",
+  // El agua del día (spec 061). Es diario, como las comidas: lo que bebiste en
+  // tu operación de junio pertenece a esa operación.
+  "agua"
 ];
 
 export const NOMBRES = {
@@ -47,7 +50,8 @@ export const NOMBRES = {
   consultas: "consultas",
   planes: "planes",
   fotos: "fotos",
-  analisis: "análisis nutricionales"
+  analisis: "análisis nutricionales",
+  agua: "vasos de agua"
 };
 
 function operacionesDe(uid) {

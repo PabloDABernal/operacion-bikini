@@ -2,7 +2,7 @@
 
 Documento para retomar el trabajo en frío. Se actualiza al terminar cada spec.
 
-**Última actualización:** 29 de agosto de 2026 (la v8 cerrada, la v9 escrita) (specs 001-060 **probadas y cerradas**, v1 a v8 terminadas; las specs **061, 062 y 063 en borrador**, y las dos últimas a medias a propósito)
+**Última actualización:** 29 de agosto de 2026 (la 061 desplegada, sin probar) (specs 001-060 **probadas y cerradas**, v1 a v8 terminadas; la **061 implementada y pendiente de prueba**, la **062 y la 063** a medias a propósito)
 
 > **Traspaso del 27 de agosto de 2026.** Se sigue en remoto desde Claude Code web. Estado al cerrar la sesión del PC: nada a medias, `main` limpio y sincronizado con `origin/main`. No hay spec abierta. **`docs/BACKLOG.md` está vacío a propósito desde hoy**: sus veintidós entradas se repartieron entre `docs/PRODUCTO.md` (apartado "Ideas para más adelante", que es de donde se elige la próxima versión), este documento (las trampas, aquí abajo) y el propio backlog (lo cerrado, para que no vuelva a proponerse). **Lo siguiente son evolutivos nuevos**: se elige una idea de `PRODUCTO.md`, se decide si es una versión partida en varias specs, y se escribe con `/nueva-spec` antes de tocar código. Antes de nada, leer "Cosas que hay que saber antes de tocar nada" de más abajo: las trampas del modelo de IA, la publicación de reglas de Firestore y que se prueba SIEMPRE en producción con push.
 
@@ -90,7 +90,7 @@ El 20 de agosto arrancó la **v4**, que sale de una auditoría de usabilidad hec
 | 058 | La despensa: lo que tienes en casa (v8) | ✅ completada |
 | 059 | La dieta aprovecha la despensa (v8) | ✅ completada |
 | 060 | Ver la receta desde la dieta (v8) | ✅ completada |
-| 061 | El agua del día (v9) | 📝 borrador, sin revisar |
+| 061 | El agua del día (v9) | 🚧 implementada y desplegada, **sin probar** |
 | 062 | Las bebidas, apuntadas (v9) | 📝 borrador **a medias a propósito**: dos decisiones abiertas |
 | 063 | El acompañamiento de la comida (v9) | 📝 borrador **a medias a propósito**: dos decisiones abiertas |
 
@@ -154,144 +154,27 @@ implementarlas. No rellenarlas con suposiciones:
 
 **Lo siguiente, por orden:**
 
-1. `revisor-specs` a la **061**, que es la única completa.
-2. Implementar la **061**, publicar `firestore.rules` con la CLI y que el usuario
-   la pruebe. Crea la colección `agua` y la mete en `COLECCIONES` de
-   `js/operaciones.js`, así que el archivado de operaciones es la regresión a
-   vigilar.
-3. Cerrar con el usuario las decisiones de la **062**, y entonces implementarla.
-4. Lo mismo con la **063**, que es la que toca el prompt de la IA.
+1. **Que el usuario pruebe la 061.** Está implementada y desplegada, con las
+   reglas ya publicadas. La regresión a vigilar es el **archivado de una
+   operación**: `agua` entra en `COLECCIONES`, así que archivar mueve también sus
+   documentos.
+2. Cerrar con el usuario las decisiones de la **062**, y entonces implementarla.
+3. Lo mismo con la **063**, que es la que toca el prompt de la IA.
+
+`revisor-specs` pasó por la 061 y encontró **un bloqueante**, corregido antes de
+implementar: la spec afirmaba que el agua no necesitaba casilla propia en
+Reiniciar datos, y era falso. `borrarOperacion()` solo vacía
+`operaciones/{id}/{colección}`, nunca las colecciones de primer nivel donde vive
+la operación en curso. Sin casilla propia, el agua del ciclo en marcha se habría
+quedado huérfana en Firestore sin que nadie se enterara.
 
 **Lección de la v8 que aplica aquí**: la 058 estimó 250-300 líneas y salió en 408
 de JavaScript. La 061 estima lo mismo con el mismo método, así que ese número se
 mira con desconfianza.
 
-## Specs
+## Historia
 
-| Spec | Qué es | Estado |
-|---|---|---|
-| 001 | Login (email y Google) con lista blanca, y pesajes | ✅ completada |
-| 002 | Comidas y ejercicio, pantalla en pestañas | ✅ completada |
-| 003 | Botón "Consejos" y toda la infraestructura de IA (proxy en Vercel) | ✅ completada |
-| 004 | Botón "Pasar consulta": entrevista guiada que genera un plan | ✅ completada |
-| 005 | Fotos de progreso con Cloudinary, subida firmada | ✅ completada |
-| 006 | Ajustes de usuario y reinicio de datos | ✅ completada |
-| 007 | Editar pesajes, comidas y ejercicios ya guardados (incluida la fecha) | ✅ completada |
-| 008 | Gráfica de peso con media móvil y objetivo, y comparador semanal | ✅ completada |
-| 009 | Rediseño "nocturna deportiva" y navegación inferior | ✅ completada |
-| 010 | Pantalla "Hoy" | ✅ completada |
-| 011 | Navegación por dispositivo y foto de perfil | ✅ completada |
-| 012 | "Hoy" afinada: resumen con +, atajos y calendario por rango | ✅ completada |
-| 013 | Listas cortas con filtro por día y comidas frecuentes | ✅ completada |
-| 014 | Hora opcional en los registros | ✅ completada |
-| 015 | Peso: rango en la gráfica y estadísticas | ✅ completada |
-| 016 | "Iniciar operación bikini": entrevista inicial y perfil | ✅ completada |
-| 017 | Consultas especializadas de ejercicio y dieta | ✅ completada |
-| 018 | Operaciones con principio y fin, e histórico | ✅ completada |
-| 019 | Borrar el histórico desde el reinicio de datos | ✅ completada |
-| 020 | Groq como proveedor de IA de reserva | ✅ completada |
-| 021 | Calendario de constancia a tamaño fijo | ✅ completada |
-| 022 | Paleta violeta nocturna | ✅ completada |
-| 023 | Una sola conversación: fuera "Consejos" | ✅ completada |
-| 024 | Consulta en la barra, Ajustes en el avatar, cada plan en su sección | ✅ completada |
-| 025 | Calendario de constancia legible | ✅ completada |
-| 026 | Recetario propio | ✅ completada |
-| 027 | Dietas y tablas de lunes a domingo, a medida y con cupo propio | ✅ completada |
-| 028 | Dietas: la semana de menús, guardada y editable | ✅ completada |
-| 029 | Ejercicios y tablas: la semana de entrenamientos, guardada y editable | ✅ completada |
-| 030 | Detalle nutricional automático: grupos de alimentos y calorías en rango | ✅ completada |
-| 031 | Gamificación: puntos, racha con día de gracia y emblemas | ✅ completada |
-| 032 | Elegir el proveedor de IA desde Ajustes (Automático / Groq primero) | ✅ completada |
-| 033 | Tocar un punto de la gráfica de peso para ver su fecha y su peso | ✅ completada |
-| 034 | La confirmación de guardado, en el propio botón de la semana | ✅ completada |
-| 035 | Sub-pestañas en Comidas y Ejercicio, y nombres que dejan de pisarse | ✅ completada |
-| 036 | Vista de escritorio en varias columnas | ✅ completada |
-| 037 | Comidas integradas, Hoy completo y detalle real en el calendario | ✅ completada |
-| 038 | Fotos en la navegación, zonas táctiles y fecha/hora plegable en Ejercicio y Peso | ✅ completada |
-| 039 | Quitar la foto de perfil | ✅ completada |
-| 040 | Recordar las últimas instrucciones al pedir dieta o tabla | ✅ completada |
-| 041 | Ajustes en pestañas (Perfil, Operación, App, Zona de peligro) | ✅ completada |
-| 042 | Chips de ejercicios frecuentes, que rellenan el formulario | ✅ completada |
-| 043 | Las filas del diario, en dos líneas y con iconos | ✅ completada |
-| 044 | Fuera los planes y fuera "Abandonar consulta" (v5) | ✅ completada |
-| 045 | La consulta, como revisión de lo hecho desde la anterior (v5) | ✅ completada |
-| 046 | La consulta propone dieta o tabla, y tú aceptas (v5) | ✅ completada |
-| 047 | La revisión se puede empezar de verdad (arreglo de la v5) | ✅ completada |
-| 048 | Los flecos que dejó la v5 (auditoría del 23 de agosto) | ✅ completada |
-| 049 | El 413 de Groq y el prompt acotado | ✅ completada |
-| 050 | Un solo hilo: ver la conversación y las revisiones juntas (v6) | ✅ completada |
-| 051 | Una caja arriba, el hilo del revés, y un solo cupo (v6) | ✅ completada |
-| 052 | La entrevista de alta, también en el hilo (v6) | ✅ completada |
-| 053 | El histórico fantasma y el archivo mudo | ✅ completada |
-| 054 | La caja deja de hablar de más durante una consulta | ✅ completada |
-| 055 | La entrevista de bienvenida empieza de cero de verdad | ✅ completada |
-| 056 | La casilla "Operaciones" borra también la que está en marcha | ✅ completada |
-| 057 | El comité de bienvenida: la ficha de alta (v7) | ✅ completada |
-| 058 | La despensa: lo que tienes en casa (v8) | ✅ completada |
-| 059 | La dieta aprovecha la despensa (v8) | ✅ completada |
-| 060 | Ver la receta desde la dieta (v8) | ✅ completada |
-| 061 | El agua del día (v9) | 📝 borrador, sin revisar |
-| 062 | Las bebidas, apuntadas (v9) | 📝 borrador **a medias a propósito**: dos decisiones abiertas |
-| 063 | El acompañamiento de la comida (v9) | 📝 borrador **a medias a propósito**: dos decisiones abiertas |
-
-## Qué toca ahora
-
-**Nada empezado, y el backlog vacío a propósito.** Al 27 de agosto de 2026 las
-specs 001 a 057 están implementadas, desplegadas y confirmadas por el usuario, y
-las versiones v1 a v7 están cerradas. La app se usa a diario en producción.
-
-Ese día el usuario dijo "vamos a vaciar ese backlog, cierra lo que tengas que
-cerrar; la aplicación ya está bien, lo próximo serán nuevos evolutivos". Se
-auditaron sus veintidós entradas contra el código y se repartieron: las ideas a
-`docs/PRODUCTO.md` ("Ideas para más adelante"), las trampas a este documento, y
-lo aceptado o descartado se quedó cerrado en `docs/BACKLOG.md`. De paso se
-arregló el único bug de verdad que había dentro (el cierre del alta prometía
-planes que nadie iba a crear) y se borró la herramienta de sembrar datos falsos,
-que seguía viva en producción.
-
-**La v8 ya está elegida y escrita, sin implementar** (28 de agosto). El usuario
-pidió mejorar la sección de Comidas: una **despensa** de ingredientes que puedas
-marcar según los tengas en casa, y que la dieta los aproveche al generarse. Está
-en `docs/PRODUCTO.md` ("Qué hará (v8)") y repartida en dos specs, partidas desde
-el inicio: **058** (la despensa) y **059** (la dieta que la aprovecha).
-
-De la misma conversación salió la **v9, decidida pero sin escribir**: el contador
-de vasos de agua, las bebidas apuntadas y el acompañamiento dentro de la comida
-("3 trozos de pan"). Se aparcó para cerrar la v8 antes de abrir otro frente.
-
-**`revisor-specs` ya ha pasado por las dos** (28 de agosto). La 058 salió sin
-bloqueantes. La 059 salió con dos, los dos resueltos antes de tocar código:
-
-- **La regla del cruce se contradecía.** Pedía que `tomate` acertara en
-  `2 tomates maduros` y que `sal` no acertara en `salmón`, y con "límite de
-  palabra" a secas eso es imposible. La regla ahora está escrita exacta —límite
-  estricto por la izquierda, sufijo `s`/`es` por la derecha— y **verificada sobre
-  17 casos**. Al implementarla, esos casos van en un test.
-- **La 059 daba por hecha una pantalla que no existe.** Se creía que una receta
-  se podía leer desde Mi dieta; `filaDeComida()` solo pinta el momento y el
-  texto. Se sacó a la **spec 060** antes de implementar nada, no después.
-
-**La 058 está implementada y desplegada** (28 de agosto, commit `f9ecfcb`), con
-las reglas de Firestore ya publicadas. **Falta que el usuario la pruebe**: hasta
-entonces no es completada.
-
-Salió en 521 líneas (~408 de JavaScript), por encima de las 250-300 estimadas.
-No se troceó porque cuando se vio el tamaño ya estaba entera y es una sola cosa.
-**Tenerlo en cuenta al estimar la 059**, que estima 200 con el mismo método.
-
-**Lo siguiente, por orden:**
-
-1. Que el usuario pruebe la **058** en producción y la dé por buena.
-2. Entonces la **059**. Depende de la 058: sin despensa no hay nada que
-   aprovechar. Sus 18 casos de cruce ya están en
-   `docs/specs/059-cruce-casos.mjs` y se convierten en test al implementarla.
-3. La **060** al final, y **está a medio escribir a propósito**: su apartado 5
-   dice cómo NO se hace, pero cómo se abre y se enseña la receta se decide con el
-   usuario cuando toque. No implementarla sin cerrar eso.
-
-**Ojo al implementar la 058**: crea la colección `usuarios/{uid}/despensa`, así
-que hay bloque nuevo en `firestore.rules` y **hay que publicarlo con la CLI antes
-de pedir que se pruebe**, o la app dará errores de permisos que parecen bugs.
+Lo que fue pasando, sesión a sesión. Lo de arriba es el estado; esto es el camino.
 
 ### Historia: la v4
 

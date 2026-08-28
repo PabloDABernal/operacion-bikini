@@ -1365,6 +1365,30 @@ button:disabled {
   font-size: 0.85rem;
 }
 
+/* El agua del día (spec 061). El progreso en grande porque es el dato, y el
+   "+1 vaso" como acción principal porque se toca ocho veces al día. */
+.agua-progreso {
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin: 0 0 var(--e3);
+}
+
+.agua-progreso.cumplido {
+  color: var(--apoyo);
+}
+
+#agua-acciones {
+  display: flex;
+  align-items: center;
+  gap: var(--e3);
+  flex-wrap: wrap;
+  margin-bottom: var(--e3);
+}
+
+#btn-mas-agua {
+  flex: 0 1 12rem;
+}
+
 /* La casilla de aprovechar la despensa al pedir dieta (spec 059). */
 .casilla-linea {
   display: flex;

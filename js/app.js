@@ -108,6 +108,15 @@ import {
 } from "./despensa.js";
 
 import {
+  VASOS_OBJETIVO_POR_DEFECTO,
+  MAXIMO_VASOS,
+  leerVasosDe,
+  guardarVasos,
+  objetivoDeVasos,
+  validarObjetivo
+} from "./agua.js";
+
+import {
   MOMENTOS,
   MOMENTO_POR_DEFECTO,
   etiquetaDeMomento,
@@ -1688,6 +1697,82 @@ id("form-receta").addEventListener("submit", async (evento) => {
     boton.disabled = false;
   }
 });
+
+// --- El agua del día (spec 061) ------------------------------------------
+//
+// Un contador, no un diario: +1, -1 y el número de hoy. Sin hora, sin tamaño de
+// vaso y sin historial.
+//
+// El agua NO da puntos, no mantiene la racha y no sale en el calendario. Y eso
+// no depende de tener cuidado aquí: `calcularPuntos()` y `calcularResumen()`
+// reciben sus colecciones como parámetros nombrados, así que `agua` no puede
+// colarse en ellos aunque esté en COLECCIONES.
+
+let vasosDeHoy = 0;
+let vasosObjetivoActual = VASOS_OBJETIVO_POR_DEFECTO;
+// El día que se pintó, para no escribir en el de hoy si la pestaña lleva abierta
+// desde ayer. Ver el comentario de cambiarVasos().
+let diaDelAgua = null;
+
+function pintarAgua() {
+  const progreso = id("agua-progreso");
+  const cumplido = vasosDeHoy >= vasosObjetivoActual;
+
+  progreso.textContent = cumplido
+    ? `${vasosDeHoy} de ${vasosObjetivoActual} vasos · objetivo cumplido`
+    : `${vasosDeHoy} de ${vasosObjetivoActual} vasos`;
+  progreso.classList.toggle("cumplido", cumplido);
+
+  // Restar con 0 no hace nada, así que el botón no se ofrece: no hay vasos
+  // negativos y un botón que no hace nada es peor que no tenerlo.
+  id("btn-menos-agua").classList.toggle("oculta", vasosDeHoy === 0);
+
+  // El tope no es de salud, es contra el toque atascado. Se dice, no se esconde.
+  id("btn-mas-agua").disabled = vasosDeHoy >= MAXIMO_VASOS;
+}
+
+async function cambiarVasos(cuantos) {
+  const antes = vasosDeHoy;
+  const ahora = Math.min(MAXIMO_VASOS, Math.max(0, antes + cuantos));
+  if (ahora === antes) return;
+
+  // La fecha es la del pintado, no hoyISO() en el momento del toque: si la
+  // pestaña lleva abierta desde ayer, el número que se ve en pantalla es el de
+  // ayer, y sumarle uno tiene que escribir en ayer. Escribir en hoy le añadiría
+  // a hoy los vasos de ayer. Es la misma medianoche que ya arrastra "Hoy"
+  // entero, heredada a propósito.
+  const fecha = diaDelAgua || hoyISO();
+
+  // Optimista, y se escribe el TOTAL, no un incremento: por eso tocar ocho veces
+  // seguidas funciona sin esperar a que vuelva cada escritura.
+  vasosDeHoy = ahora;
+  id("error-agua").textContent = "";
+  pintarAgua();
+
+  try {
+    await guardarVasos(uidActual, fecha, ahora);
+  } catch {
+    vasosDeHoy = antes;
+    pintarAgua();
+    id("error-agua").textContent = "No se ha podido guardar. Comprueba tu conexión.";
+  }
+}
+
+async function refrescarAgua() {
+  const fecha = hoyISO();
+  try {
+    vasosDeHoy = await leerVasosDe(uidActual, fecha);
+    diaDelAgua = fecha;
+  } catch {
+    vasosDeHoy = 0;
+    diaDelAgua = fecha;
+    id("error-agua").textContent = "No se ha podido cargar el agua de hoy.";
+  }
+  pintarAgua();
+}
+
+id("btn-mas-agua").addEventListener("click", () => cambiarVasos(1));
+id("btn-menos-agua").addEventListener("click", () => cambiarVasos(-1));
 
 // --- La despensa (spec 058) ----------------------------------------------
 //
@@ -4080,7 +4165,8 @@ function refrescarTodo() {
     refrescarDieta(),
     refrescarCatalogo(),
     refrescarTabla(),
-    refrescarAnalisis()
+    refrescarAnalisis(),
+    refrescarAgua()
   ]);
 }
 
@@ -4455,6 +4541,11 @@ async function refrescarAjustes() {
         : String(ajustes.pesoObjetivoKg).replace(".", ",");
     id("altura").value = ajustes.alturaCm == null ? "" : ajustes.alturaCm;
     id("fecha-objetivo").value = ajustes.fechaObjetivo || "";
+    // El objetivo del contador de agua (spec 061). Sale siempre con un número:
+    // si nunca lo has tocado, el que se está usando de verdad.
+    vasosObjetivoActual = objetivoDeVasos(ajustes);
+    id("vasos-objetivo").value = vasosObjetivoActual;
+    pintarAgua();
     proveedorIaActual = ajustes.proveedorIa || "automatico";
     id("proveedor-ia").value = proveedorIaActual;
     prerrellenarAlta(ajustes);
@@ -4498,12 +4589,25 @@ id("form-ajustes").addEventListener("submit", async (evento) => {
     return;
   }
 
+  // El objetivo de agua se valida aparte y no dentro de validarAjustes(): esa
+  // función es el formulario "Mi objetivo" —peso, altura, fecha— y meterle un
+  // sexto parámetro que no tiene nada que ver la convierte en un cajón.
+  const agua = validarObjetivo(id("vasos-objetivo").value);
+  if (agua.error) {
+    error.textContent = agua.error;
+    return;
+  }
+
   const boton = id("btn-guardar-ajustes");
   boton.disabled = true;
   try {
-    await guardarAjustes(uidActual, resultado);
+    await guardarAjustes(uidActual, { ...resultado, vasosObjetivo: agua.objetivo });
     // La línea de objetivo de la gráfica sale de aquí.
     pesoObjetivoActual = resultado.pesoObjetivoKg ?? null;
+    // Cambiar el objetivo no toca los vasos ya bebidos: cambia contra qué se
+    // comparan, así que basta con repintar.
+    vasosObjetivoActual = agua.objetivo;
+    pintarAgua();
     pintarNombre(resultado.nombre);
     refrescarGrafica();
     aviso.textContent = "Ajustes guardados.";

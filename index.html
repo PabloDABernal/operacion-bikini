@@ -84,6 +84,17 @@
         <button type="button" class="atajo" data-seccion="fotos">Foto del día</button>
       </div>
 
+      <!-- El agua del día (spec 061). Va aquí, en la columna del día, y no en
+           la de constancia: es un dato de hoy, no de cómo vas. El agua no da
+           puntos ni mantiene la racha, a propósito. -->
+      <h2>Agua</h2>
+      <p id="agua-progreso" class="agua-progreso"></p>
+      <div id="agua-acciones">
+        <button type="button" id="btn-mas-agua" class="accion-principal">+1 vaso</button>
+        <button type="button" id="btn-menos-agua" class="enlace">Quitar uno</button>
+      </div>
+      <p id="error-agua" class="error" role="alert"></p>
+
       <!-- Detalle nutricional del día (spec 030) -->
       <h2>Qué has comido hoy</h2>
       <p id="estado-analisis" class="explicacion"></p>
@@ -658,6 +669,10 @@
 
         <label for="fecha-objetivo">Fecha objetivo</label>
         <input type="date" id="fecha-objetivo">
+
+        <!-- El objetivo del contador de agua de Hoy (spec 061) -->
+        <label for="vasos-objetivo">Vasos de agua al día</label>
+        <input type="text" id="vasos-objetivo" inputmode="numeric" placeholder="8">
 
         <label for="perfil">Lo que la IA sabe de ti</label>
         <textarea id="perfil" rows="5" maxlength="2000"
