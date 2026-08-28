@@ -1,6 +1,6 @@
 # 059 — La dieta aprovecha la despensa
 
-- **Estado:** revisada (`revisor-specs`, 28 de agosto de 2026: dos bloqueantes, los dos resueltos abajo)
+- **Estado:** implementada y desplegada el 29 de agosto de 2026. **Pendiente de que el usuario la pruebe**; hasta entonces NO es completada.
 - **Fecha:** 2026-08-28
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (v8: la despensa, decidida el 28 de agosto de 2026)", segunda spec de las dos.
 - **Depende de:** la spec 058, que crea la despensa. Sin ella no hay nada que aprovechar.
@@ -106,11 +106,18 @@ y se marca si la tienes.
 ingrediente dentro de la línea con esta forma:
 
 ```
-limite-de-palabra + ingrediente + (es|s)? + limite-de-palabra
-
-En JavaScript:  new RegExp(BARRA_B + escapado(ingrediente) + "(es|s)?" + BARRA_B)
-donde BARRA_B es la secuencia de dos caracteres: contrabarra seguida de be.
+(no hay letra ni numero antes) + ingrediente + (es|s)? + (no hay letra ni numero despues)
 ```
+
+**Corregido al implementarla, el 29 de agosto.** La spec decía "límite de
+palabra" y eso se escribe con ``, que fue lo primero que se probó. Falla:
+`` exige una letra a un lado y algo que no lo sea al otro, así que un
+ingrediente acabado en signo —`aceite (virgen extra)`— **no se encontraba ni a
+sí mismo**. Lo cazó el fichero de casos antes de que llegara a producción.
+
+Ahora los dos límites son *lookarounds* que solo preguntan si al lado hay letra
+o número, que es lo que de verdad importa. El comportamiento buscado no cambia;
+lo que cambia es que ya no depende de con qué carácter acabe tu ingrediente.
 
 Es decir: **límite de palabra estricto por la izquierda**, y por la derecha se
 tolera **solo** una `s` o un `es` de plural antes del límite. Nada más.
@@ -127,11 +134,14 @@ intercambiables**:
 - El límite estricto por la izquierda es lo que impide que `lechuga` acierte en
   `leche entera`.
 
-Comprobado sobre 18 casos el 28 de agosto, incluidos los tres de arriba, antes de
-cerrar la spec. **Los casos están guardados en `docs/specs/059-cruce-casos.mjs`**
-y se ejecutan con `node docs/specs/059-cruce-casos.mjs`. **Al implementar, se
-convierten en un test de verdad**: es la única parte de la v8 donde un cambio
-pequeño de la regla rompe algo en silencio.
+**Los casos están en `docs/specs/059-cruce-casos.mjs`** y se ejecutan con
+`node docs/specs/059-cruce-casos.mjs`. Al implementar la spec dejaron de ser una
+copia de la regla y pasaron a ejecutar **el módulo de verdad** (`js/despensa.js`,
+recortándole los imports de Firebase, que necesitan red). Son 20 casos de la
+regla más seis del resto del cruce, y son lo que cazó el fallo del ``.
+
+Es la única parte de la v8 donde un cambio pequeño de la regla rompe algo en
+silencio: **si se toca el cruce, se ejecutan.**
 
 Si la regla no acierta, **se considera que falta**. Ante la duda, que la app diga
 que te falta: mandarte al súper a por algo que tenías es una molestia; dejarte

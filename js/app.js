@@ -102,7 +102,9 @@ import {
   marcarIngrediente,
   borrarIngrediente,
   listarDespensa,
-  ordenar as ordenarDespensa
+  ordenar as ordenarDespensa,
+  cruzarConLaDespensa,
+  loQueTengo
 } from "./despensa.js";
 
 import {
@@ -1512,11 +1514,32 @@ function tarjetaDeReceta(receta) {
 
   if (recetaAbierta !== receta.id) return tarjeta;
 
+  // Qué tienes y qué te falta, contra tu despensa de AHORA (spec 059). No se
+  // guarda nada: se calcula al abrir la receta. Si se hubiera guardado el día
+  // que se generó, a los tres días seguiría diciendo que tienes el tomate que ya
+  // te comiste.
+  const cruzados = cruzarConLaDespensa(receta.ingredientes, despensaCargada);
+  const marcando = despensaCargada.length > 0 && cruzados.length > 0;
+
+  if (marcando) {
+    const resumen = document.createElement("p");
+    resumen.className = "receta-resumen-despensa";
+    const tienes = cruzados.filter((linea) => linea.tengo).length;
+    resumen.textContent = `Tienes ${tienes} de ${cruzados.length}`;
+    tarjeta.appendChild(resumen);
+  }
+
   const ingredientes = document.createElement("ul");
   ingredientes.className = "receta-ingredientes";
-  (receta.ingredientes || []).forEach((ingrediente) => {
+  cruzados.forEach(({ texto, tengo }) => {
     const linea = document.createElement("li");
-    linea.textContent = ingrediente;
+    linea.textContent = texto;
+    // Sin despensa, la receta se ve exactamente como antes de la spec 059.
+    if (marcando) {
+      linea.classList.add(tengo ? "lo-tengo" : "me-falta");
+      // El icono es decorativo; lo que lee un lector de pantalla es el título.
+      linea.title = tengo ? "Lo tienes en casa" : "Te falta";
+    }
     ingredientes.appendChild(linea);
   });
   tarjeta.appendChild(ingredientes);
@@ -2106,7 +2129,11 @@ id("btn-semana-blanco").addEventListener("click", async () => {
 
 // Pide la semana a la IA, guarda las recetas que proponga y sustituye la
 // dieta que hubiera. El cupo es el mismo que el de los planes: 2 al día.
-async function generarDieta(instrucciones) {
+// `aprovechar` llega solo desde el formulario de "Pedir" (spec 059). Los otros
+// dos caminos que generan dieta —la propuesta de una revisión y el comité de
+// bienvenida— no la piden, y por eso el parámetro es opcional: ahí no hay
+// casilla que leer y la despensa no se le menciona a la IA.
+async function generarDieta(instrucciones, aprovechar = false) {
   if (quedanPlanesHoy(planesCargados, "dieta") === 0) {
     throw Object.assign(new Error("Sin cupo"), { codigo: "limite-planes" });
   }
@@ -2124,7 +2151,11 @@ async function generarDieta(instrucciones) {
   const respuesta = await pedirDietaALaIa(uidActual, instrucciones, registros, {
     nombre: ajustes.nombre || "",
     perfil: ajustes.perfil || "",
-    proveedor: ajustes.proveedorIa || "automatico"
+    proveedor: ajustes.proveedorIa || "automatico",
+    // Se lee AQUÍ y no al pintar la casilla: el número de al lado puede ir
+    // retrasado si has ido a la Despensa y has vuelto, pero lo que se manda es
+    // siempre lo que hay marcado en el momento de pedir.
+    despensa: aprovechar ? loQueTengo(despensaCargada) : []
   });
 
   // Primero las recetas: la semana las enlaza por nombre, así que tienen que
@@ -3632,6 +3663,29 @@ async function montarLoDelComite(extras) {
 // Cada plan vive en su sección: la dieta en Comidas y la tabla en Ejercicio.
 // Son siempre la semana entera, con un campo para pedir lo que haga falta y
 // su propio cupo diario.
+// La casilla "aprovechar lo que tengo en casa" (spec 059).
+//
+// El bloque entero se esconde si no hay NADA marcado —despensa vacía, o con
+// cosas pero todas agotadas—: ofrecerte aprovechar lo que no tienes sería
+// mentir, y pedir dieta vuelve a funcionar exactamente como antes de esta spec.
+//
+// El número que se enseña se lee AQUÍ, al abrir el formulario. Si te vas a la
+// Despensa, desmarcas cosas y vuelves sin recargar, puede quedarse retrasado.
+// Lo que de verdad se manda a la IA se lee en el momento de pedir, en
+// generarDieta(): el número puede ir atrasado, lo que se manda nunca.
+function pintarAprovecharDespensa() {
+  const bloque = id("bloque-aprovechar");
+  const cuantos = loQueTengo(despensaCargada).length;
+
+  bloque.classList.toggle("oculta", cuantos === 0);
+  id("aprovechar-cuantos").textContent =
+    cuantos === 1 ? "1 ingrediente marcado" : `${cuantos} ingredientes marcados`;
+
+  // Cada vez que se abre el formulario empieza desmarcada. Es lo mismo que hace
+  // el submit al terminar, pero también cubre cerrar con Cancelar y volver.
+  id("dieta-aprovechar").checked = false;
+}
+
 function pintarEspecializadas() {
   Object.keys(TIPOS_ESPECIALIZADOS).forEach((tipo) => {
     const contenedor = id(`pedir-${tipo}`);
@@ -3644,6 +3698,10 @@ function pintarEspecializadas() {
     const boton = botonDeFila(`Pedir ${config.etiqueta.toLowerCase()}`, () => {
       id(`form-plan-${tipo}`).classList.remove("oculta");
       contenedor.classList.add("oculta");
+
+      // La casilla de la despensa se decide al abrir el formulario, que es
+      // cuando el usuario la va a mirar (spec 059).
+      if (tipo === "dieta") pintarAprovecharDespensa();
 
       // Las últimas instrucciones de este tipo, para no reescribirlas cada
       // vez (spec 040). planesCargados ya viene de más reciente a más
@@ -3693,11 +3751,16 @@ Object.keys(TIPOS_ESPECIALIZADOS).forEach((tipo) => {
       // estructurada con sus recetas o sus ejercicios, para poder editarlas y
       // apuntar con un toque (specs 028 y 029).
       if (tipo === "dieta") {
-        await generarDieta(id(`instrucciones-${tipo}`).value);
+        await generarDieta(id(`instrucciones-${tipo}`).value, id("dieta-aprovechar").checked);
       } else if (tipo === "ejercicio") {
         await generarTabla(id(`instrucciones-${tipo}`).value);
       }
       id(`instrucciones-${tipo}`).value = "";
+      // La casilla NO se recuerda entre peticiones, al revés que las
+      // instrucciones (spec 040): un texto cuesta reescribirlo, una casilla es
+      // un clic. Recordarla haría que un día te saliera una dieta condicionada
+      // por tu despensa sin que supieras por qué.
+      if (tipo === "dieta") id("dieta-aprovechar").checked = false;
     } catch (fallo) {
       error.textContent = mensajeDeErrorDeConsulta(fallo.codigo);
     } finally {

@@ -264,6 +264,17 @@
         <label for="instrucciones-dieta">¿Algo que deba tener en cuenta?</label>
         <textarea id="instrucciones-dieta" rows="3" maxlength="500"
           placeholder="el jueves salgo a comer fuera, ponme ese día libre"></textarea>
+
+        <!-- Aprovechar la despensa (spec 059). Todo el bloque se esconde si no
+             hay nada marcado: ofrecerlo sin despensa sería mentir. -->
+        <div id="bloque-aprovechar" class="oculta">
+          <label class="casilla-linea" for="dieta-aprovechar">
+            <input type="checkbox" id="dieta-aprovechar">
+            <span>Aprovechar lo que tengo en casa</span>
+          </label>
+          <p id="aprovechar-cuantos" class="registro-detalle"></p>
+        </div>
+
         <button type="submit" id="btn-pedir-dieta">Pedir</button>
         <button type="button" id="btn-cancelar-dieta" class="enlace">Cancelar</button>
       </form>

@@ -1365,6 +1365,57 @@ button:disabled {
   font-size: 0.85rem;
 }
 
+/* La casilla de aprovechar la despensa al pedir dieta (spec 059). */
+.casilla-linea {
+  display: flex;
+  align-items: center;
+  gap: var(--e2);
+  cursor: pointer;
+}
+
+.casilla-linea input[type="checkbox"] {
+  width: 1.1rem;
+  height: 1.1rem;
+  accent-color: var(--acento);
+  margin: 0;
+  flex-shrink: 0;
+}
+
+#bloque-aprovechar {
+  margin: var(--e3) 0;
+}
+
+#aprovechar-cuantos {
+  margin: var(--e1) 0 0 1.6rem;
+}
+
+/* Las marcas de la despensa dentro de una receta (spec 059). Nunca se esconde
+   ningún ingrediente: lo que te falta se apaga para que la lista se lea como
+   "esto es lo que hay que comprar", pero sigue ahí. */
+.receta-resumen-despensa {
+  margin: var(--e3) 0 0;
+  font-size: 0.85rem;
+  color: var(--apoyo);
+}
+
+.receta-ingredientes .lo-tengo {
+  color: var(--tinta);
+  list-style: none;
+  margin-left: -0.9rem;
+}
+
+.receta-ingredientes .lo-tengo::before {
+  content: "✓";
+  color: var(--apoyo);
+  display: inline-block;
+  width: 0.9rem;
+  font-weight: 700;
+}
+
+.receta-ingredientes .me-falta {
+  opacity: 0.55;
+}
+
 /* La despensa (spec 058). Filas de una línea con casilla, no tarjetas: aquí no
    hay nada que desplegar, y una lista de treinta ingredientes tiene que poder
    recorrerse de un vistazo. */

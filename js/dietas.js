@@ -140,6 +140,9 @@ export async function pedirDietaALaIa(uid, instrucciones, registros, contexto) {
         "Content-Type": "application/json",
         Authorization: `Bearer ${idToken}`
       },
+      // `contexto` trae también la despensa cuando el usuario ha marcado
+      // "aprovechar lo que tengo" (spec 059); si no, llega vacía y el proxy se
+      // comporta como siempre.
       body: JSON.stringify({ instrucciones, registros, ...contexto }),
       signal: AbortSignal.timeout(ESPERA_MAXIMA_MS)
     });

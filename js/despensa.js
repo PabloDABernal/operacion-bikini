@@ -115,6 +115,90 @@ export function ordenar(ingredientes) {
   });
 }
 
+// --- El cruce despensa/receta (spec 059) ---------------------------------
+//
+// Decide si una línea de ingredientes de una receta ("2 tomates maduros") es
+// algo que tienes en la despensa ("tomate").
+//
+// Se hace AQUÍ, en el navegador y al abrir la receta, y no se lo pedimos a la
+// IA al generar la dieta. La IA entiende mejor los sinónimos, pero su respuesta
+// se guarda y una receta se mira días después: la marca quedaría congelada en
+// cómo estaba tu despensa el día que se generó. Preferimos una marca que nunca
+// miente sobre el presente, aunque falle algún cruce raro.
+
+// Un ingrediente es texto del usuario y puede traer paréntesis, puntos o
+// asteriscos. Sin escapar, "aceite (virgen)" es una expresión regular rota.
+function escaparParaRegex(texto) {
+  return texto.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+// La regla, y por qué es exactamente esta:
+//
+// - Por la izquierda, el ingrediente no puede empezar a media palabra: impide
+//   que tu "lechuga" acierte dentro de "leche entera".
+// - Por la derecha se tolera SOLO una "s" o un "es" de plural. Eso salva el caso
+//   normal —tu "tomate" acierta en "2 tomates maduros", tu "coliflor" en "2
+//   coliflores"— sin abrir la puerta al desastre: a tu "sal" le seguiría "món",
+//   que no es ninguno de los dos, así que NO se come el "salmón a la plancha".
+//
+// Las dos mitades se sostienen entre sí. Relajar la izquierda o ampliar el
+// sufijo rompe uno de los dos casos.
+//
+// Los límites van con lookarounds y no con \b, que es lo que se probó primero:
+// \b exige una letra a un lado y algo que no lo sea al otro, así que un
+// ingrediente acabado en signo —"aceite (virgen extra)"— no se encontraba ni a
+// sí mismo. El lookaround solo pregunta si al lado hay letra o número, que es lo
+// que de verdad importa aquí.
+//
+// Los casos que prueban todo esto están en docs/specs/059-cruce-casos.mjs.
+const LETRA_O_NUMERO = "\\p{L}\\p{N}";
+
+export function lineaTieneIngrediente(linea, nombre) {
+  const buscado = normalizar(nombre);
+  if (!buscado) return false;
+
+  const patron = new RegExp(
+    `(?<![${LETRA_O_NUMERO}])${escaparParaRegex(buscado)}(es|s)?(?![${LETRA_O_NUMERO}])`,
+    "u"
+  );
+
+  return patron.test(normalizar(linea));
+}
+
+// Devuelve la lista de ingredientes de una receta, cada uno con si lo tienes.
+//
+// Solo cuentan los ingredientes marcados: la despensa guarda también lo que
+// sueles usar pero se te ha acabado, y eso es justo lo que NO tienes.
+//
+// Un ingrediente tuyo se gasta al primer acierto y no vale para dos líneas de la
+// misma receta: si la receta pide tomate dos veces, tu tomate no cuenta dos.
+//
+// Ante la duda, "te falta". Mandarte al súper a por algo que ya tenías es una
+// molestia; dejarte sin cenar porque te dijo que lo tenías, no.
+export function cruzarConLaDespensa(lineas, despensa) {
+  const disponibles = despensa.filter((ingrediente) => ingrediente.tengo);
+  const gastados = new Set();
+
+  return (lineas || []).map((linea) => {
+    const encontrado = disponibles.find(
+      (ingrediente) =>
+        !gastados.has(ingrediente.id) &&
+        lineaTieneIngrediente(linea, ingrediente.nombre)
+    );
+
+    if (encontrado) gastados.add(encontrado.id);
+    return { texto: linea, tengo: Boolean(encontrado) };
+  });
+}
+
+// Lo que se le manda a la IA al pedir la dieta: solo los nombres de lo que
+// tienes ahora en casa.
+export function loQueTengo(despensa) {
+  return despensa
+    .filter((ingrediente) => ingrediente.tengo)
+    .map((ingrediente) => ingrediente.nombre);
+}
+
 export async function listarDespensa(uid) {
   const instantanea = await getDocs(coleccionDe(uid));
 

@@ -1,6 +1,6 @@
 # 058 — La despensa: lo que tienes en casa
 
-- **Estado:** implementada y desplegada el 28 de agosto de 2026. **Pendiente de que el usuario la pruebe** en producción; hasta entonces NO es completada.
+- **Estado:** ✅ completada (probada y confirmada por el usuario el 2026-08-29).
 - **Fecha:** 2026-08-28
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (v8: la despensa, decidida el 28 de agosto de 2026)", primera spec de las dos.
 
@@ -213,6 +213,35 @@ forzarla.
   segundo porque fusionar haría desaparecer una fila que nadie pidió borrar.
 - **La lista no se reordena mientras marcas** (misma revisión): saltaría la fila
   bajo el dedo justo cuando estás marcando varias seguidas.
+
+## 8 bis. Lo que salió al probarla
+
+Un fallo, corregido el 28 de agosto antes de que el usuario terminara el guion
+(commit `bdf05e9`): `filaDeIngrediente()` pedía los iconos `editar` y `borrar`, y
+en este proyecto se llaman `lapiz` y `papelera`. `TRAZOS_DE_ICONO[nombre]` era
+`undefined` y el `.forEach` reventaba al montar la primera fila.
+
+**Lo que costó tiempo no fue el fallo, fue el disfraz.** `pintarDespensa()` vacía
+la lista, escribe el recuento y solo después monta las filas: al petar ahí, la
+pantalla quedaba con la lista vacía y "2 de 2 ingredientes en casa" encima. Y
+como el repintado vivía dentro del `try` del guardado, salía
+"No se ha podido guardar. Comprueba tu conexión." con el dato ya guardado y la
+conexión perfecta, conviviendo con el "Guardado" del intento anterior.
+
+Tres cosas cambiaron a raíz de esto, y las tres valen para el resto del proyecto:
+
+1. **El guardado y el repintado no comparten `catch`.** Lo que falla al escribir
+   se reporta como fallo al escribir; lo que falla al pintar no se disfraza de
+   problema de red.
+2. **Los avisos de éxito y de error son excluyentes.** Verlos a la vez no deja
+   saber cuál es verdad.
+3. **`iconoDeAccion()` con un nombre desconocido devuelve un botón sin dibujo y
+   lo grita por consola**, en vez de tirar a quien esté pintando. Pintar una
+   lista es un bucle: un icono mal escrito no puede costar la lista entera.
+
+**Se pasó `revisor-codigo`? No.** Se ofreció y no se lanzó, y este fallo es
+exactamente de los que ese agente caza leyendo. Para la 059 se pasa antes de que
+el usuario pruebe.
 
 ## 9. Fuera de spec: ideas apuntadas
 

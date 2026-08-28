@@ -87,8 +87,8 @@ El 20 de agosto arrancó la **v4**, que sale de una auditoría de usabilidad hec
 | 055 | La entrevista de bienvenida empieza de cero de verdad | ✅ completada |
 | 056 | La casilla "Operaciones" borra también la que está en marcha | ✅ completada |
 | 057 | El comité de bienvenida: la ficha de alta (v7) | ✅ completada |
-| 058 | La despensa: lo que tienes en casa (v8) | 🚧 implementada y desplegada, **sin probar** |
-| 059 | La dieta aprovecha la despensa (v8) | 📝 revisada, sin implementar |
+| 058 | La despensa: lo que tienes en casa (v8) | ✅ completada |
+| 059 | La dieta aprovecha la despensa (v8) | 🚧 implementada y desplegada, **sin probar** |
 | 060 | Ver la receta desde la dieta (v8) | 📝 borrador, salió de revisar la 059 |
 
 ## Qué toca ahora

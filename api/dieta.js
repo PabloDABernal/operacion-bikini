@@ -8,6 +8,10 @@ const { peticionAutorizada, describirRegistros, generarJson } = require("./_ia")
 
 const MAXIMO_INSTRUCCIONES = 500;
 
+// Cuántos ingredientes de la despensa caben en el prompt (spec 059). Ver
+// loQueTengoEnCasa(): es la lección del 413 de Groq de la spec 049.
+const MAXIMO_DESPENSA = 80;
+
 const DIAS = [
   "lunes",
   "martes",
@@ -93,6 +97,40 @@ function loQuePide(instrucciones) {
   );
 }
 
+// Lo que el usuario tiene en casa (spec 059). Va en el MENSAJE, no en
+// INSTRUCCIONES: la despensa es un dato de esta petición, y INSTRUCCIONES es la
+// constante de sistema, la misma para todas las peticiones de todo el mundo.
+//
+// El tope existe por la lección del 413 de Groq (spec 049): todo lo que entra en
+// un prompt sin límite acaba reventándolo. Cuando recorta, se lo dice a la IA,
+// igual que hace describirRegistros().
+function loQueTengoEnCasa(despensa) {
+  if (!Array.isArray(despensa)) return "";
+
+  const nombres = despensa
+    .map((nombre) => String(nombre || "").trim())
+    .filter(Boolean);
+
+  if (nombres.length === 0) return "";
+
+  const usados = nombres.slice(0, MAXIMO_DESPENSA);
+  const recortada = nombres.length > usados.length;
+
+  return (
+    "\n\nEsto es lo que tengo ahora mismo en casa" +
+    (recortada ? ` (te enseño ${usados.length} de ${nombres.length})` : "") +
+    ":\n" +
+    usados.join(", ") +
+    "\n\nApóyate en estos ingredientes todo lo que puedas: repítelos entre platos" +
+    " y móntame los días alrededor de ellos, que es lo que quiero aprovechar." +
+    " PERO NO te limites a ellos: completa con lo que la semana necesite. Esto es" +
+    " una preferencia, no una restricción, y una semana triste por no salirse de" +
+    " la lista no me sirve." +
+    " Tampoco mientas: si una receta necesita algo que no está en la lista," +
+    " ponlo igual en sus ingredientes."
+  );
+}
+
 // La IA a veces devuelve seis días, o los nombra a su manera ("Lunes 17",
 // "Miercoles" sin tilde, "Day 1"). Casar por nombre era frágil: bastaba una
 // tilde para que no cuadrara ninguno y la semana saliera entera en blanco.
@@ -175,6 +213,7 @@ module.exports = async (req, res) => {
                 "Estos son mis registros de los últimos 14 días:\n\n" +
                 describirRegistros(cuerpo.registros || {}) +
                 contexto(cuerpo.nombre, cuerpo.perfil) +
+                loQueTengoEnCasa(cuerpo.despensa) +
                 loQuePide(cuerpo.instrucciones)
             }
           ]
