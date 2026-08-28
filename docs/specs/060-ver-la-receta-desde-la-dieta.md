@@ -1,6 +1,6 @@
 # 060 — Ver la receta desde la dieta
 
-- **Estado:** borrador
+- **Estado:** decidida el 29 de agosto de 2026 (apartado 5 cerrado con el usuario), lista para implementar
 - **Fecha:** 2026-08-28
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (v8: la despensa, decidida el 28 de agosto de 2026)", tercera spec.
 - **Depende de:** la spec 059, que crea el cruce despensa/receta y las marcas.
@@ -54,14 +54,42 @@ pantalla nueva, no una marca encima de una que ya existe.
 
 ## 5. Comportamiento detallado
 
-Pendiente de detallar: **cómo se abre** (botón "Ver receta" en la fila, o tocar la
-fila entera) y **cómo se enseña** (desplegando dentro de la semana, o en la capa
-de detalle que ya usa el archivo de operaciones). Se decide con el usuario al
-escribir esta spec de verdad, no ahora: la 059 solo necesitaba que quedara claro
-que esto **no** entra en ella.
+### Cómo se abre: el nombre del plato
 
-Lo que sí está decidido: **la receta se lee, no se edita**, y el cruce y las
-marcas se reutilizan tal cual de la 059.
+**El nombre del plato se toca**, y solo cuando esa comida tiene una receta
+enlazada. No se añade ningún botón: la fila ya lleva "Me lo he comido" y
+"Editar" (`filaDeComida()`), y en móvil un tercero no cabe sin apilarlos.
+
+Que se puede tocar tiene que **verse antes de tocarlo**: el nombre va subrayado
+punteado y con el cursor de mano. Un texto que reacciona al tocarlo sin avisar de
+que reacciona es un truco escondido, y esto tiene que encontrarse solo.
+
+Una comida **sin** receta enlazada se ve exactamente como hoy: texto plano, sin
+subrayado y sin reaccionar. Es el caso mayoritario —la IA devuelve como mucho
+ocho recetas por semana, y hay veintiocho comidas—, así que la fila normal no
+puede cambiar de aspecto.
+
+### Cómo se enseña: desplegada bajo la fila
+
+La receta se abre **justo debajo de su fila**, dentro de la semana, y se cierra
+volviendo a tocar el nombre. Es el mismo gesto que ya tienen las recetas en
+Comidas → Recetas (spec 026), así que no hay nada nuevo que aprender, y no
+pierdes de vista el resto de la semana.
+
+**Solo una abierta a la vez.** Abrir otra cierra la anterior: con siete días de
+cuatro comidas, dos o tres recetas abiertas convierten la semana en un scroll
+sin fondo. Se guarda en una variable de módulo, igual que `recetaAbierta` en el
+recetario.
+
+Dentro se ve, en este orden: el resumen **"Tienes N de M"**, la lista de
+ingredientes con sus marcas (spec 059) y la preparación. **No hay botones de
+editar ni de borrar**: aquí la receta se lee. Para cambiarla está el recetario.
+
+### Qué se reutiliza
+
+El cruce y el pintado de ingredientes marcados salen tal cual de la 059
+(`cruzarConLaDespensa()`). Si al implementarlo hay que duplicar ese código, es
+señal de que hay que sacarlo a una función común, no de que haya que copiarlo.
 
 ## 6. Casos límite
 
@@ -85,6 +113,14 @@ falta ya está guardado.
 - **Se separa de la 059 antes de implementar** (usuario, 28 de agosto), en vez de
   hacer crecer aquella spec por encima de 300 líneas y meterle mano al código que
   lleva el botón de marcar comida.
+- **Se abre tocando el nombre del plato, no con un botón nuevo** (usuario, 29 de
+  agosto). La fila ya lleva dos botones y en móvil un tercero se apila o se sale.
+- **Se despliega bajo la fila, no en una capa encima** (usuario, misma
+  conversación). Es el gesto que ya tienen las recetas en su sub-pestaña, y deja
+  la semana a la vista.
+- **Solo una receta abierta a la vez** (Claude, al cerrar la spec): con
+  veintiocho comidas en pantalla, varias abiertas hacen la semana ilegible. Mismo
+  criterio que el recetario, que ya funciona así.
 
 ## 9. Fuera de spec: ideas apuntadas
 

@@ -1544,6 +1544,61 @@ button:disabled {
   flex: 0 0 5rem;
 }
 
+/* El plato que tiene receta se toca para abrirla (spec 060). Es un <button>
+   para que entre con el tabulador y se active con Enter, así que hay que
+   quitarle todo lo que un botón trae de serie y dejarlo pareciendo el texto que
+   es. El subrayado punteado es lo único que lo distingue: sin él, sería un
+   texto que reacciona al tocarlo sin avisar de que reacciona. */
+.plato-con-receta {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+  text-decoration-color: var(--tinta-suave);
+}
+
+.plato-con-receta:hover,
+.plato-con-receta:focus-visible {
+  text-decoration-color: var(--acento);
+}
+
+.plato-con-receta[aria-expanded="true"] {
+  text-decoration-color: var(--acento);
+  font-weight: 600;
+}
+
+/* La receta desplegada bajo su comida. Sangrada a la izquierda, a la altura
+   donde empieza el nombre del plato, para que se lea como algo que cuelga de esa
+   fila y no como una fila más de la semana. */
+.receta-en-dieta {
+  margin: 0 0 var(--e3) 5.5rem;
+  padding: var(--e3);
+  border-left: 2px solid var(--acento);
+  border-radius: 0 var(--radio-s) var(--radio-s) 0;
+  background: var(--superficie-alta);
+}
+
+.receta-en-dieta-cabecera {
+  margin: 0;
+  font-weight: 600;
+}
+
+.receta-en-dieta .receta-preparacion {
+  font-size: 0.9rem;
+}
+
+/* En móvil, 5.5rem de sangría dejan la receta en un pasillo. */
+@media (max-width: 30rem) {
+  .receta-en-dieta {
+    margin-left: var(--e3);
+  }
+}
+
 .comida-dieta button {
   flex: 0 0 auto;
   padding: var(--e1) var(--e2);

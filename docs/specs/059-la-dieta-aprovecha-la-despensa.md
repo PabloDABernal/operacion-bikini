@@ -1,6 +1,6 @@
 # 059 — La dieta aprovecha la despensa
 
-- **Estado:** implementada y desplegada el 29 de agosto de 2026. **Pendiente de que el usuario la pruebe**; hasta entonces NO es completada.
+- **Estado:** ✅ completada (probada y confirmada por el usuario el 2026-08-29).
 - **Fecha:** 2026-08-28
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (v8: la despensa, decidida el 28 de agosto de 2026)", segunda spec de las dos.
 - **Depende de:** la spec 058, que crea la despensa. Sin ella no hay nada que aprovechar.

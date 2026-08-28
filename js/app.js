@@ -1496,6 +1496,57 @@ function pintarRecetas() {
   botonArriba.textContent = boton.textContent;
 }
 
+// Lo que se lee de una receta: el resumen de despensa, los ingredientes con sus
+// marcas y la preparación. Sin nombre, sin raciones y sin botones — eso lo pone
+// quien la enseña, que no es lo mismo en el recetario que en la dieta.
+//
+// Vive suelta porque la leen DOS sitios (spec 060): la tarjeta del recetario y
+// la receta desplegada bajo una comida de la semana. Duplicarlo significaría que
+// un arreglo del cruce se aplica en un sitio y en el otro no.
+function cuerpoDeReceta(receta) {
+  const trozo = document.createDocumentFragment();
+
+  // Qué tienes y qué te falta, contra tu despensa de AHORA (spec 059). No se
+  // guarda nada: se calcula al abrir la receta. Si se hubiera guardado el día
+  // que se generó, a los tres días seguiría diciendo que tienes el tomate que ya
+  // te comiste.
+  const cruzados = cruzarConLaDespensa(receta.ingredientes, despensaCargada);
+  const marcando = despensaCargada.length > 0 && cruzados.length > 0;
+
+  if (marcando) {
+    const resumen = document.createElement("p");
+    resumen.className = "receta-resumen-despensa";
+    const tienes = cruzados.filter((linea) => linea.tengo).length;
+    resumen.textContent = `Tienes ${tienes} de ${cruzados.length}`;
+    trozo.appendChild(resumen);
+  }
+
+  const ingredientes = document.createElement("ul");
+  ingredientes.className = "receta-ingredientes";
+  cruzados.forEach(({ texto, tengo }) => {
+    const linea = document.createElement("li");
+    linea.textContent = texto;
+    // Sin despensa, la receta se ve exactamente como antes de la spec 059.
+    if (marcando) {
+      linea.classList.add(tengo ? "lo-tengo" : "me-falta");
+      // El "✓" lo pone el CSS y la opacidad no la lee nadie: sin este título,
+      // quien no ve la pantalla no se entera de la despensa.
+      linea.title = tengo ? "Lo tienes en casa" : "Te falta";
+    }
+    ingredientes.appendChild(linea);
+  });
+  trozo.appendChild(ingredientes);
+
+  if (receta.preparacion) {
+    const preparacion = document.createElement("p");
+    preparacion.className = "receta-preparacion";
+    preparacion.textContent = receta.preparacion;
+    trozo.appendChild(preparacion);
+  }
+
+  return trozo;
+}
+
 function tarjetaDeReceta(receta) {
   const tarjeta = document.createElement("article");
   tarjeta.className = "receta";
@@ -1514,42 +1565,7 @@ function tarjetaDeReceta(receta) {
 
   if (recetaAbierta !== receta.id) return tarjeta;
 
-  // Qué tienes y qué te falta, contra tu despensa de AHORA (spec 059). No se
-  // guarda nada: se calcula al abrir la receta. Si se hubiera guardado el día
-  // que se generó, a los tres días seguiría diciendo que tienes el tomate que ya
-  // te comiste.
-  const cruzados = cruzarConLaDespensa(receta.ingredientes, despensaCargada);
-  const marcando = despensaCargada.length > 0 && cruzados.length > 0;
-
-  if (marcando) {
-    const resumen = document.createElement("p");
-    resumen.className = "receta-resumen-despensa";
-    const tienes = cruzados.filter((linea) => linea.tengo).length;
-    resumen.textContent = `Tienes ${tienes} de ${cruzados.length}`;
-    tarjeta.appendChild(resumen);
-  }
-
-  const ingredientes = document.createElement("ul");
-  ingredientes.className = "receta-ingredientes";
-  cruzados.forEach(({ texto, tengo }) => {
-    const linea = document.createElement("li");
-    linea.textContent = texto;
-    // Sin despensa, la receta se ve exactamente como antes de la spec 059.
-    if (marcando) {
-      linea.classList.add(tengo ? "lo-tengo" : "me-falta");
-      // El icono es decorativo; lo que lee un lector de pantalla es el título.
-      linea.title = tengo ? "Lo tienes en casa" : "Te falta";
-    }
-    ingredientes.appendChild(linea);
-  });
-  tarjeta.appendChild(ingredientes);
-
-  if (receta.preparacion) {
-    const preparacion = document.createElement("p");
-    preparacion.className = "receta-preparacion";
-    preparacion.textContent = receta.preparacion;
-    tarjeta.appendChild(preparacion);
-  }
+  tarjeta.appendChild(cuerpoDeReceta(receta));
 
   const acciones = document.createElement("div");
   acciones.className = "receta-acciones";
@@ -1610,6 +1626,15 @@ async function refrescarRecetas() {
     return;
   }
   pintarRecetas();
+
+  // La semana también depende de las recetas desde la spec 060: un plato solo
+  // se puede tocar si la receta que enlaza existe en `recetasCargadas`.
+  //
+  // refrescarTodo() lanza esta función y refrescarDieta() a la vez, sin orden
+  // garantizado: si la dieta llegaba primero, la semana se pintaba con la lista
+  // de recetas todavía vacía y ningún plato salía tocable hasta el siguiente
+  // repintado. Con dieta cargada, se vuelve a pintar aquí.
+  if (dietaActiva) pintarDieta();
 }
 
 id("btn-nueva-receta").addEventListener("click", () => abrirFormularioDeReceta(null));
@@ -1960,6 +1985,10 @@ function avisarEnDespensa(texto) {
 let dietaActiva = null;
 let celdaEditando = null;
 
+// Qué receta de la semana está desplegada, como "indiceDia-indiceComida" (spec
+// 060). Una sola, igual que `recetaAbierta` en el recetario.
+let recetaDeDietaAbierta = null;
+
 function pintarDieta() {
   const contenedor = id("semana-dieta");
   const estado = id("estado-dieta");
@@ -1991,11 +2020,22 @@ function pintarDieta() {
     bloque.appendChild(titulo);
 
     dia.comidas.forEach((comida, indiceComida) => {
-      bloque.appendChild(
-        celdaEditando === `${indiceDia}-${indiceComida}`
-          ? filaEnEdicion(indiceDia, indiceComida, comida)
-          : filaDeComida(indiceDia, indiceComida, comida)
-      );
+      const clave = `${indiceDia}-${indiceComida}`;
+
+      if (celdaEditando === clave) {
+        bloque.appendChild(filaEnEdicion(indiceDia, indiceComida, comida));
+        return;
+      }
+
+      bloque.appendChild(filaDeComida(indiceDia, indiceComida, comida));
+
+      // La receta, desplegada JUSTO DEBAJO de su fila (spec 060). Se pinta aquí
+      // y no dentro de filaDeComida() porque es hermana de la fila, no hija: la
+      // fila es una rejilla de columnas y meterle la receta dentro la
+      // descuadraría.
+      if (recetaDeDietaAbierta === clave) {
+        bloque.appendChild(recetaDesplegada(comida));
+      }
     });
 
     contenedor.appendChild(bloque);
@@ -2008,7 +2048,7 @@ function filaDeComida(indiceDia, indiceComida, comida) {
 
   fila.append(
     celda(etiquetaDeMomento(comida.momento), "resumen-etiqueta"),
-    celda(comida.texto || "—", "registro-texto")
+    nombreDelPlato(indiceDia, indiceComida, comida)
   );
 
   if (comida.texto) {
@@ -2021,11 +2061,78 @@ function filaDeComida(indiceDia, indiceComida, comida) {
 
   const editar = botonDeFila(comida.texto ? "Editar" : "+", () => {
     celdaEditando = `${indiceDia}-${indiceComida}`;
+    // Editar cierra la receta: el formulario ocupa el sitio de la fila y dejar
+    // la receta colgando debajo la separaría de aquello a lo que pertenece.
+    recetaDeDietaAbierta = null;
     pintarDieta();
   });
   fila.appendChild(editar);
 
   return fila;
+}
+
+// El nombre del plato (spec 060). Si esa comida tiene receta enlazada Y la
+// receta sigue existiendo, el nombre se toca para abrirla; si no, es texto
+// plano, exactamente como antes de esta spec.
+//
+// El aviso visual importa: un texto que reacciona al tocarlo sin decir que
+// reacciona es un truco escondido. De ahí la clase, que lo subraya punteado.
+//
+// Es un <button> y no un <span> con listener: así entra con el tabulador, se
+// activa con Enter y un lector de pantalla lo anuncia como algo que se pulsa.
+function nombreDelPlato(indiceDia, indiceComida, comida) {
+  const receta = recetaDeLaComida(comida);
+
+  if (!receta) return celda(comida.texto || "—", "registro-texto");
+
+  const clave = `${indiceDia}-${indiceComida}`;
+  const abierta = recetaDeDietaAbierta === clave;
+
+  const boton = botonDeFila(comida.texto, () => {
+    // Solo una abierta a la vez: con veintiocho comidas en pantalla, varias
+    // desplegadas convierten la semana en un scroll sin fondo.
+    recetaDeDietaAbierta = abierta ? null : clave;
+    pintarDieta();
+  });
+  boton.className = "registro-texto plato-con-receta";
+  boton.setAttribute("aria-expanded", String(abierta));
+  boton.title = abierta ? "Cerrar la receta" : "Ver la receta";
+  return boton;
+}
+
+// La receta enlazada a una comida de la semana, o null.
+//
+// Devuelve null también cuando el `recetaId` apunta a una receta que ya no
+// existe —se borró desde el recetario—: el enlace se guarda en la dieta y nadie
+// lo limpia al borrar. Sin esta comprobación, el nombre saldría tocable y al
+// tocarlo no se abriría nada.
+function recetaDeLaComida(comida) {
+  if (!comida.texto || !comida.recetaId) return null;
+  return recetasCargadas.find((receta) => receta.id === comida.recetaId) || null;
+}
+
+// La receta abierta bajo su fila. Solo se lee: para cambiarla está el recetario.
+function recetaDesplegada(comida) {
+  const caja = document.createElement("div");
+  caja.className = "receta-en-dieta";
+
+  const receta = recetaDeLaComida(comida);
+
+  // No debería pasar —el nombre solo se vuelve tocable si la receta existe—,
+  // pero si se borra la receta con la dieta abierta en otra pestaña, mejor
+  // decirlo que enseñar un hueco.
+  if (!receta) {
+    caja.appendChild(celda("Esta receta ya no existe.", "explicacion"));
+    return caja;
+  }
+
+  const cabecera = document.createElement("p");
+  cabecera.className = "receta-en-dieta-cabecera";
+  cabecera.textContent = `${receta.nombre} · para ${receta.raciones}`;
+  caja.appendChild(cabecera);
+
+  caja.appendChild(cuerpoDeReceta(receta));
+  return caja;
 }
 
 function filaEnEdicion(indiceDia, indiceComida, comida) {
@@ -2220,6 +2327,10 @@ async function refrescarDieta() {
     return;
   }
   celdaEditando = null;
+  // La receta desplegada se guarda por posición ("2-1"), no por identidad. Si la
+  // semana cambia —otra dieta, o una celda editada—, esa posición ya es otro
+  // plato: dejarla abierta enseñaría la receta de una comida que no es.
+  recetaDeDietaAbierta = null;
   pintarDieta();
 }
 
