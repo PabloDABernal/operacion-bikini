@@ -1,6 +1,6 @@
 # 058 — La despensa: lo que tienes en casa
 
-- **Estado:** revisada (`revisor-specs`, 28 de agosto de 2026: sin bloqueantes; sus cuatro mejoras están incorporadas)
+- **Estado:** implementada y desplegada el 28 de agosto de 2026. **Pendiente de que el usuario la pruebe** en producción; hasta entonces NO es completada.
 - **Fecha:** 2026-08-28
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (v8: la despensa, decidida el 28 de agosto de 2026)", primera spec de las dos.
 
@@ -179,7 +179,14 @@ que `js/reinicio.js` avisa en su propio comentario sobre `ejercicios` y
 | `firestore.rules` | Bloque de `despensa`. **Publicar con la CLI antes de probar.** |
 | `js/reinicio.js` | Casilla "despensa". |
 
-Estimación: **250-300 líneas**. La referencia es el recetario (spec 026): solo
+**Salió en 521 líneas**, de las cuales ~408 son JavaScript (281 en `js/app.js` y
+127 en `js/despensa.js`); el resto es HTML, CSS y la regla de Firestore. Por
+encima de lo estimado. No se troceó porque para cuando se vio el tamaño la
+feature ya estaba entera y es una sola cosa —partirla ahí habría dejado media
+despensa en producción—, pero la estimación de abajo se quedó corta y conviene
+saberlo al estimar la 059.
+
+Estimación original: **250-300 líneas**. La referencia es el recetario (spec 026): solo
 su pintado y sus manejadores en `js/app.js` ocupan ~170 líneas, más ~95 del
 modelo en `js/recetas.js`. La despensa tiene un formulario más simple (un solo
 campo) pero más lógica viva: casilla con escritura instantánea y reversión,

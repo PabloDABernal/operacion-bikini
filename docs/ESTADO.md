@@ -2,7 +2,7 @@
 
 Documento para retomar el trabajo en frío. Se actualiza al terminar cada spec.
 
-**Última actualización:** 28 de agosto de 2026 (la v8 escrita y revisada, sin implementar) (specs 001-057 **probadas y cerradas**, v1 a v7 terminadas; las specs **058 y 059 revisadas** y la **060** en borrador)
+**Última actualización:** 28 de agosto de 2026 (la 058 desplegada, sin probar) (specs 001-057 **probadas y cerradas**, v1 a v7 terminadas; la **058 implementada y pendiente de prueba**, la **059** revisada y la **060** en borrador)
 
 > **Traspaso del 27 de agosto de 2026.** Se sigue en remoto desde Claude Code web. Estado al cerrar la sesión del PC: nada a medias, `main` limpio y sincronizado con `origin/main`. No hay spec abierta. **`docs/BACKLOG.md` está vacío a propósito desde hoy**: sus veintidós entradas se repartieron entre `docs/PRODUCTO.md` (apartado "Ideas para más adelante", que es de donde se elige la próxima versión), este documento (las trampas, aquí abajo) y el propio backlog (lo cerrado, para que no vuelva a proponerse). **Lo siguiente son evolutivos nuevos**: se elige una idea de `PRODUCTO.md`, se decide si es una versión partida en varias specs, y se escribe con `/nueva-spec` antes de tocar código. Antes de nada, leer "Cosas que hay que saber antes de tocar nada" de más abajo: las trampas del modelo de IA, la publicación de reglas de Firestore y que se prueba SIEMPRE en producción con push.
 
@@ -87,7 +87,7 @@ El 20 de agosto arrancó la **v4**, que sale de una auditoría de usabilidad hec
 | 055 | La entrevista de bienvenida empieza de cero de verdad | ✅ completada |
 | 056 | La casilla "Operaciones" borra también la que está en marcha | ✅ completada |
 | 057 | El comité de bienvenida: la ficha de alta (v7) | ✅ completada |
-| 058 | La despensa: lo que tienes en casa (v8) | 📝 revisada, sin implementar |
+| 058 | La despensa: lo que tienes en casa (v8) | 🚧 implementada y desplegada, **sin probar** |
 | 059 | La dieta aprovecha la despensa (v8) | 📝 revisada, sin implementar |
 | 060 | Ver la receta desde la dieta (v8) | 📝 borrador, salió de revisar la 059 |
 
@@ -128,12 +128,20 @@ bloqueantes. La 059 salió con dos, los dos resueltos antes de tocar código:
   se podía leer desde Mi dieta; `filaDeComida()` solo pinta el momento y el
   texto. Se sacó a la **spec 060** antes de implementar nada, no después.
 
+**La 058 está implementada y desplegada** (28 de agosto, commit `f9ecfcb`), con
+las reglas de Firestore ya publicadas. **Falta que el usuario la pruebe**: hasta
+entonces no es completada.
+
+Salió en 521 líneas (~408 de JavaScript), por encima de las 250-300 estimadas.
+No se troceó porque cuando se vio el tamaño ya estaba entera y es una sola cosa.
+**Tenerlo en cuenta al estimar la 059**, que estima 200 con el mismo método.
+
 **Lo siguiente, por orden:**
 
-1. Implementar la **058** entera, publicar `firestore.rules` con la CLI y que el
-   usuario la pruebe en producción.
-2. Solo entonces, la **059**. Depende de la 058: sin despensa no hay nada que
-   aprovechar.
+1. Que el usuario pruebe la **058** en producción y la dé por buena.
+2. Entonces la **059**. Depende de la 058: sin despensa no hay nada que
+   aprovechar. Sus 18 casos de cruce ya están en
+   `docs/specs/059-cruce-casos.mjs` y se convierten en test al implementarla.
 3. La **060** al final, y **está a medio escribir a propósito**: su apartado 5
    dice cómo NO se hace, pero cómo se abre y se enseña la receta se decide con el
    usuario cuando toque. No implementarla sin cerrar eso.
