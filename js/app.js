@@ -787,7 +787,18 @@ function iconoDeAccion(nombre) {
   // El dibujo no se anuncia: la acción la dice el aria-label del botón.
   svg.setAttribute("aria-hidden", "true");
 
-  TRAZOS_DE_ICONO[nombre].forEach((d) => {
+  // Un nombre que no existe deja el botón sin dibujo, pero NO tumba a quien
+  // esté pintando. Antes reventaba aquí, y como pintar una lista es un bucle,
+  // un icono mal escrito vaciaba la lista entera y el error salía a kilómetros
+  // de distancia, disfrazado de fallo de conexión (estreno de la spec 058).
+  // El aria-label del botón sigue diciendo la acción, así que se puede usar.
+  const trazos = TRAZOS_DE_ICONO[nombre];
+  if (!trazos) {
+    console.error(`Icono desconocido: "${nombre}". Los que hay: ${Object.keys(TRAZOS_DE_ICONO).join(", ")}.`);
+    return svg;
+  }
+
+  trazos.forEach((d) => {
     const trazo = document.createElementNS(NS, "path");
     trazo.setAttribute("d", d);
     svg.appendChild(trazo);
@@ -1693,12 +1704,12 @@ function filaDeIngrediente(ingrediente) {
   const acciones = document.createElement("div");
   acciones.className = "ingrediente-acciones";
   acciones.append(
-    botonDeIcono("editar", "Editar", () => {
+    botonDeIcono("lapiz", "Editar", () => {
       ingredienteEditando = ingrediente.id;
-      id("error-despensa").textContent = "";
+      limpiarAvisosDespensa();
       pintarDespensa();
     }),
-    botonDeIcono("borrar", "Borrar", () => borrarElIngrediente(ingrediente))
+    botonDeIcono("papelera", "Borrar", () => borrarElIngrediente(ingrediente))
   );
 
   fila.append(casilla, etiqueta, acciones);
@@ -1720,7 +1731,7 @@ function filaDeIngredienteEnEdicion(ingrediente) {
 
   const cancelar = botonDeFila("Cancelar", () => {
     ingredienteEditando = null;
-    id("error-despensa").textContent = "";
+    limpiarAvisosDespensa();
     pintarDespensa();
   });
   cancelar.className = "enlace";
@@ -1745,7 +1756,7 @@ async function marcarEnDespensa(ingrediente, casilla) {
   // con ella. Lo que no cambia es el ORDEN, a propósito.
   ingrediente.tengo = ahora;
   casilla.closest(".ingrediente").classList.toggle("sin-existencias", !ahora);
-  id("error-despensa").textContent = "";
+  limpiarAvisosDespensa();
   actualizarRecuentoDespensa();
 
   try {
@@ -1756,9 +1767,24 @@ async function marcarEnDespensa(ingrediente, casilla) {
     casilla.checked = antes;
     casilla.closest(".ingrediente").classList.toggle("sin-existencias", !antes);
     actualizarRecuentoDespensa();
-    id("error-despensa").textContent =
-      "No se ha podido guardar. Comprueba tu conexión.";
+    errorEnDespensa("No se ha podido guardar. Comprueba tu conexión.");
   }
+}
+
+// Los dos avisos de la despensa son excluyentes: enseñar "Guardado" y "no se ha
+// podido guardar" a la vez es lo que pasó al estrenar la spec 058, y no había
+// forma de saber cuál de los dos era verdad.
+//
+// El error no se borra solo, al revés que el aviso: si algo ha fallado, tiene
+// que seguir ahí hasta que hagas otra cosa.
+function limpiarAvisosDespensa() {
+  id("error-despensa").textContent = "";
+  id("guardado-despensa").textContent = "";
+}
+
+function errorEnDespensa(texto) {
+  id("guardado-despensa").textContent = "";
+  id("error-despensa").textContent = texto;
 }
 
 // Solo el número: repintar la lista entera aquí la reordenaría, que es justo lo
@@ -1771,12 +1797,11 @@ function actualizarRecuentoDespensa() {
 }
 
 async function renombrarElIngrediente(ingrediente, nombreBruto, boton) {
-  const error = id("error-despensa");
-  error.textContent = "";
+  limpiarAvisosDespensa();
 
   const resultado = validarIngrediente(nombreBruto);
   if (resultado.error) {
-    error.textContent = resultado.error;
+    errorEnDespensa(resultado.error);
     return;
   }
 
@@ -1785,20 +1810,26 @@ async function renombrarElIngrediente(ingrediente, nombreBruto, boton) {
   // Al añadir sí se fusiona, porque allí no desaparece nada.
   const choque = ingredienteIgual(despensaCargada, resultado.nombre, ingrediente.id);
   if (choque) {
-    error.textContent = `"${choque.nombre}" ya está en tu despensa.`;
+    errorEnDespensa(`"${choque.nombre}" ya está en tu despensa.`);
     return;
   }
 
   boton.disabled = true;
   try {
     await renombrarIngrediente(uidActual, ingrediente.id, resultado.nombre);
-    ingredienteEditando = null;
-    await refrescarDespensa();
   } catch {
-    error.textContent = "No se ha podido guardar. Comprueba tu conexión.";
+    errorEnDespensa("No se ha podido guardar. Comprueba tu conexión.");
+    return;
   } finally {
     boton.disabled = false;
   }
+
+  // Fuera del try de arriba a propósito: lo que se escribe y lo que se pinta son
+  // dos cosas, y meterlas en el mismo catch fue el fallo del estreno de la spec
+  // 058. Un error al pintar salía como "comprueba tu conexión" con el dato ya
+  // guardado y la conexión perfecta.
+  ingredienteEditando = null;
+  await refrescarDespensa();
 }
 
 async function borrarElIngrediente(ingrediente) {
@@ -1806,12 +1837,13 @@ async function borrarElIngrediente(ingrediente) {
 
   try {
     await borrarIngrediente(uidActual, ingrediente.id);
-    if (ingredienteEditando === ingrediente.id) ingredienteEditando = null;
-    await refrescarDespensa();
   } catch {
-    id("error-despensa").textContent =
-      "No se ha podido borrar. Comprueba tu conexión.";
+    errorEnDespensa("No se ha podido borrar. Comprueba tu conexión.");
+    return;
   }
+
+  if (ingredienteEditando === ingrediente.id) ingredienteEditando = null;
+  await refrescarDespensa();
 }
 
 // Se llama al entrar en la sub-pestaña, desde abrirSubpestana(). Reordena lo
@@ -1838,19 +1870,23 @@ async function refrescarDespensa() {
 id("form-ingrediente").addEventListener("submit", async (evento) => {
   evento.preventDefault();
 
-  const error = id("error-despensa");
   const campo = id("ingrediente-nombre");
-  error.textContent = "";
+  limpiarAvisosDespensa();
 
   const resultado = validarIngrediente(campo.value);
   if (resultado.error) {
-    error.textContent = resultado.error;
+    errorEnDespensa(resultado.error);
     return;
   }
 
   const boton = id("btn-anadir-ingrediente");
   boton.disabled = true;
 
+  // Solo la escritura va en el try. El repintado se hace después, fuera: si se
+  // rompe al pintar, el dato YA está guardado y decir "comprueba tu conexión"
+  // sería mentira. Así fue como el estreno de la spec 058 enseñó a la vez
+  // "Guardado" y un error de conexión con la conexión perfecta.
+  let aviso;
   try {
     const repetido = ingredienteIgual(despensaCargada, resultado.nombre);
 
@@ -1859,32 +1895,34 @@ id("form-ingrediente").addEventListener("submit", async (evento) => {
       // va en el hueco de "Guardado" y no en el de error.
       if (!repetido.tengo) {
         await marcarIngrediente(uidActual, repetido.id, true);
+        aviso = `"${repetido.nombre}" ya estaba en tu despensa: lo marco como que lo tienes.`;
+      } else {
+        aviso = `"${repetido.nombre}" ya está en tu despensa.`;
       }
-      avisarEnDespensa(
-        repetido.tengo
-          ? `"${repetido.nombre}" ya está en tu despensa.`
-          : `"${repetido.nombre}" ya estaba en tu despensa: lo marco como que lo tienes.`
-      );
     } else {
       await guardarIngrediente(uidActual, resultado.nombre);
-      avisarEnDespensa("Guardado");
+      aviso = "Guardado";
     }
-
-    campo.value = "";
-    await refrescarDespensa();
-    // Lo normal al estrenar esto es meter quince seguidos.
-    campo.focus();
   } catch {
-    error.textContent = "No se ha podido guardar. Comprueba tu conexión.";
+    errorEnDespensa("No se ha podido guardar. Comprueba tu conexión.");
+    return;
   } finally {
     boton.disabled = false;
   }
+
+  avisarEnDespensa(aviso);
+  campo.value = "";
+  await refrescarDespensa();
+  // Lo normal al estrenar esto es meter quince seguidos.
+  campo.focus();
 });
 
 // Hermano de avisarGuardado() con texto propio: aquí el aviso no siempre dice
 // "Guardado", a veces explica que el ingrediente ya estaba.
 function avisarEnDespensa(texto) {
   const aviso = id("guardado-despensa");
+  // El error de antes deja de aplicar en cuanto algo sale bien.
+  id("error-despensa").textContent = "";
   aviso.textContent = texto;
   setTimeout(() => {
     aviso.textContent = "";
