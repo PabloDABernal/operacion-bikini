@@ -206,6 +206,10 @@ Lo que cambia:
   (`100 g de lenteja`): **no acierta**. La tolerancia de plural va en un solo
   sentido. Se acepta: escribir los ingredientes en singular es lo natural, y el
   fallo es una marca de menos, que es el lado seguro.
+- **Cancelar y volver a abrir el formulario deja la casilla desmarcada.**
+  Cancelar llama a `pintarEspecializadas()`, que rehace el botón "Pedir", y su
+  manejador llama a `pintarAprovecharDespensa()`, que la pone a `false`. Es el
+  mismo camino que al abrirlo la primera vez.
 - **El recuento "12 ingredientes marcados" no se actualiza en vivo.** Se lee al
   entrar en Mi dieta. Si vas a la Despensa, desmarcas cosas y vuelves sin recargar,
   puede decir de más. Aceptado por coherencia con el resto de la app (las recetas y
@@ -253,6 +257,12 @@ está colando dentro lo que es de la 060.
   sepas por qué.
 - **Tope de 80 ingredientes en el prompt**: la lección del 413 de Groq (spec
   049), aplicada antes de que duela.
+- **Cada ingrediente marcado lleva además un `title`** ("Lo tienes en casa" /
+  "Te falta"). No estaba en la spec; se añadió al implementarla y se documenta
+  aquí para que no quede código sin respaldo. El motivo: la marca visual son un
+  "✓" puesto desde CSS y una opacidad, y ninguna de las dos cosas la lee un
+  lector de pantalla. Sin el `title`, para quien no ve la pantalla la lista de
+  ingredientes no dice nada de la despensa.
 - **Las marcas, solo en el recetario; abrir la receta desde Mi dieta va a la spec
   060** (usuario, 28 de agosto, tras la revisión). La spec daba por hecha una
   pantalla que no existe: la dieta guarda el `recetaId` pero nunca enseña la
