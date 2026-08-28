@@ -28,6 +28,21 @@ cambia es el final del viaje: cuando se cierre una versión, lo que quede aquí 
 reparte otra vez entre `PRODUCTO.md` (si es una idea) y `ESTADO.md` (si es una
 trampa), y esto vuelve a quedarse vacío. Este archivo es un buzón, no un almacén.
 
+## En el buzón
+
+Ideas surgidas al escribir las specs 058 y 059 (28 de agosto). No se implementan
+ahora: se reparten cuando se cierre la v8.
+
+- Sugerir ingredientes para la despensa a partir de los que más se repiten en
+  tus recetas ya guardadas (spec 058).
+- Categorías de ingredientes en la despensa (verduras, carnes, especias), si la
+  lista se hace larga de verdad (spec 058).
+- Un botón en la receta para meter en la despensa, de un toque, lo que te falta
+  (spec 059).
+- **Lista de la compra de la semana**, juntando lo que falta de todas las recetas
+  de la dieta. No es nueva —lleva en `docs/PRODUCTO.md` desde la spec 026— pero
+  la 059 la deja a un paso: el cruce despensa/receta ya estará hecho.
+
 ## Cerrado el 27 de agosto de 2026
 
 No volver a proponerlo sin un motivo nuevo.

@@ -2,7 +2,7 @@
 
 Documento para retomar el trabajo en frío. Se actualiza al terminar cada spec.
 
-**Última actualización:** 27 de agosto de 2026 (traspaso a Claude Code web, y el backlog vaciado) (specs 001-057 **probadas y cerradas**; de la v1 a la v7 terminadas; lo siguiente son evolutivos nuevos, elegidos de `docs/PRODUCTO.md`)
+**Última actualización:** 28 de agosto de 2026 (la v8 escrita, sin implementar) (specs 001-057 **probadas y cerradas**, v1 a v7 terminadas; las specs **058 y 059 en borrador**, pendientes de `revisor-specs`)
 
 > **Traspaso del 27 de agosto de 2026.** Se sigue en remoto desde Claude Code web. Estado al cerrar la sesión del PC: nada a medias, `main` limpio y sincronizado con `origin/main`. No hay spec abierta. **`docs/BACKLOG.md` está vacío a propósito desde hoy**: sus veintidós entradas se repartieron entre `docs/PRODUCTO.md` (apartado "Ideas para más adelante", que es de donde se elige la próxima versión), este documento (las trampas, aquí abajo) y el propio backlog (lo cerrado, para que no vuelva a proponerse). **Lo siguiente son evolutivos nuevos**: se elige una idea de `PRODUCTO.md`, se decide si es una versión partida en varias specs, y se escribe con `/nueva-spec` antes de tocar código. Antes de nada, leer "Cosas que hay que saber antes de tocar nada" de más abajo: las trampas del modelo de IA, la publicación de reglas de Firestore y que se prueba SIEMPRE en producción con push.
 
@@ -87,6 +87,8 @@ El 20 de agosto arrancó la **v4**, que sale de una auditoría de usabilidad hec
 | 055 | La entrevista de bienvenida empieza de cero de verdad | ✅ completada |
 | 056 | La casilla "Operaciones" borra también la que está en marcha | ✅ completada |
 | 057 | El comité de bienvenida: la ficha de alta (v7) | ✅ completada |
+| 058 | La despensa: lo que tienes en casa (v8) | 📝 borrador, sin revisar |
+| 059 | La dieta aprovecha la despensa (v8) | 📝 borrador, sin revisar |
 
 ## Qué toca ahora
 
@@ -103,9 +105,28 @@ arregló el único bug de verdad que había dentro (el cierre del alta prometía
 planes que nadie iba a crear) y se borró la herramienta de sembrar datos falsos,
 que seguía viva en producción.
 
-**Lo siguiente**: elegir un evolutivo de la lista de `docs/PRODUCTO.md`, decidir
-si es una versión partida en varias specs o una sola, y escribirla con
-`/nueva-spec` antes de tocar código. Nada de esa lista está decidido.
+**La v8 ya está elegida y escrita, sin implementar** (28 de agosto). El usuario
+pidió mejorar la sección de Comidas: una **despensa** de ingredientes que puedas
+marcar según los tengas en casa, y que la dieta los aproveche al generarse. Está
+en `docs/PRODUCTO.md` ("Qué hará (v8)") y repartida en dos specs, partidas desde
+el inicio: **058** (la despensa) y **059** (la dieta que la aprovecha).
+
+De la misma conversación salió la **v9, decidida pero sin escribir**: el contador
+de vasos de agua, las bebidas apuntadas y el acompañamiento dentro de la comida
+("3 trozos de pan"). Se aparcó para cerrar la v8 antes de abrir otro frente.
+
+**Lo siguiente, por orden:**
+
+1. Pasar el agente `revisor-specs` a la **058** y a la **059**. Todavía no lo ha
+   visto nadie: están en borrador.
+2. Implementar la **058** entera, publicar `firestore.rules` con la CLI y que el
+   usuario la pruebe en producción.
+3. Solo entonces, la **059**. Depende de la 058: sin despensa no hay nada que
+   aprovechar.
+
+**Ojo al implementar la 058**: crea la colección `usuarios/{uid}/despensa`, así
+que hay bloque nuevo en `firestore.rules` y **hay que publicarlo con la CLI antes
+de pedir que se pruebe**, o la app dará errores de permisos que parecen bugs.
 
 ### Historia: la v4
 
@@ -413,7 +434,8 @@ de vista si algún día se tocan la cabecera o la gráfica de peso:
 ## Pendiente de decidir por el usuario
 
 - `PRODUCTO.md` llama "collage de evolución" a lo que es una cuadrícula de miniaturas. O se cambia la palabra, o se hace el collage de verdad.
-- **Qué evolutivo se aborda a continuación**, de la lista "Ideas para más adelante" de `docs/PRODUCTO.md`. Ya no se elige del backlog: el backlog está vacío desde el 27 de agosto. Nada de esa lista está decidido ni comprometido.
+- **Nada, de momento.** El 28 de agosto el usuario eligió la v8 (la despensa) y decidió la v9 (bebidas y acompañamientos). Lo siguiente no es decidir, es revisar e implementar las specs 058 y 059.
+- Cuando la v8 esté cerrada: **qué evolutivo se aborda después**, de la lista "Ideas para más adelante" de `docs/PRODUCTO.md`. Ya no se elige del backlog, que es solo el buzón de lo que surge a mitad de spec.
 - **Si la próxima es "guardar varias dietas y varias tablas", hay que partirla desde el inicio.** Cambia el modelo de datos y las reglas de Firestore: no cabe en una spec, y las specs no se parten a posteriori.
 
 Las ideas están en `docs/PRODUCTO.md`. `docs/BACKLOG.md` es el buzón de lo que surja a mitad de una spec, y se vuelve a vaciar al cerrar cada versión.

@@ -240,6 +240,51 @@ caben en un formulario.
 - **Las operaciones siguientes usan la misma ficha**, ya rellena con lo que la
   IA sabía de ti: cambias lo que haya cambiado y envías.
 
+## Qué hará (v8: la despensa, decidida el 28 de agosto de 2026)
+
+Sale de usar la dieta semanal. La IA te propone una semana estupenda y luego
+resulta que hay que ir al supermercado a por todo, mientras en tu nevera se
+está poniendo mala media bolsa de mix de verduras congelado. La dieta no sabe
+nada de lo que ya tienes en casa, así que no puede aprovecharlo.
+
+La v8 le enseña a la app qué tienes en la cocina, y hace que la dieta lo use.
+
+- **Una despensa tuya, en Comidas.** Una lista de los ingredientes con los que
+  sueles cocinar: desde "tomate" hasta "mix de verduras congelado", pasando por
+  carnes, legumbres y especias. La escribes una vez y se queda.
+- **Cada ingrediente se marca o se desmarca**, según lo tengas ahora mismo o se
+  te haya acabado. Marcar es un toque, y es todo el mantenimiento que pide.
+  **No lleva cantidades ni caducidades a propósito**: un inventario que hay que
+  actualizar después de cada comida acaba mintiendo, y una despensa que miente
+  es peor que no tenerla.
+- **Al pedir la dieta puedes decir "aprovecha lo que tengo".** Con esa casilla,
+  la IA recibe la lista de lo que tienes marcado y construye la semana tirando
+  de ello todo lo que pueda.
+- **No es una obligación, es una preferencia.** Las recetas no salen usando
+  *solo* lo que tienes: eso daría semanas tristes y repetidas. Si con lo tuyo da
+  para el plato entero, lo hace; si no, completa con lo que haga falta.
+- **Al abrir una receta ves qué tienes y qué te falta.** Cada ingrediente sale
+  marcado o no según tu despensa **en ese momento**, no según cómo estaba el día
+  que se generó la receta. Si te comiste el tomate y lo desmarcaste, la receta lo
+  refleja al abrirla.
+
+Qué NO hace la v8, para que quede escrito:
+
+- **No lleva la cuenta de cuánto te queda de nada.** Ver el punto de arriba.
+- **No hace la lista de la compra.** Está en las ideas de más abajo desde hace
+  semanas y sigue ahí: enseñarte qué te falta en una receta no es lo mismo que
+  juntar la compra de la semana entera, y esto último merece su propia versión.
+- **No toca las bebidas ni los acompañamientos.** Salieron en la misma
+  conversación del 28 de agosto y están decididos, pero van a la v9: ver abajo.
+
+Se reparte en dos specs, decididas así desde el inicio porque son dos cosas
+distintas y la primera se puede usar sin la segunda:
+
+| Spec | Qué |
+|---|---|
+| 058 | La despensa: la sub-pestaña, la lista y las casillas de "lo tengo" |
+| 059 | La dieta aprovecha la despensa, y la receta enseña qué te falta |
+
 ## Ideas para más adelante (27 de agosto de 2026)
 
 El 27 de agosto se vació `docs/BACKLOG.md`: la app está terminada y en uso
@@ -250,6 +295,31 @@ se elija de una lista de ideas y no de una lista de deudas.
 **Nada de esto está decidido.** Estar en esta lista no es un compromiso: es
 haber sobrevivido a la limpieza. Lo que se decida se escribirá arriba, como un
 apartado "Qué hará (v8…)" con sus specs.
+
+### Ya decidido, pendiente de escribir (v9: bebidas y acompañamientos)
+
+Salió en la misma conversación del 28 de agosto que la v8. **Está decidido**, no
+es una idea suelta: se aparcó para no meter cuatro specs en una versión, y para
+que la despensa se pruebe en producción antes de abrir otro frente.
+
+- **El agua, con un contador de un toque.** Un botón "+1 vaso" y un objetivo
+  diario configurable. Es un contador y no un registro escrito porque el agua se
+  bebe ocho veces al día, y nadie escribe "vaso de agua" ocho veces.
+- **El resto de bebidas, apuntadas como una línea normal**: el café, la cerveza,
+  el refresco. Eso sí interesa verlo escrito.
+- **Un acompañamiento dentro de la comida**, campo corto: "3 trozos de pan", "un
+  biscote". No es un picoteo aparte, va CON la comida, y la IA tiene que verlo
+  como una sola cosa ("lentejas + 3 trozos de pan") y no como dos registros
+  sueltos que parecen dos ingestas.
+- Al llegar ahí habrá que decidir dos cosas que hoy no lo están: **si el agua
+  cuenta para los puntos y la racha** (spec 031), y **si las bebidas entran en el
+  análisis nutricional**, que hoy tiene seis grupos y ninguno es líquido
+  (`api/analisis.js`).
+
+**Nota de lo que ya existe**, para no construirlo dos veces: el momento
+**"picoteo"** ya está en la app desde la spec 002 (`js/comidas.js`, `MOMENTOS`).
+Un snack ya se puede apuntar hoy. Lo que falta es el acompañamiento, que es otra
+cosa.
 
 ### Huecos que se notan usando la app
 
@@ -325,6 +395,7 @@ es cosmético.
 - **Racha**: días seguidos apuntando algo. Admite un día de gracia por semana, para que un despiste no la rompa.
 - **Punto**: unidad que se gana al registrar. Premia la conducta, no los kilos.
 - **Receta**: nombre, raciones, ingredientes y preparación. Se puede cocinar leyéndola y la IA puede reutilizarla.
+- **Despensa** (v8): la lista de ingredientes con los que sueles cocinar, cada uno marcado o no según lo tengas ahora en casa. No es un inventario: no guarda cuánto queda. Sirve para que la dieta aproveche lo que ya está en la nevera.
 - **Dieta**: una semana de menús, día a día y comida a comida, hecha de recetas.
 - **Tabla de ejercicio**: una semana de entrenamientos, día a día, con sus series y duraciones.
 - **Ejercicio del catálogo**: nombre, cómo se hace y material. Distinto de un *ejercicio* apuntado, que es un registro de actividad hecha.
@@ -339,4 +410,6 @@ es cosmético.
 - **v5 (desde el 22 de agosto de 2026, sin fecha límite)**: lo descrito en "Qué hará (v5)". Sale de usar Consulta con la app ya llena y ver que arrastraba el modelo de antes de que existieran la dieta y la tabla semanales. Se reparte en las specs 044, 045 y 046.
 - **v6 (desde el 23 de agosto de 2026, sin fecha límite)**: lo descrito en "Qué hará (v6)". Sale de usar la v5 y ver que la pantalla de Consulta había acabado con dos hilos y dos cupos. Se reparte en las specs 050 (ver el hilo junto), 051 (una caja y un cupo) y 052 (la entrevista en el hilo).
 - **v7 (desde el 25 de agosto de 2026, sin fecha límite)**: lo descrito en "Qué hará (v7)". Sale de usar la entrevista de bienvenida ya arreglada (specs 052-056) y ver que es lenta para datos que caben en un formulario. Va en la spec 057, sin partir, por decisión del usuario.
+- **v8 (desde el 28 de agosto de 2026, sin fecha límite)**: lo descrito en "Qué hará (v8)". Sale de usar la dieta semanal y ver que propone comprarlo todo mientras se estropea lo que ya hay en casa. Se reparte en las specs 058 (la despensa) y 059 (la dieta que la aprovecha), partida desde el inicio.
+- **v9 (decidida el 28 de agosto de 2026, sin empezar)**: bebidas, el contador de agua y el acompañamiento dentro de la comida. Descrita en "Ya decidido, pendiente de escribir". Se aparcó para cerrar la v8 antes de abrirla.
 - **Descartado para v2**: notificaciones push (mucho trabajo y acaban silenciadas), integración con básculas o pulseras, y comparativa de fotos lado a lado, que se pospone.
