@@ -1365,6 +1365,85 @@ button:disabled {
   font-size: 0.85rem;
 }
 
+/* La despensa (spec 058). Filas de una línea con casilla, no tarjetas: aquí no
+   hay nada que desplegar, y una lista de treinta ingredientes tiene que poder
+   recorrerse de un vistazo. */
+.fila-alta {
+  display: flex;
+  gap: var(--e2);
+  align-items: stretch;
+}
+
+.fila-alta input {
+  flex: 1;
+  min-width: 0;
+}
+
+.fila-alta button {
+  flex-shrink: 0;
+}
+
+#recuento-despensa {
+  margin: var(--e4) 0 var(--e2);
+}
+
+#lista-despensa {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e1);
+}
+
+.ingrediente {
+  display: flex;
+  align-items: center;
+  gap: var(--e3);
+  padding: var(--e2) var(--e3);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio-s);
+  background: var(--superficie);
+}
+
+/* Lo que se te ha acabado se apaga, no se esconde: sigues cocinando con ello,
+   solo que ahora mismo no lo tienes. */
+.ingrediente.sin-existencias .ingrediente-nombre {
+  color: var(--tinta-suave);
+  text-decoration: line-through;
+  text-decoration-color: var(--borde);
+}
+
+.ingrediente input[type="checkbox"] {
+  flex-shrink: 0;
+  width: 1.1rem;
+  height: 1.1rem;
+  accent-color: var(--acento);
+  margin: 0;
+}
+
+/* La etiqueta ocupa toda la fila a propósito: tocar el nombre marca la casilla,
+   y en el móvil apuntar a 20 px de casilla es pedirle demasiado al pulgar. */
+.ingrediente-nombre {
+  flex: 1;
+  min-width: 0;
+  cursor: pointer;
+  overflow-wrap: anywhere;
+}
+
+.ingrediente-acciones {
+  display: flex;
+  gap: var(--e1);
+  flex-shrink: 0;
+}
+
+.ingrediente-editando {
+  gap: var(--e2);
+  flex-wrap: wrap;
+}
+
+.ingrediente-editando input[type="text"] {
+  flex: 1;
+  min-width: 8rem;
+}
+
 /* Las dos formas de tener una semana, en la misma fila: montarla a mano o
    pedírsela a la IA. Con dieta activa los dos botones son compactos y caben
    uno al lado del otro; sin dieta, "Empezar en blanco" es la acción

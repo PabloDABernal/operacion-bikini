@@ -62,6 +62,13 @@ service cloud.firestore {
       allow read, write: if autorizado() && request.auth.uid == uid;
     }
 
+    // La despensa: los ingredientes que tienes en casa (spec 058). Fuera de las
+    // operaciones por el mismo motivo que las recetas: empezar otra operación
+    // bikini no te deja sin tomates.
+    match /usuarios/{uid}/despensa/{ingredienteId} {
+      allow read, write: if autorizado() && request.auth.uid == uid;
+    }
+
     // Dietas: la semana de menús (spec 028). Como las recetas, viven fuera de
     // las operaciones: una dieta que funcionó sigue sirviendo en la siguiente.
     match /usuarios/{uid}/dietas/{dietaId} {

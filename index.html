@@ -189,6 +189,7 @@
         <button type="button" class="subpestana activa" data-subseccion="apuntar" aria-current="true">Apuntar</button>
         <button type="button" class="subpestana" data-subseccion="dieta">Mi dieta</button>
         <button type="button" class="subpestana" data-subseccion="recetas">Recetas</button>
+        <button type="button" class="subpestana" data-subseccion="despensa">Despensa</button>
       </div>
 
       <!-- Sub-pestaña: Apuntar -->
@@ -310,6 +311,28 @@
       <button type="button" id="btn-desplegar-recetas-arriba" class="desplegar oculta"></button>
       <div id="lista-recetas"></div>
       <button type="button" id="btn-desplegar-recetas" class="desplegar oculta"></button>
+      </div>
+
+      <div class="subseccion" data-subseccion="despensa">
+      <!-- La despensa (spec 058). No es un inventario: no lleva cantidades ni
+           caducidades. Marcar y desmarcar es todo el mantenimiento que pide. -->
+      <h2>Mi despensa</h2>
+      <p id="estado-despensa" class="explicacion"></p>
+
+      <form id="form-ingrediente">
+        <label for="ingrediente-nombre">Añadir un ingrediente</label>
+        <div class="fila-alta">
+          <input type="text" id="ingrediente-nombre" maxlength="60"
+            placeholder="mix de verduras congelado" autocomplete="off">
+          <button type="submit" id="btn-anadir-ingrediente">Añadir</button>
+        </div>
+      </form>
+
+      <p id="error-despensa" class="error" role="alert"></p>
+      <p id="guardado-despensa" class="guardado" role="status"></p>
+
+      <p id="recuento-despensa" class="registro-detalle"></p>
+      <div id="lista-despensa"></div>
       </div>
 
       </div>

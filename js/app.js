@@ -94,6 +94,18 @@ import {
 } from "./recetas.js";
 
 import {
+  MAX_NOMBRE as MAX_NOMBRE_INGREDIENTE,
+  validarIngrediente,
+  ingredienteIgual,
+  guardarIngrediente,
+  renombrarIngrediente,
+  marcarIngrediente,
+  borrarIngrediente,
+  listarDespensa,
+  ordenar as ordenarDespensa
+} from "./despensa.js";
+
+import {
   MOMENTOS,
   MOMENTO_POR_DEFECTO,
   etiquetaDeMomento,
@@ -265,6 +277,13 @@ function abrirSubpestana(seccion, nombre) {
       boton.removeAttribute("aria-current");
     }
   });
+
+  // La despensa recoloca sus filas AQUÍ, al entrar, y en ningún otro momento
+  // (spec 058). Marcar no reordena: la fila saltaría bajo el dedo justo cuando
+  // estás marcando varias seguidas.
+  if (seccion === "comidas" && nombre === "despensa") {
+    reordenarDespensa();
+  }
 }
 
 // La barra de navegación desaparecía en Ejercicio, en móvil. Confirmado con
@@ -1610,6 +1629,267 @@ id("form-receta").addEventListener("submit", async (evento) => {
     boton.disabled = false;
   }
 });
+
+// --- La despensa (spec 058) ----------------------------------------------
+//
+// Lo que tienes en la cocina, para que la dieta pueda aprovecharlo (eso es la
+// spec 059). Aquí solo se monta la lista.
+//
+// Dos cosas que parecen detalles y son el corazón de la spec:
+//
+// 1. La lista NO se reordena al marcar. `despensaCargada` conserva el orden con
+//    el que se pintó al entrar, y marcar solo cambia el `tengo` de un elemento.
+//    Si se reordenara en cada toque, la fila recién marcada saltaría bajo el
+//    dedo y la siguiente ocuparía su sitio.
+// 2. Añadir un duplicado NO es un error del usuario: es su forma de decir "he
+//    vuelto a comprarlo". Por eso re-marca y avisa en el hueco de "Guardado",
+//    nunca en el de error.
+
+let despensaCargada = [];
+let ingredienteEditando = null;
+
+function pintarDespensa() {
+  const contenedor = id("lista-despensa");
+  const recuento = id("recuento-despensa");
+
+  contenedor.innerHTML = "";
+
+  id("estado-despensa").textContent = despensaCargada.length
+    ? ""
+    : "Aquí van los ingredientes con los que sueles cocinar. Márcalos según los tengas en casa y la dieta podrá aprovecharlos.";
+
+  const enCasa = despensaCargada.filter((ingrediente) => ingrediente.tengo).length;
+  recuento.textContent = despensaCargada.length
+    ? `${enCasa} de ${despensaCargada.length} ingredientes en casa`
+    : "";
+
+  despensaCargada.forEach((ingrediente) =>
+    contenedor.appendChild(filaDeIngrediente(ingrediente))
+  );
+}
+
+function filaDeIngrediente(ingrediente) {
+  if (ingredienteEditando === ingrediente.id) {
+    return filaDeIngredienteEnEdicion(ingrediente);
+  }
+
+  const fila = document.createElement("div");
+  fila.className = "ingrediente";
+  fila.classList.toggle("sin-existencias", !ingrediente.tengo);
+
+  const casilla = document.createElement("input");
+  casilla.type = "checkbox";
+  casilla.checked = Boolean(ingrediente.tengo);
+  casilla.id = `ingrediente-casilla-${ingrediente.id}`;
+  casilla.addEventListener("change", () => marcarEnDespensa(ingrediente, casilla));
+
+  // La etiqueta envuelve el nombre para que tocar el texto también marque: en
+  // el móvil, apuntar a una casilla de 20 px es pedirle demasiado al pulgar.
+  const etiqueta = document.createElement("label");
+  etiqueta.className = "ingrediente-nombre";
+  etiqueta.htmlFor = casilla.id;
+  etiqueta.textContent = ingrediente.nombre;
+
+  const acciones = document.createElement("div");
+  acciones.className = "ingrediente-acciones";
+  acciones.append(
+    botonDeIcono("editar", "Editar", () => {
+      ingredienteEditando = ingrediente.id;
+      id("error-despensa").textContent = "";
+      pintarDespensa();
+    }),
+    botonDeIcono("borrar", "Borrar", () => borrarElIngrediente(ingrediente))
+  );
+
+  fila.append(casilla, etiqueta, acciones);
+  return fila;
+}
+
+function filaDeIngredienteEnEdicion(ingrediente) {
+  const fila = document.createElement("form");
+  fila.className = "ingrediente ingrediente-editando";
+
+  const campo = document.createElement("input");
+  campo.type = "text";
+  campo.maxLength = MAX_NOMBRE_INGREDIENTE;
+  campo.value = ingrediente.nombre;
+
+  const guardar = document.createElement("button");
+  guardar.type = "submit";
+  guardar.textContent = "Guardar";
+
+  const cancelar = botonDeFila("Cancelar", () => {
+    ingredienteEditando = null;
+    id("error-despensa").textContent = "";
+    pintarDespensa();
+  });
+  cancelar.className = "enlace";
+
+  fila.addEventListener("submit", async (evento) => {
+    evento.preventDefault();
+    await renombrarElIngrediente(ingrediente, campo.value, guardar);
+  });
+
+  fila.append(campo, guardar, cancelar);
+  // Al final de la cola de pintado: antes de que la fila esté en el documento,
+  // focus() no hace nada.
+  setTimeout(() => campo.focus(), 0);
+  return fila;
+}
+
+async function marcarEnDespensa(ingrediente, casilla) {
+  const antes = Boolean(ingrediente.tengo);
+  const ahora = casilla.checked;
+
+  // Optimista: la casilla ya ha cambiado sola y la fila se apaga o se enciende
+  // con ella. Lo que no cambia es el ORDEN, a propósito.
+  ingrediente.tengo = ahora;
+  casilla.closest(".ingrediente").classList.toggle("sin-existencias", !ahora);
+  id("error-despensa").textContent = "";
+  actualizarRecuentoDespensa();
+
+  try {
+    await marcarIngrediente(uidActual, ingrediente.id, ahora);
+  } catch {
+    // Nunca dejar la casilla enseñando algo que no se guardó.
+    ingrediente.tengo = antes;
+    casilla.checked = antes;
+    casilla.closest(".ingrediente").classList.toggle("sin-existencias", !antes);
+    actualizarRecuentoDespensa();
+    id("error-despensa").textContent =
+      "No se ha podido guardar. Comprueba tu conexión.";
+  }
+}
+
+// Solo el número: repintar la lista entera aquí la reordenaría, que es justo lo
+// que no debe pasar al marcar.
+function actualizarRecuentoDespensa() {
+  const enCasa = despensaCargada.filter((ingrediente) => ingrediente.tengo).length;
+  id("recuento-despensa").textContent = despensaCargada.length
+    ? `${enCasa} de ${despensaCargada.length} ingredientes en casa`
+    : "";
+}
+
+async function renombrarElIngrediente(ingrediente, nombreBruto, boton) {
+  const error = id("error-despensa");
+  error.textContent = "";
+
+  const resultado = validarIngrediente(nombreBruto);
+  if (resultado.error) {
+    error.textContent = resultado.error;
+    return;
+  }
+
+  // Editar hasta chocar con otro RECHAZA, no fusiona: fusionar haría
+  // desaparecer una fila que nadie ha pedido borrar, y aquí no hay deshacer.
+  // Al añadir sí se fusiona, porque allí no desaparece nada.
+  const choque = ingredienteIgual(despensaCargada, resultado.nombre, ingrediente.id);
+  if (choque) {
+    error.textContent = `"${choque.nombre}" ya está en tu despensa.`;
+    return;
+  }
+
+  boton.disabled = true;
+  try {
+    await renombrarIngrediente(uidActual, ingrediente.id, resultado.nombre);
+    ingredienteEditando = null;
+    await refrescarDespensa();
+  } catch {
+    error.textContent = "No se ha podido guardar. Comprueba tu conexión.";
+  } finally {
+    boton.disabled = false;
+  }
+}
+
+async function borrarElIngrediente(ingrediente) {
+  if (!confirm(`¿Quitar "${ingrediente.nombre}" de tu despensa?`)) return;
+
+  try {
+    await borrarIngrediente(uidActual, ingrediente.id);
+    if (ingredienteEditando === ingrediente.id) ingredienteEditando = null;
+    await refrescarDespensa();
+  } catch {
+    id("error-despensa").textContent =
+      "No se ha podido borrar. Comprueba tu conexión.";
+  }
+}
+
+// Se llama al entrar en la sub-pestaña, desde abrirSubpestana(). Reordena lo
+// que ya está cargado, sin ir a la red: es solo poner arriba lo que has marcado
+// desde la última vez que entraste.
+function reordenarDespensa() {
+  if (!despensaCargada.length) return;
+  despensaCargada = ordenarDespensa(despensaCargada);
+  pintarDespensa();
+}
+
+async function refrescarDespensa() {
+  try {
+    despensaCargada = await listarDespensa(uidActual);
+  } catch {
+    despensaCargada = [];
+    id("estado-despensa").textContent =
+      "No se ha podido cargar tu despensa. Comprueba tu conexión.";
+    return;
+  }
+  pintarDespensa();
+}
+
+id("form-ingrediente").addEventListener("submit", async (evento) => {
+  evento.preventDefault();
+
+  const error = id("error-despensa");
+  const campo = id("ingrediente-nombre");
+  error.textContent = "";
+
+  const resultado = validarIngrediente(campo.value);
+  if (resultado.error) {
+    error.textContent = resultado.error;
+    return;
+  }
+
+  const boton = id("btn-anadir-ingrediente");
+  boton.disabled = true;
+
+  try {
+    const repetido = ingredienteIgual(despensaCargada, resultado.nombre);
+
+    if (repetido) {
+      // Volver a escribirlo no es equivocarse: es re-marcarlo. Por eso el aviso
+      // va en el hueco de "Guardado" y no en el de error.
+      if (!repetido.tengo) {
+        await marcarIngrediente(uidActual, repetido.id, true);
+      }
+      avisarEnDespensa(
+        repetido.tengo
+          ? `"${repetido.nombre}" ya está en tu despensa.`
+          : `"${repetido.nombre}" ya estaba en tu despensa: lo marco como que lo tienes.`
+      );
+    } else {
+      await guardarIngrediente(uidActual, resultado.nombre);
+      avisarEnDespensa("Guardado");
+    }
+
+    campo.value = "";
+    await refrescarDespensa();
+    // Lo normal al estrenar esto es meter quince seguidos.
+    campo.focus();
+  } catch {
+    error.textContent = "No se ha podido guardar. Comprueba tu conexión.";
+  } finally {
+    boton.disabled = false;
+  }
+});
+
+// Hermano de avisarGuardado() con texto propio: aquí el aviso no siempre dice
+// "Guardado", a veces explica que el ingrediente ya estaba.
+function avisarEnDespensa(texto) {
+  const aviso = id("guardado-despensa");
+  aviso.textContent = texto;
+  setTimeout(() => {
+    aviso.textContent = "";
+  }, 3000);
+}
 
 // --- La dieta de la semana (spec 028) ------------------------------------
 //
@@ -3584,6 +3864,7 @@ function refrescarTodo() {
     refrescarConsulta(),
     refrescarFotos(),
     refrescarRecetas(),
+    refrescarDespensa(),
     refrescarDieta(),
     refrescarCatalogo(),
     refrescarTabla(),

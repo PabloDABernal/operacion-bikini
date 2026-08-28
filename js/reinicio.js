@@ -52,6 +52,10 @@ export const TIPOS = [
     etiqueta: "recetas y dietas",
     colecciones: ["recetas", "dietas"]
   },
+  // La despensa (spec 058). Casilla propia y no metida en la de arriba: no se
+  // archiva con la operación, así que esta es la única forma de borrarla, y
+  // juntarla con "recetas y dietas" obligaría a borrar las tres para borrar una.
+  { clave: "despensa", etiqueta: "despensa", colecciones: ["despensa"] },
   // Lo mismo para entrenar (spec 029). La etiqueta evita a propósito la
   // palabra suelta "ejercicios", que es la casilla de arriba y borra el
   // diario: equivocarse aquí borra datos.
