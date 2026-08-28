@@ -1,6 +1,6 @@
 # 060 — Ver la receta desde la dieta
 
-- **Estado:** implementada y desplegada el 29 de agosto de 2026, revisada por `revisor-codigo` (CUMPLE, sin bloqueantes). **Pendiente de que el usuario la pruebe**; hasta entonces NO es completada.
+- **Estado:** ✅ completada (probada y confirmada por el usuario el 2026-08-29). Con ella se cierra la v8.
 - **Fecha:** 2026-08-28
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (v8: la despensa, decidida el 28 de agosto de 2026)", tercera spec.
 - **Depende de:** la spec 059, que crea el cruce despensa/receta y las marcas.

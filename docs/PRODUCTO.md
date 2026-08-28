@@ -289,6 +289,52 @@ guarda a qué receta apunta cada comida pero nunca la enseña.
 | 059 | La dieta aprovecha la despensa, y la receta del recetario enseña qué te falta |
 | 060 | Poder abrir la receta desde Mi dieta, con sus marcas |
 
+## Qué hará (v9: lo que bebes y lo que acompaña, decidida el 29 de agosto de 2026)
+
+Sale de la misma conversación que la v8, el 28 de agosto, y se aparcó para
+cerrar aquella antes de abrir otro frente. La v8 está cerrada el 29.
+
+La app sabe lo que comes y lo que entrenas, y **no sabe nada de lo que bebes**.
+Ni el agua, que es la mitad de cualquier consejo que te van a dar, ni la caña del
+viernes. Y de lo que comes se le escapa lo que acompaña: apuntas "lentejas" y no
+los tres trozos de pan que te comiste con ellas.
+
+- **El agua, con un contador de un toque.** Un botón "+1 vaso" en **Hoy**, con un
+  objetivo diario que se configura en Ajustes. Es un contador y no un registro
+  escrito porque el agua se bebe ocho veces al día, y nadie va a escribir "vaso
+  de agua" ocho veces.
+- **El resto de bebidas, apuntadas como una línea normal**: el café, la cerveza,
+  el refresco. Eso sí interesa verlo escrito, y con su hora.
+- **Un acompañamiento dentro de la comida**, campo corto: "3 trozos de pan", "un
+  biscote". No es un picoteo aparte, va CON la comida, y la IA tiene que verlo
+  como una sola cosa ("lentejas + 3 trozos de pan") y no como dos ingestas.
+
+Qué NO hace la v9, y por qué. Las tres son decisiones del usuario del 29 de
+agosto, y las tres son de contención:
+
+- **El agua no da puntos ni mantiene la racha.** La racha cuenta lo mismo que el
+  calendario de constancia —peso, comida, ejercicio— y las fotos ya se quedaron
+  fuera por eso mismo. Si el agua contara, habría que meterla también en el
+  calendario, o el calendario pintaría un día vacío que la racha da por bueno.
+  Además es el registro más barato de la app: puntuarlo devalúa los puntos de lo
+  que sí cuesta.
+- **Las bebidas no entran en el análisis nutricional.** Sus seis grupos son
+  sólidos y no hay hueco para un líquido sin rehacerlos, lo que dejaría
+  desalineados todos los análisis ya guardados. Que la cerveza no cuente
+  calorías es una deuda consciente, apuntada abajo en las ideas.
+- **El agua no se apunta con hora ni se edita vaso a vaso.** Es un contador: +1,
+  -1 y el número del día. Un historial de a qué hora bebiste cada vaso no lo va a
+  mirar nadie.
+
+Se reparte en tres specs, partidas desde el inicio porque son tres cosas
+distintas y cada una se puede usar sin las otras:
+
+| Spec | Qué |
+|---|---|
+| 061 | El agua del día: el contador en Hoy y su objetivo en Ajustes |
+| 062 | Las bebidas, apuntadas como un registro más |
+| 063 | El acompañamiento dentro de la comida |
+
 ## Ideas para más adelante (27 de agosto de 2026)
 
 El 27 de agosto se vació `docs/BACKLOG.md`: la app está terminada y en uso
@@ -300,30 +346,18 @@ se elija de una lista de ideas y no de una lista de deudas.
 haber sobrevivido a la limpieza. Lo que se decida se escribirá arriba, como un
 apartado "Qué hará (v8…)" con sus specs.
 
-### Ya decidido, pendiente de escribir (v9: bebidas y acompañamientos)
+### Deudas que deja la v9
 
-Salió en la misma conversación del 28 de agosto que la v8. **Está decidido**, no
-es una idea suelta: se aparcó para no meter cuatro specs en una versión, y para
-que la despensa se pruebe en producción antes de abrir otro frente.
-
-- **El agua, con un contador de un toque.** Un botón "+1 vaso" y un objetivo
-  diario configurable. Es un contador y no un registro escrito porque el agua se
-  bebe ocho veces al día, y nadie escribe "vaso de agua" ocho veces.
-- **El resto de bebidas, apuntadas como una línea normal**: el café, la cerveza,
-  el refresco. Eso sí interesa verlo escrito.
-- **Un acompañamiento dentro de la comida**, campo corto: "3 trozos de pan", "un
-  biscote". No es un picoteo aparte, va CON la comida, y la IA tiene que verlo
-  como una sola cosa ("lentejas + 3 trozos de pan") y no como dos registros
-  sueltos que parecen dos ingestas.
-- Al llegar ahí habrá que decidir dos cosas que hoy no lo están: **si el agua
-  cuenta para los puntos y la racha** (spec 031), y **si las bebidas entran en el
-  análisis nutricional**, que hoy tiene seis grupos y ninguno es líquido
-  (`api/analisis.js`).
-
-**Nota de lo que ya existe**, para no construirlo dos veces: el momento
-**"picoteo"** ya está en la app desde la spec 002 (`js/comidas.js`, `MOMENTOS`).
-Un snack ya se puede apuntar hoy. Lo que falta es el acompañamiento, que es otra
-cosa.
+- **La cerveza y el refresco no cuentan calorías.** La v9 los apunta pero los
+  deja fuera del análisis nutricional, que tiene seis grupos y todos son
+  sólidos (`api/analisis.js`). Meterlos obliga a rehacer el prompt, el esquema
+  y la normalización, y a decidir qué pasa con los análisis ya guardados. Es
+  una decisión consciente del 29 de agosto, no un olvido.
+- **Que el agua cuente para la constancia.** Descartado el 29 de agosto para no
+  contradecir al calendario. Si algún día se retoma, el trabajo de verdad no es
+  la gamificación: es **meter el agua en el calendario de constancia**, y solo
+  entonces en la racha. Una cosa sin la otra deja la app diciendo dos verdades
+  distintas en la misma pantalla.
 
 ### Huecos que se notan usando la app
 
@@ -399,6 +433,9 @@ es cosmético.
 - **Racha**: días seguidos apuntando algo. Admite un día de gracia por semana, para que un despiste no la rompa.
 - **Punto**: unidad que se gana al registrar. Premia la conducta, no los kilos.
 - **Receta**: nombre, raciones, ingredientes y preparación. Se puede cocinar leyéndola y la IA puede reutilizarla.
+- **Vaso de agua** (v9): la unidad del contador de agua. No se guarda a qué hora ni de qué tamaño: solo cuántos llevas hoy. No da puntos ni mantiene la racha.
+- **Bebida** (v9): lo que bebes que no es agua —café, cerveza, refresco—, apuntado como una línea con su hora, igual que una comida.
+- **Acompañamiento** (v9): lo que va CON una comida y no es un plato aparte ("3 trozos de pan"). Vive dentro del registro de la comida, no al lado.
 - **Despensa** (v8): la lista de ingredientes con los que sueles cocinar, cada uno marcado o no según lo tengas ahora en casa. No es un inventario: no guarda cuánto queda. Sirve para que la dieta aproveche lo que ya está en la nevera.
 - **Dieta**: una semana de menús, día a día y comida a comida, hecha de recetas.
 - **Tabla de ejercicio**: una semana de entrenamientos, día a día, con sus series y duraciones.
@@ -415,5 +452,6 @@ es cosmético.
 - **v6 (desde el 23 de agosto de 2026, sin fecha límite)**: lo descrito en "Qué hará (v6)". Sale de usar la v5 y ver que la pantalla de Consulta había acabado con dos hilos y dos cupos. Se reparte en las specs 050 (ver el hilo junto), 051 (una caja y un cupo) y 052 (la entrevista en el hilo).
 - **v7 (desde el 25 de agosto de 2026, sin fecha límite)**: lo descrito en "Qué hará (v7)". Sale de usar la entrevista de bienvenida ya arreglada (specs 052-056) y ver que es lenta para datos que caben en un formulario. Va en la spec 057, sin partir, por decisión del usuario.
 - **v8 (desde el 28 de agosto de 2026, sin fecha límite)**: lo descrito en "Qué hará (v8)". Sale de usar la dieta semanal y ver que propone comprarlo todo mientras se estropea lo que ya hay en casa. Se reparte en las specs 058 (la despensa) y 059 (la dieta que la aprovecha), partida desde el inicio.
-- **v9 (decidida el 28 de agosto de 2026, sin empezar)**: bebidas, el contador de agua y el acompañamiento dentro de la comida. Descrita en "Ya decidido, pendiente de escribir". Se aparcó para cerrar la v8 antes de abrirla.
+- **v8 (28 y 29 de agosto de 2026)**: la despensa. **Terminada y probada**, en las specs 058 (la despensa), 059 (la dieta la aprovecha) y 060 (ver la receta desde la dieta). La 060 no estaba prevista: salió de revisar la 059 y descubrir que daba por hecha una pantalla que no existía.
+- **v9 (desde el 29 de agosto de 2026, sin fecha límite)**: lo descrito en "Qué hará (v9)". Sale de la misma conversación que la v8. Se reparte en las specs 061 (el agua), 062 (las bebidas) y 063 (el acompañamiento), partida desde el inicio.
 - **Descartado para v2**: notificaciones push (mucho trabajo y acaban silenciadas), integración con básculas o pulseras, y comparativa de fotos lado a lado, que se pospone.
