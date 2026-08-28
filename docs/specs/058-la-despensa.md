@@ -1,6 +1,6 @@
 # 058 — La despensa: lo que tienes en casa
 
-- **Estado:** borrador
+- **Estado:** revisada (`revisor-specs`, 28 de agosto de 2026: sin bloqueantes; sus cuatro mejoras están incorporadas)
 - **Fecha:** 2026-08-28
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (v8: la despensa, decidida el 28 de agosto de 2026)", primera spec de las dos.
 
@@ -27,8 +27,11 @@ Esta spec **solo construye la despensa**. Que la dieta la aproveche es la 059.
 6. Recargar la página: la lista y las marcas siguen como las dejaste.
 7. Un ingrediente se puede **borrar** de la lista (para lo que ya no cocinas
    nunca), y se puede **editar** el nombre (para arreglar una falta).
-8. La lista sale ordenada con **lo que tienes primero** y lo que no, después.
-   Dentro de cada grupo, alfabético. Así se lee de un vistazo qué hay en casa.
+8. Al **entrar** en la sub-pestaña, la lista sale ordenada con **lo que tienes
+   primero** y lo que no, después; dentro de cada grupo, alfabético. Marcar y
+   desmarcar no recoloca nada en ese momento: el orden se recalcula la próxima
+   vez que entras. Marcar cinco cosas seguidas no debe mover las filas bajo el
+   dedo.
 9. Arriba se ve el recuento: "12 de 20 ingredientes en casa".
 10. Añadir un ingrediente que ya está en la lista **no lo duplica**: avisa de que
     ya lo tienes apuntado y, si estaba desmarcado, lo marca.
@@ -77,6 +80,11 @@ el campo de añadir visible debajo.
   dice que ese ingrediente ya está en tu despensa y, si estaba desmarcado, **se
   marca**: volver a escribirlo es la forma natural de decir "he vuelto a
   comprarlo".
+- **Ese mensaje NO es un error.** No se pinta en el hueco de error del formulario
+  ni en rojo: se pinta como aviso neutro, del mismo tono que el "Guardado" del
+  resto de la app. Volver a escribir "tomate" no es equivocarse — es re-marcarlo,
+  que es justo lo que la spec quiere que pase. Regañar al usuario por acertar es
+  el fallo que hay que evitar aquí.
 - Tras añadir, el campo se vacía y **mantiene el foco**: lo normal al estrenar
   esto es meter quince seguidos.
 
@@ -91,15 +99,29 @@ módulo desde ya, no dentro del código de pantalla.
 
 ### Marcar y desmarcar
 
-Casilla por fila. Al tocarla se escribe en Firestore inmediatamente y la fila se
-recoloca (lo que tienes va arriba). Si la escritura falla, la casilla **vuelve a
-su estado anterior** y sale el error: nunca se queda enseñando algo que no se
-guardó.
+Casilla por fila. Al tocarla, la casilla cambia **al instante** y se escribe en
+Firestore. Si la escritura falla, la casilla **vuelve a su estado anterior** y
+sale el error: nunca se queda enseñando algo que no se guardó.
+
+**La lista NO se recoloca en cada toque.** El orden ("lo que tienes primero") se
+recalcula al entrar en la sub-pestaña, no mientras marcas. Si se recolocara al
+tocar, la fila que acabas de marcar saltaría bajo el dedo y la siguiente que
+querías marcar ocuparía su sitio: marcar cinco cosas seguidas se volvería una
+trampa. Así, marcar es marcar, y el orden se ve ordenado la próxima vez que
+abres.
 
 ### Editar y borrar
 
 - **Editar**: como en el recetario (spec 026), la fila pasa a modo edición con el
-  nombre en un campo. Las mismas validaciones que al añadir.
+  nombre en un campo. Las mismas validaciones que al añadir, **incluida la de
+  duplicado** contra el resto de la lista.
+- **Editar hasta chocar con otro ingrediente NO fusiona las dos filas: rechaza el
+  cambio** y lo dice ("«tomate» ya está en tu despensa"). Fusionar significaría
+  hacer desaparecer una fila que el usuario no ha pedido borrar, y aquí no hay
+  deshacer. Al añadir sí se fusiona, porque ahí no desaparece nada: solo se marca
+  lo que ya existía.
+- Editar una fila dejando el mismo nombre (o solo cambiando mayúsculas o tildes)
+  **no** cuenta como duplicado de sí misma: se guarda con normalidad.
 - **Borrar**: pide confirmación, porque no hay deshacer.
 
 ### Recuento
@@ -157,7 +179,14 @@ que `js/reinicio.js` avisa en su propio comentario sobre `ejercicios` y
 | `firestore.rules` | Bloque de `despensa`. **Publicar con la CLI antes de probar.** |
 | `js/reinicio.js` | Casilla "despensa". |
 
-Estimación: unas 250 líneas. Cabe en una spec.
+Estimación: **250-300 líneas**. La referencia es el recetario (spec 026): solo
+su pintado y sus manejadores en `js/app.js` ocupan ~170 líneas, más ~95 del
+modelo en `js/recetas.js`. La despensa tiene un formulario más simple (un solo
+campo) pero más lógica viva: casilla con escritura instantánea y reversión,
+fusión de duplicados al añadir y recuento.
+
+**Si al implementar se pasa de 300, parar y avisar** (regla 4 de `CLAUDE.md`), no
+forzarla.
 
 ## 8. Decisiones tomadas
 
@@ -171,6 +200,12 @@ Estimación: unas 250 líneas. Cabe en una spec.
   están las recetas y la dieta.
 - **La despensa no se archiva con la operación**: coherente con `recetas` y
   `dietas`, que ya lo resolvieron así en las specs 026 y 028.
+- **El duplicado avisa, no regaña**, y **editar hasta chocar rechaza en vez de
+  fusionar** (Claude, tras la revisión de la spec del 28 de agosto). Lo primero
+  porque re-escribir un ingrediente es la forma natural de re-marcarlo; lo
+  segundo porque fusionar haría desaparecer una fila que nadie pidió borrar.
+- **La lista no se reordena mientras marcas** (misma revisión): saltaría la fila
+  bajo el dedo justo cuando estás marcando varias seguidas.
 
 ## 9. Fuera de spec: ideas apuntadas
 

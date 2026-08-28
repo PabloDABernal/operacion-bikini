@@ -2,7 +2,7 @@
 
 Documento para retomar el trabajo en frío. Se actualiza al terminar cada spec.
 
-**Última actualización:** 28 de agosto de 2026 (la v8 escrita, sin implementar) (specs 001-057 **probadas y cerradas**, v1 a v7 terminadas; las specs **058 y 059 en borrador**, pendientes de `revisor-specs`)
+**Última actualización:** 28 de agosto de 2026 (la v8 escrita y revisada, sin implementar) (specs 001-057 **probadas y cerradas**, v1 a v7 terminadas; las specs **058 y 059 revisadas** y la **060** en borrador)
 
 > **Traspaso del 27 de agosto de 2026.** Se sigue en remoto desde Claude Code web. Estado al cerrar la sesión del PC: nada a medias, `main` limpio y sincronizado con `origin/main`. No hay spec abierta. **`docs/BACKLOG.md` está vacío a propósito desde hoy**: sus veintidós entradas se repartieron entre `docs/PRODUCTO.md` (apartado "Ideas para más adelante", que es de donde se elige la próxima versión), este documento (las trampas, aquí abajo) y el propio backlog (lo cerrado, para que no vuelva a proponerse). **Lo siguiente son evolutivos nuevos**: se elige una idea de `PRODUCTO.md`, se decide si es una versión partida en varias specs, y se escribe con `/nueva-spec` antes de tocar código. Antes de nada, leer "Cosas que hay que saber antes de tocar nada" de más abajo: las trampas del modelo de IA, la publicación de reglas de Firestore y que se prueba SIEMPRE en producción con push.
 
@@ -87,8 +87,9 @@ El 20 de agosto arrancó la **v4**, que sale de una auditoría de usabilidad hec
 | 055 | La entrevista de bienvenida empieza de cero de verdad | ✅ completada |
 | 056 | La casilla "Operaciones" borra también la que está en marcha | ✅ completada |
 | 057 | El comité de bienvenida: la ficha de alta (v7) | ✅ completada |
-| 058 | La despensa: lo que tienes en casa (v8) | 📝 borrador, sin revisar |
-| 059 | La dieta aprovecha la despensa (v8) | 📝 borrador, sin revisar |
+| 058 | La despensa: lo que tienes en casa (v8) | 📝 revisada, sin implementar |
+| 059 | La dieta aprovecha la despensa (v8) | 📝 revisada, sin implementar |
+| 060 | Ver la receta desde la dieta (v8) | 📝 borrador, salió de revisar la 059 |
 
 ## Qué toca ahora
 
@@ -115,14 +116,27 @@ De la misma conversación salió la **v9, decidida pero sin escribir**: el conta
 de vasos de agua, las bebidas apuntadas y el acompañamiento dentro de la comida
 ("3 trozos de pan"). Se aparcó para cerrar la v8 antes de abrir otro frente.
 
+**`revisor-specs` ya ha pasado por las dos** (28 de agosto). La 058 salió sin
+bloqueantes. La 059 salió con dos, los dos resueltos antes de tocar código:
+
+- **La regla del cruce se contradecía.** Pedía que `tomate` acertara en
+  `2 tomates maduros` y que `sal` no acertara en `salmón`, y con "límite de
+  palabra" a secas eso es imposible. La regla ahora está escrita exacta —límite
+  estricto por la izquierda, sufijo `s`/`es` por la derecha— y **verificada sobre
+  17 casos**. Al implementarla, esos casos van en un test.
+- **La 059 daba por hecha una pantalla que no existe.** Se creía que una receta
+  se podía leer desde Mi dieta; `filaDeComida()` solo pinta el momento y el
+  texto. Se sacó a la **spec 060** antes de implementar nada, no después.
+
 **Lo siguiente, por orden:**
 
-1. Pasar el agente `revisor-specs` a la **058** y a la **059**. Todavía no lo ha
-   visto nadie: están en borrador.
-2. Implementar la **058** entera, publicar `firestore.rules` con la CLI y que el
+1. Implementar la **058** entera, publicar `firestore.rules` con la CLI y que el
    usuario la pruebe en producción.
-3. Solo entonces, la **059**. Depende de la 058: sin despensa no hay nada que
+2. Solo entonces, la **059**. Depende de la 058: sin despensa no hay nada que
    aprovechar.
+3. La **060** al final, y **está a medio escribir a propósito**: su apartado 5
+   dice cómo NO se hace, pero cómo se abre y se enseña la receta se decide con el
+   usuario cuando toque. No implementarla sin cerrar eso.
 
 **Ojo al implementar la 058**: crea la colección `usuarios/{uid}/despensa`, así
 que hay bloque nuevo en `firestore.rules` y **hay que publicarlo con la CLI antes

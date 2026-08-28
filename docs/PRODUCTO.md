@@ -277,13 +277,17 @@ Qué NO hace la v8, para que quede escrito:
 - **No toca las bebidas ni los acompañamientos.** Salieron en la misma
   conversación del 28 de agosto y están decididos, pero van a la v9: ver abajo.
 
-Se reparte en dos specs, decididas así desde el inicio porque son dos cosas
-distintas y la primera se puede usar sin la segunda:
+Se reparte en tres specs. Las dos primeras se decidieron así desde el inicio,
+porque son cosas distintas y la primera se puede usar sin la segunda. La tercera
+salió al revisar la 059, **antes de implementar nada**: aquella spec daba por
+hecho que una receta se podía leer desde Mi dieta, y resultó que no — la dieta
+guarda a qué receta apunta cada comida pero nunca la enseña.
 
 | Spec | Qué |
 |---|---|
 | 058 | La despensa: la sub-pestaña, la lista y las casillas de "lo tengo" |
-| 059 | La dieta aprovecha la despensa, y la receta enseña qué te falta |
+| 059 | La dieta aprovecha la despensa, y la receta del recetario enseña qué te falta |
+| 060 | Poder abrir la receta desde Mi dieta, con sus marcas |
 
 ## Ideas para más adelante (27 de agosto de 2026)
 

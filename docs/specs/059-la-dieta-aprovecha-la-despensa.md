@@ -1,6 +1,6 @@
 # 059 — La dieta aprovecha la despensa
 
-- **Estado:** borrador
+- **Estado:** revisada (`revisor-specs`, 28 de agosto de 2026: dos bloqueantes, los dos resueltos abajo)
 - **Fecha:** 2026-08-28
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (v8: la despensa, decidida el 28 de agosto de 2026)", segunda spec de las dos.
 - **Depende de:** la spec 058, que crea la despensa. Sin ella no hay nada que aprovechar.
@@ -21,8 +21,8 @@ cuáles te faltan.
    lo que tienes marcado: se reconocen ingredientes propios en varios platos.
 4. Las recetas **no** salen usando solo lo tuyo: pueden pedir cosas que no
    tienes. Es una preferencia, no una jaula.
-5. Al abrir cualquier receta, cada ingrediente sale marcado como **lo tienes** o
-   **te falta**, según tu despensa.
+5. Al abrir una receta **desde Comidas → Recetas**, cada ingrediente sale marcado
+   como **lo tienes** o **te falta**, según tu despensa.
 6. Arriba de los ingredientes se ve el resumen: "Tienes 5 de 8".
 7. **La marca es de ahora, no de cuando se generó la receta**: desmarcar el
    tomate en la despensa y volver a abrir la receta lo enseña como que falta.
@@ -38,8 +38,9 @@ cuáles te faltan.
 - Casilla "aprovechar lo que tengo" al pedir la dieta.
 - Mandar la lista de lo marcado al proxy y meterla en el prompt.
 - Cruce despensa/receta en el navegador, al pintar una receta.
-- Marca por ingrediente y resumen "Tienes N de M", en el recetario y en las
-  recetas que enseña la dieta.
+- Marca por ingrediente y resumen "Tienes N de M" **en el recetario**
+  (Comidas → Recetas), que hoy es el único sitio de la app donde se abre una
+  receta y se leen sus ingredientes.
 
 ### NO entra (explícitamente fuera)
 
@@ -51,6 +52,12 @@ cuáles te faltan.
 - **Descontar de la despensa lo que cocinas.** La 058 ya dejó fuera las
   cantidades; esto sería lo mismo por la puerta de atrás.
 - **Que la conversación o la revisión sepan de la despensa.** Solo la dieta.
+- **Abrir una receta desde Mi dieta.** No se puede hoy: la dieta guarda el
+  `recetaId` de cada comida pero nunca lo usa para enseñar la receta
+  (`js/app.js`, `filaDeComida()` solo pinta el momento y el texto; `recetaId`
+  solo aparece en el desplegable de edición). Montar esa vista es una pantalla
+  nueva, no una marca encima de una que ya existe, y tocaría código que también
+  lleva el botón "Me lo he comido" de la spec 034. **Va a la spec 060.**
 
 ## 4. Comportamiento detallado
 
@@ -72,11 +79,17 @@ marcados". Así sabes qué le vas a mandar sin ir a mirarlo.
 Solo con la casilla marcada, y **solo los ingredientes con `tengo: true`**. Se
 mandan como una lista de nombres, tal y como los escribió el usuario.
 
-El prompt de `api/dieta.js` gana un bloque que dice, en resumen: tiene estos
-ingredientes en casa, apóyate en ellos todo lo que puedas y repítelos entre
-platos si hace falta, **pero no te limites a ellos** — completa con lo que la
-semana necesite, que esto es una preferencia y no una restricción. Y que **no
-mienta**: si un plato necesita algo que no está en la lista, lo pone igual.
+El bloque dice, en resumen: tiene estos ingredientes en casa, apóyate en ellos
+todo lo que puedas y repítelos entre platos si hace falta, **pero no te limites a
+ellos** — completa con lo que la semana necesite, que esto es una preferencia y
+no una restricción. Y que **no mienta**: si un plato necesita algo que no está en
+la lista, lo pone igual.
+
+**Dónde va, que importa:** en el **mensaje del usuario**, junto a `contexto()` y
+al resto de lo que se pide en cada petición. **NO** en `INSTRUCCIONES`, que es la
+constante estática del `systemInstruction` y es la misma para todas las
+peticiones de todos los usuarios. La despensa es un dato de esta petición, no una
+regla del sistema.
 
 **Tope de la lista: 80 ingredientes.** Es la lección del 413 de Groq (spec 049):
 todo lo que entra en un prompt sin límite acaba reventándolo. Si hay más, se
@@ -88,17 +101,41 @@ mandan los 80 primeros y se le dice a la IA que se han recortado, igual que hace
 Al abrir una receta se compara **cada línea de sus ingredientes** con la despensa
 y se marca si la tienes.
 
-Cómo se compara, de más fiable a menos, parando en el primer acierto:
+**La regla, exacta.** Los dos textos se normalizan primero (la función de la spec
+058: minúsculas, sin tildes, sin espacios de sobra). Después se busca el
+ingrediente dentro de la línea con esta forma:
 
-1. **Igualdad normalizada**: la misma función de la spec 058 (minúsculas, sin
-   tildes, sin espacios de sobra). `Tomate` = `tomate`.
-2. **La línea de la receta contiene el ingrediente**, ya normalizados los dos.
-   `2 tomates maduros` contiene `tomate`. Esto es lo que salva las cantidades y
-   los plurales, que es el caso normal.
+```
+limite-de-palabra + ingrediente + (es|s)? + limite-de-palabra
 
-Si ninguna de las dos acierta, **se considera que falta**. Ante la duda, que la
-app diga que te falta: mandarte al súper a por algo que tenías es una molestia;
-dejarte sin cenar porque te dijo que lo tenías, no.
+En JavaScript:  new RegExp(BARRA_B + escapado(ingrediente) + "(es|s)?" + BARRA_B)
+donde BARRA_B es la secuencia de dos caracteres: contrabarra seguida de be.
+```
+
+Es decir: **límite de palabra estricto por la izquierda**, y por la derecha se
+tolera **solo** una `s` o un `es` de plural antes del límite. Nada más.
+
+Esas dos mitades son las que hacen que la regla funcione, y **no son
+intercambiables**:
+
+- El sufijo opcional es lo que salva el caso normal: tu `tomate` acierta en
+  `2 tomates maduros`, tu `coliflor` en `2 coliflores`, tu `ajo` en
+  `ajos tiernos`.
+- Que el sufijo sea **solo `s` o `es`** es lo que impide el desastre: tu `sal`
+  **no** acierta en `salmón a la plancha`, porque lo que sigue a `sal` es `món`,
+  que no es ninguno de los dos. Con un sufijo libre, `sal` se comería el salmón.
+- El límite estricto por la izquierda es lo que impide que `lechuga` acierte en
+  `leche entera`.
+
+Comprobado sobre 18 casos el 28 de agosto, incluidos los tres de arriba, antes de
+cerrar la spec. **Los casos están guardados en `docs/specs/059-cruce-casos.mjs`**
+y se ejecutan con `node docs/specs/059-cruce-casos.mjs`. **Al implementar, se
+convierten en un test de verdad**: es la única parte de la v8 donde un cambio
+pequeño de la regla rompe algo en silencio.
+
+Si la regla no acierta, **se considera que falta**. Ante la duda, que la app diga
+que te falta: mandarte al súper a por algo que tenías es una molestia; dejarte
+sin cenar porque te dijo que lo tenías, no.
 
 Cuando un ingrediente de la despensa acierta, se marca **ese** como usado y no
 se vuelve a usar para otra línea de la misma receta: si la receta pide tomate dos
@@ -117,8 +154,10 @@ en el navegador y por eso no merece nada más listo que estas dos reglas.
 - **Nunca se esconde ningún ingrediente.** La receta se lee entera, con marcas o
   sin ellas.
 - Con la despensa vacía no hay marcas ni resumen: la receta se ve como hoy.
-- La marca aparece en **los dos sitios donde se lee una receta**: el recetario
-  (Comidas → Recetas) y las recetas que cuelgan de la dieta.
+- **Solo en el recetario** (Comidas → Recetas). Es el único sitio donde hoy se
+  abre una receta. Cuando la spec 060 permita abrirla desde Mi dieta, la marca
+  saldrá allí sin tocar nada de esto: el cruce es una función pura que recibe
+  una lista de ingredientes y devuelve cuáles tienes.
 
 ## 5. Modelo de datos
 
@@ -134,8 +173,14 @@ Lo que cambia:
 
 ## 6. Casos límite
 
-- **Despensa vacía o nada marcado**: no hay casilla, no se manda nada, las
-  recetas se ven como hoy. Es el estado de todo usuario hasta que use la 058.
+- **Despensa vacía** (aún no has escrito nada): no hay casilla al pedir dieta, no
+  se manda nada, y las recetas se ven como hoy, sin marcas ni resumen. Es el
+  estado de todo usuario hasta que estrene la 058.
+- **Despensa con cosas pero todo desmarcado** (se te ha acabado todo): la casilla
+  **tampoco se enseña** — no hay nada que aprovechar. Pero las recetas **sí** se
+  marcan, y saldrá "Tienes 0 de 8" con todos los ingredientes apagados. Son dos
+  estados distintos y se comportan distinto: el primero es "no uso esto", el
+  segundo es "toca ir a comprar".
 - **Despensa de un solo ingrediente**: la casilla se enseña. Un tomate es poco,
   pero es decisión del usuario mandarlo.
 - **Más de 80 ingredientes**: se recorta y se avisa a la IA. Ver arriba.
@@ -144,10 +189,19 @@ Lo que cambia:
   cuota para insistir es justo lo que la spec 020 decidió no hacer.
 - **Receta sin ingredientes** (una editada a mano hasta vaciarla): sin marcas y
   sin resumen, no revienta.
-- **Ingrediente de la despensa muy corto** (`ajo`, `sal`): la regla 2 puede
-  acertar dentro de otra palabra. Se exige que la coincidencia caiga en **límites
-  de palabra**, para que `sal` no marque `salmón`. Es el único filo de verdad del
-  cruce y hay que probarlo.
+- **Ingrediente de la despensa muy corto** (`ajo`, `sal`): resuelto por la regla
+  de arriba, y es el caso que la obligó a ser como es. `sal` no marca `salmón`.
+  Sigue siendo el filo del cruce: va en un test.
+- **Tu despensa escrita en plural** (`lentejas`) y la receta en singular
+  (`100 g de lenteja`): **no acierta**. La tolerancia de plural va en un solo
+  sentido. Se acepta: escribir los ingredientes en singular es lo natural, y el
+  fallo es una marca de menos, que es el lado seguro.
+- **El recuento "12 ingredientes marcados" no se actualiza en vivo.** Se lee al
+  entrar en Mi dieta. Si vas a la Despensa, desmarcas cosas y vuelves sin recargar,
+  puede decir de más. Aceptado por coherencia con el resto de la app (las recetas y
+  el catálogo hacen lo mismo), y porque lo que de verdad se manda a la IA se lee en
+  el momento de pedir la dieta, no de pintar la casilla: **el número puede ir
+  retrasado, lo que se manda nunca**.
 - **Sin conexión al pedir la dieta**: el error de siempre. Nada que ver con esto.
 
 ## 7. Archivos afectados
@@ -156,14 +210,20 @@ Lo que cambia:
 |---|---|
 | `js/despensa.js` | La función de cruce (línea de receta contra lista de despensa), junto a la normalización que ya creó la 058. |
 | `index.html` | La casilla al pedir dieta y su recuento. |
-| `js/app.js` | Leer la casilla, mandar la lista, y pintar las marcas y el resumen en los dos sitios donde se lee una receta. |
+| `js/app.js` | Leer la casilla, mandar la lista, y pintar las marcas y el resumen en el recetario. |
 | `js/dietas.js` | Pasar `despensa` en la petición al proxy. |
 | `api/dieta.js` | Aceptar `despensa`, recortarla a 80 y meterla en el prompt. |
 | `styles.css` | El ingrediente que falta, apagado; la marca del que tienes. |
 
 No toca `firestore.rules`: no hay colección nueva.
 
-Estimación: unas 200 líneas. Cabe en una spec.
+Estimación: **unas 200 líneas**, ya sin la vista de receta desde la dieta, que se
+ha ido a la spec 060. Cabe en una spec.
+
+Cuidado con `js/app.js`: el pintado de la dieta lleva también el cupo y el botón
+"Me lo he comido" (spec 034). Esta spec **no** debería necesitar tocar
+`filaDeComida()` ni `pintarDieta()` — si acaba haciéndolo, es señal de que se
+está colando dentro lo que es de la 060.
 
 ## 8. Decisiones tomadas
 
@@ -183,6 +243,16 @@ Estimación: unas 200 líneas. Cabe en una spec.
   sepas por qué.
 - **Tope de 80 ingredientes en el prompt**: la lección del 413 de Groq (spec
   049), aplicada antes de que duela.
+- **Las marcas, solo en el recetario; abrir la receta desde Mi dieta va a la spec
+  060** (usuario, 28 de agosto, tras la revisión). La spec daba por hecha una
+  pantalla que no existe: la dieta guarda el `recetaId` pero nunca enseña la
+  receta. Montarla es una pantalla nueva y toca código que lleva el botón "Me lo
+  he comido" (spec 034), así que se parte **antes** de implementar, no después.
+- **La regla del cruce: límite estricto por la izquierda y sufijo `s`/`es` por la
+  derecha** (Claude, tras la revisión). El revisor dio por incompatibles
+  "tomate acierta en tomates" y "sal no acierta en salmón". No lo son si el
+  sufijo tolerado se limita a `s` y `es`: a `sal` le sigue `món`, que no es
+  ninguno de los dos. Verificado sobre 17 casos antes de cerrar la spec.
 
 ## 9. Fuera de spec: ideas apuntadas
 
