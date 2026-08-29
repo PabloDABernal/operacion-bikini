@@ -117,6 +117,14 @@ import {
 } from "./agua.js";
 
 import {
+  validarBebida,
+  guardarBebida,
+  actualizarBebida,
+  listarBebidas,
+  borrarBebida
+} from "./bebidas.js";
+
+import {
   MOMENTOS,
   MOMENTO_POR_DEFECTO,
   etiquetaDeMomento,
@@ -1055,6 +1063,11 @@ function pintarResumen(registros) {
       registro: r,
       etiqueta: "Ejercicio",
       texto: `${r.texto} · ${r.minutos} min`
+    })),
+    ...deHoy(registros.bebidas || []).map((r) => ({
+      registro: r,
+      etiqueta: "Bebida",
+      texto: r.texto
     }))
   ];
 
@@ -1155,10 +1168,16 @@ function pintarCalendario(registros) {
 }
 
 function refrescarHoy() {
+  // `bebidas` viaja en el mismo objeto, pero solo lo lee pintarResumen(): el
+  // calendario, la gamificación y el detalle del día nombran sus colecciones a
+  // mano, así que las bebidas no pueden colárseles aunque estén aquí. Es a
+  // propósito: no dan puntos, no mantienen la racha y un día de solo bebidas no
+  // es un día registrado.
   const registros = {
     pesajes: listaPeso.obtenerRegistros(),
     comidas: listaComidas.obtenerRegistros(),
-    ejercicios: listaEjercicios.obtenerRegistros()
+    ejercicios: listaEjercicios.obtenerRegistros(),
+    bebidas: listaBebidas.obtenerRegistros()
   };
 
   id("hoy-fecha").textContent = fechaLarga(hoyISO());
@@ -1167,6 +1186,7 @@ function refrescarHoy() {
   pintarCalendario(registros);
   pintarLoDeSiempre(registros.comidas);
   pintarEjerciciosFrecuentes(registros.ejercicios);
+  pintarBebidasFrecuentes(registros.bebidas);
   pintarAnalisis(registros.comidas);
   pintarGamificacion(registros);
 }
@@ -2398,7 +2418,13 @@ async function registrosRecientes() {
         minutos,
         intensidad
       })
-    )
+    ),
+    // Las bebidas (spec 062). El agua no va aquí: es un contador y no un
+    // registro escrito.
+    bebidas: recientes(listaBebidas.obtenerRegistros()).map(({ fecha, texto }) => ({
+      fecha,
+      texto
+    }))
   };
 }
 
@@ -3058,6 +3084,119 @@ id("form-comida").addEventListener("submit", async (evento) => {
   } finally {
     boton.disabled = false;
   }
+});
+
+// --- Bebidas (spec 062) --------------------------------------------------
+//
+// Colección propia, no un momento más de `comidas`. El motivo está en
+// `js/bebidas.js`: las comidas del día van enteras al análisis nutricional, y
+// las bebidas tienen que quedarse fuera de ahí por construcción.
+//
+// Las bebidas NO dan puntos ni mantienen la racha, decisión del usuario: los
+// puntos premian la conducta que te acerca al objetivo, y apuntar tres cervezas
+// no es eso. Puntuarlo sería premiarte por registrarlo.
+//
+// Toda la lista sale de crearLista(), la misma factoría de comidas y ejercicios:
+// filtro por día, "Ver todas", edición y borrado vienen de serie.
+
+const listaBebidas = crearLista({
+  alRefrescar: () => refrescarPantallas(),
+  lista: "lista-bebidas",
+  estado: "estado-bebidas",
+  reintentar: "btn-reintentar-bebidas",
+  error: "error-bebida",
+  filtro: "filtro-bebidas",
+  quitarFiltro: "btn-quitar-filtro-bebidas",
+  desplegar: "btn-desplegar-bebidas",
+  desplegarArriba: "btn-desplegar-bebidas-arriba",
+  textoSinEseDia: "No hay bebidas de ese día.",
+  recortarPorDias: true,
+  textoVacio:
+    'Aún no has apuntado ninguna bebida. El agua no va aquí: esa se cuenta en Hoy.',
+  errorCarga: "No se han podido cargar tus bebidas. Comprueba tu conexión.",
+  confirmacionBorrado: "¿Borrar esta bebida?",
+  cargar: listarBebidas,
+  borrar: borrarBebida,
+  fila: (bebida) => ({
+    que: bebida.texto,
+    detalles: [formatearFechaConHora(bebida.fecha, bebida.hora)]
+  }),
+  campos: (bebida) => {
+    const fecha = campoFecha(bebida.fecha);
+    const hora = campoHoraEdicion(bebida.hora);
+    const texto = campoTexto(bebida.texto, "edicion-texto");
+    return {
+      elementos: [fecha, hora, texto],
+      validar: () => validarBebida(texto.value, fecha.value, hora.value)
+    };
+  },
+  actualizar: (uid, bebidaId, valores) =>
+    actualizarBebida(uid, bebidaId, valores.texto, valores.fecha, valores.hora)
+});
+
+// Las bebidas que más repites, como chips (spec 042 aplicada a bebidas).
+// Rellenan el formulario y NO guardan, por lo mismo que en ejercicio: la hora
+// casi nunca es la misma, y guardar de un toque apuntaría una hora heredada que
+// habría que ir a corregir después.
+function pintarBebidasFrecuentes(bebidas) {
+  const bloque = id("bloque-bebidas-frecuentes");
+  const contenedor = id("bebidas-frecuentes");
+  const habituales = masRepetidos(bebidas, hoyISO());
+
+  bloque.classList.toggle("oculta", habituales.length === 0);
+  contenedor.innerHTML = "";
+
+  habituales.forEach((habitual) => {
+    const boton = botonDeFila(habitual.texto, () => {
+      id("bebida-texto").value = habitual.registro.texto;
+      id("error-bebida").textContent = "";
+      id("bebida-texto").focus();
+    });
+    boton.className = "chip";
+    contenedor.appendChild(boton);
+  });
+}
+
+id("btn-fecha-hora-bebida").addEventListener("click", () => {
+  id("campos-fecha-hora-bebida").classList.remove("oculta");
+  id("btn-fecha-hora-bebida").classList.add("oculta");
+});
+
+id("form-bebida").addEventListener("submit", async (evento) => {
+  evento.preventDefault();
+  const error = id("error-bebida");
+  error.textContent = "";
+
+  const resultado = validarBebida(
+    id("bebida-texto").value,
+    id("bebida-fecha").value,
+    id("bebida-hora").value
+  );
+  if (resultado.error) {
+    error.textContent = resultado.error;
+    return;
+  }
+
+  const boton = id("btn-guardar-bebida");
+  boton.disabled = true;
+  try {
+    await guardarBebida(uidActual, resultado.texto, resultado.fecha, resultado.hora);
+  } catch {
+    error.textContent = "No se ha podido guardar. Comprueba tu conexión.";
+    return;
+  } finally {
+    boton.disabled = false;
+  }
+
+  // Fuera del try del guardado: un fallo al repintar no puede salir como
+  // "comprueba tu conexión" con la bebida ya guardada (lección de la spec 058).
+  avisarGuardado("guardado-bebida");
+  id("bebida-texto").value = "";
+  id("bebida-fecha").value = hoyISO();
+  id("bebida-hora").value = horaActual();
+  id("campos-fecha-hora-bebida").classList.add("oculta");
+  id("btn-fecha-hora-bebida").classList.remove("oculta");
+  await listaBebidas.refrescar();
 });
 
 // --- Ejercicio -----------------------------------------------------------
@@ -4158,6 +4297,7 @@ function refrescarTodo() {
     listaPeso.refrescar(),
     listaComidas.refrescar(),
     listaEjercicios.refrescar(),
+    listaBebidas.refrescar(),
     refrescarConsulta(),
     refrescarFotos(),
     refrescarRecetas(),
@@ -4765,16 +4905,16 @@ function rellenarDesplegable(elementoId, opciones, porDefecto) {
 }
 
 function limpiarFormularios() {
-  ["peso", "comida-texto", "ejercicio-texto", "ejercicio-minutos"].forEach(
+  ["peso", "comida-texto", "ejercicio-texto", "ejercicio-minutos", "bebida-texto"].forEach(
     (campo) => {
       id(campo).value = "";
     }
   );
-  ["fecha", "comida-fecha", "ejercicio-fecha"].forEach((campo) => {
+  ["fecha", "comida-fecha", "ejercicio-fecha", "bebida-fecha"].forEach((campo) => {
     id(campo).value = hoyISO();
   });
   // La hora se propone, no se impone: viene rellena y se puede vaciar.
-  ["hora", "comida-hora", "ejercicio-hora"].forEach((campo) => {
+  ["hora", "comida-hora", "ejercicio-hora", "bebida-hora"].forEach((campo) => {
     id(campo).value = horaActual();
   });
   rellenarDesplegable("comida-momento", MOMENTOS, MOMENTO_POR_DEFECTO);
@@ -4782,6 +4922,7 @@ function limpiarFormularios() {
   [
     "error-pesaje",
     "error-comida",
+    "error-bebida",
     "error-ejercicio",
     "error-conversacion",
     "error-foto",

@@ -30,6 +30,8 @@ const POR_LOTE = 200;
 // El orden importa poco, pero se archiva primero lo que más pesa.
 export const COLECCIONES = [
   "comidas",
+  // Las bebidas (spec 062). Colección propia, no un momento de comidas.
+  "bebidas",
   "ejercicios",
   "pesajes",
   "consejos",
@@ -44,6 +46,7 @@ export const COLECCIONES = [
 
 export const NOMBRES = {
   comidas: "comidas",
+  bebidas: "bebidas",
   ejercicios: "ejercicio",
   pesajes: "pesajes",
   consejos: "consejos",

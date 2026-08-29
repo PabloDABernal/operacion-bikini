@@ -34,6 +34,9 @@ const MODELOS = [
 const MAXIMO_PESAJES = 30;
 const MAXIMO_COMIDAS = 60;
 const MAXIMO_EJERCICIOS = 30;
+// Las bebidas (spec 062), con su tope como todo lo demas: la leccion del 413 de
+// Groq de la spec 049.
+const MAXIMO_BEBIDAS = 30;
 
 // Se queda con los N primeros porque las listas llegan de MÁS RECIENTE a más
 // antigua (así las ordenan listarPesajes/listarComidas/listarEjercicios, por
@@ -54,7 +57,7 @@ function recortar(registros, maximo, describir) {
 }
 
 // Resumen de los registros del usuario, en texto plano para el prompt.
-function describirRegistros({ pesajes = [], comidas = [], ejercicios = [] }) {
+function describirRegistros({ pesajes = [], comidas = [], ejercicios = [], bebidas = [] }) {
   const lineas = [];
 
   lineas.push("PESAJES (kg):");
@@ -73,6 +76,16 @@ function describirRegistros({ pesajes = [], comidas = [], ejercicios = [] }) {
       (e) => `- ${e.fecha}: ${e.texto}, ${e.minutos} min, intensidad ${e.intensidad}`
     )
   );
+
+  // Las bebidas (spec 062), en bloque propio. Solo se enseñan si hay alguna: un
+  // encabezado vacío le diría a la IA que no bebes nada, que no es lo mismo que
+  // no habértelo preguntado nunca.
+  //
+  // El agua NO está aquí: es un contador (spec 061), no un registro escrito.
+  if (bebidas.length) {
+    lineas.push("\nBEBIDAS (esto no incluye el agua):");
+    lineas.push(recortar(bebidas, MAXIMO_BEBIDAS, (b) => `- ${b.fecha}: ${b.texto}`));
+  }
 
   return lineas.join("\n");
 }

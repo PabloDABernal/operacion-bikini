@@ -2,7 +2,7 @@
 
 Documento para retomar el trabajo en frío. Se actualiza al terminar cada spec.
 
-**Última actualización:** 29 de agosto de 2026 (la 061 desplegada, sin probar) (specs 001-060 **probadas y cerradas**, v1 a v8 terminadas; la **061 implementada y pendiente de prueba**, la **062 y la 063** a medias a propósito)
+**Última actualización:** 29 de agosto de 2026 (la 062 desplegada, sin probar) (specs 001-061 **probadas y cerradas**, v1 a v8 terminadas; la **062 implementada y pendiente de prueba**, la **063** a medias a propósito)
 
 > **Traspaso del 27 de agosto de 2026.** Se sigue en remoto desde Claude Code web. Estado al cerrar la sesión del PC: nada a medias, `main` limpio y sincronizado con `origin/main`. No hay spec abierta. **`docs/BACKLOG.md` está vacío a propósito desde hoy**: sus veintidós entradas se repartieron entre `docs/PRODUCTO.md` (apartado "Ideas para más adelante", que es de donde se elige la próxima versión), este documento (las trampas, aquí abajo) y el propio backlog (lo cerrado, para que no vuelva a proponerse). **Lo siguiente son evolutivos nuevos**: se elige una idea de `PRODUCTO.md`, se decide si es una versión partida en varias specs, y se escribe con `/nueva-spec` antes de tocar código. Antes de nada, leer "Cosas que hay que saber antes de tocar nada" de más abajo: las trampas del modelo de IA, la publicación de reglas de Firestore y que se prueba SIEMPRE en producción con push.
 
@@ -90,8 +90,8 @@ El 20 de agosto arrancó la **v4**, que sale de una auditoría de usabilidad hec
 | 058 | La despensa: lo que tienes en casa (v8) | ✅ completada |
 | 059 | La dieta aprovecha la despensa (v8) | ✅ completada |
 | 060 | Ver la receta desde la dieta (v8) | ✅ completada |
-| 061 | El agua del día (v9) | 🚧 implementada y desplegada, **sin probar** |
-| 062 | Las bebidas, apuntadas (v9) | 📝 borrador **a medias a propósito**: dos decisiones abiertas |
+| 061 | El agua del día (v9) | ✅ completada |
+| 062 | Las bebidas, apuntadas (v9) | 🚧 implementada y desplegada, **sin probar** |
 | 063 | El acompañamiento de la comida (v9) | 📝 borrador **a medias a propósito**: dos decisiones abiertas |
 
 ## Qué toca ahora
@@ -154,19 +154,35 @@ implementarlas. No rellenarlas con suposiciones:
 
 **Lo siguiente, por orden:**
 
-1. **Que el usuario pruebe la 061.** Está implementada y desplegada, con las
-   reglas ya publicadas. La regresión a vigilar es el **archivado de una
-   operación**: `agua` entra en `COLECCIONES`, así que archivar mueve también sus
-   documentos.
-2. Cerrar con el usuario las decisiones de la **062**, y entonces implementarla.
-3. Lo mismo con la **063**, que es la que toca el prompt de la IA.
+1. **Que el usuario pruebe la 062.** La regresión a vigilar es que las bebidas
+   NO se cuelen donde no deben: ni en el análisis nutricional, ni en los puntos,
+   ni en el calendario de constancia.
+2. Cerrar con el usuario las dos decisiones de la **063** —sobre todo si el
+   acompañamiento entra en el análisis nutricional, que es la pregunta incómoda
+   de la v9— y entonces implementarla.
 
-`revisor-specs` pasó por la 061 y encontró **un bloqueante**, corregido antes de
-implementar: la spec afirmaba que el agua no necesitaba casilla propia en
-Reiniciar datos, y era falso. `borrarOperacion()` solo vacía
-`operaciones/{id}/{colección}`, nunca las colecciones de primer nivel donde vive
-la operación en curso. Sin casilla propia, el agua del ciclo en marcha se habría
-quedado huérfana en Firestore sin que nadie se enterara.
+Lo ya hecho de la v9:
+
+- **061 (el agua)**: completada y probada.
+- **062 (las bebidas)**: desplegada, sin probar. Colección propia `bebidas`, no
+  un momento de `comidas`. El motivo salió de mirar el código: `comidasDeHoy()`
+  manda **todas** las comidas del día al análisis nutricional, así que con las
+  bebidas dentro, cada cerveza habría entrado en el análisis. Con colección
+  propia quedan fuera por construcción.
+
+**Lo que ya salió de las revisiones de la v9**, para no repetir el trabajo:
+
+- `revisor-specs` cazó **un bloqueante en la 061**: la spec decía que el agua no
+  necesitaba casilla propia en Reiniciar datos, y era falso. `borrarOperacion()`
+  solo vacía `operaciones/{id}/{colección}`, **nunca** las colecciones de primer
+  nivel donde vive la operación en curso. Sin casilla propia, el agua del ciclo
+  en marcha se habría quedado huérfana en Firestore sin que nadie se enterara.
+  **Lo mismo aplica a `bebidas`**, y por eso también lleva casilla propia.
+- **Puntos, racha, calendario y resumen de la operación se sostienen solos.**
+  `calcularPuntos()`, `calcularResumen()` y `calendarioDeConstancia()` nombran
+  sus colecciones a mano, no iteran `COLECCIONES`. Añadir `agua` o `bebidas` ahí
+  no puede colarlas en ningún sitio. Es imposible por construcción, no por
+  cuidado — y conviene no romper esa propiedad.
 
 **Lección de la v8 que aplica aquí**: la 058 estimó 250-300 líneas y salió en 408
 de JavaScript. La 061 estima lo mismo con el mismo método, así que ese número se

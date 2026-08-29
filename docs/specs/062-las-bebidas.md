@@ -1,6 +1,6 @@
 # 062 — Las bebidas, apuntadas
 
-- **Estado:** borrador
+- **Estado:** implementada y desplegada el 29 de agosto de 2026. **Pendiente de que el usuario la pruebe**; hasta entonces NO es completada.
 - **Fecha:** 2026-08-29
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (v9)", segunda spec de las tres.
 - **Depende de:** nada. Se puede implementar antes o después de la 061; van juntas en la v9 porque son el mismo tema, no porque una necesite a la otra.
@@ -43,44 +43,130 @@ El agua no entra aquí: es un contador y es la spec 061.
   está escrita en `docs/PRODUCTO.md`.
 - **Cantidades, graduación o calorías** de la bebida. Es una línea de texto, como
   una comida.
-- **Puntos y racha.** La v9 no toca la gamificación. *(A confirmar al escribir
-  esta spec de verdad: una bebida SÍ es un registro escrito, al revés que el
-  agua, así que el argumento de la 061 no le aplica igual. Ver apartado 5.)*
+- **Puntos, racha y calendario de constancia.** Confirmado con el usuario el 29
+  de agosto: los puntos premian la conducta que te acerca al objetivo, y apuntar
+  tres cervezas no es eso. Ver apartado 8.
 
-## 4. Pendiente de decidir con el usuario
+## 4. Comportamiento detallado
 
-**Esta spec está a medias a propósito.** Se escribe ahora, con la v9, para que el
-reparto en tres quede fijado desde el inicio y no haya que partir nada a
-posteriori. Pero tiene dos decisiones abiertas que no se rellenan con
-suposiciones:
+### Dónde se apunta
 
-1. **¿Una bebida es un tipo de registro nuevo, o un momento más de las comidas?**
-   `MOMENTOS` (`js/comidas.js`) ya tiene desayuno, comida, merienda, cena y
-   picoteo. Añadir "bebida" ahí es casi gratis y sale sola en las listas, en Hoy
-   y en el prompt de la IA. Pero mezcla dos cosas distintas: un momento del día
-   con un tipo de cosa, y ensucia el análisis nutricional, que lee comidas.
-   Una colección propia `bebidas` es más limpia y más cara: lista, edición,
-   borrado, Hoy, prompt, reglas, archivado y reinicio.
-2. **¿Las bebidas dan puntos?** El argumento que dejó al agua fuera fue que es el
-   registro más barato de la app. Una bebida escrita cuesta lo mismo que una
-   comida, así que ahí no vale el mismo razonamiento. Pero meterlas en la racha
-   obliga otra vez a mirar el calendario de constancia.
+En **Comidas → Apuntar**, debajo del formulario de comidas y con su propio
+bloque: **"¿Has bebido algo?"**. Mismo formulario de siempre —texto, y fecha y
+hora plegadas— para no inventar un patrón nuevo.
 
-Hasta que eso se decida, **el apartado 5 y el 6 no se pueden escribir**.
+Campos: **qué era** (texto, máximo 200 caracteres) y **cuándo** (fecha y hora,
+plegadas como en las comidas desde la spec 037).
+
+No hay "momento del día" como en las comidas. Una bebida no es un desayuno ni
+una cena: es algo que te tomaste a una hora.
+
+### La lista del día
+
+Lista propia, con el mismo comportamiento que las de comidas y ejercicios: filtro
+por día, "Ver todas", editar y borrar. Se monta con `crearLista()`, la factoría
+que ya usan las otras dos.
+
+Se ve **claramente separada de las comidas**, con su propio título, para que
+nadie confunda una cerveza con una cena.
+
+### Chips de bebidas frecuentes
+
+Como los de ejercicio (spec 042): las que más repites, y tocarlas **rellena el
+formulario**, no guarda. Igual que en ejercicio y por el mismo motivo: la hora
+casi nunca es la misma, así que guardar de un toque apuntaría una hora heredada
+que habría que ir a corregir.
+
+### En Hoy
+
+Las bebidas de hoy salen en el resumen del día, con su propia línea, igual que
+las comidas y los ejercicios.
+
+### Lo que ve la IA
+
+Las bebidas entran en el bloque de registros que va a la IA
+(`describirRegistros()` en `api/_ia.js`), con su propio encabezado. Así, al pasar
+consulta o al charlar, puede mencionarlas.
+
+**No entran en el análisis nutricional**, que es otra llamada distinta
+(`api/analisis.js`) y solo lee comidas.
 
 ## 5. Modelo de datos
 
-Pendiente de la decisión 1 del apartado 4.
+Colección nueva `usuarios/{uid}/bebidas/{bebidaId}`.
+
+| Campo | Tipo | Qué es |
+|---|---|---|
+| `texto` | string | Qué bebiste. 1-200 caracteres. |
+| `fecha` | string | `AAAA-MM-DD`. |
+| `hora` | string | `HH:MM`, opcional (cadena vacía si no se puso). |
+| `creadoEn` | timestamp | Desempata el orden dentro del mismo día. |
+
+**Por qué colección propia y no un momento más de `comidas`** (decisión del
+usuario, 29 de agosto, después de mirar el código): `comidasDeHoy()` en
+`js/app.js` filtra las comidas del día **solo por fecha** y las manda enteras al
+análisis nutricional. Con las bebidas dentro de `comidas`, cada cerveza entraría
+en el análisis — justo lo que la v9 decidió que no pasara. Habría que excluirlas
+en el análisis, en el recuento de "análisis viejo", en las listas y en el prompt;
+y cualquier spec futura que lea `comidas` sin saber de esto se las tragaría sin
+enterarse.
+
+Con colección propia, quedan fuera **por construcción**. Es la misma lección que
+dejó la 061: lo que no puede pasar es mejor que lo que hay que cuidar que no
+pase.
+
+**Se archiva con la operación**, como las comidas: va a `COLECCIONES` y a
+`NOMBRES` en `js/operaciones.js`.
+
+**Casilla propia en Reiniciar datos**, clave `bebidas`, etiqueta "bebidas". Es
+**obligatoria**, por lo mismo que el agua en la 061: `borrarOperacion()` solo
+vacía `operaciones/{id}/{colección}` y nunca las colecciones de primer nivel,
+donde vive la operación en curso. Sin casilla, las bebidas del ciclo en marcha se
+quedarían huérfanas.
+
+`firestore.rules`: bloque nuevo calcado al de `comidas`.
+
+### Lo que NO hay que tocar
+
+- **`js/gamificacion.js`**: no. Las bebidas no dan puntos ni racha.
+- **`js/calendario.js`**: no. Un día de solo bebidas no es un día registrado.
+- **`api/analisis.js`**: no. Las bebidas no entran en los seis grupos.
+
+Las tres cosas se sostienen solas: `calcularPuntos()` y `calcularResumen()`
+reciben sus colecciones como parámetros nombrados, así que añadir `bebidas` a
+`COLECCIONES` no puede colarlas en ningún sitio.
 
 ## 6. Casos límite
 
-Pendientes de la decisión 1 del apartado 4.
+- **Texto vacío o solo espacios** → error, no se guarda.
+- **Más de 200 caracteres** → error. Una bebida es "caña con Jose", no un relato.
+- **Fecha futura o inválida** → el mismo error que ya dan las comidas
+  (`errorDeFecha()`).
+- **Sin hora**: se guarda igual, como las comidas.
+- **Sin bebidas**: la lista lo dice y no enseña una lista vacía sin más.
+- **Sin conexión**: el error de siempre, nada se encola.
+- **Reiniciar datos**: casilla propia con su recuento. La de "operaciones" se
+  lleva las ya archivadas; la de "bebidas", las de la operación en curso.
 
 ## 7. Archivos afectados (estimación)
 
-Depende de la decisión 1. Como momento nuevo: `js/comidas.js`, `index.html` y
-poco más. Como colección propia: lo mismo que costó cualquier registro del
-diario, más las reglas, el archivado y el reinicio.
+| Archivo | Qué |
+|---|---|
+| `js/bebidas.js` | **Nuevo.** Validar, guardar, actualizar, listar y borrar. |
+| `index.html` | El bloque de apuntar y la lista, en Comidas → Apuntar. |
+| `js/app.js` | La lista con `crearLista()`, el alta y los chips frecuentes. |
+| `js/operaciones.js` | `bebidas` en `COLECCIONES` y en `NOMBRES`. |
+| `js/reinicio.js` | Casilla propia "bebidas". **Obligatoria**, ver apartado 5. |
+| `api/_ia.js` | Las bebidas en `describirRegistros()`. |
+| `firestore.rules` | Bloque de `bebidas`. **Publicar con la CLI antes de probar.** |
+| `styles.css` | Lo poco que no salga ya de las listas existentes. |
+
+Estimación: **200-250 líneas**. Es menos de lo que parece porque `crearLista()`
+—la factoría que ya montan las listas de comidas y de ejercicios— se lleva el
+listado, el filtro por día, el "Ver todas", la edición y el borrado. Lo propio de
+esta spec es el modelo, el alta y los chips.
+
+**Con desconfianza**: la 058 estimó 250-300 y salió en 408.
 
 ## 8. Decisiones tomadas
 
@@ -88,6 +174,15 @@ diario, más las reglas, el archivado y el reinicio.
   se bebe ocho veces al día y nadie lo escribiría ocho veces. Una cerveza sí se
   escribe.
 - **Fuera del análisis nutricional** (usuario, misma conversación).
+- **Colección propia, no un momento más de `comidas`** (usuario, 29 de agosto).
+  La pregunta se hizo primero dando por hecho que el momento nuevo salía casi
+  gratis; al mirar el código resultó que no, porque las comidas del día van
+  enteras al análisis. Ver el apartado 5.
+- **Ni puntos ni racha** (usuario, misma conversación). El argumento que dejó al
+  agua fuera —es el registro más barato de la app— aquí no vale: escribir una
+  bebida cuesta lo mismo que escribir una comida. El argumento propio es otro:
+  los puntos premian la conducta que te acerca al objetivo, y apuntar que te
+  bebiste tres cervezas no es eso. Puntuarlo sería premiarte por registrarlo.
 
 ## 9. Fuera de spec: ideas apuntadas
 

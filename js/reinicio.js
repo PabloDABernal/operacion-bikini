@@ -32,6 +32,10 @@ const MAXIMO_POR_LOTE = 500;
 export const TIPOS = [
   { clave: "pesajes", etiqueta: "pesajes", colecciones: ["pesajes"] },
   { clave: "comidas", etiqueta: "comidas", colecciones: ["comidas"] },
+  // Las bebidas (spec 062). Casilla propia y OBLIGATORIA, por lo mismo que el
+  // agua en la 061: borrarOperacion() nunca toca las colecciones de primer
+  // nivel, que es donde vive la operación en curso.
+  { clave: "bebidas", etiqueta: "bebidas", colecciones: ["bebidas"] },
   { clave: "ejercicios", etiqueta: "ejercicios", colecciones: ["ejercicios"] },
   { clave: "consejos", etiqueta: "consejos", colecciones: ["consejos"] },
   {

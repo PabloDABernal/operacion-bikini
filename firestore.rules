@@ -35,6 +35,12 @@ service cloud.firestore {
       allow read, write: if autorizado() && request.auth.uid == uid;
     }
 
+    // Las bebidas: lo que bebes que no es agua (spec 062). Colección propia y
+    // no un momento de comidas, para que no entren en el análisis nutricional.
+    match /usuarios/{uid}/bebidas/{bebidaId} {
+      allow read, write: if autorizado() && request.auth.uid == uid;
+    }
+
     match /usuarios/{uid}/ejercicios/{ejercicioId} {
       allow read, write: if autorizado() && request.auth.uid == uid;
     }

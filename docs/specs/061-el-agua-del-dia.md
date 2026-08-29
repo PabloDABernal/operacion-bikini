@@ -1,6 +1,6 @@
 # 061 — El agua del día
 
-- **Estado:** implementada y desplegada el 29 de agosto de 2026. **Pendiente de que el usuario la pruebe**; hasta entonces NO es completada.
+- **Estado:** ✅ completada (probada y confirmada por el usuario el 2026-08-29).
 - **Fecha:** 2026-08-29
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (v9: lo que bebes y lo que acompaña, decidida el 29 de agosto de 2026)", primera spec de las tres.
 

@@ -16,6 +16,7 @@ import { hoyISO, sumarDias } from "./fechas.js";
 import { listarPesajes } from "./pesajes.js";
 import { listarComidas } from "./comidas.js";
 import { listarEjercicios } from "./ejercicios.js";
+import { listarBebidas } from "./bebidas.js";
 import { leerAjustes, guardarAjustes, guardarLoAveriguado } from "./ajustes.js";
 import { listarOperaciones, crearOperacion } from "./operaciones.js";
 
@@ -106,10 +107,11 @@ async function recogerRegistros(uid, desde) {
   const limite = desde || desdeCuando();
   const recientes = (registros) => registros.filter((r) => r.fecha >= limite);
 
-  const [pesajes, comidas, ejercicios] = await Promise.all([
+  const [pesajes, comidas, ejercicios, bebidas] = await Promise.all([
     listarPesajes(uid),
     listarComidas(uid),
-    listarEjercicios(uid)
+    listarEjercicios(uid),
+    listarBebidas(uid)
   ]);
 
   return {
@@ -120,7 +122,9 @@ async function recogerRegistros(uid, desde) {
       texto,
       minutos,
       intensidad
-    }))
+    })),
+    // Las bebidas (spec 062). El agua no: es un contador, no un registro.
+    bebidas: recientes(bebidas).map(({ fecha, texto }) => ({ fecha, texto }))
   };
 }
 

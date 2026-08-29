@@ -251,6 +251,48 @@
       <button type="button" id="btn-reintentar-comidas" class="oculta">Reintentar</button>
       <ul id="lista-comidas"></ul>
       <button type="button" id="btn-desplegar-comidas" class="desplegar oculta"></button>
+
+      <!-- Las bebidas (spec 062). Colección propia y bloque propio: una cerveza
+           no es una cena, y así no se confunden ni en pantalla ni en los datos.
+           El agua no está aquí: es un contador y vive en Hoy (spec 061). -->
+      <h2>¿Has bebido algo?</h2>
+      <p class="explicacion">
+        El café, la caña, el refresco. El agua no: esa se cuenta en Hoy.
+      </p>
+      <form id="form-bebida">
+        <label for="bebida-texto">Qué has bebido</label>
+        <input type="text" id="bebida-texto" maxlength="200" placeholder="caña con Jose">
+
+        <div id="bloque-bebidas-frecuentes" class="oculta">
+          <div id="bebidas-frecuentes" class="chips"></div>
+        </div>
+
+        <button type="button" id="btn-fecha-hora-bebida" class="enlace">Cambiar fecha y hora</button>
+        <div id="campos-fecha-hora-bebida" class="oculta">
+          <label for="bebida-fecha">Fecha</label>
+          <input type="date" id="bebida-fecha">
+
+          <label for="bebida-hora">Hora</label>
+          <input type="time" id="bebida-hora">
+        </div>
+
+        <button type="submit" id="btn-guardar-bebida">Guardar bebida</button>
+      </form>
+
+      <p id="error-bebida" class="error" role="alert"></p>
+      <p id="guardado-bebida" class="guardado" role="status"></p>
+
+      <h2>Lo que llevo bebido</h2>
+      <div class="filtro-dia">
+        <label for="filtro-bebidas">Ver un día</label>
+        <input type="date" id="filtro-bebidas">
+        <button type="button" id="btn-quitar-filtro-bebidas" class="enlace oculta">Quitar filtro</button>
+      </div>
+      <button type="button" id="btn-desplegar-bebidas-arriba" class="desplegar oculta"></button>
+      <p id="estado-bebidas"></p>
+      <button type="button" id="btn-reintentar-bebidas" class="oculta">Reintentar</button>
+      <ul id="lista-bebidas"></ul>
+      <button type="button" id="btn-desplegar-bebidas" class="desplegar oculta"></button>
       </div>
 
       <!-- Sub-pestaña: Mi dieta -->
