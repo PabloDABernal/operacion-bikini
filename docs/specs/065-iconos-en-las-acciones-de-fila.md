@@ -104,6 +104,29 @@ para decir "✓ Guardado", lo que en un botón de icono habría borrado el dibuj
 lo habría devuelto como texto suelto. Ahora, si el botón tiene un SVG dentro, el
 aviso es solo el color: el icono ya es una marca de visto.
 
+## 8 ter. El cuarto intento, que es el bueno
+
+Tres arreglos no bastaron, y los tres compartían el mismo error de fondo:
+**intentar que el texto se portara bien** para que los iconos no se movieran.
+
+1. Recortar con puntos suspensivos. No funcionó en la fila con receta.
+2. Meter el texto en un `<span>` dentro del botón. Tampoco.
+3. Partirlo en dos líneas con `overflow-wrap: anywhere`. Arregló las filas
+   normales, pero **la de la receta seguía saliéndose**.
+
+El patrón estaba claro: siempre fallaba la misma fila, la única cuyo plato es un
+`<button>` (spec 060). Un `<button>` no gobierna su propio ancho mínimo, y cada
+intento era otra forma de pedirle que lo hiciera.
+
+**La fila de la dieta pasa a ser una rejilla** de cuatro columnas fijas: momento,
+plato, comido, editar. Las columnas de los iconos miden 44 px pase lo que pase, y
+la del texto es `minmax(0, 1fr)`, que no puede crecer por encima de su sitio. El
+texto se parte o se recorta dentro de su columna, pero **ya no puede empujar
+nada**, porque no es él quien coloca los iconos.
+
+La lección, para la próxima: cuando algo se sale de su sitio, es más barato
+fijarle el sitio que convencer al contenido de que no crezca.
+
 ## 9. Decisiones tomadas
 
 - **Solo las acciones que se repiten en cada fila, y la barra** (usuario, 29 de

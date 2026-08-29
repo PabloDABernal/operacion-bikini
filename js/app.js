@@ -2281,7 +2281,17 @@ id("btn-ver-semana").addEventListener("click", () => {
 
 function filaDeComida(indiceDia, indiceComida, comida) {
   const fila = document.createElement("div");
-  fila.className = "comida-dieta";
+  // `fila-plato` la convierte en una REJILLA de cuatro columnas fijas (etiqueta,
+  // plato, comido, editar). Antes era flexible, y con un plato largo los iconos
+  // salían disparados fuera del recuadro: tres intentos de que el texto se
+  // portara bien —recortar, meterlo en un span, partirlo en dos líneas— y en la
+  // fila con receta seguía escapándose, porque ahí el plato es un <button> y un
+  // button no gobierna su propio ancho mínimo.
+  //
+  // Con rejilla da igual lo que haga el texto: las columnas de los iconos miden
+  // 44 px y no se mueven. El texto se recorta contra su columna o se parte, pero
+  // nunca empuja nada.
+  fila.className = "comida-dieta fila-plato";
 
   fila.append(
     celda(etiquetaDeMomento(comida.momento), "resumen-etiqueta"),
@@ -2296,7 +2306,7 @@ function filaDeComida(indiceDia, indiceComida, comida) {
     const apuntar = botonDeIcono("comido", "Me lo he comido", () =>
       apuntarDeLaDieta(comida, apuntar)
     );
-    apuntar.classList.add("boton-comido");
+    apuntar.classList.add("boton-comido", "col-comido");
     fila.appendChild(apuntar);
   }
 
@@ -2312,6 +2322,9 @@ function filaDeComida(indiceDia, indiceComida, comida) {
       pintarDieta();
     }
   );
+  // La columna se fija a mano: una comida vacía no tiene botón de comido, y sin
+  // esto el lápiz se subiría a su hueco y dejaría de alinearse con los demás.
+  editar.classList.add("col-editar");
   fila.appendChild(editar);
 
   return fila;

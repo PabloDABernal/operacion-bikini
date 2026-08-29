@@ -1660,11 +1660,45 @@ button:disabled {
   border-top: 1px solid var(--borde);
 }
 
-/* La etiqueta del momento y el nombre del plato, a la misma altura que los
-   iconos, que miden 44 px de alto. */
-.comida-dieta .resumen-etiqueta,
-.comida-dieta .plato-nombre,
-.comida-dieta .plato-con-receta {
+/* Las filas de la semana de la dieta son una REJILLA, no una fila flexible.
+   Cuatro columnas fijas: momento, plato, "me lo he comido", editar.
+
+   Es la cuarta forma de intentar arreglar el mismo problema, y la primera que no
+   depende de que el texto se porte bien. Con flexbox, un plato largo empujaba
+   los iconos fuera del recuadro; se probó recortarlo con puntos suspensivos,
+   meterlo en un span dentro del botón y partirlo en dos líneas, y en la fila con
+   receta seguía escapándose, porque ahí el plato es un <button> y un <button> no
+   gobierna su propio ancho mínimo.
+
+   Con rejilla, las columnas de los iconos miden 44 px pase lo que pase. El texto
+   vive dentro de su columna: se parte o se recorta, pero no puede empujar nada.
+   `minmax(0, 1fr)` es lo que impide que la columna del texto crezca por encima
+   del sitio que le toca. */
+.fila-plato {
+  display: grid;
+  grid-template-columns: 5rem minmax(0, 1fr) 44px 44px;
+  align-items: start;
+}
+
+/* Cada icono, en su columna, siempre. Una comida vacía no tiene botón de
+   "comido"; sin fijar la columna, el lápiz se subiría a su hueco y dejaría de
+   alinearse con los de las demás filas. */
+.fila-plato .col-comido {
+  grid-column: 3;
+}
+
+.fila-plato .col-editar {
+  grid-column: 4;
+}
+
+/* El texto, contenido dentro de su columna pase lo que pase. */
+.fila-plato .resumen-etiqueta,
+.fila-plato .plato-nombre,
+.fila-plato .plato-con-receta {
+  min-width: 0;
+  overflow: hidden;
+  /* A la altura de la primera línea del texto, que es donde el ojo espera
+     encontrar el icono. Los iconos miden 44 px de alto. */
   padding-top: 0.7rem;
 }
 
@@ -1693,8 +1727,10 @@ button:disabled {
    bastaron: recortar con puntos suspensivos, y meter el texto en un span dentro
    del botón. */
 .plato-nombre {
-  flex: 1;
   min-width: 0;
+  /* Explícito: dentro de un <button> hay motores que no parten el texto por su
+     cuenta, y esta es justo la fila que se salía. */
+  white-space: normal;
   overflow-wrap: anywhere;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -1714,9 +1750,9 @@ button:disabled {
   /* Contenedor: el que se parte en dos líneas es el span de dentro. Un <button>
      no puede recortar ni partir bien su propio texto — mete el contenido en una
      caja anónima cuyo ancho mínimo es el del contenido. */
-  display: flex;
-  flex: 1;
+  display: block;
   min-width: 0;
+  overflow: hidden;
 }
 
 .plato-texto {
