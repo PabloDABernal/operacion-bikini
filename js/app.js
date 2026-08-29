@@ -812,6 +812,10 @@ const TRAZOS_DE_ICONO = {
   // a una celda vacía de la semana.
   comido: ["M20 6 9 17l-5-5"],
   anadir: ["M12 5v14", "M5 12h14"],
+  // El libro de la receta (spec 072). Antes el nombre del plato era un botón
+  // subrayado; ahora el nombre es texto normal como los demás y lo que se toca
+  // es este icono.
+  receta: ["M4 4h9a3 3 0 0 1 3 3v13a2 2 0 0 0-2-2H4Z", "M20 4h-4a3 3 0 0 0-3 3v13a2 2 0 0 1 2-2h5Z"],
   // Los de la barra de navegación (spec 066). Trazos simples a propósito: a
   // 24 px de alto, un dibujo con detalle se convierte en una mancha.
   peso: ["M12 3a9 9 0 0 1 9 9H3a9 9 0 0 1 9-9Z", "M12 12 15 8", "M3 12v7h18v-7"],
@@ -2426,8 +2430,31 @@ function filaDeComida(indiceDia, indiceComida, comida) {
 
   fila.append(
     celda(etiquetaDeMomento(comida.momento), "resumen-etiqueta"),
-    nombreDelPlato(indiceDia, indiceComida, comida)
+    nombreDelPlato(comida)
   );
+
+  // El icono de la receta, en su columna fija (spec 072). Solo si esa comida
+  // tiene una y sigue existiendo.
+  const receta = recetaDeLaComida(comida);
+  if (receta) {
+    const clave = `${indiceDia}-${indiceComida}`;
+    const abierta = recetaDeDietaAbierta === clave;
+
+    const verReceta = botonDeIcono(
+      "receta",
+      abierta ? "Cerrar la receta" : "Ver la receta",
+      () => {
+        // Solo una abierta a la vez: con veintiocho comidas en pantalla, varias
+        // desplegadas convierten la semana en un scroll sin fondo.
+        recetaDeDietaAbierta = abierta ? null : clave;
+        pintarDieta();
+      }
+    );
+    verReceta.classList.add("col-receta");
+    if (abierta) verReceta.classList.add("receta-abierta");
+    verReceta.setAttribute("aria-expanded", String(abierta));
+    fila.appendChild(verReceta);
+  }
 
   if (comida.texto) {
     // Iconos y no texto (spec 065): los botones de texto tenían ancho variable
@@ -2470,33 +2497,18 @@ function filaDeComida(indiceDia, indiceComida, comida) {
 //
 // Es un <button> y no un <span> con listener: así entra con el tabulador, se
 // activa con Enter y un lector de pantalla lo anuncia como algo que se pulsa.
-function nombreDelPlato(indiceDia, indiceComida, comida) {
-  const receta = recetaDeLaComida(comida);
-
-  if (!receta) return celda(comida.texto || "—", "plato-nombre");
-
-  const clave = `${indiceDia}-${indiceComida}`;
-  const abierta = recetaDeDietaAbierta === clave;
-
-  const boton = botonDeFila("", () => {
-    // Solo una abierta a la vez: con veintiocho comidas en pantalla, varias
-    // desplegadas convierten la semana en un scroll sin fondo.
-    recetaDeDietaAbierta = abierta ? null : clave;
-    pintarDieta();
-  });
-  boton.className = "plato-con-receta";
-  boton.setAttribute("aria-expanded", String(abierta));
-  boton.title = abierta ? "Cerrar la receta" : "Ver la receta";
-
-  // El texto va DENTRO de un span, y no suelto en el botón. No es un capricho:
-  // un <button> mete su contenido en una caja anónima cuyo ancho mínimo es el
-  // del contenido, y esa caja ignora el text-overflow del botón. Con el texto
-  // suelto, un plato largo no se recortaba, la fila crecía y los botones de la
-  // derecha se salían del recuadro. Era el descuadre que el usuario reportó el
-  // 29 de agosto, y le pasaba SOLO a los platos con receta, que son los únicos
-  // que se pintan como botón (spec 060).
-  boton.appendChild(celda(comida.texto, "plato-nombre plato-texto"));
-  return boton;
+// El nombre del plato: texto normal, siempre (spec 072).
+//
+// Entre las specs 060 y 071 esto era un <button> subrayado cuando la comida
+// tenía receta. Se veía distinto del resto de la semana y el usuario lo dijo:
+// "no me gusta cómo se ve lo que ya tengo la receta". Y de paso arrastró tres
+// intentos de arreglar un descuadre, porque un <button> no gobierna su propio
+// ancho mínimo.
+//
+// Ahora todos los platos se ven igual y lo que se toca para abrir la receta es
+// un icono aparte, en su columna. Menos listo y mucho más predecible.
+function nombreDelPlato(comida) {
+  return celda(comida.texto || "—", "plato-nombre");
 }
 
 // La receta enlazada a una comida de la semana, o null.

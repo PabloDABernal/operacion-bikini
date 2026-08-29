@@ -1745,8 +1745,7 @@ button:disabled {
 
 /* El texto, contenido dentro de su columna pase lo que pase. */
 .fila-plato .resumen-etiqueta,
-.fila-plato .plato-nombre,
-.fila-plato .plato-con-receta {
+.fila-plato .plato-nombre {
   min-width: 0;
   overflow: hidden;
   /* A la altura de la primera línea del texto, que es donde el ojo espera
@@ -1789,38 +1788,6 @@ button:disabled {
   line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-}
-
-.plato-con-receta {
-  background: none;
-  border: none;
-  padding: 0;
-  font: inherit;
-  color: inherit;
-  text-align: left;
-  cursor: pointer;
-  /* Contenedor: el que se parte en dos líneas es el span de dentro. Un <button>
-     no puede recortar ni partir bien su propio texto — mete el contenido en una
-     caja anónima cuyo ancho mínimo es el del contenido. */
-  display: block;
-  min-width: 0;
-  overflow: hidden;
-}
-
-.plato-texto {
-  text-decoration: underline dotted;
-  text-underline-offset: 3px;
-  text-decoration-color: var(--tinta-suave);
-}
-
-.plato-con-receta:hover .plato-texto,
-.plato-con-receta:focus-visible .plato-texto {
-  text-decoration-color: var(--acento);
-}
-
-.plato-con-receta[aria-expanded="true"] .plato-texto {
-  text-decoration-color: var(--acento);
-  font-weight: 600;
 }
 
 /* La receta desplegada bajo su comida. Sangrada a la izquierda, a la altura
