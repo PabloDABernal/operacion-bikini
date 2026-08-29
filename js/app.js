@@ -105,7 +105,9 @@ import {
   listarDespensa,
   ordenar as ordenarDespensa,
   cruzarConLaDespensa,
-  loQueTengo
+  loQueTengo,
+  guardarIngredientesDeReceta,
+  normalizar as normalizarIngrediente
 } from "./despensa.js";
 
 import {
@@ -1724,6 +1726,9 @@ id("form-receta").addEventListener("submit", async (evento) => {
     avisarGuardado("guardado-receta");
     cerrarFormularioDeReceta();
     await refrescarRecetas();
+    // También cuando la escribes tú: si la has puesto en una receta, cocinas
+    // con ello (spec 068).
+    await llenarDespensaDesde([resultado]);
   } catch {
     error.textContent = "No se ha podido guardar. Comprueba tu conexión.";
   } finally {
@@ -1824,6 +1829,13 @@ id("btn-menos-agua").addEventListener("click", () => cambiarVasos(-1));
 
 let despensaCargada = [];
 let ingredienteEditando = null;
+// Lo que se ha escrito en el buscador (spec 069). Filtra lo que se pinta, no lo
+// que hay: el recuento sigue hablando de la despensa entera.
+let busquedaDespensa = "";
+
+// Por debajo de esto, buscar no ayuda: la lista entera cabe de un vistazo y el
+// campo solo estorba.
+const MINIMO_PARA_BUSCAR = 8;
 
 function pintarDespensa() {
   const contenedor = id("lista-despensa");
@@ -1840,8 +1852,34 @@ function pintarDespensa() {
     ? `${enCasa} de ${despensaCargada.length} ingredientes en casa`
     : "";
 
-  despensaCargada.forEach((ingrediente) =>
+  // El buscador solo aparece cuando hay lista que buscar. Con cinco
+  // ingredientes es un campo que sobra en pantalla.
+  id("bloque-buscar-despensa").classList.toggle(
+    "oculta",
+    despensaCargada.length < MINIMO_PARA_BUSCAR
+  );
+
+  const visibles = ingredientesQueCoinciden();
+  visibles.forEach((ingrediente) =>
     contenedor.appendChild(filaDeIngrediente(ingrediente))
+  );
+
+  // Buscar algo que no está no es un error, pero hay que decirlo: si no, la
+  // lista se queda vacía sin explicación.
+  if (busquedaDespensa && visibles.length === 0) {
+    contenedor.appendChild(
+      celda(`Ningún ingrediente contiene "${busquedaDespensa}".`, "explicacion")
+    );
+  }
+}
+
+// Se compara normalizado, como todo lo demás de la despensa: buscar "jamon"
+// tiene que encontrar "Jamón".
+function ingredientesQueCoinciden() {
+  if (!busquedaDespensa) return despensaCargada;
+  const buscado = normalizarIngrediente(busquedaDespensa);
+  return despensaCargada.filter((ingrediente) =>
+    normalizarIngrediente(ingrediente.nombre).includes(buscado)
   );
 }
 
@@ -2021,6 +2059,27 @@ function reordenarDespensa() {
   pintarDespensa();
 }
 
+// Mete en la despensa los ingredientes de unas recetas recién guardadas (spec
+// 068). Sin marcar: que una receta mencione el azafrán no significa que lo
+// tengas. Los que ya estaban no se tocan.
+//
+// Nunca puede tumbar lo que la llamó: si la despensa falla, la receta y la dieta
+// ya están guardadas y eso es lo que importa. Se avisa por consola y punto.
+async function llenarDespensaDesde(recetas) {
+  let metidos = 0;
+  try {
+    for (const receta of recetas) {
+      metidos += await guardarIngredientesDeReceta(uidActual, receta, despensaCargada);
+      // Se relee entre recetas para que dos recetas con el mismo ingrediente no
+      // lo metan dos veces.
+      if (metidos) await refrescarDespensa();
+    }
+  } catch (fallo) {
+    console.error("No se han podido añadir ingredientes a la despensa:", fallo);
+  }
+  return metidos;
+}
+
 async function refrescarDespensa() {
   try {
     despensaCargada = await listarDespensa(uidActual);
@@ -2032,6 +2091,18 @@ async function refrescarDespensa() {
   }
   pintarDespensa();
 }
+
+id("buscar-despensa").addEventListener("input", (evento) => {
+  busquedaDespensa = evento.target.value.trim();
+  pintarDespensa();
+});
+
+id("btn-limpiar-busqueda").addEventListener("click", () => {
+  busquedaDespensa = "";
+  id("buscar-despensa").value = "";
+  pintarDespensa();
+  id("buscar-despensa").focus();
+});
 
 id("form-ingrediente").addEventListener("submit", async (evento) => {
   evento.preventDefault();
@@ -2057,14 +2128,11 @@ id("form-ingrediente").addEventListener("submit", async (evento) => {
     const repetido = ingredienteIgual(despensaCargada, resultado.nombre);
 
     if (repetido) {
-      // Volver a escribirlo no es equivocarse: es re-marcarlo. Por eso el aviso
-      // va en el hueco de "Guardado" y no en el de error.
-      if (!repetido.tengo) {
-        await marcarIngrediente(uidActual, repetido.id, true);
-        aviso = `"${repetido.nombre}" ya estaba en tu despensa: lo marco como que lo tienes.`;
-      } else {
-        aviso = `"${repetido.nombre}" ya está en tu despensa.`;
-      }
+      // Volver a escribirlo no es equivocarse, así que el aviso va en el hueco
+      // de "Guardado" y no en el de error. Pero YA NO LO MARCA (spec 068):
+      // desde que los ingredientes nacen sin marcar, escribir no dice nada
+      // sobre lo que hay en la nevera. Marcar es un acto aparte.
+      aviso = `"${repetido.nombre}" ya está en tu despensa.`;
     } else {
       await guardarIngrediente(uidActual, resultado.nombre);
       aviso = "Guardado";
@@ -2078,6 +2146,10 @@ id("form-ingrediente").addEventListener("submit", async (evento) => {
 
   avisarEnDespensa(aviso);
   campo.value = "";
+  // Si había una búsqueda puesta, lo recién añadido podría no coincidir con ella
+  // y parecería que no se ha guardado. Se limpia.
+  busquedaDespensa = "";
+  id("buscar-despensa").value = "";
   await refrescarDespensa();
   // Lo normal al estrenar esto es meter quince seguidos.
   campo.focus();
@@ -2541,6 +2613,11 @@ async function generarDieta(instrucciones, aprovechar = false) {
     recetasCargadas
   );
   await refrescarRecetas();
+
+  // Los ingredientes de lo que acaba de crearse, a la despensa (spec 068). Va
+  // aquí y no dentro de guardarRecetasPropuestas() para no meterle la despensa
+  // a js/dietas.js, que no tiene por qué saber que existe.
+  await llenarDespensaDesde(respuesta.recetas || []);
 
   // Primero la nueva y luego se borra la vieja: al revés queda un instante
   // sin ninguna dieta, y si algo falla en medio te quedas sin nada.

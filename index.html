@@ -401,6 +401,17 @@
       <p id="guardado-despensa" class="guardado" role="status"></p>
 
       <p id="recuento-despensa" class="registro-detalle"></p>
+
+      <!-- Buscador (spec 069). Con las recetas rellenando la despensa sola, la
+           lista crece sin que tú la escribas: encontrar uno concreto deja de ser
+           trivial. -->
+      <div id="bloque-buscar-despensa" class="oculta">
+        <label for="buscar-despensa">Buscar</label>
+        <div class="fila-alta">
+          <input type="text" id="buscar-despensa" placeholder="tomate" autocomplete="off">
+          <button type="button" id="btn-limpiar-busqueda" class="enlace">Limpiar</button>
+        </div>
+      </div>
       <div id="lista-despensa"></div>
       </div>
 

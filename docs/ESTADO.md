@@ -97,6 +97,8 @@ El 20 de agosto arrancó la **v4**, que sale de una auditoría de usabilidad hec
 | 065 | Iconos en las acciones de fila (v10) | 🚧 implementada y desplegada, **sin probar** |
 | 066 | La barra con iconos, y Ajustes de vuelta (v10) | 📝 borrador |
 | 067 | La tira de días, también en la tabla (v10) | 🚧 implementada y desplegada, **sin probar** |
+| 068 | La despensa se llena sola, y deja de mentir (v8+) | 🚧 implementada y desplegada, **sin probar** |
+| 069 | Buscar en la despensa (v8+) | 🚧 implementada y desplegada, **sin probar** |
 
 ## Qué toca ahora
 

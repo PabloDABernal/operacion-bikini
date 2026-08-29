@@ -289,6 +289,40 @@ guarda a qué receta apunta cada comida pero nunca la enseña.
 | 059 | La dieta aprovecha la despensa, y la receta del recetario enseña qué te falta |
 | 060 | Poder abrir la receta desde Mi dieta, con sus marcas |
 
+## Qué hará (ampliación de la v8, decidida el 29 de agosto de 2026)
+
+Sale de usar la despensa con datos de verdad. Dos cosas.
+
+**La despensa mentía.** Un ingrediente nuevo nacía marcado, con el argumento de
+que lo escribes cuando lo compras. Al usarlo resultó falso: la lista se escribe
+de golpe, y entonces la app afirma que tienes en casa lo que solo es "con esto
+cocino". El usuario lo dijo así: *"realmente solo tengo sal, así que no debería
+salir como que lo tengo"*.
+
+- **Los ingredientes nacen sin marcar.** La lista pasa a ser "con esto cocino" y
+  la casilla, "y ahora mismo lo tengo". Escribir no afirma nada sobre la nevera;
+  marcar sí, y es un acto aparte.
+- **Las recetas rellenan la despensa solas.** Al guardarse una receta —la pida la
+  IA o la escribas tú—, sus ingredientes entran en la despensa, sin marcar.
+- **Y entran limpios**: "200 g de lentejas" se guarda como "lentejas". Pero
+  "aceite de oliva" se guarda entero: la limpieza se equivoca del lado seguro.
+- **Un buscador en la despensa**, porque desde ahora crece sola y encontrar el
+  orégano en una lista de cuarenta deja de ser trivial.
+
+Qué NO hace:
+
+- **No quita nada de la despensa.** Entra solo, se borra a mano.
+- **No toca lo que ya tienes marcado.** No se migra nada: quien tenga la despensa
+  entera marcada la desmarca cuando quiera, que es justo la acción que esto le
+  devuelve.
+- **No agrupa por tipos.** Se descartó en favor del buscador: resuelve lo mismo,
+  cuesta mucho menos y no obliga a clasificar nada.
+
+| Spec | Qué |
+|---|---|
+| 068 | La despensa se llena sola, y deja de mentir |
+| 069 | Buscar en la despensa |
+
 ## Qué hará (v9: lo que bebes y lo que acompaña, decidida el 29 de agosto de 2026)
 
 Sale de la misma conversación que la v8, el 28 de agosto, y se aparcó para

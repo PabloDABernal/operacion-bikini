@@ -18,9 +18,9 @@ Esta spec **solo construye la despensa**. Que la dieta la aproveche es la 059.
    Mi dieta y Recetas.
 2. La primera vez está vacía y lo dice: explica para qué sirve en una frase, en
    vez de enseñar una lista vacía sin más.
-3. Hay un campo para escribir un ingrediente y un botón para añadirlo. Al
-   añadirlo aparece en la lista, **marcado como "lo tengo"**: si te molestas en
-   escribirlo es porque lo acabas de comprar.
+3. Hay un campo para escribir un ingrediente y un botón para añadirlo. *(Desde
+   la spec 068 aparece **sin marcar**: escribir la lista no dice nada sobre lo
+   que hay en la nevera.)*
 4. Cada ingrediente de la lista tiene una casilla. Marcada = lo tengo.
    Desmarcada = se me ha acabado, pero sigo cocinando con ello.
 5. Tocar la casilla lo guarda al instante, sin botón de guardar.
@@ -201,8 +201,11 @@ forzarla.
   inventario que hay que actualizar después de cada comida acaba mintiendo, y
   una despensa que miente es peor que no tenerla. Marcar y desmarcar es todo el
   mantenimiento que se le pide.
-- **Un ingrediente nuevo nace marcado** (usuario, misma conversación): lo
-  escribes cuando lo compras.
+- ~~**Un ingrediente nuevo nace marcado**~~ **REVERTIDO por la spec 068** el 29
+  de agosto. El argumento era "lo escribes cuando lo compras", y al usarlo
+  resultó falso: la lista se escribe de golpe, y desde la 068 la rellenan
+  también las recetas. La despensa acababa afirmando tener lo que solo era
+  "con esto cocino". **Ahora nacen sin marcar.**
 - **Vive en Comidas, no en Ajustes** (usuario): es material de cocina, va donde
   están las recetas y la dieta.
 - **La despensa no se archiva con la operación**: coherente con `recetas` y
