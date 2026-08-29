@@ -1,6 +1,6 @@
 # 065 — Iconos en las acciones de fila
 
-- **Estado:** borrador
+- **Estado:** implementada y desplegada el 29 de agosto de 2026. **Pendiente de que el usuario la pruebe**.
 - **Fecha:** 2026-08-29
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (v10)", segunda spec de las tres.
 
@@ -81,6 +81,28 @@ Ninguno.
 | `styles.css` | Lo justo, si hace falta ajustar la fila. |
 
 Estimación: **60-100 líneas**.
+
+## 8 bis. Lo que salió al implementarla
+
+**El descuadre no era lo que decía la spec 064.** Esta spec se escribió creyendo
+que la causa era el ancho variable de los botones. Al ver la captura del usuario
+quedó claro que era otra cosa, y más concreta: el plato con receta se pinta como
+`<button>` desde la spec 060, y **un `<button>` no puede recortar su propio
+texto**. El navegador mete el contenido del botón en una caja anónima cuyo ancho
+mínimo es el del contenido y que ignora el `text-overflow` del botón. Resultado:
+ese plato no se encogía, la fila crecía y los botones se salían del recuadro.
+
+Por eso solo se descuadraba **la fila que tenía receta**, que es lo que se ve en
+la captura: las demás son `<span>` y se recortan bien.
+
+Arreglado metiendo el texto en un `<span>` dentro del botón, con el recorte en el
+span y el botón como contenedor flexible. El ancho fijo de los iconos sigue
+valiendo —ahora las filas miden todas igual—, pero **no era la causa**.
+
+**`responderEnBoton()` tuvo que aprender de iconos.** Cambiaba el `textContent`
+para decir "✓ Guardado", lo que en un botón de icono habría borrado el dibujo y
+lo habría devuelto como texto suelto. Ahora, si el botón tiene un SVG dentro, el
+aviso es solo el color: el icono ya es una marca de visto.
 
 ## 9. Decisiones tomadas
 

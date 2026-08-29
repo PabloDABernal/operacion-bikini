@@ -627,10 +627,38 @@ button:disabled {
   justify-content: center;
   min-width: 44px;
   min-height: 44px;
+  /* Nunca se encoge. Es lo que hace que todas las filas de la semana midan
+     igual y la columna del plato acabe siempre en el mismo sitio (spec 065). */
+  flex: 0 0 auto;
   padding: 0;
   background: none;
   border: none;
   color: var(--tinta-suave);
+}
+
+/* Los estados del botón de "me lo he comido" cuando es un icono (spec 065).
+   Las reglas de abajo dan por hecho un botón con borde y texto; un icono no
+   tiene ni una cosa ni la otra, así que aquí manda el color. */
+.icono-accion.boton-comido {
+  color: var(--apoyo);
+}
+
+.icono-accion.boton-confirmado {
+  background: var(--apoyo);
+  color: var(--fondo);
+  border-radius: var(--radio-s);
+}
+
+.icono-accion.boton-fallido {
+  background: none;
+  color: var(--error);
+}
+
+/* Un icono confirmado se queda deshabilitado 3 segundos. Sin esto se vería
+   medio apagado justo cuando tiene que decir "hecho". */
+.icono-accion.boton-confirmado:disabled,
+.icono-accion.boton-fallido:disabled {
+  opacity: 1;
 }
 
 .icono-accion:hover,
@@ -1651,17 +1679,31 @@ button:disabled {
   color: inherit;
   text-align: left;
   cursor: pointer;
+  /* El botón es un contenedor flexible y el que se recorta es el span de
+     dentro. Un <button> no puede recortar su propio texto: mete el contenido en
+     una caja anónima cuyo ancho mínimo es el del contenido y que ignora el
+     text-overflow del botón. Con el texto suelto, un plato largo empujaba los
+     botones de la fila fuera del recuadro. */
+  display: flex;
+  min-width: 0;
+}
+
+.plato-texto {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   text-decoration: underline dotted;
   text-underline-offset: 3px;
   text-decoration-color: var(--tinta-suave);
 }
 
-.plato-con-receta:hover,
-.plato-con-receta:focus-visible {
+.plato-con-receta:hover .plato-texto,
+.plato-con-receta:focus-visible .plato-texto {
   text-decoration-color: var(--acento);
 }
 
-.plato-con-receta[aria-expanded="true"] {
+.plato-con-receta[aria-expanded="true"] .plato-texto {
   text-decoration-color: var(--acento);
   font-weight: 600;
 }

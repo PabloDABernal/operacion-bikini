@@ -395,15 +395,23 @@ const temporizadoresDeBoton = new WeakMap();
 function responderEnBoton(boton, hayQueCelebrar) {
   if (!boton) return;
 
+  // Un botón de icono no tiene texto que cambiar: si se le escribiera encima se
+  // perdería el dibujo, y al restaurarlo volvería como texto suelto. En esos el
+  // aviso es solo el color, que para eso el icono ya es una marca de visto
+  // (spec 065).
+  const esIcono = Boolean(boton.querySelector("svg"));
+
   // Solo la primera vez: si se vuelve a pulsar en mitad de un aviso, el texto
   // de partida ya no es el original y se quedaría congelado en "✓ Guardado".
-  if (boton.dataset.textoOriginal === undefined) {
+  if (!esIcono && boton.dataset.textoOriginal === undefined) {
     boton.dataset.textoOriginal = boton.textContent;
   }
 
   clearTimeout(temporizadoresDeBoton.get(boton));
 
-  boton.textContent = hayQueCelebrar ? "✓ Guardado" : "✗ No se ha guardado";
+  if (!esIcono) {
+    boton.textContent = hayQueCelebrar ? "✓ Guardado" : "✗ No se ha guardado";
+  }
   boton.classList.remove("boton-confirmado", "boton-fallido");
   boton.classList.add(hayQueCelebrar ? "boton-confirmado" : "boton-fallido");
   boton.disabled = true;
@@ -413,7 +421,7 @@ function responderEnBoton(boton, hayQueCelebrar) {
   temporizadoresDeBoton.set(
     boton,
     setTimeout(() => {
-      boton.textContent = boton.dataset.textoOriginal;
+      if (!esIcono) boton.textContent = boton.dataset.textoOriginal;
       boton.classList.remove("boton-confirmado", "boton-fallido");
       boton.disabled = false;
       temporizadoresDeBoton.delete(boton);
@@ -790,7 +798,11 @@ function botonDeFila(texto, alPulsar) {
 // a mantenerlos sincronizados.
 const TRAZOS_DE_ICONO = {
   lapiz: ["M12 20h9", "M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"],
-  papelera: ["M3 6h18", "M8 6V4h8v2", "M19 6l-1 14H6L5 6", "M10 11v6", "M14 11v6"]
+  papelera: ["M3 6h18", "M8 6V4h8v2", "M19 6l-1 14H6L5 6", "M10 11v6", "M14 11v6"],
+  // Spec 065. La marca es "me lo he comido" / "lo he hecho"; el más, añadir algo
+  // a una celda vacía de la semana.
+  comido: ["M20 6 9 17l-5-5"],
+  anadir: ["M12 5v14", "M5 12h14"]
 };
 
 function iconoDeAccion(nombre) {
@@ -2259,20 +2271,29 @@ function filaDeComida(indiceDia, indiceComida, comida) {
   );
 
   if (comida.texto) {
-    const apuntar = botonDeFila("Me lo he comido", () =>
+    // Iconos y no texto (spec 065): los botones de texto tenían ancho variable
+    // -"Me lo he comido" solo sale con texto, y el otro dice "Editar" o "+"-,
+    // así que la columna del plato acababa en un sitio distinto en cada fila.
+    // Con iconos todos miden lo mismo y las filas se alinean solas.
+    const apuntar = botonDeIcono("comido", "Me lo he comido", () =>
       apuntarDeLaDieta(comida, apuntar)
     );
-    apuntar.className = "boton-comido";
+    apuntar.classList.add("boton-comido");
     fila.appendChild(apuntar);
   }
 
-  const editar = botonDeFila(comida.texto ? "Editar" : "+", () => {
-    celdaEditando = `${indiceDia}-${indiceComida}`;
-    // Editar cierra la receta: el formulario ocupa el sitio de la fila y dejar
-    // la receta colgando debajo la separaría de aquello a lo que pertenece.
-    recetaDeDietaAbierta = null;
-    pintarDieta();
-  });
+  const editar = botonDeIcono(
+    comida.texto ? "lapiz" : "anadir",
+    comida.texto ? "Editar" : "Añadir comida",
+    () => {
+      celdaEditando = `${indiceDia}-${indiceComida}`;
+      // Editar cierra la receta: el formulario ocupa el sitio de la fila y
+      // dejar la receta colgando debajo la separaría de aquello a lo que
+      // pertenece.
+      recetaDeDietaAbierta = null;
+      pintarDieta();
+    }
+  );
   fila.appendChild(editar);
 
   return fila;
@@ -2295,7 +2316,7 @@ function nombreDelPlato(indiceDia, indiceComida, comida) {
   const clave = `${indiceDia}-${indiceComida}`;
   const abierta = recetaDeDietaAbierta === clave;
 
-  const boton = botonDeFila(comida.texto, () => {
+  const boton = botonDeFila("", () => {
     // Solo una abierta a la vez: con veintiocho comidas en pantalla, varias
     // desplegadas convierten la semana en un scroll sin fondo.
     recetaDeDietaAbierta = abierta ? null : clave;
@@ -2304,6 +2325,15 @@ function nombreDelPlato(indiceDia, indiceComida, comida) {
   boton.className = "registro-texto plato-con-receta";
   boton.setAttribute("aria-expanded", String(abierta));
   boton.title = abierta ? "Cerrar la receta" : "Ver la receta";
+
+  // El texto va DENTRO de un span, y no suelto en el botón. No es un capricho:
+  // un <button> mete su contenido en una caja anónima cuyo ancho mínimo es el
+  // del contenido, y esa caja ignora el text-overflow del botón. Con el texto
+  // suelto, un plato largo no se recortaba, la fila crecía y los botones de la
+  // derecha se salían del recuadro. Era el descuadre que el usuario reportó el
+  // 29 de agosto, y le pasaba SOLO a los platos con receta, que son los únicos
+  // que se pintan como botón (spec 060).
+  boton.appendChild(celda(comida.texto, "plato-texto"));
   return boton;
 }
 
@@ -2807,12 +2837,14 @@ function filaDeSesion(indiceDia, sesion) {
     )
   );
 
-  const hecho = botonDeFila("Lo he hecho", () => apuntarDeLaTabla(sesion, hecho));
-  hecho.className = "boton-comido";
+  const hecho = botonDeIcono("comido", "Lo he hecho", () =>
+    apuntarDeLaTabla(sesion, hecho)
+  );
+  hecho.classList.add("boton-comido");
   fila.appendChild(hecho);
 
   fila.appendChild(
-    botonDeFila("Editar", () => {
+    botonDeIcono("lapiz", "Editar", () => {
       diaEditando = indiceDia;
       pintarTabla();
     })

@@ -21,9 +21,15 @@ botón dice "Editar" o "+" según esté llena o vacía. Como cada fila tiene bot
 de distinto ancho, **la columna del plato acaba en un sitio distinto en cada
 fila** y la semana se lee torcida.
 
-Los iconos de la spec 065 arreglan el ancho de los botones. Esta spec arregla lo
-otro: veintiocho filas seguidas en pantalla son demasiado para encontrar lo de
-hoy.
+**⚠️ Este diagnóstico resultó estar equivocado**, y se corrigió el mismo 29 de
+agosto al ver una captura del usuario. La causa real era otra y más concreta: el
+plato con receta se pinta como `<button>` desde la spec 060, y **un `<button>` no
+puede recortar su propio texto** (el contenido va en una caja anónima que ignora
+el `text-overflow` del botón). Solo se descuadraba la fila con receta; las demás
+son `<span>` y se recortaban bien. Está explicado y arreglado en la **spec 065**.
+
+Lo que esta spec arregla sigue siendo válido, pero es lo otro: veintiocho filas
+seguidas en pantalla son demasiadas para encontrar lo de hoy.
 
 ## 3. Criterio de "esto funciona"
 
