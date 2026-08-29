@@ -18,6 +18,53 @@ import { campoHora } from "./pesajes.js";
 
 const MAX_CARACTERES = 500;
 
+// Los acompañamientos de una comida (spec 063): "3 trozos de pan", "un biscote".
+// Van DENTRO de la comida y no como registro aparte, que es el motivo entero de
+// la spec: apuntarlos al lado le dice a la IA que picaste entre horas, que es lo
+// contrario de lo que pasó.
+export const MAX_ACOMPANAMIENTOS = 5;
+export const MAX_ACOMPANAMIENTO = 60;
+
+// Solo para comparar duplicados. Se guarda tal y como se escribe.
+function clave(texto) {
+  return String(texto ?? "")
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/\p{Mn}/gu, "");
+}
+
+// Devuelve { texto } o { error }. Lo usa el formulario al añadir un chip, antes
+// de que la comida exista.
+export function validarAcompanamiento(bruto, yaPuestos = []) {
+  const texto = String(bruto ?? "").trim();
+
+  if (texto === "") return { error: "Escribe con qué lo acompañaste." };
+  if (texto.length > MAX_ACOMPANAMIENTO) {
+    return { error: `Máximo ${MAX_ACOMPANAMIENTO} caracteres.` };
+  }
+  if (yaPuestos.length >= MAX_ACOMPANAMIENTOS) {
+    return {
+      error: `Como mucho ${MAX_ACOMPANAMIENTOS}. Si son más, es otra comida.`
+    };
+  }
+  if (yaPuestos.some((puesto) => clave(puesto) === clave(texto))) {
+    return { error: `"${texto}" ya está.` };
+  }
+
+  return { texto };
+}
+
+// Lo que llegue de fuera se deja utilizable: las comidas de antes de la spec 063
+// no tienen el campo, y un documento tocado a mano podría traer cualquier cosa.
+export function acompanamientosDe(comida) {
+  if (!Array.isArray(comida?.acompanamientos)) return [];
+  return comida.acompanamientos
+    .map((uno) => String(uno ?? "").trim().slice(0, MAX_ACOMPANAMIENTO))
+    .filter(Boolean)
+    .slice(0, MAX_ACOMPANAMIENTOS);
+}
+
 // El orden importa: es el orden natural del día y el que se usa para ordenar
 // la lista. Firestore ordenaría alfabéticamente (cena, comida, desayuno...),
 // que no es lo que queremos, así que esto se resuelve aquí.
@@ -46,7 +93,7 @@ function coleccionDe(uid) {
 }
 
 // Devuelve { texto, momento, fecha } o { error }.
-export function validarComida(textoBruto, momento, fecha, hora) {
+export function validarComida(textoBruto, momento, fecha, hora, acompanamientos = []) {
   const texto = String(textoBruto ?? "").trim();
 
   if (texto === "") {
@@ -65,23 +112,44 @@ export function validarComida(textoBruto, momento, fecha, hora) {
     return { error: errorHora };
   }
 
-  return { texto, momento, fecha, hora: hora || "" };
+  return {
+    texto,
+    momento,
+    fecha,
+    hora: hora || "",
+    acompanamientos: acompanamientosDe({ acompanamientos })
+  };
 }
 
-export function guardarComida(uid, texto, momento, fecha, hora) {
+export function guardarComida(uid, texto, momento, fecha, hora, acompanamientos = []) {
   const comida = { texto, momento, fecha, creadoEn: serverTimestamp() };
   if (hora) comida.hora = hora;
+  // Solo si hay algo: una comida sin acompañamientos se guarda exactamente como
+  // se guardaba antes de la spec 063, sin un array vacío de relleno.
+  const lista = acompanamientosDe({ acompanamientos });
+  if (lista.length) comida.acompanamientos = lista;
   return addDoc(coleccionDe(uid), comida);
 }
 
 // creadoEn no se toca al editar: es lo que desempata el orden entre dos
 // registros del mismo día y momento.
-export function actualizarComida(uid, comidaId, texto, momento, fecha, hora) {
+export function actualizarComida(
+  uid,
+  comidaId,
+  texto,
+  momento,
+  fecha,
+  hora,
+  acompanamientos = []
+) {
   return updateDoc(doc(db, "usuarios", uid, "comidas", comidaId), {
     texto,
     momento,
     fecha,
     hora: campoHora(hora),
+    // Aquí SÍ se escribe siempre, aunque quede vacío: al editar hay que poder
+    // quitarlos todos, y omitir el campo dejaría los de antes puestos.
+    acompanamientos: acompanamientosDe({ acompanamientos }),
     editadoEn: serverTimestamp()
   });
 }

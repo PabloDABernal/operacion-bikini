@@ -222,6 +222,17 @@
         <label for="comida-momento">Momento</label>
         <select id="comida-momento"></select>
 
+        <!-- Acompañamientos (spec 063). Van DENTRO de la comida y no como
+             registro aparte: apuntarlos al lado le diría a la IA que picaste
+             entre horas, que es lo contrario de lo que pasó. -->
+        <label for="comida-acompanamiento">¿Con qué lo acompañaste? (opcional)</label>
+        <div class="fila-alta">
+          <input type="text" id="comida-acompanamiento" maxlength="60"
+            placeholder="3 trozos de pan" autocomplete="off">
+          <button type="button" id="btn-anadir-acompanamiento">Añadir</button>
+        </div>
+        <div id="acompanamientos-comida" class="chips"></div>
+
         <!-- Fecha y hora plegadas (spec 037): casi siempre es "ahora", así
              que no hace falta verlas para guardar. -->
         <button type="button" id="btn-fecha-hora-comida" class="enlace">Cambiar fecha y hora</button>

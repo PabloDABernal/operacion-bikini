@@ -1,6 +1,6 @@
 # 066 — La barra con iconos, y Ajustes de vuelta
 
-- **Estado:** implementada y desplegada el 29 de agosto de 2026. **Pendiente de que el usuario la pruebe**.
+- **Estado:** ✅ completada (probada y confirmada por el usuario el 2026-08-29). Al estrenarla tumbó la app entera; ver el apartado 10.
 - **Fecha:** 2026-08-29
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (v10)", tercera spec, y su sub-apartado "Ajustes vuelve a la barra: esto revierte una decisión anterior".
 
@@ -122,7 +122,20 @@ Estimación: **100-150 líneas**, casi todo iconos y CSS.
   precio es que un icono sin palabra hay que aprendérselo; se compensa con el
   `title` y el `aria-label`.
 
-## 10. Fuera de spec: ideas apuntadas
+## 10. Lo que salió al estrenarla
+
+**La app no arrancaba.** El bloque que pinta los iconos se escribió arriba del
+todo, junto a los demás listeners de la barra, y llama a `iconoDeAccion()`, que
+lee `TRAZOS_DE_ICONO` — una `const` declarada 450 líneas más abajo. La función se
+iza; la constante no. Al ejecutarse el bloque, la constante seguía en su **zona
+muerta temporal** y lanzaba un `ReferenceError`, que **aborta la evaluación del
+módulo entero**: la app se quedaba en "Cargando…" sin más pista.
+
+Corregido moviéndolo debajo de sus dependencias, con el aviso escrito al lado. Y
+envuelto en `try/catch`, que es la lección de fondo: **pintar unos iconos es
+decoración, y la decoración no puede impedir que arranque la app**.
+
+## 11. Fuera de spec: ideas apuntadas
 
 - Enseñar el nombre de la sección como título dentro de la pantalla al entrar,
   para que el icono no haya que adivinarlo.

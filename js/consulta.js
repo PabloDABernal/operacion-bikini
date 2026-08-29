@@ -116,7 +116,12 @@ async function recogerRegistros(uid, desde) {
 
   return {
     pesajes: recientes(pesajes).map(({ fecha, pesoKg }) => ({ fecha, pesoKg })),
-    comidas: recientes(comidas).map(({ fecha, momento, texto }) => ({ fecha, momento, texto })),
+    comidas: recientes(comidas).map(({ fecha, momento, texto, acompanamientos }) => ({
+      fecha,
+      momento,
+      texto,
+      acompanamientos: acompanamientos || []
+    })),
     ejercicios: recientes(ejercicios).map(({ fecha, texto, minutos, intensidad }) => ({
       fecha,
       texto,

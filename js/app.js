@@ -130,6 +130,9 @@ import {
 import {
   MOMENTOS,
   MOMENTO_POR_DEFECTO,
+  MAX_ACOMPANAMIENTOS,
+  validarAcompanamiento,
+  acompanamientosDe,
   etiquetaDeMomento,
   validarComida,
   guardarComida,
@@ -2687,7 +2690,12 @@ async function registrosRecientes() {
       pesoKg
     })),
     comidas: recientes(listaComidas.obtenerRegistros()).map(
-      ({ fecha, momento, texto }) => ({ fecha, momento, texto })
+      ({ fecha, momento, texto, acompanamientos }) => ({
+        fecha,
+        momento,
+        texto,
+        acompanamientos: acompanamientos || []
+      })
     ),
     ejercicios: recientes(listaEjercicios.obtenerRegistros()).map(
       ({ fecha, texto, minutos, intensidad }) => ({
@@ -3309,6 +3317,128 @@ async function repetirComida(habitual, boton) {
   }
 }
 
+// --- Acompañamientos de una comida (spec 063) ----------------------------
+//
+// Lo que va CON la comida: "3 trozos de pan", "un biscote". Dentro de la comida
+// y no como registro aparte, que es el motivo entero de la spec.
+//
+// Se guardan aquí mientras se rellena el formulario, porque la comida todavía no
+// existe: solo viajan a Firestore al guardar.
+let acompanamientosNuevos = [];
+
+// Pinta una lista de acompañamientos como chips. `alQuitar` la hace editable;
+// sin ella son solo etiquetas, que es lo que hace falta al enseñarlos.
+function pintarChipsDeAcompanamiento(contenedor, lista, alQuitar) {
+  contenedor.innerHTML = "";
+
+  lista.forEach((texto, indice) => {
+    const chip = botonDeFila(`${texto} ✕`, () => alQuitar(indice));
+    chip.className = "chip chip-quitable";
+    chip.setAttribute("aria-label", `Quitar ${texto}`);
+    chip.title = `Quitar ${texto}`;
+    contenedor.appendChild(chip);
+  });
+}
+
+function pintarAcompanamientosNuevos() {
+  pintarChipsDeAcompanamiento(
+    id("acompanamientos-comida"),
+    acompanamientosNuevos,
+    (indice) => {
+      acompanamientosNuevos.splice(indice, 1);
+      pintarAcompanamientosNuevos();
+    }
+  );
+  // El campo se apaga al llegar al tope, en vez de dejarte escribir para luego
+  // decirte que no.
+  id("comida-acompanamiento").disabled =
+    acompanamientosNuevos.length >= MAX_ACOMPANAMIENTOS;
+}
+
+id("btn-anadir-acompanamiento").addEventListener("click", () => {
+  const campo = id("comida-acompanamiento");
+  const error = id("error-comida");
+
+  const resultado = validarAcompanamiento(campo.value, acompanamientosNuevos);
+  if (resultado.error) {
+    error.textContent = resultado.error;
+    return;
+  }
+
+  error.textContent = "";
+  acompanamientosNuevos.push(resultado.texto);
+  campo.value = "";
+  pintarAcompanamientosNuevos();
+  campo.focus();
+});
+
+// Enter en el campo añade el chip, no envía la comida entera: dentro de un
+// <form>, un input suelto dispara el submit y guardaría la comida a medias.
+id("comida-acompanamiento").addEventListener("keydown", (evento) => {
+  if (evento.key !== "Enter") return;
+  evento.preventDefault();
+  id("btn-anadir-acompanamiento").click();
+});
+
+// El editor de acompañamientos de una fila en edición (spec 063). Devuelve la
+// caja para meterla entre los campos, y el propio campo de texto para que quien
+// valide pueda descartar lo que quedó escrito sin confirmar.
+//
+// Muta la lista que recibe: es la misma que se le pasará a validarComida(), así
+// que quitar o añadir un chip ya queda reflejado sin pasar nada más.
+function editorDeAcompanamientos(lista) {
+  const caja = document.createElement("div");
+  caja.className = "edicion-acompanamientos";
+
+  const campo = document.createElement("input");
+  campo.type = "text";
+  campo.maxLength = 60;
+  campo.placeholder = "3 trozos de pan";
+  campo.className = "edicion-texto";
+
+  const chips = document.createElement("div");
+  chips.className = "chips";
+
+  const repintar = () => {
+    pintarChipsDeAcompanamiento(chips, lista, (indice) => {
+      lista.splice(indice, 1);
+      repintar();
+    });
+    campo.disabled = lista.length >= MAX_ACOMPANAMIENTOS;
+  };
+
+  const anadir = botonDeFila("Añadir", () => {
+    const resultado = validarAcompanamiento(campo.value, lista);
+    // El error se enseña en el propio campo y no en el hueco de error de la
+    // lista: aquí hay una fila en edición y el error de arriba hablaría de otra
+    // cosa.
+    campo.setCustomValidity(resultado.error || "");
+    campo.reportValidity();
+    if (resultado.error) return;
+
+    lista.push(resultado.texto);
+    campo.value = "";
+    repintar();
+    campo.focus();
+  });
+  anadir.className = "enlace";
+
+  campo.addEventListener("input", () => campo.setCustomValidity(""));
+  campo.addEventListener("keydown", (evento) => {
+    if (evento.key !== "Enter") return;
+    evento.preventDefault();
+    anadir.click();
+  });
+
+  const fila = document.createElement("div");
+  fila.className = "fila-alta";
+  fila.append(campo, anadir);
+
+  caja.append(fila, chips);
+  repintar();
+  return { caja, campo };
+}
+
 const listaComidas = crearLista({
   alRefrescar: () => refrescarPantallas(),
   lista: "lista-comidas",
@@ -3327,21 +3457,44 @@ const listaComidas = crearLista({
   confirmacionBorrado: "¿Borrar esta comida?",
   cargar: listarComidas,
   borrar: borrarComida,
-  fila: (comida) => ({
-    que: comida.texto,
-    detalles: [
-      formatearFechaConHora(comida.fecha, comida.hora),
-      etiquetaDeMomento(comida.momento)
-    ]
-  }),
+  fila: (comida) => {
+    const conQue = acompanamientosDe(comida);
+    return {
+      que: comida.texto,
+      // Los acompañamientos van en la MISMA segunda línea que la hora y el
+      // momento, con un "+" delante: son parte de esa comida, no otra entrada.
+      detalles: [
+        formatearFechaConHora(comida.fecha, comida.hora),
+        etiquetaDeMomento(comida.momento),
+        conQue.length ? `+ ${conQue.join(", ")}` : ""
+      ]
+    };
+  },
   campos: (comida) => {
     const fecha = campoFecha(comida.fecha);
     const hora = campoHoraEdicion(comida.hora);
     const momento = campoDesplegable(MOMENTOS, comida.momento, "edicion-momento");
     const texto = campoArea(comida.texto, "edicion-texto");
+
+    // Copia: si se cancela la edición, la comida original no debe haber
+    // cambiado. `acompanamientosDe` ya devuelve un array nuevo.
+    const conQue = acompanamientosDe(comida);
+    const { caja, campo } = editorDeAcompanamientos(conQue);
+
     return {
-      elementos: [fecha, hora, momento, texto],
-      validar: () => validarComida(texto.value, momento.value, fecha.value, hora.value)
+      elementos: [fecha, hora, momento, texto, caja],
+      validar: () => {
+        // Lo que quedó escrito sin confirmar se descarta, igual que en el alta:
+        // si no es un chip, no es un acompañamiento.
+        campo.value = "";
+        return validarComida(
+          texto.value,
+          momento.value,
+          fecha.value,
+          hora.value,
+          conQue
+        );
+      }
     };
   },
   actualizar: (uid, comidaId, valores) =>
@@ -3351,7 +3504,8 @@ const listaComidas = crearLista({
       valores.texto,
       valores.momento,
       valores.fecha,
-      valores.hora
+      valores.hora,
+      valores.acompanamientos
     )
 });
 
@@ -3372,7 +3526,8 @@ id("form-comida").addEventListener("submit", async (evento) => {
     id("comida-texto").value,
     id("comida-momento").value,
     id("comida-fecha").value,
-    id("comida-hora").value
+    id("comida-hora").value,
+    acompanamientosNuevos
   );
   if (resultado.error) {
     error.textContent = resultado.error;
@@ -3387,10 +3542,16 @@ id("form-comida").addEventListener("submit", async (evento) => {
       resultado.texto,
       resultado.momento,
       resultado.fecha,
-      resultado.hora
+      resultado.hora,
+      resultado.acompanamientos
     );
     avisarGuardado("guardado-comida");
     id("comida-texto").value = "";
+    // El campo de acompañamiento se vacía con la comida: son de esa comida, no
+    // de la siguiente.
+    acompanamientosNuevos = [];
+    id("comida-acompanamiento").value = "";
+    pintarAcompanamientosNuevos();
     id("comida-momento").value = MOMENTO_POR_DEFECTO;
     id("comida-fecha").value = hoyISO();
     id("comida-hora").value = horaActual();
@@ -5223,7 +5384,9 @@ function rellenarDesplegable(elementoId, opciones, porDefecto) {
 }
 
 function limpiarFormularios() {
-  ["peso", "comida-texto", "ejercicio-texto", "ejercicio-minutos", "bebida-texto"].forEach(
+  acompanamientosNuevos = [];
+  pintarAcompanamientosNuevos();
+  ["peso", "comida-texto", "comida-acompanamiento", "ejercicio-texto", "ejercicio-minutos", "bebida-texto"].forEach(
     (campo) => {
       id(campo).value = "";
     }

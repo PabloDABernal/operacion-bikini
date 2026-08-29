@@ -1414,6 +1414,37 @@ button:disabled {
   font-size: 0.85rem;
 }
 
+/* Los acompañamientos de una comida, como chips con su aspa (spec 063). El
+   aspa va dentro del propio texto del chip, no como segundo botón: un botón
+   dentro de otro no es HTML válido, y a 44 px un chip entero ya es zona táctil
+   de sobra. */
+.chip-quitable {
+  border-color: var(--acento);
+  color: var(--tinta);
+}
+
+.chip-quitable:hover,
+.chip-quitable:focus-visible {
+  border-color: var(--error);
+  color: var(--error);
+}
+
+#acompanamientos-comida:empty,
+.edicion-acompanamientos .chips:empty {
+  display: none;
+}
+
+#acompanamientos-comida {
+  margin-top: var(--e2);
+}
+
+.edicion-acompanamientos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e2);
+  width: 100%;
+}
+
 /* El agua del día (spec 061). El progreso en grande porque es el dato, y el
    "+1 vaso" como acción principal porque se toca ocho veces al día. */
 .agua-progreso {

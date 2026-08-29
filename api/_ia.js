@@ -65,7 +65,15 @@ function describirRegistros({ pesajes = [], comidas = [], ejercicios = [], bebid
 
   lineas.push("\nCOMIDAS:");
   lineas.push(
-    recortar(comidas, MAXIMO_COMIDAS, (c) => `- ${c.fecha} (${c.momento}): ${c.texto}`)
+    // Los acompañamientos van PEGADOS a su comida, en la misma línea y con un
+    // "+" (spec 063). Nunca en una línea propia: eso se lee como otra ingesta,
+    // que es justo lo que la spec vino a evitar. Lo que comió fueron lentejas
+    // CON pan, no lentejas y luego pan.
+    recortar(comidas, MAXIMO_COMIDAS, (c) => {
+      const conQue = Array.isArray(c.acompanamientos) ? c.acompanamientos.filter(Boolean) : [];
+      const extra = conQue.length ? ` + ${conQue.join(", ")}` : "";
+      return `- ${c.fecha} (${c.momento}): ${c.texto}${extra}`;
+    })
   );
 
   lineas.push("\nEJERCICIO:");
