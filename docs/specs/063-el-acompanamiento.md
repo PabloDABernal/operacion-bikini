@@ -1,15 +1,14 @@
 # 063 — El acompañamiento de la comida
 
-- **Estado:** borrador
+- **Estado:** cerrada el 29 de agosto de 2026 (las dos decisiones abiertas, resueltas con el usuario). Lista para implementar.
 - **Fecha:** 2026-08-29
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (v9)", tercera spec de las tres.
-- **Depende de:** nada técnicamente, pero va la última: es la que toca el prompt de la IA, y conviene hacerla con las otras dos ya en uso.
 
 ## 1. Objetivo
 
 Que al apuntar una comida se pueda decir con qué la acompañaste —"3 trozos de
-pan", "un biscote"— sin tener que inventarse un registro aparte, y que la IA lo
-vea como **una sola ingesta** y no como dos.
+pan", "un biscote"— sin inventarse un registro aparte, y que la IA lo vea como
+**una sola ingesta** y no como dos.
 
 ## 2. Por qué existe
 
@@ -26,82 +25,127 @@ Hoy hay dos formas de apuntarlo y las dos mienten:
 
 ## 3. Criterio de "esto funciona"
 
-1. Al apuntar una comida hay un campo corto, opcional, para el acompañamiento.
-2. Una comida sin acompañamiento se apunta y se ve **exactamente como hoy**. Es
+1. Al apuntar una comida se pueden añadir **varios acompañamientos**, uno a uno.
+2. Cada uno se puede **quitar** antes de guardar.
+3. Una comida sin acompañamientos se apunta y se ve **exactamente como hoy**. Es
    el caso mayoritario y no puede volverse más incómodo.
-3. En la lista del día, la comida enseña su acompañamiento sin parecer otra
-   entrada.
-4. Se puede editar y quitar el acompañamiento de una comida ya apuntada.
-5. La IA lo recibe **pegado a su comida**, no como una línea suelta: lo que ve es
-   "lentejas con verduras + 3 trozos de pan" en un solo registro.
-6. Las comidas apuntadas antes de esta spec, sin acompañamiento, siguen viéndose
-   y funcionando igual.
+4. En la lista del día, la comida enseña sus acompañamientos **sin parecer otra
+   entrada**.
+5. Se pueden **editar** los acompañamientos de una comida ya apuntada.
+6. La IA los recibe **pegados a su comida**: lo que ve es "lentejas con verduras
+   + 3 trozos de pan" en un solo registro, no dos líneas.
+7. Las comidas apuntadas antes de esta spec siguen viéndose y funcionando igual.
 
 ## 4. Alcance
 
 ### Entra
 
-- Campo de acompañamiento al apuntar y al editar una comida.
-- Cómo se ve en la lista del día y en Hoy.
-- Cómo viaja dentro del bloque de registros que va a la IA
+- Añadir y quitar acompañamientos al apuntar y al editar una comida.
+- Cómo se ven en la lista del día y en Hoy.
+- Cómo viajan dentro del bloque de registros que va a la IA
   (`describirRegistros()` en `api/_ia.js`).
 
 ### NO entra (explícitamente fuera)
 
-- **El análisis nutricional.** *(A decidir: aquí el argumento es más flojo que en
-  las bebidas. El pan SÍ es comida sólida y SÍ pertenece a un grupo, así que
-  dejarlo fuera del análisis significa que el análisis miente sobre lo que
-  comiste. Ver el apartado 5.)*
-- **Un catálogo de acompañamientos** o chips de acompañamiento frecuente. Se
-  apunta como idea.
-- **Cantidades estructuradas** ("3 × pan"). Es texto libre, como el resto.
+- **El análisis nutricional.** Es la **spec 070**, que sale de la misma
+  conversación: el usuario decidió que el acompañamiento **sí** entre en el
+  análisis, y de paso las bebidas. Eso toca `api/analisis.js` y se hace aparte
+  para poder probar una cosa y luego la otra.
+- **Un catálogo de acompañamientos** o chips de acompañamiento frecuente. Idea.
+- **Cantidades estructuradas** ("3 × pan"). Texto libre, como el resto.
 
-## 5. Pendiente de decidir con el usuario
+## 5. Comportamiento detallado
 
-**Esta spec está a medias a propósito**, por lo mismo que la 062: se escribe
-ahora para fijar el reparto de la v9 desde el inicio, pero no se rellena con
-suposiciones.
+### Al apuntar
 
-1. **¿El acompañamiento entra en el análisis nutricional?** Es la pregunta
-   incómoda de la v9. Con las bebidas se decidió que no, y el argumento aguanta
-   —una cerveza no encaja en seis grupos sólidos—. Aquí no aguanta igual: tres
-   trozos de pan son cereales y féculas, uno de los seis grupos, y son bastantes
-   calorías. Si el acompañamiento queda fuera, **el análisis del día dirá menos
-   de lo que comiste**, y eso es peor que no tener acompañamiento. La
-   contrapartida es tocar `api/analisis.js`, que hoy funciona.
-2. **¿Un campo, o varios?** "3 trozos de pan y una copa de vino" en un solo campo
-   es texto libre y ya está. Varios campos es una lista, y una lista dentro de
-   cada comida es otro modelo de datos.
+Debajo del texto de la comida, un bloque **"¿Con qué lo acompañaste?"**: un campo
+corto y un botón de añadir. Lo añadido aparece como **chips**, cada uno con su
+aspa para quitarlo.
+
+- Máximo **60 caracteres** por acompañamiento. Es "3 trozos de pan", no una
+  frase.
+- Máximo **5 acompañamientos** por comida. Por encima de eso ya no es un
+  acompañamiento, es otra comida.
+- Vacío o repetido (comparado sin tildes ni mayúsculas) no se añade.
+- **El bloque no estorba si no se usa**: el campo está ahí, pero una comida sin
+  acompañamientos se guarda igual que siempre, sin tocar nada.
+
+### En la lista del día
+
+La comida enseña sus acompañamientos en su **segunda línea**, junto al momento y
+la hora, con el formato que ya usan las filas del diario desde la spec 043. Nunca
+como una entrada aparte: son parte de esa comida.
+
+### Al editar
+
+La fila en edición trae los mismos chips, con su campo para añadir y sus aspas
+para quitar.
+
+### Lo que ve la IA
+
+En `describirRegistros()`, pegados a su comida y en la misma línea:
+
+```
+- 2026-08-29 (comida): lentejas con verduras + 3 trozos de pan
+```
+
+**Nunca en una línea propia.** Es el motivo entero de la spec: una línea aparte
+se lee como otra ingesta.
 
 ## 6. Modelo de datos
 
-Un campo `acompanamiento` (string, opcional) dentro del documento de `comidas`
-que ya existe. Sin colección nueva y sin migración: las comidas viejas
-simplemente no lo tienen.
+Un campo nuevo dentro de los documentos de `comidas` que ya existen:
 
-Esto sí está claro y no depende de las decisiones de arriba, **salvo** que se
-elija la lista de la decisión 2.
+| Campo | Tipo | Qué es |
+|---|---|---|
+| `acompanamientos` | array de string | Hasta 5, de 1 a 60 caracteres cada uno. Ausente o vacío en las comidas de antes. |
 
-## 7. Archivos afectados (estimación)
+**Sin colección nueva y sin migración**: las comidas viejas simplemente no lo
+tienen, y todo lo que lo lee usa `|| []`.
+
+Se eligió lista y no un solo campo de texto por decisión del usuario del 29 de
+agosto. El coste es un formulario algo más vivo; la ventaja es que cada
+acompañamiento es un dato y no una frase que luego hay que interpretar — lo que
+importa cuando la spec 070 se los pase al análisis.
+
+## 7. Casos límite
+
+- **Comida sin acompañamientos**: todo igual que antes de esta spec.
+- **Comida vieja sin el campo**: `|| []`, no revienta.
+- **Añadir un repetido**: no se añade, y se dice.
+- **Más de 5**: el campo deja de aceptar y lo dice.
+- **Guardar con texto a medias en el campo de acompañamiento**: se añade solo lo
+  que se haya confirmado con el botón. El texto suelto no se guarda, para que no
+  entre a medias sin que el usuario lo vea como chip.
+- **Editar y quitarlos todos**: se guarda la comida sin ellos, con el campo
+  vacío.
+
+## 8. Archivos afectados
 
 | Archivo | Qué |
 |---|---|
-| `js/comidas.js` | El campo en `validarComida()`, `guardarComida()` y `actualizarComida()`. |
-| `index.html` | El campo en el formulario de apuntar y en el de editar. |
-| `js/app.js` | La fila del diario y el resumen de Hoy. |
-| `api/_ia.js` | `describirRegistros()`, para que viaje pegado a su comida. |
-| `styles.css` | Cómo se ve dentro de la fila. |
+| `js/comidas.js` | `acompanamientos` en `validarComida()`, `guardarComida()` y `actualizarComida()`. |
+| `index.html` | El bloque de acompañamientos en el formulario de comida. |
+| `js/app.js` | Los chips al apuntar y al editar, y la segunda línea de la fila. |
+| `api/_ia.js` | `describirRegistros()`, pegados a su comida. |
+| `styles.css` | Los chips con su aspa. |
 
-## 8. Decisiones tomadas
+Estimación: **200-250 líneas**.
+
+## 9. Decisiones tomadas
 
 - **Va DENTRO de la comida, no al lado** (usuario, 28 de agosto). No es un
   picoteo: apuntarlo aparte le dice a la IA que picaste entre horas, que es lo
   contrario de lo que pasó.
+- **Una lista de varios, no un campo de texto** (usuario, 29 de agosto).
+- **El análisis nutricional se hace aparte, en la spec 070** (Claude, al cerrar
+  esta): el usuario dijo que sí entren, y eso toca `api/analisis.js`, que hoy
+  funciona. Dos specs para poder probar una cosa y luego la otra.
 
-## 9. Fuera de spec: ideas apuntadas
+## 10. Fuera de spec: ideas apuntadas
 
 - Chips de acompañamiento frecuente, como los de ejercicio (spec 042).
 
 ## ✅ Para probar a mano
 
-(Cuando la spec esté cerrada.)
+(Lo afina el agente `qa-manual` antes de la prueba.)

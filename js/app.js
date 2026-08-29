@@ -358,15 +358,6 @@ if (window.visualViewport) {
 // botón exista. No convertir esto en un listener delegado ni volver a
 // consultar el selector más tarde: ese botón acabaría llamando a
 // abrirPestana(undefined).
-// Los dibujos de la barra (spec 066). Se pintan una vez al cargar, desde
-// TRAZOS_DE_ICONO, para no repetir los SVG a mano en el HTML.
-//
-// El botón sin data-icono se queda con su texto: es "Hoy", a propósito.
-document.querySelectorAll(".nav-boton[data-icono]").forEach((boton) => {
-  boton.appendChild(iconoDeAccion(boton.dataset.icono));
-  boton.title = boton.getAttribute("aria-label");
-});
-
 document.querySelectorAll(".nav-boton, .atajo").forEach((boton) => {
   boton.addEventListener("click", () =>
     abrirPestana(boton.dataset.seccion, boton.dataset.subseccion)
@@ -875,6 +866,29 @@ function botonDeIcono(nombre, etiqueta, alPulsar) {
   elemento.addEventListener("click", alPulsar);
   return elemento;
 }
+
+// Los dibujos de la barra (spec 066). Se pintan una vez al cargar, desde
+// TRAZOS_DE_ICONO, para no repetir los SVG a mano en el HTML. El botón sin
+// data-icono se queda con su texto: es "Hoy", a propósito.
+//
+// OJO CON EL SITIO: esto TIENE que ir después de TRAZOS_DE_ICONO. Se escribió
+// arriba del todo, junto a los demás listeners de la barra, y tumbó la app
+// entera: `const` no se puede leer antes de su declaración (zona muerta
+// temporal), así que iconoDeAccion() lanzaba un ReferenceError al evaluar el
+// módulo y la app se quedaba en "Cargando…" sin más pista. 29 de agosto de 2026.
+//
+// Y va envuelto en try/catch por lo mismo: esto es decoración, y la decoración
+// no puede impedir que la app arranque. Sin iconos la barra sigue funcionando;
+// sin app no funciona nada.
+try {
+  document.querySelectorAll(".nav-boton[data-icono]").forEach((boton) => {
+    boton.appendChild(iconoDeAccion(boton.dataset.icono));
+    boton.title = boton.getAttribute("aria-label");
+  });
+} catch (fallo) {
+  console.error("No se han podido pintar los iconos de la barra:", fallo);
+}
+
 
 // --- Campos de una fila en edición ---------------------------------------
 
