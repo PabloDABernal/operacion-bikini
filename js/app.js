@@ -2152,7 +2152,20 @@ function pintarDieta() {
     diaDietaAbierto = 0;
   }
 
-  pintarTiraDeDias();
+  pintarTiraDeDias({
+    contenedor: "dias-dieta",
+    dias: dietaActiva.dias,
+    abierto: diaDietaAbierto,
+    tieneAlgo: (dia) => dia.comidas.some((comida) => comida.texto),
+    alElegir: (indice) => {
+      diaDietaAbierto = indice;
+      // La receta abierta se guarda por posición ("2-1"), así que al cambiar de
+      // día esa posición ya es otro plato.
+      recetaDeDietaAbierta = null;
+      celdaEditando = null;
+      pintarDieta();
+    }
+  });
 
   const verSemana = id("btn-ver-semana");
   verSemana.classList.remove("oculta");
@@ -2204,15 +2217,21 @@ function pintarDieta() {
 //
 // La letra sola no se la puede leer nadie que no vea la pantalla, así que el
 // aria-label dice el día entero.
-function pintarTiraDeDias() {
-  const tira = id("dias-dieta");
+// La tira la usan las DOS semanas: la dieta (spec 064) y la tabla de ejercicio
+// (spec 067). Es literalmente el mismo componente, y duplicarlo garantizaría que
+// un arreglo se aplicara en una pantalla y en la otra no.
+//
+// Recibe los días, cuál está abierto, cómo saber si un día tiene algo, y qué
+// hacer al tocar. Lo demás lo pone ella.
+function pintarTiraDeDias({ contenedor, dias, abierto, tieneAlgo, alElegir }) {
+  const tira = id(contenedor);
   tira.innerHTML = "";
 
-  if (!dietaActiva) return;
+  if (!dias) return;
 
   const hoy = diaDeLaSemana(hoyISO());
 
-  dietaActiva.dias.forEach((dia, indice) => {
+  dias.forEach((dia, indice) => {
     const boton = document.createElement("button");
     boton.type = "button";
     boton.className = "dia-recuadro";
@@ -2220,8 +2239,8 @@ function pintarTiraDeDias() {
     boton.title = dia.dia;
 
     boton.classList.toggle("es-hoy", indice === hoy);
-    boton.classList.toggle("abierto", indice === diaDietaAbierto);
-    if (indice === diaDietaAbierto) boton.setAttribute("aria-current", "true");
+    boton.classList.toggle("abierto", indice === abierto);
+    if (indice === abierto) boton.setAttribute("aria-current", "true");
 
     const letra = document.createElement("span");
     letra.className = "dia-letra";
@@ -2236,21 +2255,20 @@ function pintarTiraDeDias() {
     // arreglar.
     const punto = document.createElement("span");
     punto.className = "dia-punto";
-    punto.classList.toggle("con-algo", dia.comidas.some((comida) => comida.texto));
+    punto.classList.toggle("con-algo", tieneAlgo(dia));
     boton.appendChild(punto);
 
-    boton.addEventListener("click", () => {
-      diaDietaAbierto = indice;
-      // La receta abierta se guarda por posición ("2-1"), así que al cambiar de
-      // día esa posición ya es otro plato.
-      recetaDeDietaAbierta = null;
-      celdaEditando = null;
-      pintarDieta();
-    });
+    boton.addEventListener("click", () => alElegir(indice));
 
     tira.appendChild(boton);
   });
 }
+
+id("btn-ver-semana-tabla").addEventListener("click", () => {
+  diaTablaAbierto = diaTablaAbierto === null ? diaDeLaSemana(hoyISO()) : null;
+  diaEditando = null;
+  pintarTabla();
+});
 
 id("btn-ver-semana").addEventListener("click", () => {
   // Al volver a un solo día se abre el de hoy, no el último que se estuviera
@@ -2311,7 +2329,7 @@ function filaDeComida(indiceDia, indiceComida, comida) {
 function nombreDelPlato(indiceDia, indiceComida, comida) {
   const receta = recetaDeLaComida(comida);
 
-  if (!receta) return celda(comida.texto || "—", "registro-texto");
+  if (!receta) return celda(comida.texto || "—", "plato-nombre");
 
   const clave = `${indiceDia}-${indiceComida}`;
   const abierta = recetaDeDietaAbierta === clave;
@@ -2322,7 +2340,7 @@ function nombreDelPlato(indiceDia, indiceComida, comida) {
     recetaDeDietaAbierta = abierta ? null : clave;
     pintarDieta();
   });
-  boton.className = "registro-texto plato-con-receta";
+  boton.className = "plato-con-receta";
   boton.setAttribute("aria-expanded", String(abierta));
   boton.title = abierta ? "Cerrar la receta" : "Ver la receta";
 
@@ -2333,7 +2351,7 @@ function nombreDelPlato(indiceDia, indiceComida, comida) {
   // derecha se salían del recuadro. Era el descuadre que el usuario reportó el
   // 29 de agosto, y le pasaba SOLO a los platos con receta, que son los únicos
   // que se pintan como botón (spec 060).
-  boton.appendChild(celda(comida.texto, "plato-texto"));
+  boton.appendChild(celda(comida.texto, "plato-nombre plato-texto"));
   return boton;
 }
 
@@ -2773,6 +2791,11 @@ id("form-ejercicio-catalogo").addEventListener("submit", async (evento) => {
 let tablaActiva = null;
 let diaEditando = null;
 
+// Qué día de la tabla se está mirando, 0 = lunes (spec 067). `null` es la semana
+// entera. Hermano de diaDietaAbierto, pero suyo: las dos semanas se miran por
+// separado y ver el lunes en la dieta no obliga a ver el lunes en la tabla.
+let diaTablaAbierto = 0;
+
 function pintarTabla() {
   const contenedor = id("semana-tabla");
   const estado = id("estado-tabla");
@@ -2788,12 +2811,39 @@ function pintarTabla() {
   if (!tablaActiva) {
     estado.textContent =
       "Aún no tienes tabla. Puedes montarla tú con tus ejercicios —esto no gasta ninguna petición a la IA— o pedírsela a la IA aquí debajo.";
+    id("dias-tabla").innerHTML = "";
+    id("btn-ver-semana-tabla").classList.add("oculta");
     return;
   }
 
   estado.textContent = "";
 
+  if (diaTablaAbierto !== null && diaTablaAbierto >= tablaActiva.dias.length) {
+    diaTablaAbierto = 0;
+  }
+
+  pintarTiraDeDias({
+    contenedor: "dias-tabla",
+    dias: tablaActiva.dias,
+    abierto: diaTablaAbierto,
+    // Un día de descanso es un día sin sesión, y eso es normal: sale sin punto,
+    // igual que un día vacío de la dieta.
+    tieneAlgo: (dia) => Boolean(dia.sesion && dia.sesion.titulo),
+    alElegir: (indice) => {
+      diaTablaAbierto = indice;
+      diaEditando = null;
+      pintarTabla();
+    }
+  });
+
+  const verSemana = id("btn-ver-semana-tabla");
+  verSemana.classList.remove("oculta");
+  verSemana.textContent =
+    diaTablaAbierto === null ? "Ver un solo día" : "Ver la semana entera";
+
   tablaActiva.dias.forEach((dia, indiceDia) => {
+    if (diaTablaAbierto !== null && indiceDia !== diaTablaAbierto) return;
+
     const bloque = document.createElement("section");
     bloque.className = "dia-dieta";
 
@@ -3087,6 +3137,9 @@ async function refrescarTabla() {
     return;
   }
   diaEditando = null;
+  // Vuelve al día de hoy: si la semana ha cambiado, el día que se estuviera
+  // mirando ya es otra cosa.
+  diaTablaAbierto = diaDeLaSemana(hoyISO());
   pintarTabla();
 }
 

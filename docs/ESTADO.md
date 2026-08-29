@@ -96,6 +96,7 @@ El 20 de agosto arrancó la **v4**, que sale de una auditoría de usabilidad hec
 | 064 | La semana de la dieta, en siete recuadros (v10) | 🚧 implementada y desplegada, **sin probar** |
 | 065 | Iconos en las acciones de fila (v10) | 🚧 implementada y desplegada, **sin probar** |
 | 066 | La barra con iconos, y Ajustes de vuelta (v10) | 📝 borrador |
+| 067 | La tira de días, también en la tabla (v10) | 🚧 implementada y desplegada, **sin probar** |
 
 ## Qué toca ahora
 

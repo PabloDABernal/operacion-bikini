@@ -1652,10 +1652,20 @@ button:disabled {
 
 .comida-dieta {
   display: flex;
-  align-items: center;
+  /* Arriba y no centrado: con un plato de dos líneas, centrar dejaría la
+     etiqueta del momento y los iconos flotando a media altura. */
+  align-items: flex-start;
   gap: var(--e2);
   padding: var(--e2) 0;
   border-top: 1px solid var(--borde);
+}
+
+/* La etiqueta del momento y el nombre del plato, a la misma altura que los
+   iconos, que miden 44 px de alto. */
+.comida-dieta .resumen-etiqueta,
+.comida-dieta .plato-nombre,
+.comida-dieta .plato-con-receta {
+  padding-top: 0.7rem;
 }
 
 .comida-dieta:first-of-type {
@@ -1671,6 +1681,28 @@ button:disabled {
    quitarle todo lo que un botón trae de serie y dejarlo pareciendo el texto que
    es. El subrayado punteado es lo único que lo distingue: sin él, sería un
    texto que reacciona al tocarlo sin avisar de que reacciona. */
+/* El nombre del plato en la semana. Se parte en DOS LÍNEAS en vez de
+   recortarse: un plato es "pollo al horno con tomate triturado y verduras", y
+   cortarlo a la mitad no dice lo que has puesto.
+
+   `overflow-wrap: anywhere` es lo que de verdad arregla el descuadre, y por eso
+   está aquí y no como adorno: sin él, el ancho mínimo de este elemento es el de
+   su palabra más larga, y un flex item nunca se encoge por debajo de su mínimo.
+   Con él, el mínimo es una letra, así que la fila NUNCA puede crecer más que su
+   recuadro por largo que sea el texto. Se probaron antes dos apaños que no
+   bastaron: recortar con puntos suspensivos, y meter el texto en un span dentro
+   del botón. */
+.plato-nombre {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
 .plato-con-receta {
   background: none;
   border: none;
@@ -1679,20 +1711,15 @@ button:disabled {
   color: inherit;
   text-align: left;
   cursor: pointer;
-  /* El botón es un contenedor flexible y el que se recorta es el span de
-     dentro. Un <button> no puede recortar su propio texto: mete el contenido en
-     una caja anónima cuyo ancho mínimo es el del contenido y que ignora el
-     text-overflow del botón. Con el texto suelto, un plato largo empujaba los
-     botones de la fila fuera del recuadro. */
+  /* Contenedor: el que se parte en dos líneas es el span de dentro. Un <button>
+     no puede recortar ni partir bien su propio texto — mete el contenido en una
+     caja anónima cuyo ancho mínimo es el del contenido. */
   display: flex;
+  flex: 1;
   min-width: 0;
 }
 
 .plato-texto {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
   text-decoration: underline dotted;
   text-underline-offset: 3px;
   text-decoration-color: var(--tinta-suave);
@@ -1955,6 +1982,34 @@ button:disabled {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr) minmax(0, 1fr);
     gap: var(--e6);
     align-items: start;
+  }
+
+  /* Comidas tiene CUATRO sub-pestañas desde la spec 058, y la rejilla se diseñó
+     para tres. La Despensa caía en una segunda fila, debajo de Apuntar y lejos
+     de las Recetas, que es con lo que se usa: miras qué tienes y montas la
+     receta. En móvil no se notaba, porque ahí las pestañas siguen siendo
+     pestañas.
+
+     Se colocan a mano las cuatro. La Despensa va DEBAJO de Recetas, en la misma
+     columna, que es donde el usuario esperaba encontrarla (29 de agosto). */
+  .seccion[data-seccion="comidas"] .subseccion[data-subseccion="apuntar"] {
+    grid-column: 1;
+    grid-row: 1 / span 2;
+  }
+
+  .seccion[data-seccion="comidas"] .subseccion[data-subseccion="dieta"] {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+  }
+
+  .seccion[data-seccion="comidas"] .subseccion[data-subseccion="recetas"] {
+    grid-column: 3;
+    grid-row: 1;
+  }
+
+  .seccion[data-seccion="comidas"] .subseccion[data-subseccion="despensa"] {
+    grid-column: 3;
+    grid-row: 2;
   }
 
   /* Hoy y Peso: dos columnas. En Peso la izquierda es la más ancha porque
