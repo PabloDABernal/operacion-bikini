@@ -2,7 +2,7 @@
 
 Documento para retomar el trabajo en frío. Se actualiza al terminar cada spec.
 
-**Última actualización:** 29 de agosto de 2026 (la 062 desplegada, sin probar) (specs 001-061 **probadas y cerradas**, v1 a v8 terminadas; la **062 implementada y pendiente de prueba**, la **063** a medias a propósito)
+**Última actualización:** 29 de agosto de 2026 (la 064 desplegada, sin probar; la 062 tampoco está probada) (specs 001-061 **probadas y cerradas**, v1 a v8 terminadas; la **062 implementada y pendiente de prueba**, la **063** a medias a propósito)
 
 > **Traspaso del 27 de agosto de 2026.** Se sigue en remoto desde Claude Code web. Estado al cerrar la sesión del PC: nada a medias, `main` limpio y sincronizado con `origin/main`. No hay spec abierta. **`docs/BACKLOG.md` está vacío a propósito desde hoy**: sus veintidós entradas se repartieron entre `docs/PRODUCTO.md` (apartado "Ideas para más adelante", que es de donde se elige la próxima versión), este documento (las trampas, aquí abajo) y el propio backlog (lo cerrado, para que no vuelva a proponerse). **Lo siguiente son evolutivos nuevos**: se elige una idea de `PRODUCTO.md`, se decide si es una versión partida en varias specs, y se escribe con `/nueva-spec` antes de tocar código. Antes de nada, leer "Cosas que hay que saber antes de tocar nada" de más abajo: las trampas del modelo de IA, la publicación de reglas de Firestore y que se prueba SIEMPRE en producción con push.
 
@@ -93,6 +93,9 @@ El 20 de agosto arrancó la **v4**, que sale de una auditoría de usabilidad hec
 | 061 | El agua del día (v9) | ✅ completada |
 | 062 | Las bebidas, apuntadas (v9) | 🚧 implementada y desplegada, **sin probar** |
 | 063 | El acompañamiento de la comida (v9) | 📝 borrador **a medias a propósito**: dos decisiones abiertas |
+| 064 | La semana de la dieta, en siete recuadros (v10) | 🚧 implementada y desplegada, **sin probar** |
+| 065 | Iconos en las acciones de fila (v10) | 📝 borrador |
+| 066 | La barra con iconos, y Ajustes de vuelta (v10) | 📝 borrador |
 
 ## Qué toca ahora
 

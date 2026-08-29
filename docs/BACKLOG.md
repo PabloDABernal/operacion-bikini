@@ -30,6 +30,13 @@ trampa), y esto vuelve a quedarse vacío. Este archivo es un buzón, no un almac
 
 ## En el buzón
 
+- **La misma tira de siete días para la tabla de ejercicio** (spec 064). Tiene
+  exactamente el mismo problema que tenía la dieta; se deja para cuando la de la
+  dieta esté probada y se sepa si funciona.
+- **Que el día abierto de la dieta se recuerde** al volver a la pestaña
+  (spec 064). Hoy siempre se abre en el día de hoy, a propósito.
+
+
 Ideas surgidas al escribir las specs 058 y 059 (28 de agosto). No se implementan
 ahora: se reparten cuando se cierre la v8.
 

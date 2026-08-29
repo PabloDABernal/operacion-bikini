@@ -335,6 +335,55 @@ distintas y cada una se puede usar sin las otras:
 | 062 | Las bebidas, apuntadas como un registro más |
 | 063 | El acompañamiento dentro de la comida |
 
+## Qué hará (v10: la semana que se lee y la app con iconos, decidida el 29 de agosto de 2026)
+
+Sale de usar la dieta. Dos problemas, y el segundo es la causa del primero.
+
+**La semana de la dieta se descuadra.** Cada comida es una fila con la etiqueta
+del momento, el plato y dos botones. Los botones son de texto y de ancho
+variable —"Me lo he comido", "Editar", "+"—, así que la columna del plato acaba
+en un sitio distinto en cada fila y la semana se lee torcida. Además, siete días
+por cuatro comidas son veintiocho filas seguidas en pantalla: mucho scroll para
+ver lo de hoy.
+
+- **La semana pasa a ser siete recuadros, L M X J V S D**, en una tira. Tocas uno
+  y debajo aparecen las comidas de ese día, solo de ese.
+- **El día en el que estás se ve marcado**, y es el que sale abierto al entrar.
+- **Las acciones de fila llevan icono en vez de texto**: "Me lo he comido",
+  "Editar" y "Borrar". Al ser de ancho fijo, las filas se alinean solas — que es
+  el arreglo del descuadre, no un adorno.
+- **La barra de navegación pasa a iconos**, salvo "Hoy", que se queda en texto.
+- **Ajustes vuelve a la barra, con un engranaje**, y el avatar deja de abrirlo.
+
+Qué NO hace la v10:
+
+- **No cambia ningún dato.** Es cómo se ve y cómo se llega, nada más. La dieta
+  que tengas guardada es la misma.
+- **No iconiza los botones únicos** (Guardar, Cancelar, Pedir dieta, Analizar).
+  Solo los que se repiten en cada fila y la barra. Una acción que aparece una vez
+  se explica mejor con su palabra que con un dibujo.
+- **No quita la vista de la semana entera**: sigue habiendo forma de ver los
+  siete días de un vistazo, para cuando lo que quieres es repasar la semana.
+
+### Ajustes vuelve a la barra: esto revierte una decisión anterior
+
+La **spec 024** sacó Ajustes de la barra a propósito y lo puso detrás del avatar.
+Aquello tenía sentido cuando la barra tenía cinco botones de texto y no cabía
+más. Con iconos caben siete, y esconder Ajustes detrás de una foto nunca fue
+evidente: hay que saberlo.
+
+Decisión del usuario del 29 de agosto, tomada sabiendo que revertía la 024. **El
+avatar deja de abrir Ajustes**: dos caminos a la misma pantalla es justo la
+duplicidad que la v4 se dedicó a quitar.
+
+Se reparte en tres specs:
+
+| Spec | Qué |
+|---|---|
+| 064 | La semana de la dieta, en siete recuadros con el día de hoy marcado |
+| 065 | Iconos en las acciones de fila |
+| 066 | La barra con iconos, y Ajustes de vuelta con su engranaje |
+
 ## Ideas para más adelante (27 de agosto de 2026)
 
 El 27 de agosto se vació `docs/BACKLOG.md`: la app está terminada y en uso
@@ -454,4 +503,5 @@ es cosmético.
 - **v8 (desde el 28 de agosto de 2026, sin fecha límite)**: lo descrito en "Qué hará (v8)". Sale de usar la dieta semanal y ver que propone comprarlo todo mientras se estropea lo que ya hay en casa. Se reparte en las specs 058 (la despensa) y 059 (la dieta que la aprovecha), partida desde el inicio.
 - **v8 (28 y 29 de agosto de 2026)**: la despensa. **Terminada y probada**, en las specs 058 (la despensa), 059 (la dieta la aprovecha) y 060 (ver la receta desde la dieta). La 060 no estaba prevista: salió de revisar la 059 y descubrir que daba por hecha una pantalla que no existía.
 - **v9 (desde el 29 de agosto de 2026, sin fecha límite)**: lo descrito en "Qué hará (v9)". Sale de la misma conversación que la v8. Se reparte en las specs 061 (el agua), 062 (las bebidas) y 063 (el acompañamiento), partida desde el inicio.
+- **v10 (desde el 29 de agosto de 2026, sin fecha límite)**: lo descrito en "Qué hará (v10)". Sale de que la semana de la dieta se descuadraba al usarla. Se reparte en las specs 064 (los siete recuadros), 065 (iconos de fila) y 066 (la barra y Ajustes).
 - **Descartado para v2**: notificaciones push (mucho trabajo y acaban silenciadas), integración con básculas o pulseras, y comparativa de fotos lado a lado, que se pospone.

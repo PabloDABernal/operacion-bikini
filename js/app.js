@@ -16,7 +16,8 @@ import {
   formatearFecha,
   formatearHora,
   formatearFechaConHora,
-  compararPorFechaYCreacion
+  compararPorFechaYCreacion,
+  diaDeLaSemana
 } from "./fechas.js";
 
 import { pesosPorDia, mediaMovil, calendarioDeConstancia } from "./grafica.js";
@@ -2094,6 +2095,19 @@ let celdaEditando = null;
 // 060). Una sola, igual que `recetaAbierta` en el recetario.
 let recetaDeDietaAbierta = null;
 
+// Qué día de la semana se está mirando, 0 = lunes (spec 064). `null` significa
+// "la semana entera", que es como se veía antes de esta spec y sigue estando
+// disponible: la vista de un día sirve para lo diario, la de la semana para
+// repasar lo que te han mandado.
+//
+// No se guarda en ningún sitio y no se recuerda entre recargas: es un estado de
+// mirar, no una preferencia.
+let diaDietaAbierto = 0;
+
+// Las letras de la tira. La equis del miércoles es la convención española, no
+// una errata: L M X J V S D.
+const LETRAS_DE_DIA = ["L", "M", "X", "J", "V", "S", "D"];
+
 function pintarDieta() {
   const contenedor = id("semana-dieta");
   const estado = id("estado-dieta");
@@ -2111,16 +2125,39 @@ function pintarDieta() {
   if (!dietaActiva) {
     estado.textContent =
       "Aún no tienes dieta. Puedes montarla tú eligiendo de tus recetas —esto no gasta ninguna petición a la IA— o pedírsela a la IA aquí debajo.";
+    // Sin dieta no hay tira ni modos de vista: recuadros vacíos no dicen nada.
+    id("dias-dieta").innerHTML = "";
+    id("btn-ver-semana").classList.add("oculta");
     return;
   }
 
   estado.textContent = "";
 
+  // Una semana guardada de antes podría no tener exactamente siete días. Sin
+  // esto, un día abierto fuera de rango dejaría la pantalla en blanco sin decir
+  // por qué.
+  if (diaDietaAbierto !== null && diaDietaAbierto >= dietaActiva.dias.length) {
+    diaDietaAbierto = 0;
+  }
+
+  pintarTiraDeDias();
+
+  const verSemana = id("btn-ver-semana");
+  verSemana.classList.remove("oculta");
+  verSemana.textContent =
+    diaDietaAbierto === null ? "Ver un solo día" : "Ver la semana entera";
+
   dietaActiva.dias.forEach((dia, indiceDia) => {
+    // Con un día abierto se pinta solo ese. Con `null`, la semana entera, que es
+    // como se veía antes de la spec 064.
+    if (diaDietaAbierto !== null && indiceDia !== diaDietaAbierto) return;
+
     const bloque = document.createElement("section");
     bloque.className = "dia-dieta";
 
     const titulo = document.createElement("h3");
+    // El nombre entero, no la letra: la tira es para elegir, el título para
+    // saber dónde estás sin descifrar una inicial.
     titulo.textContent = dia.dia;
     bloque.appendChild(titulo);
 
@@ -2146,6 +2183,71 @@ function pintarDieta() {
     contenedor.appendChild(bloque);
   });
 }
+
+// La tira de siete recuadros (spec 064).
+//
+// Cada uno lleva su letra y, si ese día tiene algo puesto, un punto debajo. Un
+// punto y no el número de comidas: de un vistazo interesa si hay algo, no
+// cuánto.
+//
+// La letra sola no se la puede leer nadie que no vea la pantalla, así que el
+// aria-label dice el día entero.
+function pintarTiraDeDias() {
+  const tira = id("dias-dieta");
+  tira.innerHTML = "";
+
+  if (!dietaActiva) return;
+
+  const hoy = diaDeLaSemana(hoyISO());
+
+  dietaActiva.dias.forEach((dia, indice) => {
+    const boton = document.createElement("button");
+    boton.type = "button";
+    boton.className = "dia-recuadro";
+    boton.setAttribute("aria-label", dia.dia);
+    boton.title = dia.dia;
+
+    boton.classList.toggle("es-hoy", indice === hoy);
+    boton.classList.toggle("abierto", indice === diaDietaAbierto);
+    if (indice === diaDietaAbierto) boton.setAttribute("aria-current", "true");
+
+    const letra = document.createElement("span");
+    letra.className = "dia-letra";
+    // Con más de siete días la letra no existe; se cae al número antes que a
+    // un hueco vacío.
+    letra.textContent = LETRAS_DE_DIA[indice] || String(indice + 1);
+    boton.appendChild(letra);
+
+    // El punto va siempre en el DOM, encendido o apagado: si solo se añadiera
+    // cuando hay comidas, los recuadros con y sin punto medirían distinto y la
+    // tira quedaría descuadrada, que es justo lo que esta versión viene a
+    // arreglar.
+    const punto = document.createElement("span");
+    punto.className = "dia-punto";
+    punto.classList.toggle("con-algo", dia.comidas.some((comida) => comida.texto));
+    boton.appendChild(punto);
+
+    boton.addEventListener("click", () => {
+      diaDietaAbierto = indice;
+      // La receta abierta se guarda por posición ("2-1"), así que al cambiar de
+      // día esa posición ya es otro plato.
+      recetaDeDietaAbierta = null;
+      celdaEditando = null;
+      pintarDieta();
+    });
+
+    tira.appendChild(boton);
+  });
+}
+
+id("btn-ver-semana").addEventListener("click", () => {
+  // Al volver a un solo día se abre el de hoy, no el último que se estuviera
+  // mirando: es el que se quiere ver el 99% de las veces.
+  diaDietaAbierto = diaDietaAbierto === null ? diaDeLaSemana(hoyISO()) : null;
+  recetaDeDietaAbierta = null;
+  celdaEditando = null;
+  pintarDieta();
+});
 
 function filaDeComida(indiceDia, indiceComida, comida) {
   const fila = document.createElement("div");
@@ -2442,6 +2544,9 @@ async function refrescarDieta() {
   // semana cambia —otra dieta, o una celda editada—, esa posición ya es otro
   // plato: dejarla abierta enseñaría la receta de una comida que no es.
   recetaDeDietaAbierta = null;
+  // Vuelve al día de hoy: si la semana ha cambiado, el día que se estuviera
+  // mirando ya es otra cosa.
+  diaDietaAbierto = diaDeLaSemana(hoyISO());
   pintarDieta();
 }
 

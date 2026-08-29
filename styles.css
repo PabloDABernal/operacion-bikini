@@ -1532,6 +1532,76 @@ button:disabled {
 
 /* La semana de la dieta (spec 028) */
 
+/* La tira de siete días (spec 064). Siete recuadros iguales que se reparten el
+   ancho: al ser todos idénticos, la tira no puede descuadrarse por más largo
+   que sea el nombre de un plato. */
+.tira-dias {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: var(--e2);
+  margin-bottom: var(--e4);
+}
+
+.dia-recuadro {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--e1);
+  /* Vertical a propósito: un recuadro alto cabe en séptimos de pantalla sin
+     apretar, y deja sitio al punto debajo de la letra. El mínimo de alto es
+     zona táctil, no estética. */
+  min-height: 3.25rem;
+  padding: var(--e2) 0;
+  border: 1px solid var(--borde);
+  border-radius: var(--radio-s);
+  background: var(--superficie);
+  color: var(--tinta-suave);
+  cursor: pointer;
+}
+
+.dia-letra {
+  font-weight: 700;
+  font-size: 1rem;
+  line-height: 1;
+}
+
+/* El punto está SIEMPRE en el DOM, encendido o apagado. Si solo existiera
+   cuando hay comidas, los recuadros medirían distinto entre sí. */
+.dia-punto {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: transparent;
+}
+
+.dia-punto.con-algo {
+  background: var(--tinta-suave);
+}
+
+/* Hoy: marcado se esté mirando o no. */
+.dia-recuadro.es-hoy {
+  border-color: var(--apoyo);
+  color: var(--tinta);
+}
+
+/* El día abierto: relleno, no solo borde, para que se distinga de "hoy" a
+   simple vista. Lo normal al entrar es que un mismo recuadro sea las dos cosas,
+   así que tienen que poder convivir sin pelearse. */
+.dia-recuadro.abierto {
+  background: var(--acento);
+  border-color: var(--acento);
+  color: var(--sobre-acento);
+}
+
+.dia-recuadro.abierto .dia-punto.con-algo {
+  background: var(--sobre-acento);
+}
+
+.dia-recuadro.abierto.es-hoy {
+  box-shadow: inset 0 0 0 2px var(--apoyo);
+}
+
 #semana-dieta {
   display: flex;
   flex-direction: column;
