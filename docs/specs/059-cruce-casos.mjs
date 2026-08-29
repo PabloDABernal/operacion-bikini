@@ -75,3 +75,43 @@ comprobar("receta sin ingredientes no revienta", cruzarConLaDespensa(undefined, 
 comprobar("despensa vacia: todo falta", cruzarConLaDespensa(["tomate"], []).map((i) => i.tengo), [false]);
 comprobar("loQueTengo solo lo marcado", loQueTengo(despensa), ["tomate", "cebolla"]);
 comprobar("normalizar", normalizar("  JAMÓN Serrano "), "jamon serrano");
+
+// --- Una linea con VARIOS ingredientes -----------------------------------
+//
+// El fallo que reporto el usuario el 29 de agosto: "no tengo sal y pimienta,
+// que tengo solo pimienta". Antes bastaba con encontrar UNO de los ingredientes
+// de la linea para marcarla entera.
+
+const soloPimienta = [{ id: "p", nombre: "pimienta", tengo: true }];
+const salYPimienta = [
+  { id: "s", nombre: "sal", tengo: true },
+  { id: "p", nombre: "pimienta", tengo: true }
+];
+
+const marca = (linea, desp) => cruzarConLaDespensa([linea], desp)[0].tengo;
+
+comprobar("EL CASO: solo pimienta, la linea pide sal y pimienta", marca("sal y pimienta", soloPimienta), false);
+comprobar("con las dos, si la tienes", marca("sal y pimienta", salYPimienta), true);
+comprobar("solo pimienta, la linea pide solo pimienta", marca("pimienta negra", soloPimienta), true);
+comprobar("tres cosas y te falta una", marca("tomate, cebolla y ajo", [
+  { id: "1", nombre: "tomate", tengo: true },
+  { id: "2", nombre: "cebolla", tengo: true }
+]), false);
+comprobar("tres cosas y las tienes todas", marca("tomate, cebolla y ajo", [
+  { id: "1", nombre: "tomate", tengo: true },
+  { id: "2", nombre: "cebolla", tengo: true },
+  { id: "3", nombre: "ajo", tengo: true }
+]), true);
+comprobar("una linea normal no se ve afectada", marca("200 g de lentejas", [
+  { id: "1", nombre: "lenteja", tengo: true }
+]), true);
+
+// Lo que falla no debe gastar lo que si estaba: la cebolla sigue disponible
+// para la linea siguiente.
+comprobar(
+  "un fallo no consume los ingredientes que si estaban",
+  cruzarConLaDespensa(["cebolla y ajo", "1 cebolla"], [
+    { id: "1", nombre: "cebolla", tengo: true }
+  ]).map((l) => l.tengo),
+  [false, true]
+);

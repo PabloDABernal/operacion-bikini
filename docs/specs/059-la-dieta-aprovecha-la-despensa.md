@@ -151,6 +151,32 @@ Cuando un ingrediente de la despensa acierta, se marca **ese** como usado y no
 se vuelve a usar para otra línea de la misma receta: si la receta pide tomate dos
 veces, no se cuenta el tuyo dos veces.
 
+### Una línea puede llevar VARIOS ingredientes
+
+**Corregido el 29 de agosto**, con el usuario delante: *"no tengo sal y pimienta,
+que tengo solo pimienta"*.
+
+La spec daba por hecho que cada línea de una receta es **un** ingrediente. No es
+verdad: "sal y pimienta" son dos, y "tomate, cebolla y ajo" son tres. La regla
+original marcaba la línea entera en cuanto encontraba **uno**, así que una línea
+que pide dos cosas salía como "la tienes" teniendo solo una.
+
+Ahora la línea se parte por las comas y por las conjunciones (`y`, `e`), y
+**tiene que estar todo** para que cuente como que la tienes. Si falta una parte,
+la línea es "te falta" — que es el lado seguro de siempre.
+
+Dos detalles que importan:
+
+- **Se parte a lo bruto a propósito.** Partir de más solo puede hacer que una
+  línea salga como "te falta". No partir era lo que dejaba pasar el fallo.
+- **Una línea que falla no consume tus ingredientes.** Si "cebolla y ajo" falla
+  por el ajo, tu cebolla sigue disponible para la línea siguiente.
+
+**Cómo se coló.** La prueba automática del 28 de agosto contenía literalmente el
+caso `"sal y pimienta"` con la despensa `["sal"]`, y lo daba por **acierto
+correcto**. El caso estaba; lo que estaba mal era la expectativa. Ahora está al
+revés y con su nombre: "EL CASO".
+
 **Este cruce es cosmético.** Es una marca al lado de un texto: si se equivoca, la
 receta sigue siendo legible y la dieta sigue siendo la misma. Por eso puede vivir
 en el navegador y por eso no merece nada más listo que estas dos reglas.

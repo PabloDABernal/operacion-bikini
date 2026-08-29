@@ -282,15 +282,45 @@ export function cruzarConLaDespensa(lineas, despensa) {
   const gastados = new Set();
 
   return (lineas || []).map((linea) => {
-    const encontrado = disponibles.find(
-      (ingrediente) =>
-        !gastados.has(ingrediente.id) &&
-        lineaTieneIngrediente(linea, ingrediente.nombre)
-    );
+    const partes = partesDeLinea(linea);
 
-    if (encontrado) gastados.add(encontrado.id);
-    return { texto: linea, tengo: Boolean(encontrado) };
+    // TODAS las partes tienen que estar. Es el arreglo del 29 de agosto: antes
+    // bastaba con encontrar una, así que "sal y pimienta" salía como que la
+    // tenías teniendo solo pimienta. Una línea que pide dos cosas no la tienes
+    // hasta que tienes las dos.
+    const usados = [];
+    const tengoTodo = partes.every((parte) => {
+      const encontrado = disponibles.find(
+        (ingrediente) =>
+          !gastados.has(ingrediente.id) &&
+          !usados.includes(ingrediente.id) &&
+          lineaTieneIngrediente(parte, ingrediente.nombre)
+      );
+      if (encontrado) usados.push(encontrado.id);
+      return Boolean(encontrado);
+    });
+
+    // Los ingredientes solo se dan por gastados si la línea entera cuadró: si
+    // falta algo, lo que sí estaba sigue disponible para otra línea.
+    if (tengoTodo) usados.forEach((id) => gastados.add(id));
+
+    return { texto: linea, tengo: tengoTodo };
   });
+}
+
+// Una línea de receta puede llevar varios ingredientes: "sal y pimienta",
+// "tomate, cebolla y ajo". Se parte por las comas y por las conjunciones.
+//
+// Se parte a lo bruto a propósito: partir de más solo puede hacer que una línea
+// salga como "te falta", que es el lado seguro. No partir dejaba pasar el fallo
+// que reportó el usuario el 29 de agosto.
+export function partesDeLinea(linea) {
+  const partes = String(linea ?? "")
+    .split(/\s*,\s*|\s+y\s+|\s+e\s+/i)
+    .map((parte) => parte.trim())
+    .filter(Boolean);
+
+  return partes.length ? partes : [String(linea ?? "").trim()];
 }
 
 // Lo que se le manda a la IA al pedir la dieta: solo los nombres de lo que
