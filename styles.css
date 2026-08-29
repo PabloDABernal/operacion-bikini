@@ -1728,19 +1728,36 @@ button:disabled {
    del sitio que le toca. */
 .fila-plato {
   display: grid;
-  grid-template-columns: 5rem minmax(0, 1fr) 44px 44px;
+  /* Cinco columnas desde la spec 072: momento, plato, ver receta, comido,
+     editar. La de la receta está SIEMPRE reservada, aunque esa comida no tenga
+     receta: si la columna apareciera y desapareciera, los iconos de las filas
+     de al lado no coincidirían entre sí, que es justo lo que esta rejilla vino
+     a arreglar.
+
+     En 320 px: 4,5rem de momento + 3×44 px de iconos dejan 116 px para el
+     nombre del plato, que con dos líneas da de sobra. */
+  grid-template-columns: 4.5rem minmax(0, 1fr) 44px 44px 44px;
   align-items: start;
 }
 
 /* Cada icono, en su columna, siempre. Una comida vacía no tiene botón de
    "comido"; sin fijar la columna, el lápiz se subiría a su hueco y dejaría de
    alinearse con los de las demás filas. */
-.fila-plato .col-comido {
+.fila-plato .col-receta {
   grid-column: 3;
 }
 
-.fila-plato .col-editar {
+.fila-plato .col-comido {
   grid-column: 4;
+}
+
+.fila-plato .col-editar {
+  grid-column: 5;
+}
+
+/* La receta abierta se nota en su propio icono, que es lo que se ha tocado. */
+.fila-plato .receta-abierta {
+  color: var(--acento);
 }
 
 /* El texto, contenido dentro de su columna pase lo que pase. */
