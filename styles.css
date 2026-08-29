@@ -113,8 +113,13 @@ header {
   display: none;
 }
 
-/* Avatar: la foto si la hay, y si no la inicial del email. */
+/* Avatar: la foto si la hay, y si no la inicial del email.
+
+   Desde la spec 066 NO se toca: Ajustes se abre con el engranaje de la barra.
+   En el HTML es un <span>, y aquí se le quita todo lo que lo hacía parecer
+   pulsable — o seguiría prometiendo algo que ya no hace. */
 .avatar {
+  cursor: default;
   flex: 0 0 auto;
   width: 2.5rem;
   height: 2.5rem;
@@ -223,6 +228,14 @@ header {
   display: flex;
 }
 
+/* Siete botones desde la spec 066: Hoy en texto, los otros seis en icono, y
+   Ajustes de vuelta a la barra con su engranaje.
+
+   La cuenta de la zona táctil, que es lo que decidía si esto era viable: en la
+   pantalla más estrecha que se contempla, 320 px, cada botón se lleva 320/7 =
+   45,7 px. Por encima de los 44 px que pide una zona táctil decente, con poco
+   margen pero por encima. Con la palabra debajo del icono no habría salido: por
+   eso los iconos van solos. */
 .nav-boton {
   flex: 1;
   min-width: 0;
@@ -232,13 +245,21 @@ header {
   border: none;
   border-radius: 0;
   color: var(--tinta-suave);
-  /* Con cinco botones, en una pantalla de 320 px "Ejercicio" no cabe a 0,75
-     rem: la letra se encoge sola hasta caber, pero nunca se parte en dos
-     líneas ni se abrevia la palabra. */
+  /* Solo lo usa "Hoy", que es el único que sigue siendo texto. */
   font-size: clamp(0.65rem, 3vw, 0.75rem);
   font-weight: 600;
   white-space: nowrap;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* El dibujo hereda el color del botón, así que la sección activa se marca sola
+   igual que se marcaba el texto. */
+.nav-boton svg {
+  width: 24px;
+  height: 24px;
 }
 
 .nav-boton.activa {

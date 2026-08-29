@@ -1,6 +1,6 @@
 # 062 — Las bebidas, apuntadas
 
-- **Estado:** implementada y desplegada el 29 de agosto de 2026. **Pendiente de que el usuario la pruebe**; hasta entonces NO es completada.
+- **Estado:** ✅ completada (probada y confirmada por el usuario el 2026-08-29).
 - **Fecha:** 2026-08-29
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (v9)", segunda spec de las tres.
 - **Depende de:** nada. Se puede implementar antes o después de la 061; van juntas en la v9 porque son el mismo tema, no porque una necesite a la otra.

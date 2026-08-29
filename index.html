@@ -35,7 +35,7 @@
   <section id="pantalla-principal" class="pantalla oculta">
     <header>
       <div class="identidad">
-        <button type="button" id="btn-perfil" class="avatar" aria-label="Ir a Ajustes"></button>
+        <span id="btn-perfil" class="avatar"></span>
         <span id="email-usuario"></span>
       </div>
     </header>
@@ -856,12 +856,19 @@
          ocasional, dentro de "Más". -->
     <nav id="nav-inferior" aria-label="Secciones">
       <div class="interior">
+        <!-- Hoy en texto y el resto en iconos (spec 066). Con siete botones no
+             cabe la palabra debajo en un movil estrecho, y Hoy es la seccion a
+             la que mas se vuelve y la unica sin un dibujo obvio.
+
+             El dibujo lo pone el JavaScript, en pintarBarra(): los trazos viven
+             en TRAZOS_DE_ICONO y no se repiten aqui como SVG a mano. -->
         <button type="button" class="nav-boton" data-seccion="hoy">Hoy</button>
-        <button type="button" class="nav-boton" data-seccion="peso">Peso</button>
-        <button type="button" class="nav-boton" data-seccion="comidas">Comidas</button>
-        <button type="button" class="nav-boton" data-seccion="ejercicio">Ejercicio</button>
-        <button type="button" class="nav-boton" data-seccion="fotos">Fotos</button>
-        <button type="button" class="nav-boton" data-seccion="consulta">Consulta</button>
+        <button type="button" class="nav-boton" data-seccion="peso" data-icono="peso" aria-label="Peso"></button>
+        <button type="button" class="nav-boton" data-seccion="comidas" data-icono="comidas" aria-label="Comidas"></button>
+        <button type="button" class="nav-boton" data-seccion="ejercicio" data-icono="ejercicio" aria-label="Ejercicio"></button>
+        <button type="button" class="nav-boton" data-seccion="fotos" data-icono="fotos" aria-label="Fotos"></button>
+        <button type="button" class="nav-boton" data-seccion="consulta" data-icono="consulta" aria-label="Consulta"></button>
+        <button type="button" class="nav-boton" data-seccion="ajustes" data-icono="ajustes" aria-label="Ajustes"></button>
       </div>
     </nav>
   </section>

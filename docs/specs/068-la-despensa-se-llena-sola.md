@@ -1,6 +1,6 @@
 # 068 — La despensa se llena sola, y deja de mentir
 
-- **Estado:** implementada y desplegada el 29 de agosto de 2026. **Pendiente de que el usuario la pruebe**.
+- **Estado:** ✅ completada (probada y confirmada por el usuario el 2026-08-29).
 - **Fecha:** 2026-08-29
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (v8)", ampliación del 29 de agosto.
 

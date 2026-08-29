@@ -1,6 +1,6 @@
 # 064 — La semana de la dieta, en siete recuadros
 
-- **Estado:** implementada y desplegada el 29 de agosto de 2026. **Pendiente de que el usuario la pruebe**; hasta entonces NO es completada.
+- **Estado:** ✅ completada (probada y confirmada por el usuario el 2026-08-29).
 - **Fecha:** 2026-08-29
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (v10: la semana que se lee y la app con iconos, decidida el 29 de agosto de 2026)", primera spec de las tres.
 

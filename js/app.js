@@ -257,6 +257,11 @@ function abrirPestana(nombre, subseccion) {
     boton.classList.toggle("activa", boton.dataset.seccion === nombre);
   });
 
+  // Antes esto colgaba del clic en el avatar. Desde la spec 066 Ajustes se abre
+  // desde la barra, y también desde otros sitios, así que vive aquí: se entre
+  // por donde se entre, los recuentos se releen.
+  if (nombre === "ajustes") refrescarRecuentos();
+
   // Comidas y Ejercicio tienen sub-pestañas dentro (spec 035). Sin decir cuál,
   // se abre la primera: entrar en Comidas es entrar a apuntar, que es lo que se
   // hace veinte veces al día. No se recuerda dónde estabas.
@@ -353,6 +358,15 @@ if (window.visualViewport) {
 // botón exista. No convertir esto en un listener delegado ni volver a
 // consultar el selector más tarde: ese botón acabaría llamando a
 // abrirPestana(undefined).
+// Los dibujos de la barra (spec 066). Se pintan una vez al cargar, desde
+// TRAZOS_DE_ICONO, para no repetir los SVG a mano en el HTML.
+//
+// El botón sin data-icono se queda con su texto: es "Hoy", a propósito.
+document.querySelectorAll(".nav-boton[data-icono]").forEach((boton) => {
+  boton.appendChild(iconoDeAccion(boton.dataset.icono));
+  boton.title = boton.getAttribute("aria-label");
+});
+
 document.querySelectorAll(".nav-boton, .atajo").forEach((boton) => {
   boton.addEventListener("click", () =>
     abrirPestana(boton.dataset.seccion, boton.dataset.subseccion)
@@ -499,15 +513,14 @@ function pintarAvatar(url, email) {
   });
 }
 
-// El avatar es la puerta de Ajustes desde la spec 024: la barra se quedó con
-// cinco botones para que cupiera Consulta.
-// Los recuentos de "Reiniciar datos" solo se leían una vez, al iniciar
-// sesión: si apuntabas algo después, salían desactualizados hasta recargar
-// la página entera. Se refrescan también al abrir Ajustes.
-id("btn-perfil").addEventListener("click", () => {
-  abrirPestana("ajustes");
-  refrescarRecuentos();
-});
+// El avatar FUE la puerta de Ajustes entre las specs 024 y 066. Ya no: desde la
+// 066 hay un engranaje en la barra, y dos caminos a la misma pantalla son justo
+// la duplicidad que la v4 se dedicó a quitar. Ahora es solo tu foto, y en el
+// HTML es un <span>, no un botón que promete algo que no hace.
+//
+// Los recuentos de "Reiniciar datos" solo se leían una vez, al iniciar sesión:
+// si apuntabas algo después, salían desactualizados hasta recargar la página
+// entera. Por eso se refrescan al entrar en Ajustes, ahora desde la barra.
 id("btn-cambiar-foto").addEventListener("click", () => id("archivo-perfil").click());
 
 id("archivo-perfil").addEventListener("change", async (evento) => {
@@ -804,7 +817,18 @@ const TRAZOS_DE_ICONO = {
   // Spec 065. La marca es "me lo he comido" / "lo he hecho"; el más, añadir algo
   // a una celda vacía de la semana.
   comido: ["M20 6 9 17l-5-5"],
-  anadir: ["M12 5v14", "M5 12h14"]
+  anadir: ["M12 5v14", "M5 12h14"],
+  // Los de la barra de navegación (spec 066). Trazos simples a propósito: a
+  // 24 px de alto, un dibujo con detalle se convierte en una mancha.
+  peso: ["M12 3a9 9 0 0 1 9 9H3a9 9 0 0 1 9-9Z", "M12 12 15 8", "M3 12v7h18v-7"],
+  comidas: ["M4 3v8a3 3 0 0 0 6 0V3", "M7 11v10", "M17 3c-2 2-2 6-2 8h4V3", "M17 11v10"],
+  ejercicio: ["M6 8v8", "M18 8v8", "M3 10v4", "M21 10v4", "M6 12h12"],
+  fotos: ["M3 8h4l2-3h6l2 3h4v12H3Z", "M12 17a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z"],
+  consulta: ["M21 12a8 8 0 0 1-11.6 7.1L3 21l1.9-6.4A8 8 0 1 1 21 12Z"],
+  ajustes: [
+    "M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z",
+    "M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-1.8-.3 1.6 1.6 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.6 1.6 0 0 0-1-1.5 1.6 1.6 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.6 1.6 0 0 0 .3-1.8 1.6 1.6 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.6 1.6 0 0 0 1.5-1 1.6 1.6 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.6 1.6 0 0 0 1.8.3H9a1.6 1.6 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.6 1.6 0 0 0 1 1.5 1.6 1.6 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0-.3 1.8V9a1.6 1.6 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1Z"
+  ]
 };
 
 function iconoDeAccion(nombre) {

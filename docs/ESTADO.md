@@ -91,14 +91,14 @@ El 20 de agosto arrancó la **v4**, que sale de una auditoría de usabilidad hec
 | 059 | La dieta aprovecha la despensa (v8) | ✅ completada |
 | 060 | Ver la receta desde la dieta (v8) | ✅ completada |
 | 061 | El agua del día (v9) | ✅ completada |
-| 062 | Las bebidas, apuntadas (v9) | 🚧 implementada y desplegada, **sin probar** |
+| 062 | Las bebidas, apuntadas (v9) | ✅ completada |
 | 063 | El acompañamiento de la comida (v9) | 📝 borrador **a medias a propósito**: dos decisiones abiertas |
-| 064 | La semana de la dieta, en siete recuadros (v10) | 🚧 implementada y desplegada, **sin probar** |
-| 065 | Iconos en las acciones de fila (v10) | 🚧 implementada y desplegada, **sin probar** |
-| 066 | La barra con iconos, y Ajustes de vuelta (v10) | 📝 borrador |
-| 067 | La tira de días, también en la tabla (v10) | 🚧 implementada y desplegada, **sin probar** |
-| 068 | La despensa se llena sola, y deja de mentir (v8+) | 🚧 implementada y desplegada, **sin probar** |
-| 069 | Buscar en la despensa (v8+) | 🚧 implementada y desplegada, **sin probar** |
+| 064 | La semana de la dieta, en siete recuadros (v10) | ✅ completada |
+| 065 | Iconos en las acciones de fila (v10) | ✅ completada |
+| 066 | La barra con iconos, y Ajustes de vuelta (v10) | 🚧 implementada y desplegada, **sin probar** |
+| 067 | La tira de días, también en la tabla (v10) | ✅ completada |
+| 068 | La despensa se llena sola, y deja de mentir (v8+) | ✅ completada |
+| 069 | Buscar en la despensa (v8+) | ✅ completada |
 
 ## Qué toca ahora
 

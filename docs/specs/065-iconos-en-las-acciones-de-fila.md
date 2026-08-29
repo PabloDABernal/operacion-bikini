@@ -1,6 +1,6 @@
 # 065 — Iconos en las acciones de fila
 
-- **Estado:** implementada y desplegada el 29 de agosto de 2026. **Pendiente de que el usuario la pruebe**.
+- **Estado:** ✅ completada (probada y confirmada por el usuario el 2026-08-29).
 - **Fecha:** 2026-08-29
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (v10)", segunda spec de las tres.
 

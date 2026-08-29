@@ -1,6 +1,6 @@
 # 066 — La barra con iconos, y Ajustes de vuelta
 
-- **Estado:** borrador
+- **Estado:** implementada y desplegada el 29 de agosto de 2026. **Pendiente de que el usuario la pruebe**.
 - **Fecha:** 2026-08-29
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (v10)", tercera spec, y su sub-apartado "Ajustes vuelve a la barra: esto revierte una decisión anterior".
 
@@ -73,6 +73,15 @@ reparte su ancho entre los botones; con siete, cada uno tiene menos.
 
 **Mínimo innegociable: 44 px de zona táctil.** Si con siete botones no se llega
 en una pantalla estrecha, hay que decirlo y decidir, **no encogerlos y ya**.
+
+**La cuenta, hecha:** la barra ocupa el ancho entero de la pantalla (`left: 0;
+right: 0`, y su `.interior` no lleva relleno lateral). En 320 px, que es la
+pantalla más estrecha que se contempla, cada botón se lleva **320/7 = 45,7 px**.
+Por encima de los 44, con poco margen pero por encima. En un móvil normal de
+360 px son 51,4.
+
+**Con la palabra debajo del icono no habría salido**, y esa es la razón de fondo
+por la que los iconos van solos: no era solo estética.
 
 ### El avatar
 

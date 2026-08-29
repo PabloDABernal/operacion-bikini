@@ -1,6 +1,6 @@
 # 067 — La tira de días, también en la tabla de ejercicio
 
-- **Estado:** implementada y desplegada el 29 de agosto de 2026. **Pendiente de que el usuario la pruebe**.
+- **Estado:** ✅ completada (probada y confirmada por el usuario el 2026-08-29).
 - **Fecha:** 2026-08-29
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (v10)", ampliación del 29 de agosto.
 
