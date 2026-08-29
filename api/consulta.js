@@ -278,6 +278,16 @@ module.exports = async (req, res) => {
     });
   }
 
+  // Una respuesta sirve si trae texto en ALGUNO de los dos campos (spec 071).
+  // No se mira el `tipo`: los modelos se equivocan de campo con facilidad, y lo
+  // que hace falta para seguir la conversación es que haya algo escrito.
+  //
+  // Con esto, un proveedor que devuelve todo vacío deja de contar como éxito y
+  // se le pregunta al otro, en vez de darle un error al usuario teniendo la
+  // reserva sin tocar.
+  const tieneTexto = (json) =>
+    Boolean((json && json.pregunta) || (json && json.cierre));
+
   const pedirTurno = (partes, etiqueta) =>
     generarJson(
       res,
@@ -290,10 +300,11 @@ module.exports = async (req, res) => {
         }
       },
       etiqueta,
-      cuerpo.proveedor
+      cuerpo.proveedor,
+      tieneTexto
     );
 
-  const respuesta = await pedirTurno(
+  let respuesta = await pedirTurno(
     contents,
     debeCerrar ? "Cierre de consulta" : "Turno de consulta"
   );
@@ -307,6 +318,32 @@ module.exports = async (req, res) => {
   // dos bloques, nutrición y rutina, y podía llegar solo uno): con un único
   // texto de salida no hay medias respuestas que rescatar, y reintentar un
   // texto que ha llegado vacío gasta otra llamada de cuota para lo mismo.
+  // RESCATE (spec 071). El texto se coge de donde venga.
+  //
+  // El fallo que lo motivó: en una conversación, el prompt le pide poner la
+  // respuesta en "pregunta" y dejar "cierre" vacío. Ante un mensaje emotivo
+  // —"no sé si tirar la toalla"— el modelo escribe algo que suena a despedida y
+  // lo mete en "cierre". La respuesta era buena y se tiraba entera, con un
+  // "La IA no ha sabido responder" en pantalla.
+  //
+  // Se respeta el `tipo` que declara el modelo y solo se rellena el campo que
+  // falta con el otro. Al revés —deducir el tipo del campo que traiga texto—
+  // cerraría una entrevista antes de tiempo, que es peor que un error.
+  const texto = respuesta.cierre || respuesta.pregunta || "";
+
+  if (respuesta.tipo === "cierre" && texto) {
+    respuesta = { ...respuesta, cierre: texto };
+  } else if (respuesta.pregunta || respuesta.cierre) {
+    respuesta = { ...respuesta, pregunta: respuesta.pregunta || respuesta.cierre };
+  }
+
+  // La conversación NO se cierra nunca (spec 023): si el modelo dice "cierre",
+  // se le devuelve al navegador como lo que es, un mensaje más del hilo. Sin
+  // esto, un cierre inventado en mitad de una charla la daría por terminada.
+  if (conversacion && respuesta.tipo === "cierre" && respuesta.cierre) {
+    return res.status(200).json({ tipo: "pregunta", pregunta: respuesta.cierre });
+  }
+
   if (respuesta.tipo === "cierre" && respuesta.cierre) {
     return res.status(200).json({
       tipo: "cierre",

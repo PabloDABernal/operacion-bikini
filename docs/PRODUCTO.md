@@ -430,6 +430,42 @@ Se reparte en tres specs:
 | 066 | La barra con iconos, y Ajustes de vuelta con su engranaje |
 | 067 | La misma tira de días en la tabla de ejercicio (ampliación del 29 de agosto) |
 
+## Qué hará (v11: la IA que no falla tonto, decidida el 30 de agosto de 2026)
+
+Sale de usar la conversación. El usuario, con una captura delante: *"no me
+funciona del todo bien, o no contesta o me pone cosas así"*. Había escrito *"me
+cuesta esto, no sé si tirar la toalla"* y la app respondió **"La IA no ha sabido
+responder"**.
+
+**No era verdad que no supiera.** Al investigarlo, la IA había contestado con
+JSON válido, pero el texto venía en un campo que el proxy no miraba, así que se
+tiró la respuesta entera. Y peor: como el JSON era válido, contaba como éxito, y
+**la reserva no llegaba a intentarse**.
+
+- **El texto se coge de donde venga.** Si el campo esperado está vacío pero otro
+  trae la respuesta, se usa esa.
+- **Una respuesta vacía cuenta como fallo de ese proveedor**, así que se le
+  pregunta al otro antes de darte un error.
+- **La conversación no se cierra nunca.** Si el modelo devuelve algo que suena a
+  despedida, se enseña como un mensaje más del hilo.
+- **Los errores dicen qué hacer**: si sirve reintentar, si hay que esperar a
+  mañana, o si conviene cambiar de proveedor en Ajustes.
+
+Qué NO hace, y es una decisión del usuario:
+
+- **No añade un tercer proveedor de IA.** Primero se exprimen los dos que hay. El
+  problema era de forma, no de cuota: un tercero no habría arreglado nada de lo
+  que estaba pasando. Si con estos dos sigue fallando, entonces se añade
+  **sabiendo por qué**.
+- **No reintenta la misma llamada.** Con el rescate y la reserva, un reintento
+  sería una tercera llamada para un caso ya cubierto.
+- **No toca los prompts.** El problema no era lo que se le pide, sino qué se
+  hacía con lo que devolvía.
+
+| Spec | Qué |
+|---|---|
+| 071 | La IA deja de tirar respuestas buenas |
+
 ## Ideas para más adelante (27 de agosto de 2026)
 
 El 27 de agosto se vació `docs/BACKLOG.md`: la app está terminada y en uso
@@ -550,4 +586,5 @@ es cosmético.
 - **v8 (28 y 29 de agosto de 2026)**: la despensa. **Terminada y probada**, en las specs 058 (la despensa), 059 (la dieta la aprovecha) y 060 (ver la receta desde la dieta). La 060 no estaba prevista: salió de revisar la 059 y descubrir que daba por hecha una pantalla que no existía.
 - **v9 (desde el 29 de agosto de 2026, sin fecha límite)**: lo descrito en "Qué hará (v9)". Sale de la misma conversación que la v8. Se reparte en las specs 061 (el agua), 062 (las bebidas) y 063 (el acompañamiento), partida desde el inicio.
 - **v10 (desde el 29 de agosto de 2026, sin fecha límite)**: lo descrito en "Qué hará (v10)". Sale de que la semana de la dieta se descuadraba al usarla. Se reparte en las specs 064 (los siete recuadros), 065 (iconos de fila) y 066 (la barra y Ajustes).
+- **v11 (desde el 30 de agosto de 2026, sin fecha límite)**: lo descrito en "Qué hará (v11)". Sale de que la conversación fallaba con respuestas que en realidad eran buenas. Va en la spec 071.
 - **Descartado para v2**: notificaciones push (mucho trabajo y acaban silenciadas), integración con básculas o pulseras, y comparativa de fotos lado a lado, que se pospone.

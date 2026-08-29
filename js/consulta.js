@@ -48,16 +48,31 @@ const MENSAJES = {
   tardanza:
     "La IA está tardando demasiado. Espera un momento y vuelve a intentarlo.",
   "ia-saturada":
-    "La IA está saturada ahora mismo. Espera un minuto y vuelve a intentarlo.",
+    "La IA está saturada ahora mismo, y la reserva tampoco ha podido. Espera un minuto y vuelve a intentarlo.",
   "limite-diario": "Te has quedado sin mensajes por hoy. Vuelve mañana.",
   "ya-hay-operacion":
     "Ya tienes una operación en marcha. Recarga la página para verla.",
   "cupo-diario": "Te has quedado sin mensajes por hoy. Vuelve mañana.",
-  "cuota-agotada": "La IA ha alcanzado su límite diario gratuito. Prueba mañana.",
-  "respuesta-ilegible": "La IA no ha sabido responder. Inténtalo de nuevo."
+  "cuota-agotada":
+    "La IA ha gastado su cupo gratuito de hoy. No sirve reintentar: prueba mañana, o cambia de proveedor en Ajustes.",
+  // Desde la spec 071 este error es raro de verdad: llegar aquí significa que
+  // los DOS proveedores contestaron sin nada escrito. Por eso el mensaje ya no
+  // dice solo "inténtalo": dice que se han probado los dos, que es lo que
+  // explica por qué reintentar puede no bastar.
+  "respuesta-ilegible":
+    "Los dos proveedores han contestado sin nada dentro. Prueba a reformular el mensaje, o inténtalo de nuevo en un minuto.",
+  "sin-clave":
+    "Falta configurar la clave de este proveedor. Prueba a cambiar de proveedor en Ajustes.",
+  inalcanzable:
+    "No se ha podido contactar con la IA. Comprueba tu conexión y vuelve a intentarlo.",
+  red: "No se ha podido contactar con la app. Comprueba tu conexión."
 };
 
-const MENSAJE_GENERICO = "No se ha podido continuar la consulta. Inténtalo de nuevo.";
+// Un mensaje ÚTIL dice tres cosas: qué falló, si sirve reintentar y qué hacer si
+// no. "Inténtalo de nuevo" a secas, cuando el problema es que se acabó la cuota
+// del día, manda al usuario a chocarse contra la misma pared.
+const MENSAJE_GENERICO =
+  "No se ha podido continuar la consulta. Inténtalo de nuevo en un minuto; si sigue fallando, prueba a cambiar de proveedor de IA en Ajustes.";
 
 // Un fallo del proveedor que no sea de los conocidos llega con el estado HTTP
 // que devolvió (spec 032: puede ser Gemini o Groq, según cuál se eligiera):

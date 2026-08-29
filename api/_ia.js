@@ -513,16 +513,42 @@ function responderFalloFinal(res, primero, reserva) {
 // `proveedor` es "automatico" (Gemini primero) o "groq-primero"; cualquier
 // otro valor se trata como "automatico" (spec 032): el servidor no confía en
 // lo que mande el navegador para decidir a quién preguntar.
-async function generarJson(res, cuerpo, etiqueta, proveedor) {
+// `esUtil` es opcional (spec 071): una función que mira el JSON ya parseado y
+// dice si sirve para algo. Sin ella, cualquier JSON válido se da por bueno.
+//
+// Existe porque había un agujero: un proveedor podía devolver JSON perfectamente
+// válido pero inservible —todos los campos de texto vacíos— y eso contaba como
+// éxito, así que la reserva NO se intentaba y el usuario veía "La IA no ha
+// sabido responder" teniendo el otro proveedor disponible y sin tocar.
+//
+// Ahora una respuesta inútil se trata como lo que es: un fallo de ese proveedor,
+// y se le pregunta al otro.
+async function generarJson(res, cuerpo, etiqueta, proveedor, esUtil) {
   const orden = proveedor === "groq-primero" ? ["groq", "gemini"] : ["gemini", "groq"];
 
-  const primero = await INTENTOS[orden[0]](cuerpo, etiqueta);
+  const intentar = async (cual) => {
+    const salida = await INTENTOS[cual](cuerpo, etiqueta);
+    if (!salida.ok) return salida;
+    if (!esUtil || esUtil(salida.json)) return salida;
+
+    console.error(
+      `${cual} devolvió JSON válido pero inservible: ${JSON.stringify(salida.json).slice(0, 300)}`
+    );
+    return {
+      ok: false,
+      proveedor: cual,
+      mereceReserva: true,
+      motivo: "respuesta-ilegible"
+    };
+  };
+
+  const primero = await intentar(orden[0]);
   if (primero.ok) return primero.json;
 
   let reserva = "no-hacia-falta";
 
   if (primero.mereceReserva) {
-    const segundo = await INTENTOS[orden[1]](cuerpo, etiqueta);
+    const segundo = await intentar(orden[1]);
     if (segundo.ok) return segundo.json;
     reserva = comoReserva(segundo);
   }
