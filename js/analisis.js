@@ -65,9 +65,17 @@ export function quedanAnalisisHoy(analisis) {
 // Un análisis está viejo si has apuntado comidas después de hacerlo. Se
 // cuentan las comidas, no su contenido: editar una ya analizada no dispara el
 // aviso, y es una imprecisión aceptada.
-export function estaViejo(analisis, comidasDeHoy) {
+// El nombre del campo guardado se queda en `comidasAnalizadas` para no migrar
+// los análisis que ya existen, pero desde la spec 070 cuenta también las
+// bebidas: si el análisis las tiene en cuenta, apuntar una caña tiene que
+// envejecerlo igual que apuntar una comida.
+//
+// Un análisis guardado antes de la 070 tiene ahí solo las comidas, así que la
+// primera bebida del día lo dará por viejo. Es el comportamiento correcto: ese
+// análisis, en efecto, no la vio.
+export function estaViejo(analisis, registrosDeHoy) {
   if (!analisis) return false;
-  return comidasDeHoy > (analisis.comidasAnalizadas || 0);
+  return registrosDeHoy > (analisis.comidasAnalizadas || 0);
 }
 
 export function guardarAnalisis(uid, fecha, datos, comidasAnalizadas, vecesPrevias) {
@@ -87,7 +95,9 @@ export function guardarAnalisis(uid, fecha, datos, comidasAnalizadas, vecesPrevi
   });
 }
 
-export async function pedirAnalisisALaIa(uid, comidas, proveedor) {
+// `bebidas` es opcional (spec 070): si no viene, el proxy se comporta como
+// antes y el análisis solo mira lo que has comido.
+export async function pedirAnalisisALaIa(uid, comidas, proveedor, bebidas = []) {
   const idToken = await auth.currentUser.getIdToken();
 
   let respuesta;
@@ -98,7 +108,7 @@ export async function pedirAnalisisALaIa(uid, comidas, proveedor) {
         "Content-Type": "application/json",
         Authorization: `Bearer ${idToken}`
       },
-      body: JSON.stringify({ comidas, proveedor }),
+      body: JSON.stringify({ comidas, bebidas, proveedor }),
       signal: AbortSignal.timeout(ESPERA_MAXIMA_MS)
     });
   } catch (fallo) {

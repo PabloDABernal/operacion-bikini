@@ -1306,11 +1306,19 @@ function comidasDeHoy(comidas) {
   return comidas.filter((comida) => comida.fecha === hoy);
 }
 
+// Las bebidas de hoy, para el análisis nutricional (spec 070).
+function bebidasDeHoy() {
+  const hoy = hoyISO();
+  return listaBebidas.obtenerRegistros().filter((bebida) => bebida.fecha === hoy);
+}
+
 function pintarAnalisis(comidas) {
   const deHoy = comidasDeHoy(comidas);
   const boton = id("btn-analizar");
   const quedan = quedanAnalisisHoy(analisisDeHoy);
-  const viejo = estaViejo(analisisDeHoy, deHoy.length);
+  // Comidas Y bebidas: desde la spec 070 el análisis mira las dos cosas, así
+  // que apuntar una caña también lo deja viejo.
+  const viejo = estaViejo(analisisDeHoy, deHoy.length + bebidasDeHoy().length);
 
   pintarDetalleDelDia();
 
@@ -1424,15 +1432,25 @@ id("btn-analizar").addEventListener("click", async () => {
   try {
     const respuesta = await pedirAnalisisALaIa(
       uidActual,
-      deHoy.map(({ momento, texto }) => ({ momento, texto })),
-      proveedorIaActual
+      // Los acompañamientos viajan con su comida (spec 070): el pan que te
+      // comiste con las lentejas son calorías, y hasta ahora el análisis hacía
+      // como que no existía.
+      deHoy.map(({ momento, texto, acompanamientos }) => ({
+        momento,
+        texto,
+        acompanamientos: acompanamientos || []
+      })),
+      proveedorIaActual,
+      // Y las bebidas del día, en su bloque. El agua no: es un contador y no se
+      // apunta como registro (spec 061).
+      bebidasDeHoy().map(({ texto }) => ({ texto }))
     );
 
     await guardarAnalisis(
       uidActual,
       hoyISO(),
       respuesta,
-      deHoy.length,
+      deHoy.length + bebidasDeHoy().length,
       analisisDeHoy ? analisisDeHoy.veces : 0
     );
     await refrescarAnalisis();

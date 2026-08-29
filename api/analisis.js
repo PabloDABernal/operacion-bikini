@@ -36,8 +36,10 @@ Tienes que hacer dos cosas:
 ${GRUPOS.map((grupo, i) => `   ${i + 1}. ${grupo}`).join("\n")}
    De cada uno dices cuánto pesó en el día con UNA de estas cuatro palabras, tal cual: nada, poco, bastante, mucho.
    Los seis van SIEMPRE, aunque la respuesta sea "nada".
+   CUENTA TAMBIÉN lo que acompaña a cada comida (lo que va detrás de un "+": pan, biscotes, picos) y lo que ha bebido. El pan es cereales y féculas; una cerveza o un refresco son ultraprocesados y dulces. No hay un grupo para bebidas y no hace falta: cada cosa va al grupo que le toca por lo que es.
 
 2. Estimar las calorías del día como una HORQUILLA, con un mínimo y un máximo.
+   Cuentan TODAS: la comida, lo que la acompaña y lo que ha bebido. Tres cañas son calorías aunque no sean un plato.
    NUNCA un número exacto: no ha pesado nada y fingir precisión sería mentir.
    La horquilla tiene que ser ancha de verdad, del orden de 300 kcal entre mínimo y máximo.
 
@@ -80,12 +82,39 @@ function normalizar(texto) {
 }
 
 // Lo que el usuario escribió, tal cual, con su momento.
+// Los acompañamientos van PEGADOS a su comida (spec 070), igual que en el
+// prompt de la conversación: lo que comió fueron lentejas CON pan, no lentejas
+// y luego pan. Una línea aparte le diría al análisis que fueron dos ingestas.
 function describirComidas(comidas) {
   if (!comidas.length) return "- no ha apuntado nada";
 
   return comidas
-    .map((comida) => `- ${comida.momento}: ${comida.texto}`)
+    .map((comida) => {
+      const conQue = Array.isArray(comida.acompanamientos)
+        ? comida.acompanamientos.filter(Boolean)
+        : [];
+      const extra = conQue.length ? ` + ${conQue.join(", ")}` : "";
+      return `- ${comida.momento}: ${comida.texto}${extra}`;
+    })
     .join("\n");
+}
+
+// Lo que ha bebido hoy (spec 070). Bloque aparte porque no es una ingesta de
+// comida, pero SÍ cuenta: una caña son calorías, y hasta ahora el análisis hacía
+// como que no existía.
+//
+// No hay grupo "bebidas" entre los seis, y no se añade: los seis describen
+// composición, meter ahí la cerveza junto al café mezcla cosas distintas, y
+// cambiar la lista desalinearía todos los análisis ya guardados. Lo que se hace
+// es que las bebidas cuenten DONDE les toca —una cerveza en ultraprocesados— y
+// en la horquilla de calorías.
+function describirBebidas(bebidas) {
+  if (!bebidas.length) return "";
+
+  return (
+    "\n\nY esto es lo que llevo bebido hoy (aparte del agua, que no se apunta):\n" +
+    bebidas.map((bebida) => `- ${bebida.texto}`).join("\n")
+  );
 }
 
 // Los seis grupos, emparejados por ORDEN y no por nombre, que es la lección de
@@ -205,7 +234,9 @@ module.exports = async (req, res) => {
           parts: [
             {
               text:
-                "Esto es lo que llevo comido hoy:\n\n" + describirComidas(comidas)
+                "Esto es lo que llevo comido hoy:\n\n" +
+                describirComidas(comidas) +
+                describirBebidas(Array.isArray(cuerpo.bebidas) ? cuerpo.bebidas : [])
             }
           ]
         }

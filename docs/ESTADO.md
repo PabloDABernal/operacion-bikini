@@ -93,6 +93,7 @@ El 20 de agosto arrancó la **v4**, que sale de una auditoría de usabilidad hec
 | 061 | El agua del día (v9) | ✅ completada |
 | 062 | Las bebidas, apuntadas (v9) | ✅ completada |
 | 063 | El acompañamiento de la comida (v9) | 🚧 implementada y desplegada, **sin probar** |
+| 070 | El análisis cuenta bebidas y acompañamientos (v9) | 🚧 implementada y desplegada, **sin probar** |
 | 064 | La semana de la dieta, en siete recuadros (v10) | ✅ completada |
 | 065 | Iconos en las acciones de fila (v10) | ✅ completada |
 | 066 | La barra con iconos, y Ajustes de vuelta (v10) | ✅ completada |

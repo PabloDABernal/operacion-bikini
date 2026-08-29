@@ -352,10 +352,13 @@ agosto, y las tres son de contención:
   calendario, o el calendario pintaría un día vacío que la racha da por bueno.
   Además es el registro más barato de la app: puntuarlo devalúa los puntos de lo
   que sí cuesta.
-- **Las bebidas no entran en el análisis nutricional.** Sus seis grupos son
-  sólidos y no hay hueco para un líquido sin rehacerlos, lo que dejaría
-  desalineados todos los análisis ya guardados. Que la cerveza no cuente
-  calorías es una deuda consciente, apuntada abajo en las ideas.
+- ~~**Las bebidas no entran en el análisis nutricional.**~~ **CAMBIADO el 29 de
+  agosto**, al decidir la spec 063: el usuario eligió que el acompañamiento entre
+  en el análisis y las bebidas también. Se hace **sin tocar los seis grupos**:
+  cada cosa cuenta en el grupo que le toca por lo que es —el pan en cereales, una
+  cerveza en ultraprocesados— y todo suma a la horquilla de calorías. Añadir un
+  séptimo grupo "bebidas" se descartó: los seis describen composición, y cambiar
+  la lista desalinearía los análisis ya guardados. Es la **spec 070**.
 - **El agua no se apunta con hora ni se edita vaso a vaso.** Es un contador: +1,
   -1 y el número del día. Un historial de a qué hora bebiste cada vaso no lo va a
   mirar nadie.
@@ -368,6 +371,7 @@ distintas y cada una se puede usar sin las otras:
 | 061 | El agua del día: el contador en Hoy y su objetivo en Ajustes |
 | 062 | Las bebidas, apuntadas como un registro más |
 | 063 | El acompañamiento dentro de la comida |
+| 070 | El análisis nutricional cuenta lo que bebes y lo que acompaña |
 
 ## Qué hará (v10: la semana que se lee y la app con iconos, decidida el 29 de agosto de 2026)
 
