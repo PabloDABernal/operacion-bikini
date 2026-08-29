@@ -362,6 +362,13 @@ Qué NO hace la v10:
 - **No iconiza los botones únicos** (Guardar, Cancelar, Pedir dieta, Analizar).
   Solo los que se repiten en cada fila y la barra. Una acción que aparece una vez
   se explica mejor con su palabra que con un dibujo.
+- **La Despensa vuelve a su sitio en escritorio.** Desde la spec 058 hay cuatro
+  sub-pestañas en Comidas y la rejilla de escritorio estaba hecha para tres, así
+  que la Despensa caía debajo de Apuntar en vez de junto a las Recetas, que es
+  con lo que se usa. En móvil no se notaba.
+- **El nombre de un plato largo se parte en dos líneas**, en vez de recortarse
+  con puntos suspensivos. Un plato es "pollo al horno con tomate triturado y
+  verduras", y cortarlo a la mitad no dice lo que has puesto.
 - **No quita la vista de la semana entera**: sigue habiendo forma de ver los
   siete días de un vistazo, para cuando lo que quieres es repasar la semana.
 
@@ -383,6 +390,7 @@ Se reparte en tres specs:
 | 064 | La semana de la dieta, en siete recuadros con el día de hoy marcado |
 | 065 | Iconos en las acciones de fila |
 | 066 | La barra con iconos, y Ajustes de vuelta con su engranaje |
+| 067 | La misma tira de días en la tabla de ejercicio (ampliación del 29 de agosto) |
 
 ## Ideas para más adelante (27 de agosto de 2026)
 
