@@ -177,6 +177,16 @@ caso `"sal y pimienta"` con la despensa `["sal"]`, y lo daba por **acierto
 correcto**. El caso estaba; lo que estaba mal era la expectativa. Ahora está al
 revés y con su nombre: "EL CASO".
 
+**Y de cara al futuro, que no lleguen así** (usuario, 29 de agosto): el prompt de
+`api/dieta.js` ahora le exige a la IA **un solo ingrediente por línea**, con el
+ejemplo de "sal y pimienta" delante y el motivo escrito —cada línea se cruza con
+la despensa, y una línea con dos cosas dentro no se puede responder—. El
+formulario de escribir recetas a mano dice lo mismo.
+
+**El partido de líneas se queda igualmente**, y no es redundante: las recetas ya
+guardadas siguen teniéndolas juntas, y una IA que recibe una instrucción no
+siempre la cumple. El prompt es la mejora; el partido es la red.
+
 **Este cruce es cosmético.** Es una marca al lado de un texto: si se equivoca, la
 receta sigue siendo legible y la dieta sigue siendo la misma. Por eso puede vivir
 en el navegador y por eso no merece nada más listo que estas dos reglas.

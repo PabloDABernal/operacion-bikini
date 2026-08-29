@@ -36,7 +36,8 @@ Te piden la dieta de una semana entera, de lunes a domingo:
 
 Además, devuelve las RECETAS de los platos que haya que cocinar (comidas y cenas, no el yogur ni la fruta):
 - Como mucho ocho recetas, las de los platos que más se repitan.
-- De cada una: nombre exacto tal y como lo has escrito en la semana, para cuántas personas, ingredientes (uno por línea) y preparación en dos o tres frases.
+- De cada una: nombre exacto tal y como lo has escrito en la semana, para cuántas personas, ingredientes y preparación en dos o tres frases.
+- LOS INGREDIENTES VAN UNO POR LÍNEA, y en cada línea UN SOLO ingrediente. Nunca juntes dos en la misma línea: "sal y pimienta" son DOS líneas, "sal" y "pimienta". Lo mismo con las comas: "tomate, cebolla y ajo" son tres líneas. Cada línea se cruza con la despensa de esta persona para decirle qué tiene y qué le falta, y una línea con dos cosas dentro no se puede responder.
 - El nombre de la receta tiene que coincidir LETRA POR LETRA con el que has puesto en la semana, o no se podrán enlazar.`;
 
 // Todos los campos obligatorios: con campos opcionales, Gemini se los salta
