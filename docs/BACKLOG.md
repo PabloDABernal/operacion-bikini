@@ -30,9 +30,6 @@ trampa), y esto vuelve a quedarse vacío. Este archivo es un buzón, no un almac
 
 ## En el buzón
 
-- **La misma tira de siete días para la tabla de ejercicio** (spec 064). Tiene
-  exactamente el mismo problema que tenía la dieta; se deja para cuando la de la
-  dieta esté probada y se sepa si funciona.
 - **Que el día abierto de la dieta se recuerde** al volver a la pestaña
   (spec 064). Hoy siempre se abre en el día de hoy, a propósito.
 
@@ -46,9 +43,16 @@ ahora: se reparten cuando se cierre la v8.
   lista se hace larga de verdad (spec 058).
 - Un botón en la receta para meter en la despensa, de un toque, lo que te falta
   (spec 059).
-- **Lista de la compra de la semana**, juntando lo que falta de todas las recetas
-  de la dieta. No es nueva —lleva en `docs/PRODUCTO.md` desde la spec 026— pero
-  la 059 la deja a un paso: el cruce despensa/receta ya estará hecho.
+
+## Hechas ya (limpieza del 30 de agosto de 2026)
+
+Estaban en el buzón y **ya estaban implementadas**: el buzón se había quedado
+por detrás del código. Se anotan aquí para que nadie las vuelva a proponer.
+
+- **La misma tira de siete días para la tabla de ejercicio.** La hizo la
+  **spec 067**: `dias-tabla` en `index.html` y la misma función de `js/app.js`
+  que pinta la de la dieta.
+- **Lista de la compra de la semana.** La hizo la **spec 073** (v12).
 
 ## Cerrado el 27 de agosto de 2026
 

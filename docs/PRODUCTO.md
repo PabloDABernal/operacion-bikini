@@ -538,8 +538,6 @@ apartado "Qué hará (v8…)" con sus specs.
   solo hay una activa de cada (specs 028 y 029): pedir otra pisa la que tenías.
   Es la más grande de la lista — cambia el modelo de datos y las reglas de
   Firestore, así que sería una versión partida en varias specs, nunca una sola.
-- **Lista de la compra** de la semana, a partir de la dieta y sus recetas
-  (specs 026 y 028).
 - **Borrar una operación concreta del histórico** desde su tarjeta. La spec 019
   borra el histórico entero o nada, y la 056 le añadió la operación en curso,
   pero sigue sin haber un borrado de una sola.
