@@ -131,6 +131,9 @@ import {
   ordenar as ordenarMaterial
 } from "./material.js";
 
+import { hayQueSembrar, sembrar } from "./siembra.js";
+import { VERSION as VERSION_DATOS_INICIALES } from "./datos-iniciales.js";
+
 // Ingredientes de una receta recién creada que se parecen a algo que ya tenías
 // (spec 072). Se preguntan al terminar la dieta; hasta que se contesten, no se
 // guardan.
@@ -5969,6 +5972,38 @@ id("btn-borrar-definitivo").addEventListener("click", async () => {
 
 // --- Arranque ------------------------------------------------------------
 
+// Las recetas y los ingredientes que la app trae puestos (spec 075). Ocurre una
+// vez por cuenta: la marca es `datosInicialesVersion` en los ajustes.
+//
+// NUNCA puede tumbar el arranque. Si falla, se avisa por consola y la app sigue:
+// esto es un extra, no el diario del usuario. Es la misma regla que
+// llenarDespensaDesde() de la spec 068, y por el mismo motivo.
+//
+// Como la marca se guarda al final, un fallo a medias la deja sin poner y el
+// siguiente arranque lo reintenta. Lo que ya entró no se duplica, porque se
+// vuelve a comparar contra lo que hay.
+async function sembrarSiHaceFalta() {
+  // `ajustesActuales` lo deja puesto refrescarAjustes(), a la que se ha
+  // esperado antes de llamar aquí. Si aun así no está, es que su lectura falló:
+  // no se siembra, y se reintenta al siguiente arranque.
+  if (!ajustesActuales || !hayQueSembrar(ajustesActuales)) return;
+
+  try {
+    const metidos = await sembrar(uidActual, recetasCargadas, despensaCargada);
+    if (metidos.recetas || metidos.ingredientes) {
+      // Lo sembrado no se ve hasta repintar: las listas en memoria son de antes.
+      await Promise.all([refrescarRecetas(), refrescarDespensa()]);
+    }
+    ajustesActuales.datosInicialesVersion = VERSION_DATOS_INICIALES;
+    console.info(
+      `Datos iniciales: ${metidos.recetas} recetas y ${metidos.ingredientes} ingredientes.`
+    );
+  } catch (fallo) {
+    console.error("No se han podido sembrar los datos iniciales:", fallo);
+  }
+}
+
+
 function rellenarDesplegable(elementoId, opciones, porDefecto) {
   const select = id(elementoId);
   select.innerHTML = "";
@@ -6043,8 +6078,15 @@ observarSesion(
     // Con await: refrescarTodo() pinta la pestaña Consulta, que necesita saber
     // si hay operación activa. Sin esperar aquí, se pintaba con el valor de
     // antes de leerlo.
-    refrescarOperaciones().then(refrescarTodo);
-    refrescarAjustes();
+    // La siembra (spec 075) necesita las DOS cosas: los ajustes, que traen la
+    // marca de si ya se sembró, y las listas cargadas, contra las que compara
+    // para no duplicar. Por eso espera a las dos ramas en vez de colgarse de
+    // una: colgada solo de refrescarTodo() se encontraba los ajustes a medio
+    // leer y no sembraba hasta el segundo arranque.
+    Promise.all([
+      refrescarOperaciones().then(refrescarTodo),
+      refrescarAjustes()
+    ]).then(sembrarSiHaceFalta);
     refrescarRecuentos();
   },
   () => {
