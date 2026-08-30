@@ -28,6 +28,16 @@ cambia es el final del viaje: cuando se cierre una versión, lo que quede aquí 
 reparte otra vez entre `PRODUCTO.md` (si es una idea) y `ESTADO.md` (si es una
 trampa), y esto vuelve a quedarse vacío. Este archivo es un buzón, no un almacén.
 
+## Fase productiva desde el 31 de agosto de 2026
+
+La app pasa a usarse en serio y **este archivo vuelve a ser el buzón principal**:
+aquí caen las cosas que se noten usándola. Lo de siempre — una línea cada una, y
+no se implementan sobre la marcha.
+
+Lo que cambia respecto a la fase de construcción: las ideas ya no salen de una
+lista de versiones planificadas, salen del uso. Cuando se junten varias que
+apunten al mismo sitio, eso será la próxima versión.
+
 ## En el buzón
 
 - **Que el día abierto de la dieta se recuerde** al volver a la pestaña

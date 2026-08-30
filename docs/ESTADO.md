@@ -2,7 +2,39 @@
 
 Documento para retomar el trabajo en frío. Se actualiza al terminar cada spec.
 
-**Última actualización:** 30 de agosto de 2026 (specs 001-073 **cerradas**, v1 a v12 terminadas)
+**Última actualización:** 30 de agosto de 2026 — **fin de la fase de construcción**. Specs 001-073 cerradas (v1 a v12), la 074 desplegada. **Desde el 31 de agosto el proyecto entra en fase productiva.**
+
+> **Fase productiva desde el 31 de agosto de 2026.** Se acabó construir a
+> ciclos. Mañana empieza la operación bikini de verdad y **la app pasa a usarse
+> en serio**: a partir de aquí el trabajo entra por lo que el usuario se
+> encuentre usándola, no por una lista de versiones planificadas.
+>
+> **Qué cambia en la forma de trabajar:**
+>
+> - Lo que salga del uso real **sigue pasando por una spec** si toca más de un
+>   archivo. La metodología de `CLAUDE.md` no se relaja por ser fase productiva;
+>   lo que cambia es de dónde salen las ideas.
+> - Un fallo que impida usar la app se arregla y punto, sin spec. Se anota
+>   después, en `docs/BACKLOG.md`, para que quede el rastro.
+> - `docs/BACKLOG.md` vuelve a ser el buzón principal: es donde caen las cosas
+>   que se noten al usarla.
+>
+> **Lo que queda a medias, y es poco:**
+>
+> - La **spec 074 (el armario)** está desplegada y **sin probar formalmente**.
+>   No se cierra con una sesión de pruebas: **se valida usándola**. Su guion
+>   sigue al final de la spec por si hace falta.
+> - Al usarla, mirar **una decisión concreta**: una pieza de material nace
+>   MARCADA, al revés que un ingrediente de la despensa desde la spec 068. Está
+>   razonado en `js/material.js`, pero deja dos pantallas gemelas comportándose
+>   distinto. Si chirría, se cambia en una línea.
+> - Las specs **075 (el cruce de la tabla con el armario)** y **076 (el material
+>   que falta)** están declaradas en `docs/PRODUCTO.md` y **sin escribir**. No
+>   son un compromiso: se escriben si al usar la 074 se echan de menos.
+>
+> `main` limpio y sincronizado. Las tres suites de pruebas en verde (una llevaba
+> en rojo desde la spec 072 y se arregló hoy). Reglas de Firestore publicadas,
+> incluido el bloque `material`.
 
 > **Cierre del 30 de agosto de 2026.** La **spec 073 (la lista de la compra)
 > queda cerrada** por decisión del usuario: está implementada, desplegada y con
@@ -125,9 +157,10 @@ El 20 de agosto arrancó la **v4**, que sale de una auditoría de usabilidad hec
 
 ## Qué toca ahora
 
-**La spec 074, desplegada y sin probar.** Al 30 de agosto de 2026 las specs
-**001 a 073 están cerradas** y las versiones v1 a v12 terminadas. La app se usa
-a diario en producción.
+**Usar la app.** Al 30 de agosto de 2026 las specs **001 a 073 están cerradas**
+y las versiones v1 a v12 terminadas. La 074 está desplegada y se valida con el
+uso. **Desde el 31 de agosto no hay una versión en marcha**: el trabajo entra
+por lo que se encuentre usándola.
 
 La **v13 (el material)** está en marcha, declarada en `docs/PRODUCTO.md` y
 partida en tres desde el inicio: **074 el armario** (hecha, sin probar), **075 el
@@ -150,8 +183,8 @@ que parecen bugs.
 
 ### Lo siguiente
 
-1. **Que el usuario pruebe la 074**, el armario. Es lo único desplegado sin
-   probar. El guion está al final de la spec.
+1. **Usar la app**, que es lo que valida la 074. Es lo único desplegado sin
+   probar formalmente; el guion está al final de la spec por si hace falta.
 2. Al probarla, mirar con lupa **una decisión**: una pieza de material nace
    MARCADA, al revés que un ingrediente de la despensa desde la spec 068. Está
    razonado en `js/material.js`, pero deja dos pantallas gemelas comportándose
