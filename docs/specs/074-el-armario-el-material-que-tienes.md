@@ -1,6 +1,6 @@
 # 074 — El armario: el material que tienes
 
-- **Estado:** borrador
+- **Estado:** revisada (`revisor-specs`, 30 de agosto de 2026)
 - **Fecha:** 2026-08-30
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (v13: el material, decidida el 30 de agosto de 2026)", primer punto.
 
@@ -39,6 +39,20 @@ no a mitad de camino.
     primero.
 11. En **Ajustes → Zona de peligro** hay una casilla **"material"** propia, y
     marcarla sola borra el armario sin tocar nada más.
+
+## 3 bis. Tamaño: se acepta pasar de 300 líneas
+
+CLAUDE.md pide avisar si una spec parece necesitar más de ~300 líneas de
+cambios. **Esta las va a pasar, y se acepta antes de empezar**: la 058, de la
+que esto es espejo, salió en 521 frente a las 250-300 que había estimado, y la
+074 tiene la misma superficie (formulario, marcar con reversión, fusión de
+duplicados al añadir, editar que rechaza fusionar, recuento, orden recalculado,
+colección, reglas y casilla de reinicio).
+
+Decisión del usuario el 30 de agosto, tras el aviso de `revisor-specs`. Se
+implementa **entera y en una sola spec**: trocear un patrón ya resuelto costaría
+más que repetirlo. Lo que sí sigue en pie es parar y avisar **si se pasa de las
+600**, que ya no sería el mismo patrón sino otra cosa.
 
 ## 4. Alcance
 
@@ -176,12 +190,16 @@ juntarlas obligaría a borrar las dos para borrar una.
 | Archivo | Qué |
 |---|---|
 | `js/material.js` | **Nuevo.** Modelo: validar, listar, guardar, actualizar, marcar, borrar. Calcado a `js/despensa.js`. |
-| `js/despensa.js` | Exportar la normalización y el emparejado singular/plural para que `material.js` los use, si no lo están ya. |
+| `js/despensa.js` | **Sin cambios.** `normalizar()` y `mismoIngrediente()` (spec 072) ya están exportados y son genéricos: `material.js` los importa tal cual. Verificado por `revisor-specs` el 30 de agosto. |
 | `index.html` | Sub-pestaña **Material** en Ejercicio: botón, `div.subseccion`, formulario, recuento y lista. |
 | `js/app.js` | Pintar la lista, enganchar añadir/marcar/editar/borrar y cargarla al abrir la sub-pestaña. |
 | `js/reinicio.js` | Casilla **"material"** con su colección. |
 | `firestore.rules` | Bloque para `usuarios/{uid}/material/{materialId}`. **Publicar con la CLI antes de pedir la prueba.** |
 | `css/estilos.css` | Nada nuevo si las clases de la despensa valen. Si hace falta, lo mínimo. |
+
+Como `js/despensa.js` no se toca, **la regresión sobre Comidas → Despensa deja de
+ser un riesgo real**; el guion la mantiene igualmente porque `material.js`
+importa de ahí.
 
 ## 9. Decisiones tomadas
 
