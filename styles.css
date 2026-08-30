@@ -2145,6 +2145,30 @@ button:disabled {
     grid-row: 2;
   }
 
+  /* Ejercicio pasó a CUATRO sub-pestañas con la spec 074, mismo problema que
+     Comidas con la Despensa (arriba): la rejilla se diseñó para tres. Los
+     Materiales van DEBAJO de Catálogo, en su misma columna, porque la 075 los
+     cruzará: mismo criterio que Despensa/Recetas. */
+  .seccion[data-seccion="ejercicio"] .subseccion[data-subseccion="apuntar"] {
+    grid-column: 1;
+    grid-row: 1 / span 2;
+  }
+
+  .seccion[data-seccion="ejercicio"] .subseccion[data-subseccion="tabla"] {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+  }
+
+  .seccion[data-seccion="ejercicio"] .subseccion[data-subseccion="catalogo"] {
+    grid-column: 3;
+    grid-row: 1;
+  }
+
+  .seccion[data-seccion="ejercicio"] .subseccion[data-subseccion="materiales"] {
+    grid-column: 3;
+    grid-row: 2;
+  }
+
   /* Hoy y Peso: dos columnas. En Peso la izquierda es la más ancha porque
      lleva la gráfica. */
   #bloque-hoy:not(.oculta) {

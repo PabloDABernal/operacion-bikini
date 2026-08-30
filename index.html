@@ -475,6 +475,7 @@
         <button type="button" class="subpestana activa" data-subseccion="apuntar" aria-current="true">Apuntar</button>
         <button type="button" class="subpestana" data-subseccion="tabla">Mi tabla</button>
         <button type="button" class="subpestana" data-subseccion="catalogo">Catálogo</button>
+        <button type="button" class="subpestana" data-subseccion="materiales">Materiales</button>
       </div>
 
       <!-- Sub-pestaña: Apuntar -->
@@ -598,6 +599,31 @@
       <button type="button" id="btn-desplegar-catalogo-arriba" class="desplegar oculta"></button>
       <div id="lista-catalogo"></div>
       <button type="button" id="btn-desplegar-catalogo" class="desplegar oculta"></button>
+      </div>
+
+      <div class="subseccion" data-subseccion="materiales">
+      <!-- Los materiales (spec 074): la despensa de Ejercicio. No es un
+           inventario: no lleva cantidades ni variantes. Marcar y desmarcar es
+           todo el mantenimiento que pide. Reaprovecha las filas y casillas de
+           la despensa (clases .ingrediente), no necesita CSS propio. -->
+      <h2>Mis materiales</h2>
+      <p id="estado-materiales" class="explicacion"></p>
+
+      <form id="form-material">
+        <label for="material-nombre">Añadir un material</label>
+        <div class="fila-alta">
+          <input type="text" id="material-nombre" maxlength="60"
+            placeholder="mancuernas" autocomplete="off">
+          <button type="submit" id="btn-anadir-material">Añadir</button>
+        </div>
+      </form>
+
+      <p id="error-materiales" class="error" role="alert"></p>
+      <p id="guardado-materiales" class="guardado" role="status"></p>
+
+      <p id="recuento-materiales" class="registro-detalle"></p>
+
+      <div id="lista-materiales"></div>
       </div>
 
       </div>

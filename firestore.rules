@@ -75,6 +75,13 @@ service cloud.firestore {
       allow read, write: if autorizado() && request.auth.uid == uid;
     }
 
+    // Los materiales de entrenamiento (spec 074): la despensa de Ejercicio.
+    // Fuera de las operaciones por el mismo motivo que el catálogo de
+    // ejercicios: no es el diario de una etapa.
+    match /usuarios/{uid}/materiales/{materialId} {
+      allow read, write: if autorizado() && request.auth.uid == uid;
+    }
+
     // La lista de la compra (spec 073): SOLO los apuntes a mano. Lo que falta
     // de la dieta no se guarda, se calcula cruzando recetas y despensa.
     //

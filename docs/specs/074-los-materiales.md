@@ -75,11 +75,12 @@ más, y el campo de añadir visible debajo.
 - Vacío o solo espacios → error `Escribe un material.`, no se guarda.
 - Máximo **60 caracteres** → error `Máximo 60 caracteres.`.
 - Duplicado (comparando **normalizado**, ver abajo) → no se crea otro. El
-  mensaje dice que ese material ya está en tu lista y, si estaba desmarcado,
-  **se marca**.
+  mensaje dice que ese material ya está en tu lista. **No lo marca**: como
+  nace sin marcar (ver más abajo), escribirlo de nuevo no afirma nada sobre lo
+  que hay en casa — es el mismo criterio que la despensa desde la spec 068.
 - **Ese mensaje NO es un error.** Se pinta como aviso neutro, igual que el
-  "Guardado" del resto de la app, por el mismo motivo que en la despensa:
-  volver a escribir "mancuernas" no es equivocarse, es re-marcarlo.
+  "Guardado" del resto de la app: volver a escribir "mancuernas" no es
+  equivocarse.
 - Tras añadir, el campo se vacía y **mantiene el foco**.
 
 ### Normalización para comparar (solo para comparar, no para guardar)

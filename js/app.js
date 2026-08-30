@@ -113,6 +113,18 @@ import {
 } from "./despensa.js";
 
 import {
+  MAX_NOMBRE as MAX_NOMBRE_MATERIAL,
+  validarMaterial,
+  materialIgual,
+  guardarMaterial,
+  renombrarMaterial,
+  marcarMaterial,
+  borrarMaterial,
+  listarMateriales,
+  ordenar as ordenarMateriales
+} from "./materiales.js";
+
+import {
   validarApunte,
   guardarApunte,
   borrarApunte,
@@ -327,6 +339,11 @@ function abrirSubpestana(seccion, nombre) {
   // estás marcando varias seguidas.
   if (seccion === "comidas" && nombre === "despensa") {
     reordenarDespensa();
+  }
+
+  // Los materiales (spec 074) se recolocan con el mismo criterio.
+  if (seccion === "ejercicio" && nombre === "materiales") {
+    reordenarMateriales();
   }
 }
 
@@ -2505,6 +2522,246 @@ function avisarEnDespensa(texto) {
   const aviso = id("guardado-despensa");
   // El error de antes deja de aplicar en cuanto algo sale bien.
   id("error-despensa").textContent = "";
+  aviso.textContent = texto;
+  setTimeout(() => {
+    aviso.textContent = "";
+  }, 3000);
+}
+
+// --- Los materiales (spec 074) --------------------------------------------
+//
+// La despensa de Ejercicio: con qué entrenas en casa. Calcado de la despensa
+// (arriba), sin buscador ni relleno automático desde el catálogo —esta spec
+// solo construye la lista— y sin la casilla de "aprovecha mi material" al
+// pedir tabla, que es la spec 075.
+
+let materialesCargados = [];
+let materialEditando = null;
+
+function pintarMateriales() {
+  const contenedor = id("lista-materiales");
+  const recuento = id("recuento-materiales");
+
+  contenedor.innerHTML = "";
+
+  id("estado-materiales").textContent = materialesCargados.length
+    ? ""
+    : "Aquí van los materiales con los que sueles entrenar. Márcalos según los tengas en casa y las tablas podrán aprovecharlos.";
+
+  const enCasa = materialesCargados.filter((material) => material.tengo).length;
+  recuento.textContent = materialesCargados.length
+    ? `${enCasa} de ${materialesCargados.length} materiales en casa`
+    : "";
+
+  materialesCargados.forEach((material) =>
+    contenedor.appendChild(filaDeMaterial(material))
+  );
+}
+
+function filaDeMaterial(material) {
+  if (materialEditando === material.id) {
+    return filaDeMaterialEnEdicion(material);
+  }
+
+  const fila = document.createElement("div");
+  fila.className = "ingrediente";
+  fila.classList.toggle("sin-existencias", !material.tengo);
+
+  const casilla = document.createElement("input");
+  casilla.type = "checkbox";
+  casilla.checked = Boolean(material.tengo);
+  casilla.id = `material-casilla-${material.id}`;
+  casilla.addEventListener("change", () => marcarEnMateriales(material, casilla));
+
+  const etiqueta = document.createElement("label");
+  etiqueta.className = "ingrediente-nombre";
+  etiqueta.htmlFor = casilla.id;
+  etiqueta.textContent = material.nombre;
+
+  const acciones = document.createElement("div");
+  acciones.className = "ingrediente-acciones";
+  acciones.append(
+    botonDeIcono("lapiz", "Editar", () => {
+      materialEditando = material.id;
+      limpiarAvisosMateriales();
+      pintarMateriales();
+    }),
+    botonDeIcono("papelera", "Borrar", () => borrarElMaterial(material))
+  );
+
+  fila.append(casilla, etiqueta, acciones);
+  return fila;
+}
+
+function filaDeMaterialEnEdicion(material) {
+  const fila = document.createElement("form");
+  fila.className = "ingrediente ingrediente-editando";
+
+  const campo = document.createElement("input");
+  campo.type = "text";
+  campo.maxLength = MAX_NOMBRE_MATERIAL;
+  campo.value = material.nombre;
+
+  const guardar = document.createElement("button");
+  guardar.type = "submit";
+  guardar.textContent = "Guardar";
+
+  const cancelar = botonDeFila("Cancelar", () => {
+    materialEditando = null;
+    limpiarAvisosMateriales();
+    pintarMateriales();
+  });
+  cancelar.className = "enlace";
+
+  fila.addEventListener("submit", async (evento) => {
+    evento.preventDefault();
+    await renombrarElMaterial(material, campo.value, guardar);
+  });
+
+  fila.append(campo, guardar, cancelar);
+  setTimeout(() => campo.focus(), 0);
+  return fila;
+}
+
+async function marcarEnMateriales(material, casilla) {
+  const antes = Boolean(material.tengo);
+  const ahora = casilla.checked;
+
+  material.tengo = ahora;
+  casilla.closest(".ingrediente").classList.toggle("sin-existencias", !ahora);
+  limpiarAvisosMateriales();
+  actualizarRecuentoMateriales();
+
+  try {
+    await marcarMaterial(uidActual, material.id, ahora);
+  } catch {
+    material.tengo = antes;
+    casilla.checked = antes;
+    casilla.closest(".ingrediente").classList.toggle("sin-existencias", !antes);
+    actualizarRecuentoMateriales();
+    errorEnMateriales("No se ha podido guardar. Comprueba tu conexión.");
+  }
+}
+
+function limpiarAvisosMateriales() {
+  id("error-materiales").textContent = "";
+  id("guardado-materiales").textContent = "";
+}
+
+function errorEnMateriales(texto) {
+  id("guardado-materiales").textContent = "";
+  id("error-materiales").textContent = texto;
+}
+
+function actualizarRecuentoMateriales() {
+  const enCasa = materialesCargados.filter((material) => material.tengo).length;
+  id("recuento-materiales").textContent = materialesCargados.length
+    ? `${enCasa} de ${materialesCargados.length} materiales en casa`
+    : "";
+}
+
+async function renombrarElMaterial(material, nombreBruto, boton) {
+  limpiarAvisosMateriales();
+
+  const resultado = validarMaterial(nombreBruto);
+  if (resultado.error) {
+    errorEnMateriales(resultado.error);
+    return;
+  }
+
+  const choque = materialIgual(materialesCargados, resultado.nombre, material.id);
+  if (choque) {
+    errorEnMateriales(`"${choque.nombre}" ya está en tu lista.`);
+    return;
+  }
+
+  boton.disabled = true;
+  try {
+    await renombrarMaterial(uidActual, material.id, resultado.nombre);
+  } catch {
+    errorEnMateriales("No se ha podido guardar. Comprueba tu conexión.");
+    return;
+  } finally {
+    boton.disabled = false;
+  }
+
+  materialEditando = null;
+  await refrescarMateriales();
+}
+
+async function borrarElMaterial(material) {
+  if (!confirm(`¿Quitar "${material.nombre}" de tu lista de materiales?`)) return;
+
+  try {
+    await borrarMaterial(uidActual, material.id);
+  } catch {
+    errorEnMateriales("No se ha podido borrar. Comprueba tu conexión.");
+    return;
+  }
+
+  if (materialEditando === material.id) materialEditando = null;
+  await refrescarMateriales();
+}
+
+function reordenarMateriales() {
+  if (!materialesCargados.length) return;
+  materialesCargados = ordenarMateriales(materialesCargados);
+  pintarMateriales();
+}
+
+async function refrescarMateriales() {
+  try {
+    materialesCargados = await listarMateriales(uidActual);
+  } catch {
+    materialesCargados = [];
+    id("estado-materiales").textContent =
+      "No se han podido cargar tus materiales. Comprueba tu conexión.";
+    return;
+  }
+  pintarMateriales();
+}
+
+id("form-material").addEventListener("submit", async (evento) => {
+  evento.preventDefault();
+
+  const campo = id("material-nombre");
+  limpiarAvisosMateriales();
+
+  const resultado = validarMaterial(campo.value);
+  if (resultado.error) {
+    errorEnMateriales(resultado.error);
+    return;
+  }
+
+  const boton = id("btn-anadir-material");
+  boton.disabled = true;
+
+  let aviso;
+  try {
+    const repetido = materialIgual(materialesCargados, resultado.nombre);
+
+    if (repetido) {
+      aviso = `"${repetido.nombre}" ya está en tu lista.`;
+    } else {
+      await guardarMaterial(uidActual, resultado.nombre);
+      aviso = "Guardado";
+    }
+  } catch {
+    errorEnMateriales("No se ha podido guardar. Comprueba tu conexión.");
+    return;
+  } finally {
+    boton.disabled = false;
+  }
+
+  avisarEnMateriales(aviso);
+  campo.value = "";
+  await refrescarMateriales();
+  campo.focus();
+});
+
+function avisarEnMateriales(texto) {
+  const aviso = id("guardado-materiales");
+  id("error-materiales").textContent = "";
   aviso.textContent = texto;
   setTimeout(() => {
     aviso.textContent = "";
@@ -5097,6 +5354,7 @@ function refrescarTodo() {
     refrescarCompra(),
     refrescarDieta(),
     refrescarCatalogo(),
+    refrescarMateriales(),
     refrescarTabla(),
     refrescarAnalisis(),
     refrescarAgua()

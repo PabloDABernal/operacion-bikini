@@ -83,6 +83,9 @@ export const TIPOS = [
     etiqueta: "catálogo de ejercicios y tabla",
     colecciones: ["ejerciciosCatalogo", "tablas"]
   },
+  // Los materiales (spec 074). Casilla propia, igual que la despensa: no se
+  // archiva con la operación, así que es la única forma de borrarla.
+  { clave: "materiales", etiqueta: "materiales", colecciones: ["materiales"] },
   // Las operaciones van aparte: no son una colección del día a día, sino los
   // ciclos con todo lo que llevan dentro (spec 019). Desde la spec 056 incluye
   // también la que esté en marcha, que se tira sin archivar.
