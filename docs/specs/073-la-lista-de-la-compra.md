@@ -1,214 +1,189 @@
-# 073 — La lista de la compra
+# 073 — Qué me falta de la compra
 
-- **Estado:** implementada y desplegada el 30 de agosto de 2026. **Pendiente de que el usuario la pruebe**.
+- **Estado:** implementada, pendiente de `revisor-codigo` y de que el usuario la pruebe (rehecha el 30 de agosto de 2026, antes de que probara la primera versión).
 - **Fecha:** 2026-08-30
-- **Referencia en PRODUCTO.md:** apartado "Qué hará (v12: la lista de la compra, decidida el 30 de agosto de 2026)".
+- **Referencia en PRODUCTO.md:** apartado "Qué hará (v12: la lista de la compra, decidida el 30 de agosto de 2026, corregida el mismo día antes de probarla)".
+
+## 0. Por qué se rehizo antes de probarse
+
+La primera versión de esta spec ponía la lista de la compra como un bloque fijo
+**encima** de la lista de ingredientes de la despensa, con apuntes a mano
+("papel higiénico"). El usuario, al leer cómo había quedado —antes de probarla
+en la app—, dijo que no le gustaba: *"mejor que salga un botón (…) pero no que
+salga arriba de los ingredientes. eso es un añadido, no lo importante, que son
+los ingredientes"*.
+
+Se rehace: sigue siendo "qué me falta de la compra", con el mismo criterio de
+qué cuenta como falta, pero cambia dónde vive, cómo se ve y qué entra:
+
+| | Versión original | Esta versión |
+|---|---|---|
+| Dónde | Bloque fijo, **encima** de la despensa | Un botón, **debajo** de la despensa |
+| Cómo se ve | Siempre visible | Se despliega/pliega al pulsar el botón |
+| Apuntes a mano | Sí, colección propia | **No existen** |
+| Qué enseña | Lo que falta + apuntes | Solo lo que falta |
 
 ## 1. Objetivo
 
-Que la app diga qué hay que comprar: los ingredientes de la dieta de esta semana
-que **no** tienes, más lo que apuntes a mano, y que marcar algo como comprado lo
-quite de la lista.
+Que el usuario pueda ver, cuando quiera y sin que estorbe a lo importante (los
+ingredientes de su despensa), qué le falta comprar de las recetas de su dieta
+de esta semana — y marcarlo como comprado ahí mismo.
 
 ## 2. Por qué existe
 
 Lleva en la lista de ideas desde la spec 026, y hasta ahora era cara. Ya no: la
 spec 059 hizo el cruce despensa/receta y la 068 llenó la despensa sola, así que
 **las piezas ya están**. Solo falta juntar lo que falta de todas las recetas de
-la semana en un sitio.
+la semana y enseñarlo sin competir con la despensa por el primer sitio.
 
 ## 3. Criterio de "esto funciona"
 
-1. En **Comidas → Despensa**, además de lo que tienes, hay una **lista de la
-   compra**.
-2. Salen los ingredientes de las recetas de tu dieta que **no tienes marcados**.
+1. En **Comidas → Despensa**, debajo de la lista de ingredientes, hay un botón
+   **"Ver qué me falta de la compra"**.
+2. Pulsarlo despliega, justo debajo del botón, los ingredientes de las recetas
+   de tu dieta que **no tienes marcados** en la despensa.
 3. Un ingrediente que aparece en tres recetas sale **una vez**.
-4. Se puede **apuntar algo a mano** ("papel higiénico") y aparece en la lista.
-5. Marcar como comprado un ingrediente lo marca en tu despensa: **desaparece de
-   la lista** y las recetas pasan a enseñarlo con su ✓.
-6. Marcar como comprado un apunte a mano lo **borra**.
-7. Sin dieta, la lista solo tiene lo que hayas apuntado a mano.
-8. Con todo comprado, lo dice en vez de enseñar una lista vacía.
-9. La lista dice **qué comidas de tu semana no tienen receta**, por su nombre,
-   para que sepas qué le falta por saber.
-10. Al crear una receta y enlazarla a una de esas comidas, sus ingredientes
-    **aparecen en la lista** y esa comida deja de salir en el aviso.
+4. Cada fila tiene un botón para decir **"ya lo tengo"**: marca el ingrediente
+   en tu despensa (`tengo: true`) y desaparece de esta lista al instante.
+5. Con todo comprado (o sin nada que falte), el desplegado lo dice en vez de
+   enseñar una lista vacía.
+6. Sin dieta activa, el desplegado lo dice y no hay nada que listar.
+7. El desplegado dice también **qué comidas de tu semana no tienen receta**,
+   por su nombre, para que sepas qué le falta por saber.
+8. Volver a pulsar el botón lo pliega. El estado (desplegado o no) no se
+   guarda: cada vez que entras en Despensa empieza plegado.
 
 ## 4. Alcance
 
 ### Entra
 
-- La lista dentro de Despensa: lo que falta de la dieta y los apuntes a mano.
-- Apuntar y borrar a mano.
-- Marcar como comprado, con sus dos comportamientos.
-- La colección de apuntes, sus reglas y su casilla de reinicio.
+- El botón y el desplegable dentro de Despensa, debajo de la lista de
+  ingredientes.
+- El cálculo al vuelo de lo que falta (reutilizando `loQueFalta()` de la spec
+  059/072, ya existente en `js/despensa.js`).
+- Marcar un ingrediente como "ya lo tengo" desde ahí (reutilizando
+  `marcarIngrediente()`, ya existente).
+- El aviso de comidas sin receta (reutilizando `comidasSinReceta()`, ya
+  escrita en la implementación anterior de esta misma spec).
 
 ### NO entra (explícitamente fuera)
 
-- **Cantidades.** La lista dice "tomate", no "3 tomates". La despensa nunca ha
-  llevado cantidades (spec 058) y esto no lo cambia.
+- **Apuntar cosas a mano.** Estaba en la versión anterior; se quita: desviaba
+  el foco de lo que importa (los ingredientes) y no era lo que el usuario
+  pedía. Sin apuntes a mano, **no hace falta colección nueva en Firestore, ni
+  reglas, ni casilla de reinicio**: todo esto pasa a estar fuera de spec.
+- **Cantidades.** La lista dice "tomate", no "3 tomates".
 - **Agrupar por pasillo o por tipo de producto.** Se descartó ya para la
   despensa, en favor del buscador (spec 069).
-- **Compartir la lista** con otra persona. Cada usuario ve solo lo suyo, como
-  todo en esta app.
-- **Adivinar los ingredientes de las comidas sin receta.** Se dice cuáles son y
-  el usuario les pone receta él mismo; ver el apartado 5.
-- **Un atajo para crear la receta desde la lista.** El camino ya existe (Recetas
-  → Nueva receta, y enlazarla al editar la comida). Se apunta como idea por si
-  el camino largo molesta al usarlo.
+- **Compartir la lista** con otra persona.
+- **Adivinar los ingredientes de las comidas sin receta.** Se dice cuáles son
+  y el usuario les pone receta él mismo; ver el apartado 5.
+- **Recordar si estaba desplegado o plegado** entre visitas a la sub-pestaña.
 
 ## 5. Lo que esta lista no sabe, y cómo lo arregla el usuario
 
-**Solo las comidas con receta tienen ingredientes.** La IA devuelve como mucho
-ocho recetas por semana; el resto de las veintiocho comidas —"yogur con nueces",
-"fruta"— son solo un nombre, sin lista de ingredientes detrás.
+Igual que en la versión anterior de esta spec: **solo las comidas con receta
+tienen ingredientes**. La IA devuelve como mucho ocho recetas por semana; el
+resto de las comidas —"yogur con nueces", "fruta"— son solo un nombre.
 
-Así que la lista **cubre lo que dicen las recetas, no la semana entera**. Una
-lista de la compra que parece completa y no lo es es peor que no tenerla, porque
-te vas al súper confiado.
-
-**Pero esto tiene arreglo, y lo tiene el usuario.** Lo señaló él mismo el 30 de
-agosto: *"¿puedo crear recetas yo? sería editar las comidas que no tienen receta
-para que tengan"*. Y sí, ya se puede desde las specs 026 y 028:
+El desplegable dice, por su nombre, **qué comidas de la semana no tienen
+receta enlazada**, para que el usuario pueda cerrarlo él mismo:
 
 1. **Comidas → Recetas → Nueva receta**, con sus ingredientes.
-2. **Comidas → Mi dieta**, editar esa comida, y en el desplegable *"o usa una
-   receta tuya…"* elegirla. Queda enlazada.
+2. **Comidas → Mi dieta**, editar esa comida y enlazar la receta.
 
-Desde ese momento, sus ingredientes entran en la lista de la compra como los
-demás.
-
-Por eso la lista **no se limita a avisar de lo que no sabe: dice cuáles son**.
-Enseña las comidas de tu semana sin receta enlazada, por su nombre, para que sepas
-exactamente qué le falta y puedas cerrarlo tú. Un aviso genérico —"puede que
-falten cosas"— no sirve de nada; tres nombres concretos sí.
-
-Adivinar los ingredientes de "yogur con nueces" **con la IA** se descarta: sería
-pedirle que invente una receta para cada comida suelta, con su cupo y su espera,
-para una lista de la compra. El usuario lo hace mejor y gratis.
-
+Desde ese momento, sus ingredientes entran en lo que falta como los demás.
 
 ## 6. Comportamiento detallado
 
-### Dónde
+### Dónde y cómo
 
-Dentro de **Comidas → Despensa**, en su propio bloque, **encima** de la lista de
-ingredientes: cuando entras ahí pensando en comprar, lo primero que quieres ver
-es qué falta.
+Dentro de **Comidas → Despensa**, **debajo** de `#lista-despensa`: un botón de
+texto (estilo `.desplegar`, el mismo que usan las listas largas de la app) que
+alterna entre "Ver qué me falta de la compra" y "Ocultar qué me falta de la
+compra". Al pulsarlo, se pinta o se vacía un contenedor debajo del propio
+botón. No es una sub-pestaña ni un bloque aparte: es parte de la sub-pestaña
+Despensa, en último lugar, para no competir con la lista de ingredientes por
+la atención de quien entra ahí.
 
-No se hace sub-pestaña propia por dos motivos: Comidas ya tiene cuatro y en móvil
-una quinta aprieta, y en escritorio la rejilla de tres columnas está colocada a
-mano para cuatro (spec 072). Y sobre todo, es el mismo asunto: qué hay en casa y
-qué hace falta.
+### Qué sale al desplegar
 
-### Qué sale
+Los ingredientes de las recetas enlazadas a la dieta activa que **no** están
+marcados en la despensa, calculados **al vuelo** con `loQueFalta()` — sin
+guardar nada, igual que el cruce de la spec 059. Los repetidos se juntan con
+la regla de la spec 072 (igualdad y plural).
 
-Dos cosas en una sola lista:
+- Con dieta activa y algo pendiente: la lista de ingredientes, cada uno con su
+  botón "ya lo tengo".
+- Con dieta activa y nada pendiente: *"No te falta nada de tu dieta."*
+- Sin dieta activa: *"Aún no tienes dieta, así que no hay nada que comprobar."*
 
-- **Lo que falta de la dieta**: cada ingrediente de las recetas enlazadas a tu
-  dieta activa, que no esté marcado en tu despensa. Se calcula **al vuelo**, sin
-  guardar nada: es la despensa cruzada con las recetas, igual que la spec 059.
-- **Lo que has apuntado a mano**, que sí se guarda.
+Debajo de la lista (o del aviso de "nada pendiente"), si hay comidas sin
+receta enlazada, el mismo aviso por nombre que ya tenía la versión anterior de
+esta spec.
 
-Los repetidos se juntan con la misma regla de la spec 072 —igualdad y plural—,
-así que "tomate" y "tomates" salen una vez.
+### Marcar "ya lo tengo"
 
-### Marcar como comprado
-
-- Un **ingrediente**: se marca en la despensa (`tengo: true`). Desaparece de la
-  lista, y las recetas pasan a enseñarlo con su ✓. Comprar algo es tenerlo.
-- Un **apunte a mano**: se borra. No tiene sentido guardar el papel higiénico
-  para siempre.
-
-Los dos desaparecen de la lista, que es lo que el usuario espera; lo que cambia
-por debajo es dónde va a parar cada uno.
-
-### Apuntar a mano
-
-Un campo y un botón, como en la despensa. Máximo 60 caracteres, sin repetidos y
-hasta 50 apuntes. También se puede **borrar** uno sin marcarlo como comprado.
+Marca el ingrediente en la despensa (`marcarIngrediente(uid, id, true)`) y
+desaparece de esta lista al instante; la fila de la despensa (si está a la
+vista) se actualiza igual. Sin conexión, revierte y avisa, como el resto de la
+despensa.
 
 ## 7. Modelo de datos
 
-Colección nueva `usuarios/{uid}/compra/{apunteId}`, **solo para los apuntes a
-mano**:
-
-| Campo | Tipo | Qué es |
-|---|---|---|
-| `texto` | string | Qué hay que comprar. 1-60 caracteres. |
-| `creadoEn` | timestamp | Para ordenarlos. |
-
-**Lo que falta de la dieta NO se guarda.** Es una vista derivada de la despensa y
-las recetas, como el cruce de la 059: guardarla obligaría a mantenerla al día
-cada vez que cambia la dieta, la despensa o una receta, y a resolver qué pasa
-cuando se contradicen.
-
-### Por qué los apuntes NO van a la despensa
-
-Fue lo primero que se pensó, y está mal. La despensa se le manda a la IA al pedir
-dieta (`loQueTengo()`, spec 059): **el papel higiénico acabaría en el prompt como
-un ingrediente que tienes en casa**. Colección aparte, y el problema no existe.
-
-`compra` vive **fuera de las operaciones**, como la despensa: la lista de la
-compra no es el diario de una etapa.
-
-Necesita **casilla propia** en Reiniciar datos, por lo mismo que el agua en la
-061 y las bebidas en la 062: `borrarOperacion()` nunca toca las colecciones de
-primer nivel, así que sin casilla se quedaría huérfana.
+**Ninguno nuevo.** Sin apuntes a mano, esta spec no necesita colección propia:
+todo se calcula al vuelo cruzando `despensa`, `dietas` y `recetas`, que ya
+existen.
 
 ## 8. Casos límite
 
-- **Sin dieta activa**: solo salen los apuntes a mano, y se dice.
-- **Dieta sin recetas enlazadas**: la lista solo tiene apuntes, y el aviso de que
-  solo sabe lo que dicen las recetas cobra todo su sentido.
-- **Receta borrada del recetario**: sus ingredientes dejan de salir. Correcto: ya
-  no vas a cocinarla.
-- **Un apunte a mano que coincide con un ingrediente que falta**: sale una vez,
-  como apunte. Al marcarlo, se borra el apunte **y** se marca el ingrediente si
-  existe en la despensa.
+- **Sin dieta activa**: el desplegable lo dice, no hay lista.
+- **Dieta sin recetas enlazadas**: el desplegable dice que no falta nada, y el
+  aviso de comidas sin receta cobra todo su sentido.
+- **Receta borrada del recetario**: sus ingredientes dejan de salir.
 - **Todo comprado**: se dice, no se enseña una lista vacía.
-- **Sin conexión al marcar**: revierte y sale el error, como en toda la despensa.
+- **Sin conexión al marcar "ya lo tengo"**: revierte y sale el error, como en
+  toda la despensa.
+- **Se pliega el desplegable con algo marcado a medias**: no hay nada a medias
+  posible — marcar es una acción atómica por fila.
 
 ## 9. Archivos afectados
 
 | Archivo | Qué |
 |---|---|
-| `js/compra.js` | **Nuevo.** Los apuntes: validar, listar, guardar, borrar. |
-| `js/despensa.js` | `loQueFalta()`: los ingredientes de unas recetas que no tienes. |
-| `index.html` | El bloque de la compra dentro de Despensa. |
-| `js/app.js` | Pintado, alta, marcado y borrado. |
-| `firestore.rules` | Bloque de `compra`. **Publicar con la CLI antes de probar.** |
-| `js/reinicio.js` | Casilla "lista de la compra". **Obligatoria**, ver apartado 7. |
-| `styles.css` | La lista y su estado vacío. |
+| `js/despensa.js` | Ninguno nuevo: reutiliza `loQueFalta()`, ya escrita. |
+| `index.html` | Botón y contenedor del desplegable, debajo de `#lista-despensa`. Se retira el bloque `#lista-compra`/`#form-apunte` de la versión anterior. |
+| `js/app.js` | Pintado del desplegable y de sus filas, alternar mostrar/ocultar, marcar "ya lo tengo". Se retira todo el bloque "La lista de la compra" de la implementación anterior (`js/compra.js` completo, sus imports, `apuntesDeCompra`, `pintarCompra()`, `filaDeCompra()`, `marcarComprado()`, `refrescarCompra()`, el formulario de apuntar). `recetasDeLaDieta()` y `comidasSinReceta()` se conservan: no dependían de los apuntes. |
+| `js/compra.js` | **Se borra.** Era solo para los apuntes a mano, que ya no existen. |
+| `firestore.rules` | Se retira el bloque `usuarios/{uid}/compra/{apunteId}` de la versión anterior. |
+| `js/reinicio.js` | Se retira la entrada `compra` de `TIPOS`, ya innecesaria. |
+| `styles.css` | Reutiliza `.desplegar` y las filas `.ingrediente` que ya existen; no debería hacer falta CSS nuevo. |
 
-Estimación: **250-320 líneas**. Va justa al tope de las 300 de `CLAUDE.md`, y con
-el precedente de la 058 —que estimó 250-300 y salió en 408— hay que mirarla con
-desconfianza. **Si al implementar se pasa de 320, parar y avisar.**
-
-**Salió en 303**, contando código, HTML, CSS y reglas. Dentro de lo estimado,
-por primera vez en varias specs. El motivo es que casi todo estaba ya hecho: el
-cruce de la 059, la limpieza de la 068, el emparejado de la 072 y las filas de la
-despensa de la 058 se reutilizan tal cual.
+**Al ser una reescritura que QUITA más de lo que añade** (colección, reglas,
+formulario y sus manejadores desaparecen), no se estima un tope de líneas
+nuevo: el resultado neto debería ser más pequeño que la versión anterior
+(303 líneas), no más grande.
 
 ## 10. Decisiones tomadas
 
-- **Vive dentro de Despensa** (usuario, 30 de agosto): es el mismo asunto, y no
-  obliga a tocar la navegación ni la rejilla de escritorio.
-- **Lo que falta, y poder apuntar a mano** (usuario).
-- **Marcar comprado marca en la despensa** (usuario): comprar algo es tenerlo.
-- **Los apuntes a mano NO van a la despensa** (Claude, al escribir la spec):
-  acabarían en el prompt de la dieta como ingredientes que tienes en casa. Las
-  dos respuestas del usuario chocaban aquí y se resuelve con una colección
-  aparte.
-- **La lista dice lo que no sabe, y POR SU NOMBRE** (usuario, 30 de agosto).
-  Él mismo señaló que puede crear recetas y enlazarlas a las comidas que no
-  la tienen, así que la limitación no es un techo: es algo que él puede
-  cerrar. Un aviso genérico no serviría; una lista de nombres concretos sí.
+- **Un botón, no un bloque fijo, y debajo de los ingredientes, no encima**
+  (usuario, 30 de agosto, antes de probar la primera versión): la despensa es
+  lo importante de esa sub-pestaña; la compra es un añadido.
+- **Se sigue mostrando solo lo que falta**, no un listado completo
+  tengo/no-tengo de todos los ingredientes de la semana (usuario, 30 de
+  agosto): mismo criterio que ya tenía la versión anterior, no se cambia.
+- **Fuera los apuntes a mano** (usuario, 30 de agosto): no eran lo que se
+  pedía y desviaban el foco.
+- **El desplegado no recuerda su estado entre visitas** (Claude, al escribir
+  esta corrección): es el mismo patrón que "Ver todos" en el resto de la app,
+  y no hay ninguna razón para tratarlo distinto aquí.
 
 ## 11. Fuera de spec: ideas apuntadas
 
 - Cantidades en la lista.
-- Un botón en el aviso que lleve directo a crear la receta de esa comida.
+- Un botón en el aviso de "comida sin receta" que lleve directo a crearla.
+- Apuntar cosas sueltas a mano, si más adelante se echa en falta (se quitó a
+  propósito en esta corrección, pero queda anotado por si cambia de opinión).
 
 ## ✅ Para probar a mano
 

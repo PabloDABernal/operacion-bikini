@@ -479,25 +479,38 @@ Qué NO hace, y es una decisión del usuario:
 |---|---|
 | 071 | La IA deja de tirar respuestas buenas |
 
-## Qué hará (v12: la lista de la compra, decidida el 30 de agosto de 2026)
+## Qué hará (v12: la lista de la compra, decidida el 30 de agosto de 2026, corregida el mismo día antes de probarla)
 
 La idea más vieja de la lista: lleva ahí desde la spec 026. Hasta ahora era cara;
 ya no, porque las piezas se fueron haciendo por otros motivos — el cruce
 despensa/receta (059), la despensa que se llena sola (068) y el emparejado por
 singular y plural (072).
 
-- **Dentro de Despensa, una lista de la compra.** Los ingredientes de las recetas
-  de tu dieta que **no tienes marcados**, sin repetir.
-- **Y lo que apuntes a mano**, que no tiene por qué ser comida.
-- **Marcar algo como comprado lo quita de la lista.** Un ingrediente se marca en
-  tu despensa —comprar algo es tenerlo— y un apunte a mano se borra.
-- **La lista dice lo que no sabe, por su nombre.** Solo las comidas con receta
-  tienen ingredientes; las demás salen listadas para que sepas qué le falta.
+**Corrección del 30 de agosto, antes de que el usuario la probara.** La primera
+versión de la 073 la ponía como un bloque fijo **encima** de la lista de
+ingredientes de la despensa, con apuntes a mano tipo "papel higiénico". Al
+leer cómo había quedado, el usuario dijo que no: lo importante de esa
+sub-pestaña son los ingredientes, y la lista de la compra es un añadido que no
+debe competir con eso por el primer sitio.
+
+- **Dentro de Despensa, un botón debajo de la lista de ingredientes**, del
+  estilo "Ver qué me falta de la compra". Pulsarlo despliega justo debajo,
+  igual que los "Ver todos" que ya usa la app; volver a pulsarlo lo esconde.
+- **Enseña los ingredientes de las recetas de tu dieta que no tienes
+  marcados**, sin repetir — el criterio no cambia, solo dónde y cómo se ve.
+- **Marcar algo como "ya lo tengo" lo marca en tu despensa** y desaparece de
+  la lista desplegada.
+- **La lista sigue diciendo lo que no sabe, por su nombre.** Solo las comidas
+  con receta tienen ingredientes; las demás salen listadas para que sepas qué
+  le falta.
 
 Qué NO hace:
 
-- **No lleva cantidades.** Dice "tomate", no "3 tomates". La despensa nunca las
-  ha llevado y esto no lo cambia.
+- **No lleva cantidades.** Dice "tomate", no "3 tomates".
+- **No se puede apuntar nada a mano.** La primera versión sí dejaba ("papel
+  higiénico"); se quitó en la corrección del 30 de agosto porque desviaba el
+  foco de lo que importa — los ingredientes de la despensa — y no era lo que
+  el usuario pedía.
 - **No adivina los ingredientes** de las comidas sin receta. En vez de eso te
   dice cuáles son, y **tú puedes crearles una receta y enlazarla** — lo señaló el
   propio usuario, y ya se podía desde las specs 026 y 028.
@@ -506,7 +519,7 @@ Qué NO hace:
 
 | Spec | Qué |
 |---|---|
-| 073 | La lista de la compra |
+| 073 | Qué me falta de la compra (rehecha el 30 de agosto, antes de probarse) |
 
 ## Qué hará (v13: los materiales, decidida el 30 de agosto de 2026)
 

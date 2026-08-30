@@ -82,16 +82,6 @@ service cloud.firestore {
       allow read, write: if autorizado() && request.auth.uid == uid;
     }
 
-    // La lista de la compra (spec 073): SOLO los apuntes a mano. Lo que falta
-    // de la dieta no se guarda, se calcula cruzando recetas y despensa.
-    //
-    // Colección propia y no la despensa a propósito: la despensa se le manda a
-    // la IA al pedir dieta, y el papel higiénico acabaría en el prompt como un
-    // ingrediente que tienes en casa.
-    match /usuarios/{uid}/compra/{apunteId} {
-      allow read, write: if autorizado() && request.auth.uid == uid;
-    }
-
     // Dietas: la semana de menús (spec 028). Como las recetas, viven fuera de
     // las operaciones: una dieta que funcionó sigue sirviendo en la siguiente.
     match /usuarios/{uid}/dietas/{dietaId} {
