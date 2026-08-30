@@ -14,7 +14,9 @@ const m = await import(
   "data:text/javascript;base64," + Buffer.from(fuente, "utf8").toString("base64")
 );
 
-const { ingredienteDeLinea, ingredientesNuevosDe } = m;
+const { ingredienteDeLinea, clasificarIngredientes, mismoIngrediente } = m;
+const ingredientesNuevosDe = (receta, despensa) =>
+  clasificarIngredientes(receta, despensa).nuevos;
 
 let mal = 0;
 const ok = (linea, esperado, nota) => {
@@ -85,4 +87,62 @@ comprobar(
   "lineas vacias se ignoran",
   ingredientesNuevosDe({ ingredientes: ["", "   ", "1 cebolla"] }, []),
   ["cebolla"]
+);
+
+// --- Singular y plural, y los parecidos (spec 072) ------------------------
+
+const mismo = (a, b) => mismoIngrediente(a, b);
+
+comprobar("tomate = tomates", mismo("tomate", "tomates"), true);
+comprobar("coliflor = coliflores", mismo("coliflor", "coliflores"), true);
+comprobar("al reves tambien", mismo("lentejas", "lenteja"), true);
+comprobar("sin tildes ni mayusculas", mismo("  JAMON ", "jamon"), true);
+comprobar("tomate NO es tomate triturado", mismo("tomate", "tomate triturado"), false);
+comprobar("leche NO es leche de avena", mismo("leche", "leche de avena"), false);
+comprobar("pimiento NO es pimienta", mismo("pimiento", "pimienta"), false);
+comprobar("sal NO es salmon", mismo("sal", "salmon"), false);
+
+// Lo que se pregunta en vez de unirse solo.
+const conTomate = [{ id: "1", nombre: "tomate", tengo: true }];
+
+comprobar(
+  "el plural no molesta: tomates ya lo tienes",
+  clasificarIngredientes({ ingredientes: ["2 tomates"] }, conTomate),
+  { nuevos: [], dudas: [] }
+);
+
+comprobar(
+  "tomate triturado se PREGUNTA, no se une",
+  clasificarIngredientes({ ingredientes: ["tomate triturado"] }, conTomate),
+  { nuevos: [], dudas: [{ nombre: "tomate triturado", parecido: "tomate" }] }
+);
+
+comprobar(
+  "lo que no se parece a nada entra directo",
+  clasificarIngredientes({ ingredientes: ["1 cebolla"] }, conTomate),
+  { nuevos: ["cebolla"], dudas: [] }
+);
+
+comprobar(
+  "leche de avena se pregunta contra leche",
+  clasificarIngredientes(
+    { ingredientes: ["leche de avena"] },
+    [{ id: "1", nombre: "leche", tengo: true }]
+  ),
+  { nuevos: [], dudas: [{ nombre: "leche de avena", parecido: "leche" }] }
+);
+
+comprobar(
+  "salmon NO se pregunta contra sal",
+  clasificarIngredientes(
+    { ingredientes: ["salmon"] },
+    [{ id: "1", nombre: "sal", tengo: true }]
+  ),
+  { nuevos: ["salmon"], dudas: [] }
+);
+
+comprobar(
+  "dentro de la misma receta, tomate y tomates no entran los dos",
+  clasificarIngredientes({ ingredientes: ["1 tomate", "2 tomates"] }, []).nuevos,
+  ["tomate"]
 );

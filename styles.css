@@ -1612,6 +1612,47 @@ button:disabled {
 
 /* La semana de la dieta (spec 028) */
 
+/* Las dudas de la despensa (spec 072). Sale al terminar de crearse la dieta,
+   encima de la semana: es lo que hay que atender antes de ponerse a mirar los
+   menús. */
+#dudas-despensa {
+  border: 1px solid var(--acento);
+  border-radius: var(--radio);
+  background: var(--superficie);
+  padding: var(--e4);
+  margin-bottom: var(--e4);
+}
+
+#dudas-despensa h3 {
+  margin: 0 0 var(--e2);
+  color: var(--acento);
+}
+
+.duda-despensa {
+  padding: var(--e3) 0;
+  border-top: 1px solid var(--borde);
+}
+
+.duda-despensa:first-child {
+  border-top: none;
+}
+
+.duda-pregunta {
+  margin: 0 0 var(--e2);
+}
+
+.duda-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e2);
+}
+
+.duda-acciones button {
+  flex: 1 1 8rem;
+  padding: var(--e2) var(--e3);
+  font-size: 0.9rem;
+}
+
 /* La tira de siete días (spec 064). Siete recuadros iguales que se reparten el
    ancho: al ser todos idénticos, la tira no puede descuadrarse por más largo
    que sea el nombre de un plato. */

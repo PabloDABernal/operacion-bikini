@@ -110,6 +110,11 @@ import {
   normalizar as normalizarIngrediente
 } from "./despensa.js";
 
+// Ingredientes de una receta recién creada que se parecen a algo que ya tenías
+// (spec 072). Se preguntan al terminar la dieta; hasta que se contesten, no se
+// guardan.
+let dudasDeDespensa = [];
+
 import {
   VASOS_OBJETIVO_POR_DEFECTO,
   MAXIMO_VASOS,
@@ -2130,17 +2135,90 @@ function reordenarDespensa() {
 // ya están guardadas y eso es lo que importa. Se avisa por consola y punto.
 async function llenarDespensaDesde(recetas) {
   let metidos = 0;
+  const dudas = [];
+
   try {
     for (const receta of recetas) {
-      metidos += await guardarIngredientesDeReceta(uidActual, receta, despensaCargada);
+      const salida = await guardarIngredientesDeReceta(
+        uidActual,
+        receta,
+        // La despensa cargada MÁS lo que está pendiente de preguntar: si dos
+        // recetas mencionan "tomate triturado", se pregunta una vez.
+        [...despensaCargada, ...dudas.map((duda) => ({ nombre: duda.nombre }))]
+      );
+      metidos += salida.metidos;
+      dudas.push(...salida.dudas);
+
       // Se relee entre recetas para que dos recetas con el mismo ingrediente no
       // lo metan dos veces.
-      if (metidos) await refrescarDespensa();
+      if (salida.metidos) await refrescarDespensa();
     }
   } catch (fallo) {
     console.error("No se han podido añadir ingredientes a la despensa:", fallo);
   }
+
+  dudasDeDespensa = dudas;
+  pintarDudasDeDespensa();
   return metidos;
+}
+
+// El panel de dudas (spec 072). Sale al terminar de crearse la dieta y
+// desaparece en cuanto se contestan todas.
+//
+// Si se recarga la página sin contestar, las dudas se pierden y esos
+// ingredientes no entran. Es a propósito: no se guarda una lista de preguntas
+// pendientes en Firestore por algo que se resuelve en dos toques, y la
+// alternativa —meterlos por si acaso— es justo el duplicado que se quiere
+// evitar.
+function pintarDudasDeDespensa() {
+  const bloque = id("dudas-despensa");
+  const lista = id("lista-dudas");
+
+  bloque.classList.toggle("oculta", dudasDeDespensa.length === 0);
+  lista.innerHTML = "";
+  if (!dudasDeDespensa.length) return;
+
+  id("dudas-titulo").textContent =
+    dudasDeDespensa.length === 1
+      ? "1 ingrediente por revisar"
+      : `${dudasDeDespensa.length} ingredientes por revisar`;
+
+  dudasDeDespensa.forEach((duda) => {
+    const fila = document.createElement("div");
+    fila.className = "duda-despensa";
+
+    const pregunta = document.createElement("p");
+    pregunta.className = "duda-pregunta";
+    pregunta.textContent = `«${duda.nombre}» ¿es lo mismo que tu «${duda.parecido}»?`;
+    fila.appendChild(pregunta);
+
+    const acciones = document.createElement("div");
+    acciones.className = "duda-acciones";
+
+    const esElMismo = botonDeFila("Es el mismo", () => resolverDuda(duda, false));
+    const sonDistintos = botonDeFila("Son distintos", () => resolverDuda(duda, true));
+    sonDistintos.className = "accion-principal";
+
+    acciones.append(esElMismo, sonDistintos);
+    fila.appendChild(acciones);
+    lista.appendChild(fila);
+  });
+}
+
+// "Es el mismo" no guarda nada: ya lo tienes con otro nombre. "Son distintos"
+// lo mete como uno más, sin marcar, igual que cualquier alta.
+async function resolverDuda(duda, esNuevo) {
+  dudasDeDespensa = dudasDeDespensa.filter((otra) => otra !== duda);
+  pintarDudasDeDespensa();
+
+  if (!esNuevo) return;
+
+  try {
+    await guardarIngrediente(uidActual, duda.nombre);
+    await refrescarDespensa();
+  } catch (fallo) {
+    console.error("No se ha podido añadir el ingrediente:", fallo);
+  }
 }
 
 async function refrescarDespensa() {

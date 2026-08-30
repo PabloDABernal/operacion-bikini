@@ -322,6 +322,19 @@ Qué NO hace:
 |---|---|
 | 068 | La despensa se llena sola, y deja de mentir |
 | 069 | Buscar en la despensa |
+| 072 | La despensa con sensibilidad, y la receta con su icono (30 de agosto) |
+
+**Segunda tanda, del 30 de agosto.** Al usarlo con datos de verdad salieron dos
+cosas más:
+
+- **El plato con receta se veía distinto** del resto de la semana, subrayado. Ya
+  no: todos los platos son texto normal y **la receta se abre con un icono**.
+- **La despensa no tenía sensibilidad.** "tomate" y "tomates" entraban como dos.
+  Ahora **el singular y el plural se unen solos**, y lo que solo *se parece*
+  —"tomate" contra "tomate triturado"— **se pregunta** al terminar la dieta, con
+  dos botones: es el mismo, o son distintos.
+- **Unir los parecidos automáticamente se descartó**: parece listo hasta que
+  junta "leche" con "leche de avena", o "pimiento" con "pimienta".
 
 ## Qué hará (v9: lo que bebes y lo que acompaña, decidida el 29 de agosto de 2026)
 

@@ -98,11 +98,15 @@ export function guardarIngrediente(uid, nombre) {
 // se les cambia la marca—, así que llamar a esto dos veces con la misma receta
 // no hace nada la segunda.
 export async function guardarIngredientesDeReceta(uid, receta, despensa) {
-  const nuevos = ingredientesNuevosDe(receta, despensa);
+  const { nuevos, dudas } = clasificarIngredientes(receta, despensa);
   for (const nombre of nuevos) {
     await guardarIngrediente(uid, nombre);
   }
-  return nuevos.length;
+  // Las dudas NO se guardan aquí: se devuelven para preguntárselas al usuario
+  // (spec 072). Guardarlas sería justo lo que se quiere evitar — una despensa
+  // con "tomate" y "tomate triturado" como si fueran cosas distintas sin que
+  // nadie lo haya decidido.
+  return { metidos: nuevos.length, dudas };
 }
 
 export function renombrarIngrediente(uid, ingredienteId, nombre) {
@@ -197,24 +201,79 @@ export function ingredienteDeLinea(linea) {
   return texto;
 }
 
-// Los ingredientes de una receta, listos para la despensa: limpios, sin
-// repetidos entre sí y sin los que ya tienes apuntados.
-export function ingredientesNuevosDe(receta, despensa) {
-  const vistos = new Set(despensa.map((ingrediente) => normalizar(ingrediente.nombre)));
+// ¿Son el mismo ingrediente? (spec 072)
+//
+// Lo único que se une SOLO es el singular y el plural: tomate = tomates,
+// lenteja = lentejas, coliflor = coliflores. Es la única regla que casi nunca se
+// equivoca en español.
+//
+// Todo lo demás —"tomate" contra "tomate triturado"— NO se une por su cuenta: se
+// pregunta. Unirlo automáticamente parece listo hasta que junta "leche" con
+// "leche de avena", o "pimiento" con "pimienta".
+export function mismoIngrediente(uno, otro) {
+  const a = normalizar(uno);
+  const b = normalizar(otro);
+  if (!a || !b) return false;
+  if (a === b) return true;
+
+  const esPluralDe = (plural, singular) =>
+    plural === `${singular}s` || plural === `${singular}es`;
+
+  return esPluralDe(a, b) || esPluralDe(b, a);
+}
+
+// El ingrediente de tu despensa que SE PARECE a este, sin ser el mismo, o null.
+//
+// "Parecerse" es que uno contenga al otro como palabra entera, con la misma
+// regla del cruce de la spec 059. Así "tomate triturado" se parece a tu
+// "tomate", pero "salmón" no se parece a tu "sal".
+export function parecidoEnLaDespensa(nombre, despensa) {
+  return (
+    despensa.find(
+      (ingrediente) =>
+        !mismoIngrediente(nombre, ingrediente.nombre) &&
+        (lineaTieneIngrediente(nombre, ingrediente.nombre) ||
+          lineaTieneIngrediente(ingrediente.nombre, nombre))
+    ) || null
+  );
+}
+
+// Reparte los ingredientes de una receta en tres montones (spec 072):
+//
+// - los que YA tienes (mismo, o su plural): no se hace nada con ellos;
+// - los `nuevos`, que no se parecen a nada tuyo y entran directos;
+// - las `dudas`, que se parecen a algo tuyo y hay que preguntarte.
+//
+// Se devuelve el reparto en vez de guardarlo aquí: quien llama decide qué hacer
+// con las dudas, y este módulo no sabe de pantallas.
+export function clasificarIngredientes(receta, despensa) {
   const nuevos = [];
+  const dudas = [];
+  // Lo ya visto cuenta como despensa para el siguiente: dentro de la misma
+  // receta, "tomate" y "tomates" no pueden entrar los dos.
+  const conocidos = [...despensa];
 
   (receta.ingredientes || []).forEach((linea) => {
     const nombre = ingredienteDeLinea(linea).slice(0, MAX_NOMBRE);
     if (!nombre) return;
 
-    const clave = normalizar(nombre);
-    if (!clave || vistos.has(clave)) return;
+    if (conocidos.some((ingrediente) => mismoIngrediente(nombre, ingrediente.nombre))) {
+      return;
+    }
+    if (dudas.some((duda) => mismoIngrediente(nombre, duda.nombre))) return;
 
-    vistos.add(clave);
+    const parecido = parecidoEnLaDespensa(nombre, conocidos);
+    if (parecido) {
+      dudas.push({ nombre, parecido: parecido.nombre });
+      return;
+    }
+
     nuevos.push(nombre);
+    // Se apunta como conocido para que el resto de la receta lo tenga en cuenta.
+    conocidos.push({ nombre, tengo: false });
   });
 
-  return nuevos;
+  return { nuevos, dudas };
 }
 
 // --- El cruce despensa/receta (spec 059) ---------------------------------

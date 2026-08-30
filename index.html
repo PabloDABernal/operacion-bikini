@@ -350,6 +350,17 @@
       <!-- La tira de días (spec 064). Siete recuadros L M X J V S D: tocas uno
            y debajo salen solo sus comidas. Antes eran veintiocho filas
            seguidas, con los botones de texto descuadrando cada una. -->
+      <!-- Las dudas de la despensa (spec 072). Sale al terminar de crearse la
+           dieta, con los ingredientes que se parecen a los que ya tenías. -->
+      <div id="dudas-despensa" class="oculta">
+        <h3 id="dudas-titulo"></h3>
+        <p class="explicacion">
+          Estos se parecen a algo que ya tienes. Dime si son lo mismo o no, para
+          no dejarte la despensa con duplicados.
+        </p>
+        <div id="lista-dudas"></div>
+      </div>
+
       <div id="dias-dieta" class="tira-dias"></div>
       <div id="semana-dieta"></div>
       <button type="button" id="btn-ver-semana" class="enlace oculta"></button>
