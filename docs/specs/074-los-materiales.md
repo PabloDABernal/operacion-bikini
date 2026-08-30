@@ -119,6 +119,21 @@ saltar la fila bajo el dedo).
 Encima de la lista: "4 de 9 materiales en casa". Con la lista vacía no se
 enseña.
 
+### Colocación en escritorio
+
+La rejilla de tres columnas de Ejercicio (spec 036) se diseñó para tres
+sub-pestañas y ya tuvo que ajustarse a mano cuando Comidas pasó a cuatro con la
+Despensa (spec 058/v10): Despensa se colocó **debajo de Recetas**, en su misma
+columna, porque es con lo que se usa junta.
+
+Aquí se aplica el mismo criterio: **Materiales va debajo de Catálogo**, en su
+misma columna (la tercera), porque la 075 cruzará el material de cada
+ejercicio del catálogo con esta lista — es exactamente el paralelismo de
+Recetas/Despensa. Requiere tocar `styles.css` en el mismo bloque de la media
+query de escritorio donde vive la regla de Comidas (los selectores
+`.seccion[data-seccion="ejercicio"] .subseccion[data-subseccion="…"]`, hoy
+inexistentes porque con tres sub-pestañas caían solas por orden de aparición).
+
 ## 5. Modelo de datos
 
 Colección nueva `usuarios/{uid}/materiales/{materialId}`.
@@ -157,15 +172,17 @@ no se junta con "catálogo de ejercicios y tabla" porque son cosas distintas.
 | `js/materiales.js` | **Nuevo.** Modelo: validar, listar, guardar, actualizar, marcar, borrar. Reutiliza `normalizar()` de `js/despensa.js`. |
 | `index.html` | Sub-pestaña, sección, formulario de alta y contenedor de lista, en `data-de="ejercicio"`. |
 | `js/app.js` | Pintado de la lista, altas, marcado, edición, borrado y recuento. |
-| `styles.css` | Se reaprovechan las reglas de la despensa; no debería hacer falta CSS nuevo. |
+| `styles.css` | Se reaprovechan las filas/casillas de la despensa. Sí hace falta CSS nuevo para la rejilla de escritorio: cuatro reglas `grid-column`/`grid-row` en `data-seccion="ejercicio"` (ver "Colocación en escritorio" arriba), calcadas de las de Comidas. |
 | `firestore.rules` | Bloque de `materiales`. **Publicar con la CLI antes de probar.** |
 | `js/reinicio.js` | Casilla "materiales". |
 
-**Estimación: 250-300 líneas**, tomando como referencia la despensa (spec 058,
-521 líneas reales) pero descontando lo que aquí no hace falta rehacer: no hay
-mensaje de estado vacío distinto por escribir desde cero (se copia el patrón),
-y la normalización se reutiliza en vez de escribirse de nuevo. **Si al
-implementar se pasa de 300, parar y avisar** (regla 4 de `CLAUDE.md`).
+**Estimación: 350-400 líneas.** La despensa (spec 058) tiene un alcance casi
+idéntico —alta, edición, borrado, marcado, normalizar, recuento, estado vacío,
+reglas, reinicio— y estimó 250-300 pero salió en 521 (408 de JS). Reutilizar
+`normalizar()` ahorra solo esa función (~15 líneas), no la diferencia real:
+esta spec parte directamente de la cifra real de la 058, sin repetir una
+estimación que ya falló una vez. **Si al implementar se pasa de 400, parar y
+avisar** (regla 4 de `CLAUDE.md`).
 
 ## 8. Decisiones tomadas
 
@@ -183,6 +200,10 @@ implementar se pasa de 300, parar y avisar** (regla 4 de `CLAUDE.md`).
 - **No se rellena sola desde el catálogo** (usuario, 30 de agosto): a
   diferencia de la despensa (spec 068), se deja para más adelante, viendo
   primero cómo se usa la lista con esta spec ya en producción.
+- **Materiales va debajo de Catálogo en la rejilla de escritorio** (Claude,
+  tras la revisión de `revisor-specs`, aplicando el mismo criterio que el
+  usuario ya fijó para Despensa/Recetas el 29 de agosto): se usa junto a lo
+  que cruzará con ella en la spec 075.
 
 ## 9. Fuera de spec: ideas apuntadas
 
