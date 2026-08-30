@@ -2,20 +2,19 @@
 
 Documento para retomar el trabajo en frío. Se actualiza al terminar cada spec.
 
-**Última actualización:** 30 de agosto de 2026 (traspaso a Claude Code web) (specs 001-072 **probadas y cerradas**, v1 a v11 terminadas; la **073 desplegada y SIN PROBAR**)
+**Última actualización:** 30 de agosto de 2026 (specs 001-073 **cerradas**, v1 a v12 terminadas)
 
-> **Traspaso del 30 de agosto de 2026.** Se sigue en remoto desde Claude Code
-> web. `main` limpio y sincronizado con `origin/main`, último commit `2238bea`.
+> **Cierre del 30 de agosto de 2026.** La **spec 073 (la lista de la compra)
+> queda cerrada** por decisión del usuario: está implementada, desplegada y con
+> las reglas de Firestore publicadas y verificadas con la CLI (`already up to
+> date`, re-liberadas). El guion de prueba manual está al final de la propia
+> spec por si hace falta repasarlo. Con ella se da por terminada la **v12**.
 >
-> **Lo primero al retomar: el usuario tiene que probar la spec 073** (la lista de
-> la compra). Está implementada y desplegada, con las reglas de Firestore ya
-> publicadas, pero **nadie la ha probado todavía**. Su guion está al final de la
-> propia spec y en la conversación; lo esencial: Comidas → Despensa, que salga lo
-> que falta de la dieta sin repetir, que el ✓ lo marque en la despensa, y que el
-> aviso liste por su nombre las comidas sin receta.
->
-> Todo lo anterior (001-072) está probado y confirmado. No hay ninguna decisión
-> pendiente ni nada a medias.
+> `main` limpio y sincronizado con `origin/main`. No hay ninguna decisión
+> pendiente ni nada a medias. **Lo siguiente son evolutivos nuevos**: se elige
+> una idea del apartado "Ideas para más adelante" de `docs/PRODUCTO.md`, se
+> decide si es una versión partida en varias specs, y se escribe con
+> `/nueva-spec` antes de tocar código.
 >
 > **Las pruebas automáticas se ejecutan con `node`** y conviene pasarlas si se
 > toca el cruce o la despensa:
@@ -115,7 +114,7 @@ El 20 de agosto arrancó la **v4**, que sale de una auditoría de usabilidad hec
 | 070 | El análisis cuenta bebidas y acompañamientos (v9) | ✅ completada |
 | 071 | La IA deja de tirar respuestas buenas (v11) | ✅ completada |
 | 072 | La despensa con sensibilidad, y la receta con su icono (v8+) | ✅ completada |
-| 073 | La lista de la compra (v12) | 🚧 implementada y desplegada, **sin probar** |
+| 073 | La lista de la compra (v12) | ✅ completada |
 | 064 | La semana de la dieta, en siete recuadros (v10) | ✅ completada |
 | 065 | Iconos en las acciones de fila (v10) | ✅ completada |
 | 066 | La barra con iconos, y Ajustes de vuelta (v10) | ✅ completada |

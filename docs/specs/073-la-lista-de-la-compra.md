@@ -1,6 +1,6 @@
 # 073 — La lista de la compra
 
-- **Estado:** implementada y desplegada el 30 de agosto de 2026. **Pendiente de que el usuario la pruebe**.
+- **Estado:** ✅ completada (probada y confirmada por el usuario el 2026-08-30).
 - **Fecha:** 2026-08-30
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (v12: la lista de la compra, decidida el 30 de agosto de 2026)".
 
