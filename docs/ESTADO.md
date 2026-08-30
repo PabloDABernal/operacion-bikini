@@ -2,7 +2,26 @@
 
 Documento para retomar el trabajo en frío. Se actualiza al terminar cada spec.
 
-**Última actualización:** 30 de agosto de 2026 (**specs 001-072 probadas y cerradas**, v1 a v11 terminadas; nada a medias, toca elegir lo siguiente)
+**Última actualización:** 30 de agosto de 2026 (traspaso a Claude Code web) (specs 001-072 **probadas y cerradas**, v1 a v11 terminadas; la **073 desplegada y SIN PROBAR**)
+
+> **Traspaso del 30 de agosto de 2026.** Se sigue en remoto desde Claude Code
+> web. `main` limpio y sincronizado con `origin/main`, último commit `2238bea`.
+>
+> **Lo primero al retomar: el usuario tiene que probar la spec 073** (la lista de
+> la compra). Está implementada y desplegada, con las reglas de Firestore ya
+> publicadas, pero **nadie la ha probado todavía**. Su guion está al final de la
+> propia spec y en la conversación; lo esencial: Comidas → Despensa, que salga lo
+> que falta de la dieta sin repetir, que el ✓ lo marque en la despensa, y que el
+> aviso liste por su nombre las comidas sin receta.
+>
+> Todo lo anterior (001-072) está probado y confirmado. No hay ninguna decisión
+> pendiente ni nada a medias.
+>
+> **Las pruebas automáticas se ejecutan con `node`** y conviene pasarlas si se
+> toca el cruce o la despensa:
+> `node docs/specs/059-cruce-casos.mjs`, `node docs/specs/061-agua-casos.mjs` y
+> `node docs/specs/068-limpieza-casos.mjs`. Las tres pasaban al cerrar la sesión.
+
 
 > **Traspaso del 27 de agosto de 2026.** Se sigue en remoto desde Claude Code web. Estado al cerrar la sesión del PC: nada a medias, `main` limpio y sincronizado con `origin/main`. No hay spec abierta. **`docs/BACKLOG.md` está vacío a propósito desde hoy**: sus veintidós entradas se repartieron entre `docs/PRODUCTO.md` (apartado "Ideas para más adelante", que es de donde se elige la próxima versión), este documento (las trampas, aquí abajo) y el propio backlog (lo cerrado, para que no vuelva a proponerse). **Lo siguiente son evolutivos nuevos**: se elige una idea de `PRODUCTO.md`, se decide si es una versión partida en varias specs, y se escribe con `/nueva-spec` antes de tocar código. Antes de nada, leer "Cosas que hay que saber antes de tocar nada" de más abajo: las trampas del modelo de IA, la publicación de reglas de Firestore y que se prueba SIEMPRE en producción con push.
 
@@ -118,8 +137,13 @@ están cerradas. La app se usa a diario en producción.
 | **v9** | Lo que bebes y lo que acompaña: el agua (061), las bebidas (062), el acompañamiento (063) y que el análisis los cuente (070). |
 | **v10** | La semana en siete recuadros, los iconos de fila y la barra con Ajustes (064-067). |
 | **v11** | La IA deja de tirar respuestas buenas (071). |
+| **v12** | La lista de la compra (073). **Desplegada, sin probar.** |
 
 ### Lo siguiente
+
+1. **Que el usuario pruebe la 073**, la lista de la compra. Es lo único
+   desplegado sin probar.
+2. Después, **elegir**.
 
 **Elegir.** No hay nada a medias ni ninguna decisión pendiente. Las ideas viven
 en `docs/PRODUCTO.md`, apartado "Ideas para más adelante", y `docs/BACKLOG.md`
@@ -127,9 +151,10 @@ tiene su buzón con lo que fue saliendo.
 
 Lo que más se ha nombrado sin hacerse:
 
-- **La lista de la compra** de la semana. Lleva desde la spec 026 en la lista, y
-  ahora está a un paso: el cruce despensa/receta ya existe (059) y la despensa se
-  llena sola (068). Sería juntar lo que falta de todas las recetas de la dieta.
+- ~~**La lista de la compra**~~ **hecha el 30 de agosto**, en la spec 073. Era la
+  idea más vieja del proyecto —de la spec 026— y salió en 303 líneas porque el
+  cruce (059), la limpieza (068) y el emparejado (072) ya estaban hechos por
+  otros motivos.
 - **Un tercer proveedor de IA**, si los dos actuales siguen quedándose cortos. La
   071 arregló el fallo que había; si vuelve a fallar, ahora se sabría por qué.
 - **La tira de siete días en más sitios**, y el resto del pulido visual de
