@@ -1,6 +1,6 @@
 # 073 — Qué me falta de la compra
 
-- **Estado:** implementada, pendiente de `revisor-codigo` y de que el usuario la pruebe (rehecha el 30 de agosto de 2026, antes de que probara la primera versión).
+- **Estado:** implementada, revisada por `revisor-codigo` (veredicto: cumple), pendiente de que el usuario la pruebe (rehecha el 30 de agosto de 2026, antes de que probara la primera versión).
 - **Fecha:** 2026-08-30
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (v12: la lista de la compra, decidida el 30 de agosto de 2026, corregida el mismo día antes de probarla)".
 
