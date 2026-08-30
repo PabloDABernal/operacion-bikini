@@ -411,6 +411,24 @@
       <div class="subseccion" data-subseccion="despensa">
       <!-- La despensa (spec 058). No es un inventario: no lleva cantidades ni
            caducidades. Marcar y desmarcar es todo el mantenimiento que pide. -->
+      <!-- La lista de la compra (spec 073). Va DENTRO de Despensa y encima de
+           lo que tienes: cuando entras aquí pensando en comprar, lo primero que
+           quieres ver es qué falta. -->
+      <h2>Lista de la compra</h2>
+      <p id="estado-compra" class="explicacion"></p>
+      <div id="lista-compra"></div>
+      <p id="sin-receta-compra" class="explicacion oculta"></p>
+
+      <form id="form-apunte">
+        <label for="apunte-texto">Apuntar algo más</label>
+        <div class="fila-alta">
+          <input type="text" id="apunte-texto" maxlength="60"
+            placeholder="papel higiénico" autocomplete="off">
+          <button type="submit" id="btn-anadir-apunte">Apuntar</button>
+        </div>
+      </form>
+      <p id="error-compra" class="error" role="alert"></p>
+
       <h2>Mi despensa</h2>
       <p id="estado-despensa" class="explicacion"></p>
 

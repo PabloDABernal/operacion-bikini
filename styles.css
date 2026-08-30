@@ -1612,6 +1612,26 @@ button:disabled {
 
 /* La semana de la dieta (spec 028) */
 
+/* La lista de la compra (spec 073). Reutiliza .ingrediente, que ya es una fila
+   con su casilla y sus acciones: aquí lo que hace de casilla es el icono de
+   "ya lo tengo", que es la misma acción con otro nombre. */
+#lista-compra {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e1);
+  margin-bottom: var(--e3);
+}
+
+#sin-receta-compra {
+  border-left: 2px solid var(--apoyo);
+  padding-left: var(--e3);
+  margin-bottom: var(--e3);
+}
+
+#form-apunte {
+  margin-bottom: var(--e3);
+}
+
 /* Las dudas de la despensa (spec 072). Sale al terminar de crearse la dieta,
    encima de la semana: es lo que hay que atender antes de ponerse a mirar los
    menús. */

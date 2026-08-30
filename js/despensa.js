@@ -382,6 +382,49 @@ export function partesDeLinea(linea) {
   return partes.length ? partes : [String(linea ?? "").trim()];
 }
 
+// Lo que te falta comprar (spec 073): los ingredientes de estas recetas que NO
+// tienes marcados en la despensa.
+//
+// Se calcula al vuelo y no se guarda: es la despensa cruzada con las recetas,
+// igual que el cruce de la spec 059.
+//
+// Los repetidos se juntan con la regla de la spec 072 —igualdad y plural—, así
+// que un ingrediente que sale en tres recetas aparece una vez, y "tomate" y
+// "tomates" no salen los dos.
+//
+// Devuelve, por cada uno, el nombre que se enseña y el ingrediente de tu
+// despensa al que corresponde, si es que está apuntado: quien lo marque como
+// comprado necesita saber a cuál marcar.
+export function loQueFalta(recetas, despensa) {
+  const faltan = [];
+
+  const yaEsta = (nombre) =>
+    faltan.some((falta) => mismoIngrediente(falta.nombre, nombre));
+
+  (recetas || []).forEach((receta) => {
+    (receta.ingredientes || []).forEach((linea) => {
+      const nombre = ingredienteDeLinea(linea).slice(0, MAX_NOMBRE);
+      if (!nombre || yaEsta(nombre)) return;
+
+      const enDespensa = despensa.find((ingrediente) =>
+        mismoIngrediente(ingrediente.nombre, nombre)
+      );
+
+      // Si lo tienes marcado, no hay nada que comprar.
+      if (enDespensa && enDespensa.tengo) return;
+
+      faltan.push({
+        // El nombre de tu despensa manda sobre el de la receta: es como tú lo
+        // llamas, y es lo que vas a buscar en el súper.
+        nombre: enDespensa ? enDespensa.nombre : nombre,
+        ingredienteId: enDespensa ? enDespensa.id : null
+      });
+    });
+  });
+
+  return faltan;
+}
+
 // Lo que se le manda a la IA al pedir la dieta: solo los nombres de lo que
 // tienes ahora en casa.
 export function loQueTengo(despensa) {

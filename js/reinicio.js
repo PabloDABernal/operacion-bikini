@@ -70,6 +70,11 @@ export const TIPOS = [
   // archiva con la operación, así que esta es la única forma de borrarla, y
   // juntarla con "recetas y dietas" obligaría a borrar las tres para borrar una.
   { clave: "despensa", etiqueta: "despensa", colecciones: ["despensa"] },
+  // La lista de la compra (spec 073). Casilla propia y OBLIGATORIA, por lo mismo
+  // que el agua y las bebidas: borrarOperacion() nunca toca las colecciones de
+  // primer nivel, así que sin ella se quedaría huérfana. Y separada de la
+  // despensa porque son cosas distintas: lo que tienes y lo que hay que comprar.
+  { clave: "compra", etiqueta: "lista de la compra", colecciones: ["compra"] },
   // Lo mismo para entrenar (spec 029). La etiqueta evita a propósito la
   // palabra suelta "ejercicios", que es la casilla de arriba y borra el
   // diario: equivocarse aquí borra datos.

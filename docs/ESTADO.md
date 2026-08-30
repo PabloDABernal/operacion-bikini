@@ -96,6 +96,7 @@ El 20 de agosto arrancó la **v4**, que sale de una auditoría de usabilidad hec
 | 070 | El análisis cuenta bebidas y acompañamientos (v9) | ✅ completada |
 | 071 | La IA deja de tirar respuestas buenas (v11) | ✅ completada |
 | 072 | La despensa con sensibilidad, y la receta con su icono (v8+) | ✅ completada |
+| 073 | La lista de la compra (v12) | 🚧 implementada y desplegada, **sin probar** |
 | 064 | La semana de la dieta, en siete recuadros (v10) | ✅ completada |
 | 065 | Iconos en las acciones de fila (v10) | ✅ completada |
 | 066 | La barra con iconos, y Ajustes de vuelta (v10) | ✅ completada |

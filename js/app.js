@@ -107,8 +107,17 @@ import {
   cruzarConLaDespensa,
   loQueTengo,
   guardarIngredientesDeReceta,
-  normalizar as normalizarIngrediente
+  normalizar as normalizarIngrediente,
+  mismoIngrediente,
+  loQueFalta
 } from "./despensa.js";
+
+import {
+  validarApunte,
+  guardarApunte,
+  borrarApunte,
+  listarCompra
+} from "./compra.js";
 
 // Ingredientes de una receta recién creada que se parecen a algo que ya tenías
 // (spec 072). Se preguntan al terminar la dieta; hasta que se contesten, no se
@@ -1747,6 +1756,8 @@ async function refrescarRecetas() {
   // de recetas todavía vacía y ningún plato salía tocable hasta el siguiente
   // repintado. Con dieta cargada, se vuelve a pintar aquí.
   if (dietaActiva) pintarDieta();
+  // Y la lista de la compra, que sale de los ingredientes de esas recetas.
+  pintarCompra();
 }
 
 id("btn-nueva-receta").addEventListener("click", () => abrirFormularioDeReceta(null));
@@ -1879,6 +1890,195 @@ async function refrescarAgua() {
 
 id("btn-mas-agua").addEventListener("click", () => cambiarVasos(1));
 id("btn-menos-agua").addEventListener("click", () => cambiarVasos(-1));
+
+// --- La lista de la compra (spec 073) ------------------------------------
+//
+// Dos cosas en una sola lista: lo que falta de tu dieta —calculado al vuelo,
+// cruzando las recetas de la semana con tu despensa— y lo que hayas apuntado a
+// mano, que sí se guarda.
+//
+// Marcar como comprado hace cosas distintas según qué sea, pero desde fuera se
+// ve igual: desaparece de la lista. Un ingrediente se marca en la despensa
+// —comprar algo es tenerlo—; un apunte a mano se borra.
+
+let apuntesDeCompra = [];
+
+// Las recetas enlazadas a las comidas de la dieta activa, sin repetir.
+function recetasDeLaDieta() {
+  if (!dietaActiva) return [];
+
+  const ids = new Set();
+  dietaActiva.dias.forEach((dia) => {
+    dia.comidas.forEach((comida) => {
+      if (comida.recetaId) ids.add(comida.recetaId);
+    });
+  });
+
+  return recetasCargadas.filter((receta) => ids.has(receta.id));
+}
+
+// Las comidas de la semana que NO tienen receta enlazada, por su nombre.
+//
+// La lista no se limita a avisar de que no lo sabe todo: dice cuáles son, para
+// que el usuario pueda crearles una receta y enlazarla (specs 026 y 028). Un
+// aviso genérico no sirve de nada; tres nombres concretos sí.
+function comidasSinReceta() {
+  if (!dietaActiva) return [];
+
+  const nombres = [];
+  dietaActiva.dias.forEach((dia) => {
+    dia.comidas.forEach((comida) => {
+      if (!comida.texto) return;
+      if (recetaDeLaComida(comida)) return;
+      if (!nombres.includes(comida.texto)) nombres.push(comida.texto);
+    });
+  });
+
+  return nombres;
+}
+
+function pintarCompra() {
+  const contenedor = id("lista-compra");
+  const estado = id("estado-compra");
+  const aviso = id("sin-receta-compra");
+
+  contenedor.innerHTML = "";
+
+  const faltan = loQueFalta(recetasDeLaDieta(), despensaCargada);
+  const todo = [
+    ...faltan.map((falta) => ({ ...falta, apunteId: null })),
+    ...apuntesDeCompra.map((apunte) => ({
+      nombre: apunte.texto,
+      ingredienteId: null,
+      apunteId: apunte.id
+    }))
+  ];
+
+  estado.textContent = todo.length
+    ? ""
+    : dietaActiva
+      ? "No te falta nada de tu dieta. Puedes apuntar aquí lo que necesites."
+      : "Aún no tienes dieta, así que aquí solo saldrá lo que apuntes a mano.";
+
+  todo.forEach((cosa) => contenedor.appendChild(filaDeCompra(cosa)));
+
+  // Lo que la lista NO sabe, dicho por su nombre.
+  const sinReceta = comidasSinReceta();
+  aviso.classList.toggle("oculta", sinReceta.length === 0);
+  if (sinReceta.length) {
+    const cuantas =
+      sinReceta.length === 1
+        ? "esta comida de tu semana no tiene receta"
+        : "estas comidas de tu semana no tienen receta";
+    aviso.textContent =
+      `Ojo: ${cuantas}, así que no sé qué llevan — ${sinReceta.join(", ")}. ` +
+      "Si les creas una receta y la enlazas al editar la comida, sus " +
+      "ingredientes saldrán aquí.";
+  }
+}
+
+function filaDeCompra(cosa) {
+  const fila = document.createElement("div");
+  fila.className = "ingrediente";
+
+  const comprado = botonDeIcono("comido", `Ya lo tengo: ${cosa.nombre}`, () =>
+    marcarComprado(cosa)
+  );
+  comprado.classList.add("boton-comido");
+
+  const acciones = document.createElement("div");
+  acciones.className = "ingrediente-acciones";
+
+  // Solo los apuntes a mano se quitan a mano: lo que falta de la dieta no se
+  // borra, se deja de necesitar.
+  if (cosa.apunteId) {
+    acciones.appendChild(
+      botonDeIcono("papelera", `Quitar ${cosa.nombre} de la lista`, () =>
+        quitarApunte(cosa)
+      )
+    );
+  }
+
+  fila.append(comprado, celda(cosa.nombre, "ingrediente-nombre"), acciones);
+  return fila;
+}
+
+// Comprar algo es tenerlo. Un ingrediente se marca en la despensa; un apunte a
+// mano se borra. Los dos desaparecen de la lista, que es lo que se espera.
+async function marcarComprado(cosa) {
+  id("error-compra").textContent = "";
+
+  try {
+    if (cosa.apunteId) await borrarApunte(uidActual, cosa.apunteId);
+
+    if (cosa.ingredienteId) {
+      await marcarIngrediente(uidActual, cosa.ingredienteId, true);
+    } else if (!cosa.apunteId) {
+      // Está en una receta pero no en tu despensa todavía. Entra YA MARCADO,
+      // porque acabas de comprarlo: es la única alta que nace marcada desde la
+      // spec 068, y aquí sí es verdad que lo tienes.
+      const referencia = await guardarIngrediente(uidActual, cosa.nombre);
+      await marcarIngrediente(uidActual, referencia.id, true);
+    }
+
+    await refrescarCompra();
+    await refrescarDespensa();
+  } catch {
+    id("error-compra").textContent =
+      "No se ha podido guardar. Comprueba tu conexión.";
+  }
+}
+
+async function quitarApunte(cosa) {
+  id("error-compra").textContent = "";
+  try {
+    await borrarApunte(uidActual, cosa.apunteId);
+    await refrescarCompra();
+  } catch {
+    id("error-compra").textContent =
+      "No se ha podido borrar. Comprueba tu conexión.";
+  }
+}
+
+async function refrescarCompra() {
+  try {
+    apuntesDeCompra = await listarCompra(uidActual);
+  } catch {
+    apuntesDeCompra = [];
+    id("error-compra").textContent =
+      "No se ha podido cargar la lista de la compra.";
+  }
+  pintarCompra();
+}
+
+id("form-apunte").addEventListener("submit", async (evento) => {
+  evento.preventDefault();
+
+  const campo = id("apunte-texto");
+  const error = id("error-compra");
+  error.textContent = "";
+
+  const resultado = validarApunte(campo.value, apuntesDeCompra);
+  if (resultado.error) {
+    error.textContent = resultado.error;
+    return;
+  }
+
+  const boton = id("btn-anadir-apunte");
+  boton.disabled = true;
+  try {
+    await guardarApunte(uidActual, resultado.texto);
+  } catch {
+    error.textContent = "No se ha podido guardar. Comprueba tu conexión.";
+    return;
+  } finally {
+    boton.disabled = false;
+  }
+
+  campo.value = "";
+  await refrescarCompra();
+  campo.focus();
+});
 
 // --- La despensa (spec 058) ----------------------------------------------
 //
@@ -2231,6 +2431,9 @@ async function refrescarDespensa() {
     return;
   }
   pintarDespensa();
+  // La lista de la compra sale de cruzar la despensa con las recetas, así que
+  // cambiar la despensa la cambia (spec 073).
+  pintarCompra();
 }
 
 id("buscar-despensa").addEventListener("input", (evento) => {
@@ -2840,6 +3043,8 @@ async function refrescarDieta() {
   // mirando ya es otra cosa.
   diaDietaAbierto = diaDeLaSemana(hoyISO());
   pintarDieta();
+  // Otra dieta, otras recetas, otra lista de la compra.
+  pintarCompra();
 }
 
 // --- Catálogo de ejercicios (spec 029) -----------------------------------
@@ -4889,6 +5094,7 @@ function refrescarTodo() {
     refrescarFotos(),
     refrescarRecetas(),
     refrescarDespensa(),
+    refrescarCompra(),
     refrescarDieta(),
     refrescarCatalogo(),
     refrescarTabla(),

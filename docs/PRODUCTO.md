@@ -479,6 +479,35 @@ Qué NO hace, y es una decisión del usuario:
 |---|---|
 | 071 | La IA deja de tirar respuestas buenas |
 
+## Qué hará (v12: la lista de la compra, decidida el 30 de agosto de 2026)
+
+La idea más vieja de la lista: lleva ahí desde la spec 026. Hasta ahora era cara;
+ya no, porque las piezas se fueron haciendo por otros motivos — el cruce
+despensa/receta (059), la despensa que se llena sola (068) y el emparejado por
+singular y plural (072).
+
+- **Dentro de Despensa, una lista de la compra.** Los ingredientes de las recetas
+  de tu dieta que **no tienes marcados**, sin repetir.
+- **Y lo que apuntes a mano**, que no tiene por qué ser comida.
+- **Marcar algo como comprado lo quita de la lista.** Un ingrediente se marca en
+  tu despensa —comprar algo es tenerlo— y un apunte a mano se borra.
+- **La lista dice lo que no sabe, por su nombre.** Solo las comidas con receta
+  tienen ingredientes; las demás salen listadas para que sepas qué le falta.
+
+Qué NO hace:
+
+- **No lleva cantidades.** Dice "tomate", no "3 tomates". La despensa nunca las
+  ha llevado y esto no lo cambia.
+- **No adivina los ingredientes** de las comidas sin receta. En vez de eso te
+  dice cuáles son, y **tú puedes crearles una receta y enlazarla** — lo señaló el
+  propio usuario, y ya se podía desde las specs 026 y 028.
+- **No agrupa por pasillo.** Se descartó ya para la despensa, en favor del
+  buscador.
+
+| Spec | Qué |
+|---|---|
+| 073 | La lista de la compra |
+
 ## Ideas para más adelante (27 de agosto de 2026)
 
 El 27 de agosto se vació `docs/BACKLOG.md`: la app está terminada y en uso
@@ -600,4 +629,5 @@ es cosmético.
 - **v9 (desde el 29 de agosto de 2026, sin fecha límite)**: lo descrito en "Qué hará (v9)". Sale de la misma conversación que la v8. Se reparte en las specs 061 (el agua), 062 (las bebidas) y 063 (el acompañamiento), partida desde el inicio.
 - **v10 (desde el 29 de agosto de 2026, sin fecha límite)**: lo descrito en "Qué hará (v10)". Sale de que la semana de la dieta se descuadraba al usarla. Se reparte en las specs 064 (los siete recuadros), 065 (iconos de fila) y 066 (la barra y Ajustes).
 - **v11 (desde el 30 de agosto de 2026, sin fecha límite)**: lo descrito en "Qué hará (v11)". Sale de que la conversación fallaba con respuestas que en realidad eran buenas. Va en la spec 071.
+- **v12 (30 de agosto de 2026)**: la lista de la compra, en la spec 073. Es la idea más vieja del proyecto —de la spec 026— y salió barata porque el cruce, la limpieza y el emparejado ya estaban hechos por otros motivos.
 - **Descartado para v2**: notificaciones push (mucho trabajo y acaban silenciadas), integración con básculas o pulseras, y comparativa de fotos lado a lado, que se pospone.
