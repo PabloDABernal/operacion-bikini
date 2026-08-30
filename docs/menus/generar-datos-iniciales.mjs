@@ -32,13 +32,14 @@ for (const receta of datos.recetas) {
 
 // --- Menús: de tres bloques a siete días --------------------------------
 //
-// El papel trae "jueves", "viernes" y "fin de semana". La app quiere lunes a
-// domingo, así que la conversión se hace AQUÍ, al generar, y no en el navegador:
-// el módulo sale con la semana ya montada y nadie tiene que volver a pensarlo.
+// El papel trae los días repartidos en dos páginas: lunes, martes y miércoles en
+// la primera, y jueves, viernes y "fin de semana" en la segunda. La app quiere
+// lunes a domingo, así que la conversión se hace AQUÍ, al generar, y no en el
+// navegador: el módulo sale con la semana ya montada.
 //
-// Lunes, martes y miércoles repiten el jueves porque el papel no dice qué comer
-// esos días, y media semana en blanco es una dieta rota. Sábado y domingo llevan
-// los dos lo mismo que "fin de semana".
+// "Fin de semana" va en el SÁBADO. El domingo se queda VACÍO a propósito: es el
+// día de descanso, y rellenarlo con lo del sábado sería inventarse una comida
+// que el papel no manda.
 const DIAS = [
   "lunes",
   "martes",
@@ -51,13 +52,14 @@ const DIAS = [
 const MOMENTOS = ["desayuno", "comida", "merienda", "cena"];
 
 const DE_DONDE_SALE = {
-  lunes: "jueves",
-  martes: "jueves",
-  "miércoles": "jueves",
+  lunes: "lunes",
+  martes: "martes",
+  "miércoles": "miércoles",
   jueves: "jueves",
   viernes: "viernes",
   "sábado": "finDeSemana",
-  domingo: "finDeSemana"
+  // El domingo descansa: sin bloque del que salir, se queda en blanco.
+  domingo: null
 };
 
 // Para enlazar cada plato con su receta hace falta que el texto del plato sea
@@ -68,12 +70,13 @@ const menus = datos.menus.map((menu) => ({
   numero: menu.numero,
   nombre: `Menú ${menu.numero}`,
   dias: DIAS.map((dia) => {
-    const bloque = menu.dias[DE_DONDE_SALE[dia]];
+    const deDonde = DE_DONDE_SALE[dia];
+    const bloque = deDonde ? menu.dias[deDonde] : null;
     return {
       dia,
       comidas: MOMENTOS.map((momento) => ({
         momento,
-        texto: bloque[momento] || ""
+        texto: bloque ? bloque[momento] || "" : ""
       }))
     };
   })

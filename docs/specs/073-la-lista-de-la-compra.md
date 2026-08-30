@@ -4,6 +4,13 @@
 - **Fecha:** 2026-08-30
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (v12: la lista de la compra, decidida el 30 de agosto de 2026)".
 
+> **La compra se mudó el 30 de agosto.** Esta spec la puso **dentro de
+> Despensa y encima de ella**, con el argumento de que quien entra ahí pensando
+> en comprar quiere ver primero lo que falta. Al usarla en escritorio resultó
+> ilegible: tres bloques apilados en la misma columna —la compra, el formulario
+> de apuntes y la despensa entera—. **Ahora tiene sub-pestaña propia**, "Compra",
+> junto a Despensa. Lo pidió el usuario. Todo lo demás de esta spec sigue igual.
+
 ## 1. Objetivo
 
 Que la app diga qué hay que comprar: los ingredientes de la dieta de esta semana

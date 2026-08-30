@@ -104,18 +104,44 @@ comprobar(
 );
 
 comprobar(
-  "sábado y domingo llevan lo mismo",
+  "el domingo descansa: se queda vacío",
   datos.MENUS.every((m) => {
-    const sabado = m.dias.find((d) => d.dia === "sábado");
     const domingo = m.dias.find((d) => d.dia === "domingo");
-    return JSON.stringify(sabado.comidas) === JSON.stringify(domingo.comidas);
+    return domingo.comidas.every((c) => c.texto === "");
   }),
   true
 );
 
 comprobar(
-  "ningún día se queda en blanco",
-  datos.MENUS.every((m) => m.dias.every((d) => d.comidas.some((c) => c.texto))),
+  "los otros seis días están llenos",
+  datos.MENUS.every((m) =>
+    m.dias
+      .filter((d) => d.dia !== "domingo")
+      .every((d) => d.comidas.every((c) => c.texto))
+  ),
+  true
+);
+
+// Lunes, martes y miércoles salen de la página 1 del PDF, no de repetir el
+// jueves: la primera transcripción se saltó esa página y hubo que corregirlo.
+comprobar(
+  "lunes no es una copia del jueves",
+  datos.MENUS.every((m) => {
+    const lunes = m.dias.find((d) => d.dia === "lunes");
+    const jueves = m.dias.find((d) => d.dia === "jueves");
+    return JSON.stringify(lunes.comidas) !== JSON.stringify(jueves.comidas);
+  }),
+  true
+);
+
+comprobar(
+  "y martes y miércoles tampoco",
+  datos.MENUS.every((m) => {
+    const textos = m.dias
+      .filter((d) => ["lunes", "martes", "miércoles"].includes(d.dia))
+      .map((d) => JSON.stringify(d.comidas));
+    return new Set(textos).size === 3;
+  }),
   true
 );
 

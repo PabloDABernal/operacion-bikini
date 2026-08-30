@@ -1321,19 +1321,19 @@ export const MENUS = [
         "comidas": [
           {
             "momento": "desayuno",
-            "texto": "1 taza de café con bebida de avena. 1 rebanada de pan de espelta 100% Mercadona. 3 lonchas de jamón York Aldi. A media mañana: taza de infusión y pieza de fruta (arándanos, naranja, clementina, papaya, kiwi, melón, piña, plátano, uvas)"
+            "texto": "1 taza de café con bebida de avena. 125gr de yogur vegetal con fruta y 30gr de cereal sin azúcar (arroz, quinoa, maíz, sin gluten...). A media mañana: taza de infusión y pieza de fruta (arándanos, naranja, clementina, papaya, kiwi, melón, piña, plátano, uvas)"
           },
           {
             "momento": "comida",
-            "texto": "Bacalao al papillote con verduras (cualquier pescado blanco)"
+            "texto": "125gr de arroz (hervido) con verduras. Muslo de pollo asado / 120gr de pechuga de pollo"
           },
           {
             "momento": "merienda",
-            "texto": "Pudding de chía y mermelada sin azúcar"
+            "texto": "125gr de queso batido / yogur natural de proteínas / kéfir"
           },
           {
             "momento": "cena",
-            "texto": "Alcachofas a la plancha con mostaza. 1-2 huevos a la plancha"
+            "texto": "Tortilla de 2 huevos con pimiento rojo, berenjena y jamón serrano"
           }
         ]
       },
@@ -1342,11 +1342,11 @@ export const MENUS = [
         "comidas": [
           {
             "momento": "desayuno",
-            "texto": "1 taza de café con bebida de avena. 1 rebanada de pan de espelta 100% Mercadona. 3 lonchas de jamón York Aldi. A media mañana: taza de infusión y pieza de fruta (arándanos, naranja, clementina, papaya, kiwi, melón, piña, plátano, uvas)"
+            "texto": "1 taza de café con bebida de avena. Tortitas de 40gr de avena y plátano. A media mañana: taza de infusión y pieza de fruta (arándanos, naranja, clementina, papaya, kiwi, melón, piña, plátano, uvas)"
           },
           {
             "momento": "comida",
-            "texto": "Bacalao al papillote con verduras (cualquier pescado blanco)"
+            "texto": "Berenjena rellena de atún"
           },
           {
             "momento": "merienda",
@@ -1354,7 +1354,7 @@ export const MENUS = [
           },
           {
             "momento": "cena",
-            "texto": "Alcachofas a la plancha con mostaza. 1-2 huevos a la plancha"
+            "texto": "Champiñones en salsa de soja. 120gr de sardinas / boquerones asados (cualquier pescado azul)"
           }
         ]
       },
@@ -1363,19 +1363,19 @@ export const MENUS = [
         "comidas": [
           {
             "momento": "desayuno",
-            "texto": "1 taza de café con bebida de avena. 1 rebanada de pan de espelta 100% Mercadona. 3 lonchas de jamón York Aldi. A media mañana: taza de infusión y pieza de fruta (arándanos, naranja, clementina, papaya, kiwi, melón, piña, plátano, uvas)"
+            "texto": "1 taza de café con bebida de avena. Pudding de chía, 30gr de avena y fruta. A media mañana: taza de infusión y pieza de fruta (arándanos, naranja, clementina, papaya, kiwi, melón, piña, plátano, uvas)"
           },
           {
             "momento": "comida",
-            "texto": "Bacalao al papillote con verduras (cualquier pescado blanco)"
+            "texto": "50gr de pasta integral / de lentejas (en seco) a la boloñesa (110gr de carne picada)"
           },
           {
             "momento": "merienda",
-            "texto": "Pudding de chía y mermelada sin azúcar"
+            "texto": "125gr de queso batido / yogur natural de proteínas / kéfir"
           },
           {
             "momento": "cena",
-            "texto": "Alcachofas a la plancha con mostaza. 1-2 huevos a la plancha"
+            "texto": "Crema de puerro y calabacín. Tortilla de 2 huevos y una lata de atún al natural"
           }
         ]
       },
@@ -1447,19 +1447,19 @@ export const MENUS = [
         "comidas": [
           {
             "momento": "desayuno",
-            "texto": "1 taza de café con bebida de avena. Tortitas de 40gr de avena y plátano. A media mañana: pieza de fruta (arándanos, naranja, clementina, papaya, kiwi, melón, piña, plátano, uvas)"
+            "texto": ""
           },
           {
             "momento": "comida",
-            "texto": "Lubina al horno con tomates y triigueros"
+            "texto": ""
           },
           {
             "momento": "merienda",
-            "texto": "Pudding de chía y canela"
+            "texto": ""
           },
           {
             "momento": "cena",
-            "texto": "Ensalada de espinacas, tomate, aguacate y atún. Pechugas de pavo a la plancha especiado con jengibre y cúrcuma"
+            "texto": ""
           }
         ]
       }
@@ -1474,11 +1474,11 @@ export const MENUS = [
         "comidas": [
           {
             "momento": "desayuno",
-            "texto": "Café con bebida vegetal. 125gr de yogur con fruta y 30gr de cereal. A media mañana: pieza de fruta"
+            "texto": "Café con bebida vegetal. Tortitas de 30gr de avena y plátano. A media mañana: pieza de fruta"
           },
           {
             "momento": "comida",
-            "texto": "Salmón a la plancha con judías verdes salteadas con ajos"
+            "texto": "Calabacín a la plancha o brócoli al ajillo. 100-125 gramos de arroz integral, hervido. Pechuga / muslo de pollo a la plancha"
           },
           {
             "momento": "merienda",
@@ -1486,7 +1486,7 @@ export const MENUS = [
           },
           {
             "momento": "cena",
-            "texto": "Taza de sopa de pollo. Sartenada de champiñón con 2 huevos y 2 claras"
+            "texto": "Berenjena a la plancha. 1-2 filetes de lubina a la plancha (90-180gr)"
           }
         ]
       },
@@ -1495,11 +1495,11 @@ export const MENUS = [
         "comidas": [
           {
             "momento": "desayuno",
-            "texto": "Café con bebida vegetal. 125gr de yogur con fruta y 30gr de cereal. A media mañana: pieza de fruta"
+            "texto": "Café con bebida vegetal. Tortitas de 30gr de avena y plátano. A media mañana: pieza de fruta"
           },
           {
             "momento": "comida",
-            "texto": "Salmón a la plancha con judías verdes salteadas con ajos"
+            "texto": "Crema de zanahoria. 1 hamburguesa de ternera"
           },
           {
             "momento": "merienda",
@@ -1507,7 +1507,7 @@ export const MENUS = [
           },
           {
             "momento": "cena",
-            "texto": "Taza de sopa de pollo. Sartenada de champiñón con 2 huevos y 2 claras"
+            "texto": "Ensalada de repollo y manzana. Tortilla de 2 huevos con 1 lata de atún al natural"
           }
         ]
       },
@@ -1516,11 +1516,11 @@ export const MENUS = [
         "comidas": [
           {
             "momento": "desayuno",
-            "texto": "Café con bebida vegetal. 125gr de yogur con fruta y 30gr de cereal. A media mañana: pieza de fruta"
+            "texto": "Café con bebida vegetal. Tortitas de 30gr de avena y plátano. A media mañana: pieza de fruta"
           },
           {
             "momento": "comida",
-            "texto": "Salmón a la plancha con judías verdes salteadas con ajos"
+            "texto": "Ensalada de 50-60gr pasta de lentejas (seco) y queso de cabra + lata de atún, o ensalada de 120-150gr de alubias (en conserva) con atún"
           },
           {
             "momento": "merienda",
@@ -1528,7 +1528,7 @@ export const MENUS = [
           },
           {
             "momento": "cena",
-            "texto": "Taza de sopa de pollo. Sartenada de champiñón con 2 huevos y 2 claras"
+            "texto": "Espinacas rehogadas con pimentón. 1-2 brochetas de pavo / pollo"
           }
         ]
       },
@@ -1600,19 +1600,19 @@ export const MENUS = [
         "comidas": [
           {
             "momento": "desayuno",
-            "texto": "Café con bebida vegetal. 125gr de yogur con fruta y 30gr de cereal. A media mañana: pieza de fruta"
+            "texto": ""
           },
           {
             "momento": "comida",
-            "texto": "Calabaza con requesón / burrata / mozzarella. Muslo y contramuslo de pollo asado"
+            "texto": ""
           },
           {
             "momento": "merienda",
-            "texto": "125 gramos de kéfir / yogur natural / yogur vegetal / yogur de proteínas + canela / mermelada sin azúcar / cacao desgrasado"
+            "texto": ""
           },
           {
             "momento": "cena",
-            "texto": "Merluza con menestra"
+            "texto": ""
           }
         ]
       }
@@ -1627,11 +1627,11 @@ export const MENUS = [
         "comidas": [
           {
             "momento": "desayuno",
-            "texto": "1 taza de café con leche. Tortitas de 30gr de avena y plátano. A media mañana: pieza de fruta"
+            "texto": "1 taza de café con leche. 1-2 rebanadas de pan de espelta 100% Mercadona. 4 lonchas de jamón York Aldi. A media mañana: pieza de fruta"
           },
           {
             "momento": "comida",
-            "texto": "100gr de pollo con champiñones, zanahoria y arroz (125gr)"
+            "texto": "130gr de garbanzos (en conserva) con judías verdes. 100gr de pechuga de pollo a la plancha"
           },
           {
             "momento": "merienda",
@@ -1639,7 +1639,7 @@ export const MENUS = [
           },
           {
             "momento": "cena",
-            "texto": "Revuelto de 2 huevos con acelgas y jamón serrano"
+            "texto": "2 huevos revueltos con atún y espárragos trigueros (puedes añadir 2 claras)"
           }
         ]
       },
@@ -1652,7 +1652,7 @@ export const MENUS = [
           },
           {
             "momento": "comida",
-            "texto": "100gr de pollo con champiñones, zanahoria y arroz (125gr)"
+            "texto": "150gr de merluza con pisto y cous-cous (120gr hervido)"
           },
           {
             "momento": "merienda",
@@ -1660,7 +1660,7 @@ export const MENUS = [
           },
           {
             "momento": "cena",
-            "texto": "Revuelto de 2 huevos con acelgas y jamón serrano"
+            "texto": "1 taza de gazpacho. 2 piezas de muslo - contramuslo deshuesado de pollo"
           }
         ]
       },
@@ -1669,11 +1669,11 @@ export const MENUS = [
         "comidas": [
           {
             "momento": "desayuno",
-            "texto": "1 taza de café con leche. Tortitas de 30gr de avena y plátano. A media mañana: pieza de fruta"
+            "texto": "1 taza de café con leche. 1-2 rebanadas de pan de espelta 100% Mercadona. 1 ración individual de queso fresco de cabra. A media mañana: pieza de fruta"
           },
           {
             "momento": "comida",
-            "texto": "100gr de pollo con champiñones, zanahoria y arroz (125gr)"
+            "texto": "Ensalada de 150gr de lentejas y mostaza. Filete o hamburguesa de ternera"
           },
           {
             "momento": "merienda",
@@ -1681,7 +1681,7 @@ export const MENUS = [
           },
           {
             "momento": "cena",
-            "texto": "Revuelto de 2 huevos con acelgas y jamón serrano"
+            "texto": "Berenjena asada. 150gr de bonito / 120gr de sardina o boquerón a la plancha o asado (puede ser cualquier pescado azul)"
           }
         ]
       },
@@ -1753,19 +1753,19 @@ export const MENUS = [
         "comidas": [
           {
             "momento": "desayuno",
-            "texto": "1 taza de café con leche. Tortitas de 30gr de avena y plátano. A media mañana: pieza de fruta"
+            "texto": ""
           },
           {
             "momento": "comida",
-            "texto": "Espaguetis de calabacín con berenjena, champiñones y carne picada (120gr)"
+            "texto": ""
           },
           {
             "momento": "merienda",
-            "texto": "125 gramos de kéfir con canela"
+            "texto": ""
           },
           {
             "momento": "cena",
-            "texto": "Bacalao al papillote con verduras asadas"
+            "texto": ""
           }
         ]
       }
@@ -1784,7 +1784,7 @@ export const MENUS = [
           },
           {
             "momento": "comida",
-            "texto": "150gr de bacalao al papillote con verduras. 100-125 gramos de arroz blanco cocido"
+            "texto": "Ensalada de repollo y zanahoria. 130gr de pechuga de pollo a la plancha marinado. 1 unidad mediana de patata, hervida"
           },
           {
             "momento": "merienda",
@@ -1792,7 +1792,7 @@ export const MENUS = [
           },
           {
             "momento": "cena",
-            "texto": "1 taza de consomé de pollo. Tortilla de 2 huevos con verduras"
+            "texto": "(Consomera o plato hondo) de crema de calabaza. Tortilla a la francesa de 2 huevos con jamón de york"
           }
         ]
       },
@@ -1801,11 +1801,11 @@ export const MENUS = [
         "comidas": [
           {
             "momento": "desayuno",
-            "texto": "1 taza de café con bebida vegetal o semidesnatada / infusión. 125gr de yogur natural con pieza de fruta y 30gr de cereal sin azúcar. A media mañana: pieza de fruta y 15 gramos de frutos secos"
+            "texto": "1 taza de café con bebida vegetal o semidesnatada / infusión. Gachas de 30-40gr de avena y arándanos. A media mañana: pieza de fruta y 15 gramos de frutos secos"
           },
           {
             "momento": "comida",
-            "texto": "150gr de bacalao al papillote con verduras. 100-125 gramos de arroz blanco cocido"
+            "texto": "150gr de merluza al papillote con verduras. 100 gramos de ñoquis salteados"
           },
           {
             "momento": "merienda",
@@ -1813,7 +1813,7 @@ export const MENUS = [
           },
           {
             "momento": "cena",
-            "texto": "1 taza de consomé de pollo. Tortilla de 2 huevos con verduras"
+            "texto": "Berenjena asada / a la plancha. Sepia a la plancha"
           }
         ]
       },
@@ -1822,11 +1822,11 @@ export const MENUS = [
         "comidas": [
           {
             "momento": "desayuno",
-            "texto": "1 taza de café con bebida vegetal o semidesnatada / infusión. 125gr de yogur natural con pieza de fruta y 30gr de cereal sin azúcar. A media mañana: pieza de fruta y 15 gramos de frutos secos"
+            "texto": "1 taza de café con bebida vegetal o semidesnatada / infusión. Tortitas de avena y plátano. A media mañana: pieza de fruta y 15 gramos de frutos secos"
           },
           {
             "momento": "comida",
-            "texto": "150gr de bacalao al papillote con verduras. 100-125 gramos de arroz blanco cocido"
+            "texto": "Brócoli y champiñón en salsa de soja. 130gr de pechuga de pollo a la plancha / 2 piezas contramuslo deshuesado a la plancha / muslo de pollo asado. Medio boniato asado"
           },
           {
             "momento": "merienda",
@@ -1834,7 +1834,7 @@ export const MENUS = [
           },
           {
             "momento": "cena",
-            "texto": "1 taza de consomé de pollo. Tortilla de 2 huevos con verduras"
+            "texto": "Ensalada mixta completa (huevo duro + lata de atún al natural)"
           }
         ]
       },
@@ -1906,19 +1906,19 @@ export const MENUS = [
         "comidas": [
           {
             "momento": "desayuno",
-            "texto": "1 taza de café con bebida vegetal o semidesnatada / infusión. 1-2 rebanadas de pan de espelta 100% Mercadona. Aceite y sal. Nota: puedes hacer una tortilla francesa o añadir medio aguacate. A media mañana: pieza de fruta y 15 gramos de frutos secos"
+            "texto": ""
           },
           {
             "momento": "comida",
-            "texto": "Espinacas con 150gr de garbanzos (en conserva). Boquerones con ajo y perejil y rodajas de tomate al horno"
+            "texto": ""
           },
           {
             "momento": "merienda",
-            "texto": "1 yogur líquido de proteínas / yogur natural / yogur vegetal ALPRO"
+            "texto": ""
           },
           {
             "momento": "cena",
-            "texto": "Puerros asados en airfryer u horno. Brochetas de pollo"
+            "texto": ""
           }
         ]
       }

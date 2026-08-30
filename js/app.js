@@ -131,7 +131,7 @@ import {
   ordenar as ordenarMaterial
 } from "./material.js";
 
-import { hayQueSembrar, sembrar } from "./siembra.js";
+import { hayQueSembrar, sembrar, olvidarLaSiembra } from "./siembra.js";
 import { VERSION as VERSION_DATOS_INICIALES } from "./datos-iniciales.js";
 
 // Ingredientes de una receta recién creada que se parecen a algo que ya tenías
@@ -347,6 +347,13 @@ function abrirSubpestana(seccion, nombre) {
   // El armario, igual y por lo mismo (spec 074).
   if (seccion === "ejercicio" && nombre === "material") {
     reordenarMaterialCargado();
+  }
+
+  // La compra se recalcula al entrar, no se guarda: es la despensa cruzada con
+  // las recetas de la dieta (spec 073). Desde que tiene sub-pestaña propia hay
+  // que repintarla aquí, porque ya no se ve al abrir Despensa.
+  if (seccion === "comidas" && nombre === "compra") {
+    pintarCompra();
   }
 }
 
@@ -5870,6 +5877,29 @@ function pintarCasillas() {
   const contenedor = id("casillas-reinicio");
   contenedor.innerHTML = "";
 
+  // "Todo", arriba y separada. Marcar catorce casillas a mano para vaciar la
+  // cuenta era el camino largo para lo que más se hace aquí. NO borra nada por
+  // su cuenta: solo marca las demás, así que sigue haciendo falta escribir la
+  // palabra y pulsar el botón.
+  const todo = document.createElement("label");
+  todo.className = "casilla-reinicio casilla-todo";
+
+  const casillaTodo = document.createElement("input");
+  casillaTodo.type = "checkbox";
+  casillaTodo.id = "casilla-todo";
+  casillaTodo.addEventListener("change", () => {
+    TIPOS.forEach((tipo) => {
+      id(`casilla-${tipo.clave}`).checked = casillaTodo.checked;
+    });
+    reiniciarConfirmacion();
+  });
+
+  const textoTodo = document.createElement("span");
+  textoTodo.textContent = "Todo";
+
+  todo.append(casillaTodo, textoTodo);
+  contenedor.appendChild(todo);
+
   TIPOS.forEach((tipo) => {
     const etiqueta = document.createElement("label");
     etiqueta.className = "casilla-reinicio";
@@ -5877,7 +5907,13 @@ function pintarCasillas() {
     const casilla = document.createElement("input");
     casilla.type = "checkbox";
     casilla.id = `casilla-${tipo.clave}`;
-    casilla.addEventListener("change", reiniciarConfirmacion);
+    casilla.addEventListener("change", () => {
+      // Si destildas una suelta, "Todo" deja de ser verdad y se destilda sola.
+      id("casilla-todo").checked = TIPOS.every(
+        (otro) => id(`casilla-${otro.clave}`).checked
+      );
+      reiniciarConfirmacion();
+    });
 
     const texto = document.createElement("span");
     texto.textContent = tipo.etiqueta.charAt(0).toUpperCase() + tipo.etiqueta.slice(1);
@@ -5940,6 +5976,18 @@ id("btn-borrar-definitivo").addEventListener("click", async () => {
 
   try {
     await borrarSeleccion(uidActual, seleccion);
+    // Borrar las recetas o la despensa quita la marca de la siembra (spec 075),
+    // así que lo que la app trae puesto VUELVE al siguiente arranque. Es lo que
+    // pidió el usuario el 30 de agosto, y revierte lo que decía aquella spec:
+    // vaciar la cuenta es dejarla como recién estrenada, y una cuenta recién
+    // estrenada trae sus recetas y sus ingredientes.
+    //
+    // Solo esas dos casillas: borrar los pesajes no tiene por qué resucitar un
+    // recetario que nadie ha tocado.
+    if (seleccion.includes("recetas") || seleccion.includes("despensa")) {
+      await olvidarLaSiembra(uidActual);
+      if (ajustesActuales) delete ajustesActuales.datosInicialesVersion;
+    }
     estado.textContent = "Datos borrados.";
     await refrescarRecuentos();
     // El histórico se pinta desde `operacionesCargadas`, la copia en memoria:
@@ -5955,6 +6003,9 @@ id("btn-borrar-definitivo").addEventListener("click", async () => {
     // saludándote por un nombre que ya no está guardado.
     await refrescarAjustes();
     await refrescarTodo();
+    // Con la marca quitada, esto vuelve a dejar puestas las recetas y los
+    // ingredientes sin que haya que recargar la página.
+    await sembrarSiHaceFalta();
   } catch {
     // Las casillas y la palabra se quedan como están, para reintentar de un
     // clic. Los recuentos sí se actualizan: enseñan qué llegó a borrarse.

@@ -201,6 +201,7 @@
         <button type="button" class="subpestana" data-subseccion="dieta">Mi dieta</button>
         <button type="button" class="subpestana" data-subseccion="recetas">Recetas</button>
         <button type="button" class="subpestana" data-subseccion="despensa">Despensa</button>
+        <button type="button" class="subpestana" data-subseccion="compra">Compra</button>
       </div>
 
       <!-- Sub-pestaña: Apuntar -->
@@ -411,24 +412,6 @@
       <div class="subseccion" data-subseccion="despensa">
       <!-- La despensa (spec 058). No es un inventario: no lleva cantidades ni
            caducidades. Marcar y desmarcar es todo el mantenimiento que pide. -->
-      <!-- La lista de la compra (spec 073). Va DENTRO de Despensa y encima de
-           lo que tienes: cuando entras aquí pensando en comprar, lo primero que
-           quieres ver es qué falta. -->
-      <h2>Lista de la compra</h2>
-      <p id="estado-compra" class="explicacion"></p>
-      <div id="lista-compra"></div>
-      <p id="sin-receta-compra" class="explicacion oculta"></p>
-
-      <form id="form-apunte">
-        <label for="apunte-texto">Apuntar algo más</label>
-        <div class="fila-alta">
-          <input type="text" id="apunte-texto" maxlength="60"
-            placeholder="papel higiénico" autocomplete="off">
-          <button type="submit" id="btn-anadir-apunte">Apuntar</button>
-        </div>
-      </form>
-      <p id="error-compra" class="error" role="alert"></p>
-
       <h2>Mi despensa</h2>
       <p id="estado-despensa" class="explicacion"></p>
 
@@ -457,6 +440,28 @@
         </div>
       </div>
       <div id="lista-despensa"></div>
+      </div>
+
+      <div class="subseccion" data-subseccion="compra">
+      <!-- La lista de la compra (spec 073). Nació dentro de Despensa y encima
+           de ella; en escritorio eso dejaba tres bloques apilados en la misma
+           columna y no había forma de leerlo. Desde la 075-bis tiene
+           sub-pestaña propia: son dos cosas distintas —lo que tienes y lo que
+           hay que comprar— y ahora se ven como tales. -->
+      <h2>Lista de la compra</h2>
+      <p id="estado-compra" class="explicacion"></p>
+      <div id="lista-compra"></div>
+      <p id="sin-receta-compra" class="explicacion oculta"></p>
+
+      <form id="form-apunte">
+        <label for="apunte-texto">Apuntar algo más</label>
+        <div class="fila-alta">
+          <input type="text" id="apunte-texto" maxlength="60"
+            placeholder="papel higiénico" autocomplete="off">
+          <button type="submit" id="btn-anadir-apunte">Apuntar</button>
+        </div>
+      </form>
+      <p id="error-compra" class="error" role="alert"></p>
       </div>
 
       </div>

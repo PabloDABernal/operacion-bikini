@@ -1123,6 +1123,16 @@ button:disabled {
   font-size: 0.85rem;
 }
 
+/* "Todo" manda sobre las demás, así que se lee como un encabezado y no como
+   una más de la lista: si se confundiera con ellas, marcarla sin querer
+   seleccionaría la cuenta entera. */
+.casilla-todo {
+  font-weight: 600;
+  padding-bottom: var(--e2);
+  margin-bottom: var(--e2);
+  border-bottom: 1px solid var(--borde);
+}
+
 #btn-borrar-seleccion,
 #btn-borrar-definitivo {
   background: var(--error);

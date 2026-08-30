@@ -81,11 +81,18 @@ uno.
 Se genera con un script en `docs/menus/`, que se queda en el repositorio para
 poder rehacerlo si se corrige una transcripción.
 
-**Los menús ya vienen con los siete días**: la conversión de "jueves / viernes /
-fin de semana" a lunes-domingo se hace **al generar**, no en el navegador. Sábado
-y domingo llevan lo mismo que "fin de semana", y lunes, martes y miércoles
-repiten el jueves — el papel no dice qué comer esos días, y dejarlos vacíos daría
-una semana rota.
+**Los menús ya vienen con los siete días**, montados **al generar** y no en el
+navegador. Cada día sale del suyo: lunes, martes y miércoles de la **página 1**
+del PDF, y jueves, viernes y "fin de semana" de la **página 2**. "Fin de semana"
+va en el **sábado**, y el **domingo se queda vacío**: es el día de descanso, y
+rellenarlo sería inventarse una comida que el papel no manda.
+
+> **Corregido el 30 de agosto.** La primera versión de esta spec decía que lunes,
+> martes y miércoles repetían el jueves "porque el papel no los trae". Era falso:
+> **sí los trae, en la página 1**, que se leyó como si fuera una portada. Lo vio
+> el usuario. Los cuatro menús están ahora con sus días de verdad, y hay dos
+> casos en `075-siembra-casos.mjs` que fallan si alguien vuelve a copiar un día
+> sobre otro.
 
 ### Cuándo se siembra
 
@@ -142,12 +149,14 @@ ingredientes son despensa; se borran con las casillas que ya hay.
 
 - **Sin conexión al arrancar**: no se siembra, se avisa por consola, la marca no
   se guarda y se reintenta al siguiente arranque.
-- **El usuario borra una receta sembrada**: **no vuelve**. La marca de versión
-  sigue puesta, y volver a meter lo que acabas de borrar es lo contrario de lo
-  que pediste. Es una decisión, no una limitación.
-- **Reinicio de datos** con la casilla de recetas o de despensa: se borran y
-  **no vuelven**, por lo mismo. Si algún día se quiere que vuelvan, la forma es
-  borrar también `datosInicialesVersion`, y eso sería otra spec.
+- **El usuario borra una receta suelta**: **no vuelve**. Borrar una cosa concreta
+  es una decisión sobre esa cosa, y resucitarla sería llevarle la contraria.
+- **Reinicio de datos** con la casilla de recetas o de despensa: **vuelven**.
+  Borrar el recetario entero no es lo mismo que borrar una receta: es dejar la
+  cuenta como recién estrenada, y una cuenta recién estrenada trae sus recetas y
+  sus ingredientes. El reinicio pone `datosInicialesVersion` a 0 y la siembra se
+  ejecuta otra vez, sin recargar. **Decisión del usuario el 30 de agosto**, que
+  revierte lo que decía la primera versión de esta spec.
 - **Dos pestañas abiertas a la vez en el primer arranque**: las dos podrían
   sembrar. Lo tapa el paso 2 y 3 solo en parte, porque leen antes de escribir.
   Aceptado: es una carrera de un único instante en la vida de una cuenta, y el
@@ -164,8 +173,8 @@ ingredientes son despensa; se borran con las casillas que ya hay.
 | **Los ingredientes entran sin marcar** | La 068 lo dejó claro: escribir la lista no dice nada sobre lo que hay en la nevera. Meterlos marcados haría que la app afirmase tener 133 cosas. |
 | **La receta del usuario manda** sobre la del menú | Nunca pisar lo que alguien escribió a mano. |
 | **La lista de ingredientes va curada a mano** | Pasar las líneas del PDF por `ingredienteDeLinea()` daba 222 entradas sucias, con "aceite de oliva", "AOVE" y "café de aceite de oliva, virgen" como tres cosas. Una despensa así ensucia el cruce y la lista de la compra. |
-| **Lunes a miércoles repiten el jueves** | El papel solo trae jueves, viernes y fin de semana. Media semana en blanco sería una dieta rota. |
-| **Lo borrado no vuelve** | Ver casos límite. |
+| **Cada día sale del suyo, y el domingo descansa** | El papel trae los siete: lunes a miércoles en la página 1 y el resto en la 2. El domingo no lleva nada porque es el día de descanso. |
+| **Borrar el recetario o la despensa los devuelve** | Vaciar es dejar la cuenta como nueva. Borrar una receta suelta sigue siendo definitivo. |
 | **`writeBatch` en tandas de 400** | 206 escrituras de una en una tardan cerca de un minuto. |
 
 ## 9. Archivos afectados
@@ -176,7 +185,8 @@ ingredientes son despensa; se borran con las casillas que ya hay.
 | `js/datos-iniciales.js` | **Nuevo y generado.** Los datos. |
 | `js/siembra.js` | **Nuevo.** Sembrar: comparar contra lo que hay, escribir por lotes, marcar la versión. |
 | `js/ajustes.js` | Leer y guardar `datosInicialesVersion`. |
-| `js/app.js` | Llamar a la siembra al arrancar, sin bloquear ni poder tumbar nada. |
+| `js/app.js` | Llamar a la siembra al arrancar, sin bloquear ni poder tumbar nada. Y volver a llamarla tras un reinicio que borre recetas o despensa. |
+| `docs/specs/075-siembra-casos.mjs` | **Nuevo.** 26 casos: los datos generados, cuándo se siembra y qué falta. |
 
 ## 10. Fuera de spec: ideas apuntadas
 

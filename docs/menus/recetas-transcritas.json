@@ -1568,7 +1568,7 @@
     {
       "numero": 1,
       "pagina": 2,
-      "_nota": "El papel va de jueves a fin de semana, no de lunes a domingo. 'Media mañana' se pega al desayuno (decisión del usuario). 'Fin de semana' se copia igual en sábado y domingo.",
+      "_nota": "Lunes, martes y miércoles salen de la página 1 del PDF; jueves, viernes y fin de semana de la página 2. 'Media mañana' se pega al desayuno. 'Fin de semana' va en el SÁBADO; el domingo se deja vacío, que es el día de descanso.",
       "dias": {
         "jueves": {
           "desayuno": "1 taza de café con bebida de avena. 1 rebanada de pan de espelta 100% Mercadona. 3 lonchas de jamón York Aldi. A media mañana: taza de infusión y pieza de fruta (arándanos, naranja, clementina, papaya, kiwi, melón, piña, plátano, uvas)",
@@ -1587,13 +1587,31 @@
           "comida": "Lubina al horno con tomates y triigueros",
           "merienda": "Pudding de chía y canela",
           "cena": "Ensalada de espinacas, tomate, aguacate y atún. Pechugas de pavo a la plancha especiado con jengibre y cúrcuma"
+        },
+        "lunes": {
+          "desayuno": "1 taza de café con bebida de avena. 125gr de yogur vegetal con fruta y 30gr de cereal sin azúcar (arroz, quinoa, maíz, sin gluten...). A media mañana: taza de infusión y pieza de fruta (arándanos, naranja, clementina, papaya, kiwi, melón, piña, plátano, uvas)",
+          "comida": "125gr de arroz (hervido) con verduras. Muslo de pollo asado / 120gr de pechuga de pollo",
+          "merienda": "125gr de queso batido / yogur natural de proteínas / kéfir",
+          "cena": "Tortilla de 2 huevos con pimiento rojo, berenjena y jamón serrano"
+        },
+        "martes": {
+          "desayuno": "1 taza de café con bebida de avena. Tortitas de 40gr de avena y plátano. A media mañana: taza de infusión y pieza de fruta (arándanos, naranja, clementina, papaya, kiwi, melón, piña, plátano, uvas)",
+          "comida": "Berenjena rellena de atún",
+          "merienda": "Pudding de chía y mermelada sin azúcar",
+          "cena": "Champiñones en salsa de soja. 120gr de sardinas / boquerones asados (cualquier pescado azul)"
+        },
+        "miércoles": {
+          "desayuno": "1 taza de café con bebida de avena. Pudding de chía, 30gr de avena y fruta. A media mañana: taza de infusión y pieza de fruta (arándanos, naranja, clementina, papaya, kiwi, melón, piña, plátano, uvas)",
+          "comida": "50gr de pasta integral / de lentejas (en seco) a la boloñesa (110gr de carne picada)",
+          "merienda": "125gr de queso batido / yogur natural de proteínas / kéfir",
+          "cena": "Crema de puerro y calabacín. Tortilla de 2 huevos y una lata de atún al natural"
         }
       }
     },
     {
       "numero": 2,
       "pagina": 2,
-      "_nota": "Jueves, viernes y fin de semana. 'Media mañana' se pega al desayuno; 'fin de semana' se copia en sábado y domingo.",
+      "_nota": "Lunes, martes y miércoles salen de la página 1 del PDF; jueves, viernes y fin de semana de la página 2. 'Media mañana' se pega al desayuno. 'Fin de semana' va en el SÁBADO; el domingo se deja vacío, que es el día de descanso.",
       "dias": {
         "jueves": {
           "desayuno": "Café con bebida vegetal. 125gr de yogur con fruta y 30gr de cereal. A media mañana: pieza de fruta",
@@ -1612,13 +1630,31 @@
           "comida": "Calabaza con requesón / burrata / mozzarella. Muslo y contramuslo de pollo asado",
           "merienda": "125 gramos de kéfir / yogur natural / yogur vegetal / yogur de proteínas + canela / mermelada sin azúcar / cacao desgrasado",
           "cena": "Merluza con menestra"
+        },
+        "lunes": {
+          "desayuno": "Café con bebida vegetal. Tortitas de 30gr de avena y plátano. A media mañana: pieza de fruta",
+          "comida": "Calabacín a la plancha o brócoli al ajillo. 100-125 gramos de arroz integral, hervido. Pechuga / muslo de pollo a la plancha",
+          "merienda": "125 gramos de kéfir / yogur natural / yogur vegetal / yogur de proteínas + canela / mermelada sin azúcar / cacao desgrasado",
+          "cena": "Berenjena a la plancha. 1-2 filetes de lubina a la plancha (90-180gr)"
+        },
+        "martes": {
+          "desayuno": "Café con bebida vegetal. Tortitas de 30gr de avena y plátano. A media mañana: pieza de fruta",
+          "comida": "Crema de zanahoria. 1 hamburguesa de ternera",
+          "merienda": "125 gramos de kéfir / yogur natural / yogur vegetal / yogur de proteínas + canela / mermelada sin azúcar / cacao desgrasado",
+          "cena": "Ensalada de repollo y manzana. Tortilla de 2 huevos con 1 lata de atún al natural"
+        },
+        "miércoles": {
+          "desayuno": "Café con bebida vegetal. Tortitas de 30gr de avena y plátano. A media mañana: pieza de fruta",
+          "comida": "Ensalada de 50-60gr pasta de lentejas (seco) y queso de cabra + lata de atún, o ensalada de 120-150gr de alubias (en conserva) con atún",
+          "merienda": "125 gramos de kéfir / yogur natural / yogur vegetal / yogur de proteínas + canela / mermelada sin azúcar / cacao desgrasado",
+          "cena": "Espinacas rehogadas con pimentón. 1-2 brochetas de pavo / pollo"
         }
       }
     },
     {
       "numero": 3,
       "pagina": 2,
-      "_nota": "Jueves, viernes y fin de semana. 'Media mañana' se pega al desayuno; 'fin de semana' se copia en sábado y domingo.",
+      "_nota": "Lunes, martes y miércoles salen de la página 1 del PDF; jueves, viernes y fin de semana de la página 2. 'Media mañana' se pega al desayuno. 'Fin de semana' va en el SÁBADO; el domingo se deja vacío, que es el día de descanso.",
       "dias": {
         "jueves": {
           "desayuno": "1 taza de café con leche. Tortitas de 30gr de avena y plátano. A media mañana: pieza de fruta",
@@ -1637,13 +1673,31 @@
           "comida": "Espaguetis de calabacín con berenjena, champiñones y carne picada (120gr)",
           "merienda": "125 gramos de kéfir con canela",
           "cena": "Bacalao al papillote con verduras asadas"
+        },
+        "lunes": {
+          "desayuno": "1 taza de café con leche. 1-2 rebanadas de pan de espelta 100% Mercadona. 4 lonchas de jamón York Aldi. A media mañana: pieza de fruta",
+          "comida": "130gr de garbanzos (en conserva) con judías verdes. 100gr de pechuga de pollo a la plancha",
+          "merienda": "125 gramos de kéfir con canela",
+          "cena": "2 huevos revueltos con atún y espárragos trigueros (puedes añadir 2 claras)"
+        },
+        "martes": {
+          "desayuno": "1 taza de café con leche. Tortitas de 30gr de avena y plátano. A media mañana: pieza de fruta",
+          "comida": "150gr de merluza con pisto y cous-cous (120gr hervido)",
+          "merienda": "125 gramos de kéfir con canela",
+          "cena": "1 taza de gazpacho. 2 piezas de muslo - contramuslo deshuesado de pollo"
+        },
+        "miércoles": {
+          "desayuno": "1 taza de café con leche. 1-2 rebanadas de pan de espelta 100% Mercadona. 1 ración individual de queso fresco de cabra. A media mañana: pieza de fruta",
+          "comida": "Ensalada de 150gr de lentejas y mostaza. Filete o hamburguesa de ternera",
+          "merienda": "125 gramos de kéfir con canela",
+          "cena": "Berenjena asada. 150gr de bonito / 120gr de sardina o boquerón a la plancha o asado (puede ser cualquier pescado azul)"
         }
       }
     },
     {
       "numero": 4,
       "pagina": 2,
-      "_nota": "Jueves, viernes y fin de semana. 'Media mañana' se pega al desayuno; 'fin de semana' se copia en sábado y domingo.",
+      "_nota": "Lunes, martes y miércoles salen de la página 1 del PDF; jueves, viernes y fin de semana de la página 2. 'Media mañana' se pega al desayuno. 'Fin de semana' va en el SÁBADO; el domingo se deja vacío, que es el día de descanso.",
       "dias": {
         "jueves": {
           "desayuno": "1 taza de café con bebida vegetal o semidesnatada / infusión. 125gr de yogur natural con pieza de fruta y 30gr de cereal sin azúcar. A media mañana: pieza de fruta y 15 gramos de frutos secos",
@@ -1662,6 +1716,24 @@
           "comida": "Espinacas con 150gr de garbanzos (en conserva). Boquerones con ajo y perejil y rodajas de tomate al horno",
           "merienda": "1 yogur líquido de proteínas / yogur natural / yogur vegetal ALPRO",
           "cena": "Puerros asados en airfryer u horno. Brochetas de pollo"
+        },
+        "lunes": {
+          "desayuno": "1 taza de café con bebida vegetal o semidesnatada / infusión. 125gr de yogur natural con pieza de fruta y 30gr de cereal sin azúcar. A media mañana: pieza de fruta y 15 gramos de frutos secos",
+          "comida": "Ensalada de repollo y zanahoria. 130gr de pechuga de pollo a la plancha marinado. 1 unidad mediana de patata, hervida",
+          "merienda": "1 yogur líquido de proteínas / yogur natural / yogur vegetal ALPRO",
+          "cena": "(Consomera o plato hondo) de crema de calabaza. Tortilla a la francesa de 2 huevos con jamón de york"
+        },
+        "martes": {
+          "desayuno": "1 taza de café con bebida vegetal o semidesnatada / infusión. Gachas de 30-40gr de avena y arándanos. A media mañana: pieza de fruta y 15 gramos de frutos secos",
+          "comida": "150gr de merluza al papillote con verduras. 100 gramos de ñoquis salteados",
+          "merienda": "1 yogur líquido de proteínas / yogur natural / yogur vegetal ALPRO",
+          "cena": "Berenjena asada / a la plancha. Sepia a la plancha"
+        },
+        "miércoles": {
+          "desayuno": "1 taza de café con bebida vegetal o semidesnatada / infusión. Tortitas de avena y plátano. A media mañana: pieza de fruta y 15 gramos de frutos secos",
+          "comida": "Brócoli y champiñón en salsa de soja. 130gr de pechuga de pollo a la plancha / 2 piezas contramuslo deshuesado a la plancha / muslo de pollo asado. Medio boniato asado",
+          "merienda": "1 yogur líquido de proteínas / yogur natural / yogur vegetal ALPRO",
+          "cena": "Ensalada mixta completa (huevo duro + lata de atún al natural)"
         }
       }
     }

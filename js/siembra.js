@@ -12,6 +12,7 @@
 import {
   collection,
   doc,
+  setDoc,
   writeBatch,
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
@@ -66,6 +67,20 @@ async function porLotes(cosas, operacion) {
     cosas.slice(desde, desde + POR_LOTE).forEach((cosa) => operacion(lote, cosa));
     await lote.commit();
   }
+}
+
+// Quita la marca, para que la próxima siembra vuelva a poner lo que falte.
+//
+// La llama el reinicio de datos al borrar las recetas o la despensa: vaciar la
+// cuenta la deja como recién estrenada, y una cuenta recién estrenada trae sus
+// recetas y sus ingredientes. Decisión del usuario el 30 de agosto, que
+// revierte lo que decía la spec 075 sobre que lo borrado no vuelve.
+export function olvidarLaSiembra(uid) {
+  return setDoc(
+    doc(db, "usuarios", uid),
+    { datosInicialesVersion: 0, actualizadoEn: serverTimestamp() },
+    { merge: true }
+  );
 }
 
 // Siembra lo que falte y deja la marca puesta.
