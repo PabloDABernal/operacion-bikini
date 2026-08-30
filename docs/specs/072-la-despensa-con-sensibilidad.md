@@ -1,6 +1,6 @@
 # 072 — La despensa con sensibilidad, y la receta con su icono
 
-- **Estado:** implementada y desplegada el 30 de agosto de 2026. **Pendiente de que el usuario la pruebe**.
+- **Estado:** ✅ completada (probada y confirmada por el usuario el 2026-08-30).
 - **Fecha:** 2026-08-30
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (ampliación de la v8)", segunda tanda del 30 de agosto.
 

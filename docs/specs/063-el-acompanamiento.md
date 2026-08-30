@@ -1,6 +1,6 @@
 # 063 — El acompañamiento de la comida
 
-- **Estado:** implementada y desplegada el 29 de agosto de 2026. **Pendiente de que el usuario la pruebe**.
+- **Estado:** ✅ completada (probada y confirmada por el usuario el 2026-08-30).
 - **Fecha:** 2026-08-29
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (v9)", tercera spec de las tres.
 

@@ -92,10 +92,10 @@ El 20 de agosto arrancó la **v4**, que sale de una auditoría de usabilidad hec
 | 060 | Ver la receta desde la dieta (v8) | ✅ completada |
 | 061 | El agua del día (v9) | ✅ completada |
 | 062 | Las bebidas, apuntadas (v9) | ✅ completada |
-| 063 | El acompañamiento de la comida (v9) | 🚧 implementada y desplegada, **sin probar** |
-| 070 | El análisis cuenta bebidas y acompañamientos (v9) | 🚧 implementada y desplegada, **sin probar** |
-| 071 | La IA deja de tirar respuestas buenas (v11) | 🚧 implementada y desplegada, **sin probar** |
-| 072 | La despensa con sensibilidad, y la receta con su icono (v8+) | 🚧 implementada y desplegada, **sin probar** |
+| 063 | El acompañamiento de la comida (v9) | ✅ completada |
+| 070 | El análisis cuenta bebidas y acompañamientos (v9) | ✅ completada |
+| 071 | La IA deja de tirar respuestas buenas (v11) | ✅ completada |
+| 072 | La despensa con sensibilidad, y la receta con su icono (v8+) | ✅ completada |
 | 064 | La semana de la dieta, en siete recuadros (v10) | ✅ completada |
 | 065 | Iconos en las acciones de fila (v10) | ✅ completada |
 | 066 | La barra con iconos, y Ajustes de vuelta (v10) | ✅ completada |
