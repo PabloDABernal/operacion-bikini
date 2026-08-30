@@ -475,6 +475,7 @@
         <button type="button" class="subpestana activa" data-subseccion="apuntar" aria-current="true">Apuntar</button>
         <button type="button" class="subpestana" data-subseccion="tabla">Mi tabla</button>
         <button type="button" class="subpestana" data-subseccion="catalogo">Catálogo</button>
+        <button type="button" class="subpestana" data-subseccion="material">Material</button>
       </div>
 
       <!-- Sub-pestaña: Apuntar -->
@@ -598,6 +599,33 @@
       <button type="button" id="btn-desplegar-catalogo-arriba" class="desplegar oculta"></button>
       <div id="lista-catalogo"></div>
       <button type="button" id="btn-desplegar-catalogo" class="desplegar oculta"></button>
+      </div>
+
+      <div class="subseccion" data-subseccion="material">
+      <!-- El armario (spec 074). Espejo de Comidas → Despensa: lo que tienes
+           para entrenar, para que la tabla pueda aprovecharlo (eso será la
+           075). No lleva cantidades ni kilos, igual que la despensa. -->
+      <h2>Mi material</h2>
+      <p id="estado-material" class="explicacion"></p>
+
+      <form id="form-material">
+        <label for="material-nombre">Añadir material</label>
+        <div class="fila-alta">
+          <input type="text" id="material-nombre" maxlength="60"
+            placeholder="mancuernas" autocomplete="off">
+          <button type="submit" id="btn-anadir-material">Añadir</button>
+        </div>
+      </form>
+
+      <p id="error-material" class="error" role="alert"></p>
+      <p id="guardado-material" class="guardado" role="status"></p>
+
+      <p id="recuento-material" class="registro-detalle"></p>
+
+      <!-- Sin buscador, a propósito. La despensa lo necesitó (spec 069) porque
+           las recetas la llenan sola y crece sin que la escribas; el armario lo
+           escribes tú entero y tiene diez cosas. -->
+      <div id="lista-material"></div>
       </div>
 
       </div>

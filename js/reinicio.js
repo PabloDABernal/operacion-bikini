@@ -83,6 +83,12 @@ export const TIPOS = [
     etiqueta: "catálogo de ejercicios y tabla",
     colecciones: ["ejerciciosCatalogo", "tablas"]
   },
+  // El armario (spec 074). Casilla propia por lo mismo que la despensa: no se
+  // archiva con la operación, así que esta es la única forma de borrarlo. Y no
+  // se junta con la de arriba porque son cosas distintas — los ejercicios que
+  // te sabes no son las cosas que tienes, y juntarlas obligaría a borrar las
+  // dos para borrar una.
+  { clave: "material", etiqueta: "material", colecciones: ["material"] },
   // Las operaciones van aparte: no son una colección del día a día, sino los
   // ciclos con todo lo que llevan dentro (spec 019). Desde la spec 056 incluye
   // también la que esté en marcha, que se tira sin archivar.

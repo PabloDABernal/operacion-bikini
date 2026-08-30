@@ -119,6 +119,18 @@ import {
   listarCompra
 } from "./compra.js";
 
+import {
+  MAX_NOMBRE as MAX_NOMBRE_MATERIAL,
+  validarMaterial,
+  materialIgual,
+  guardarMaterial,
+  renombrarMaterial,
+  marcarMaterial,
+  borrarMaterial,
+  listarMaterial,
+  ordenar as ordenarMaterial
+} from "./material.js";
+
 // Ingredientes de una receta recién creada que se parecen a algo que ya tenías
 // (spec 072). Se preguntan al terminar la dieta; hasta que se contesten, no se
 // guardan.
@@ -327,6 +339,11 @@ function abrirSubpestana(seccion, nombre) {
   // estás marcando varias seguidas.
   if (seccion === "comidas" && nombre === "despensa") {
     reordenarDespensa();
+  }
+
+  // El armario, igual y por lo mismo (spec 074).
+  if (seccion === "ejercicio" && nombre === "material") {
+    reordenarMaterialCargado();
   }
 }
 
@@ -2510,6 +2527,272 @@ function avisarEnDespensa(texto) {
     aviso.textContent = "";
   }, 3000);
 }
+
+// --- El armario: el material que tienes (spec 074) ------------------------
+//
+// Espejo de la despensa, y a propósito: mismo patrón, mismos aciertos. La lista
+// NO se reordena al marcar (se reordena al entrar), y añadir algo repetido no es
+// un error del usuario sino su forma de decir "esto ya lo tengo".
+//
+// Lo único que se aparta de la despensa está en js/material.js: una pieza nace
+// MARCADA. Allí está el porqué, y en resumen es que el armario no se llena solo.
+
+let materialCargado = [];
+let materialEditando = null;
+
+function pintarMaterial() {
+  const contenedor = id("lista-material");
+
+  contenedor.innerHTML = "";
+
+  id("estado-material").textContent = materialCargado.length
+    ? ""
+    : "Aquí va el material con el que entrenas. Márcalo según lo tengas y tus tablas podrán aprovecharlo.";
+
+  actualizarRecuentoMaterial();
+
+  materialCargado.forEach((pieza) =>
+    contenedor.appendChild(filaDeMaterial(pieza))
+  );
+}
+
+function filaDeMaterial(pieza) {
+  if (materialEditando === pieza.id) return filaDeMaterialEnEdicion(pieza);
+
+  const fila = document.createElement("div");
+  fila.className = "ingrediente";
+  fila.classList.toggle("sin-existencias", !pieza.tengo);
+
+  const casilla = document.createElement("input");
+  casilla.type = "checkbox";
+  casilla.checked = Boolean(pieza.tengo);
+  casilla.id = `material-casilla-${pieza.id}`;
+  casilla.addEventListener("change", () => marcarEnElArmario(pieza, casilla));
+
+  // La etiqueta envuelve el nombre para que tocar el texto también marque, como
+  // en la despensa: en el móvil, apuntar a una casilla de 20 px es pedirle
+  // demasiado al pulgar.
+  const etiqueta = document.createElement("label");
+  etiqueta.className = "ingrediente-nombre";
+  etiqueta.htmlFor = casilla.id;
+  etiqueta.textContent = pieza.nombre;
+
+  const acciones = document.createElement("div");
+  acciones.className = "ingrediente-acciones";
+  acciones.append(
+    botonDeIcono("lapiz", "Editar", () => {
+      materialEditando = pieza.id;
+      limpiarAvisosMaterial();
+      pintarMaterial();
+    }),
+    botonDeIcono("papelera", "Borrar", () => borrarLaPieza(pieza))
+  );
+
+  fila.append(casilla, etiqueta, acciones);
+  return fila;
+}
+
+function filaDeMaterialEnEdicion(pieza) {
+  const fila = document.createElement("form");
+  fila.className = "ingrediente ingrediente-editando";
+
+  const campo = document.createElement("input");
+  campo.type = "text";
+  campo.maxLength = MAX_NOMBRE_MATERIAL;
+  campo.value = pieza.nombre;
+
+  const guardar = document.createElement("button");
+  guardar.type = "submit";
+  guardar.textContent = "Guardar";
+
+  const cancelar = botonDeFila("Cancelar", () => {
+    materialEditando = null;
+    limpiarAvisosMaterial();
+    pintarMaterial();
+  });
+  cancelar.className = "enlace";
+
+  fila.addEventListener("submit", async (evento) => {
+    evento.preventDefault();
+    await renombrarLaPieza(pieza, campo.value, guardar);
+  });
+
+  fila.append(campo, guardar, cancelar);
+  // Al final de la cola de pintado: antes de que la fila esté en el documento,
+  // focus() no hace nada.
+  setTimeout(() => campo.focus(), 0);
+  return fila;
+}
+
+async function marcarEnElArmario(pieza, casilla) {
+  const antes = Boolean(pieza.tengo);
+  const ahora = casilla.checked;
+
+  // Optimista, y sin tocar el ORDEN a propósito.
+  pieza.tengo = ahora;
+  casilla.closest(".ingrediente").classList.toggle("sin-existencias", !ahora);
+  limpiarAvisosMaterial();
+  actualizarRecuentoMaterial();
+
+  try {
+    await marcarMaterial(uidActual, pieza.id, ahora);
+  } catch {
+    // Nunca dejar la casilla enseñando algo que no se guardó.
+    pieza.tengo = antes;
+    casilla.checked = antes;
+    casilla.closest(".ingrediente").classList.toggle("sin-existencias", !antes);
+    actualizarRecuentoMaterial();
+    errorEnMaterial("No se ha podido guardar. Comprueba tu conexión.");
+  }
+}
+
+// Los dos avisos son excluyentes, por lo mismo que en la despensa: enseñar
+// "Guardado" y "no se ha podido guardar" a la vez no deja saber cuál es verdad.
+function limpiarAvisosMaterial() {
+  id("error-material").textContent = "";
+  id("guardado-material").textContent = "";
+}
+
+function errorEnMaterial(texto) {
+  id("guardado-material").textContent = "";
+  id("error-material").textContent = texto;
+}
+
+function avisarEnMaterial(texto) {
+  const aviso = id("guardado-material");
+  // El error de antes deja de aplicar en cuanto algo sale bien.
+  id("error-material").textContent = "";
+  aviso.textContent = texto;
+  setTimeout(() => {
+    aviso.textContent = "";
+  }, 3000);
+}
+
+// Solo el número: repintar la lista entera aquí la reordenaría, que es justo lo
+// que no debe pasar al marcar.
+function actualizarRecuentoMaterial() {
+  const tengo = materialCargado.filter((pieza) => pieza.tengo).length;
+  id("recuento-material").textContent = materialCargado.length
+    ? `${tengo} de ${materialCargado.length} cosas en el armario`
+    : "";
+}
+
+async function renombrarLaPieza(pieza, nombreBruto, boton) {
+  limpiarAvisosMaterial();
+
+  const resultado = validarMaterial(nombreBruto);
+  if (resultado.error) {
+    errorEnMaterial(resultado.error);
+    return;
+  }
+
+  // Editar hasta chocar con otra RECHAZA, no fusiona: fusionar haría
+  // desaparecer una fila que nadie ha pedido borrar, y aquí no hay deshacer.
+  // Al añadir sí se fusiona, porque allí no desaparece nada.
+  const choque = materialIgual(materialCargado, resultado.nombre, pieza.id);
+  if (choque) {
+    errorEnMaterial(`"${choque.nombre}" ya está en tu armario.`);
+    return;
+  }
+
+  boton.disabled = true;
+  try {
+    await renombrarMaterial(uidActual, pieza.id, resultado.nombre);
+  } catch {
+    errorEnMaterial("No se ha podido guardar. Comprueba tu conexión.");
+    return;
+  } finally {
+    boton.disabled = false;
+  }
+
+  // Fuera del try a propósito: lo que se escribe y lo que se pinta son dos
+  // cosas, y meterlas en el mismo catch fue el fallo del estreno de la 058.
+  materialEditando = null;
+  await refrescarMaterial();
+}
+
+async function borrarLaPieza(pieza) {
+  if (!confirm(`¿Quitar "${pieza.nombre}" de tu material?`)) return;
+
+  try {
+    await borrarMaterial(uidActual, pieza.id);
+  } catch {
+    errorEnMaterial("No se ha podido borrar. Comprueba tu conexión.");
+    return;
+  }
+
+  if (materialEditando === pieza.id) materialEditando = null;
+  await refrescarMaterial();
+}
+
+// Se llama al entrar en la sub-pestaña. Reordena lo ya cargado, sin ir a la red.
+function reordenarMaterialCargado() {
+  if (!materialCargado.length) return;
+  materialCargado = ordenarMaterial(materialCargado);
+  pintarMaterial();
+}
+
+async function refrescarMaterial() {
+  try {
+    materialCargado = await listarMaterial(uidActual);
+  } catch {
+    materialCargado = [];
+    id("estado-material").textContent =
+      "No se ha podido cargar tu material. Comprueba tu conexión.";
+    return;
+  }
+  pintarMaterial();
+}
+
+id("form-material").addEventListener("submit", async (evento) => {
+  evento.preventDefault();
+
+  const campo = id("material-nombre");
+  limpiarAvisosMaterial();
+
+  const resultado = validarMaterial(campo.value);
+  if (resultado.error) {
+    errorEnMaterial(resultado.error);
+    return;
+  }
+
+  const boton = id("btn-anadir-material");
+  boton.disabled = true;
+
+  // Solo la escritura va en el try. El repintado se hace después, fuera: si se
+  // rompe al pintar, el dato YA está guardado y decir "comprueba tu conexión"
+  // sería mentira. Es la lección del estreno de la spec 058.
+  let aviso;
+  try {
+    const repetido = materialIgual(materialCargado, resultado.nombre);
+
+    if (repetido) {
+      // Volver a escribirlo no es equivocarse: es decir "esto lo tengo". Por eso
+      // el aviso va en el hueco de "Guardado" y no en el de error, y por eso SÍ
+      // lo marca — al revés que la despensa desde la 068, donde escribir no
+      // dice nada sobre la nevera porque la llenan las recetas. El armario lo
+      // escribes tú.
+      if (!repetido.tengo) {
+        await marcarMaterial(uidActual, repetido.id, true);
+      }
+      aviso = `"${repetido.nombre}" ya está en tu armario.`;
+    } else {
+      await guardarMaterial(uidActual, resultado.nombre);
+      aviso = "Guardado";
+    }
+  } catch {
+    errorEnMaterial("No se ha podido guardar. Comprueba tu conexión.");
+    return;
+  } finally {
+    boton.disabled = false;
+  }
+
+  avisarEnMaterial(aviso);
+  campo.value = "";
+  await refrescarMaterial();
+  // Lo normal al estrenar esto es meter cinco o seis seguidas.
+  campo.focus();
+});
 
 // --- La dieta de la semana (spec 028) ------------------------------------
 //
@@ -5095,6 +5378,7 @@ function refrescarTodo() {
     refrescarRecetas(),
     refrescarDespensa(),
     refrescarCompra(),
+    refrescarMaterial(),
     refrescarDieta(),
     refrescarCatalogo(),
     refrescarTabla(),

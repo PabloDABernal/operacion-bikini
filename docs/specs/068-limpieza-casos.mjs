@@ -71,10 +71,14 @@ comprobar(
   ["lentejas"]
 );
 
+// Esperaba ["tomate", "tomates"] cuando se escribió, y así se quedó al pasar la
+// spec 072: aquella decidió que el singular y el plural son el mismo
+// ingrediente, se actualizó el código y no esta línea. Corregido el 30 de
+// agosto de 2026, al salir en rojo antes de implementar la spec 074.
 comprobar(
   "no repite dentro de la misma receta",
   ingredientesNuevosDe({ ingredientes: ["1 tomate", "2 tomates"] }, []),
-  ["tomate", "tomates"]
+  ["tomate"]
 );
 
 comprobar(
