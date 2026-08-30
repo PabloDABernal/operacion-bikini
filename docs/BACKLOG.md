@@ -77,6 +77,18 @@ No volver a proponerlo sin un motivo nuevo.
   podía llenar de datos falsos una cuenta con dos meses de datos reales. Están en
   el historial de git si alguna vez hacen falta.
 
+## Descartado el 30 de agosto de 2026
+
+El usuario las repasó al elegir la v13 y las descartó en bloque: **"residuos del
+pasado"**. Salen de "Ideas para más adelante" de `docs/PRODUCTO.md` y se anotan
+aquí. No volver a proponerlas sin un motivo nuevo.
+
+- **Guardar varias dietas y varias tablas**, y recuperar una anterior.
+- **Borrar una operación concreta del histórico** desde su tarjeta.
+- **Registrar los pesos levantados y ver la progresión de cargas.** Con esto cae
+  también el chip de series y repeticiones de la spec 042, que colgaba de ello.
+- **Que el análisis nutricional del día alimente el contexto de la conversación.**
+
 ## Descartado el 25 de agosto de 2026
 
 No volver a proponerlo sin un motivo nuevo.

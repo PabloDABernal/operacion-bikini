@@ -534,20 +534,8 @@ apartado "Qué hará (v8…)" con sus specs.
 
 ### Huecos que se notan usando la app
 
-- **Guardar varias dietas y varias tablas**, y poder recuperar una anterior. Hoy
-  solo hay una activa de cada (specs 028 y 029): pedir otra pisa la que tenías.
-  Es la más grande de la lista — cambia el modelo de datos y las reglas de
-  Firestore, así que sería una versión partida en varias specs, nunca una sola.
-- **Borrar una operación concreta del histórico** desde su tarjeta. La spec 019
-  borra el histórico entero o nada, y la 056 le añadió la operación en curso,
-  pero sigue sin haber un borrado de una sola.
 - **Marcar ejercicios sueltos dentro de una sesión**, en vez de la sesión entera
   (spec 029).
-- **Registrar los pesos levantados y ver la progresión de cargas** (spec 029).
-  De aquí cuelga el chip de series y repeticiones de la spec 042: sin cargas
-  registradas no hay nada que enseñar.
-- **Que el análisis nutricional del día alimente el contexto de la conversación**
-  (spec 030). Hoy se calcula y no se le cuenta a nadie: la IA no lo ve.
 - **Evolución de los grupos de alimentos a lo largo de la semana** (spec 030:
   solo el día de hoy, sin histórico).
 - **Que la revisión sepa si de verdad tienes dieta y tabla.** El 27 de agosto se
