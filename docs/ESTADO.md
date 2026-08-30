@@ -149,7 +149,7 @@ El 20 de agosto arrancó la **v4**, que sale de una auditoría de usabilidad hec
 | 073 | La lista de la compra (v12) | ✅ completada |
 | 074 | El armario: el material que tienes (v13) | 🚧 implementada y desplegada, **sin probar** |
 | 075 | Las recetas y los ingredientes, ya puestos (v14) | 🚧 implementada y desplegada, **sin probar** |
-| 076 | Elegir menú en vez de pedírselo a la IA (v14) | 📝 escrita, sin implementar |
+| 076 | Elegir menú en vez de pedírselo a la IA (v14) | 🚧 implementada y desplegada, **sin probar** |
 | 064 | La semana de la dieta, en siete recuadros (v10) | ✅ completada |
 | 065 | Iconos en las acciones de fila (v10) | ✅ completada |
 | 066 | La barra con iconos, y Ajustes de vuelta (v10) | ✅ completada |
@@ -188,9 +188,9 @@ que parecen bugs.
 1. **Usar la app**, que es lo que valida la 074 (el armario) y la 075 (las
    recetas y los ingredientes ya puestos). Son lo único desplegado sin probar;
    sus guiones están al final de cada spec.
-2. **La spec 076 está escrita y sin implementar**: el desplegable para elegir
-   uno de los cuatro menús en vez de pedírselo a la IA. La 075 le dejó los menús
-   ya montados con sus siete días, así que es corta.
+2. La **v14 está entera y desplegada** (075 y 076): las recetas y los
+   ingredientes ya puestos, y el desplegable para elegir uno de los cuatro
+   menús sin pasar por la IA. Falta probarlo todo.
 2. Al probarla, mirar con lupa **una decisión**: una pieza de material nace
    MARCADA, al revés que un ingrediente de la despensa desde la spec 068. Está
    razonado en `js/material.js`, pero deja dos pantallas gemelas comportándose

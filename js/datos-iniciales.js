@@ -1430,7 +1430,7 @@ export const MENUS = [
           },
           {
             "momento": "comida",
-            "texto": "Lubina al horno con tomates y triigueros"
+            "texto": "Lubina al horno con tomates y trigueros"
           },
           {
             "momento": "merienda",

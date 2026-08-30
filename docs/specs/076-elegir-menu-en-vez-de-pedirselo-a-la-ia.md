@@ -1,6 +1,6 @@
 # 076 — Elegir menú en vez de pedírselo a la IA
 
-- **Estado:** borrador
+- **Estado:** 🚧 implementada y desplegada el 30 de agosto de 2026. **Pendiente de que el usuario la pruebe.**
 - **Fecha:** 2026-08-30
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (v14: los menús de la nutricionista, decidida el 30 de agosto de 2026)", punto tercero.
 
@@ -26,11 +26,12 @@ llamada y no fallan.
    desplegable **"O elige un menú"** con los cuatro menús.
 2. Eliges **Menú 2** y pulsas **Usar este menú**: la semana se rellena al momento
    con sus siete días, **sin llamar a la IA** y **sin gastar cupo**.
-3. Los siete días salen llenos, de lunes a domingo, con sus cuatro momentos.
+3. Salen los siete días con sus cuatro momentos. **De lunes a sábado llenos; el
+   domingo vacío**, que es el día de descanso.
 4. Los platos que son una receta salen **enlazados a su receta**: se abren desde
    la dieta con el icono de la spec 060.
-5. Sábado y domingo llevan lo mismo, y lunes a miércoles lo mismo que el jueves.
-   Es lo que dice el papel; la spec 075 lo dejó así a propósito.
+5. Cada día trae lo suyo: los del papel, sin copiar unos sobre otros. El fin de
+   semana del papel va en el **sábado**.
 6. **Pedirle la dieta a la IA sigue funcionando igual** que hasta ahora, con su
    casilla de aprovechar la despensa (059) y su cupo.
 7. Con una dieta ya puesta, elegir un menú **avisa antes de pisarla**: la dieta
@@ -44,8 +45,8 @@ llamada y no fallan.
 
 - Desplegable con los cuatro menús y botón para aplicar el elegido.
 - Rellenar la semana desde `MENUS` de `js/datos-iniciales.js`.
-- Enlazar cada plato con su receta por nombre, con lo que ya hace
-  `semanaDesdeLaIa()` de `js/dietas.js`.
+- Enlazar cada plato con su receta, buscando el nombre de la receta dentro del
+  texto del plato (`semanaDesdeMenu()` en `js/dietas.js`).
 - Confirmación antes de pisar una dieta que ya existe.
 
 ### NO entra (explícitamente fuera)
@@ -84,9 +85,25 @@ distraído.
 
 1. Si ya hay dieta activa, **pregunta**: *"Esto sustituye tu dieta de la semana.
    ¿Seguir?"*. Es la misma cortesía que el borrado: no hay deshacer.
-2. Coge el menú de `MENUS` y lo pasa por `semanaDesdeLaIa()`, que es quien
-   empareja cada plato con su receta por nombre. **Se reutiliza tal cual**: hace
-   exactamente lo que hace falta y ya está probada desde la spec 028.
+2. Coge el menú de `MENUS` y lo pasa por **`semanaDesdeMenu()`**, en
+   `js/dietas.js`.
+
+   > **Cambiado al implementarla.** Esta spec decía reutilizar
+   > `semanaDesdeLaIa()` tal cual. Al probarlo, **enlazaba 4 platos de 96**:
+   > aquella compara por nombre **exacto**, que es lo correcto para la IA
+   > —devuelve el nombre tal y como lo acaba de inventar— pero no para el papel,
+   > donde un plato es una frase entera con cantidades y a veces dos cosas
+   > ("Pudding de chía y mermelada **sin azúcar**", "125gr de arroz (hervido) con
+   > verduras. Muslo de pollo asado").
+   >
+   > `semanaDesdeMenu()` busca el nombre de la receta **dentro** del texto del
+   > plato, probando de la más larga a la más corta y descartando nombres de
+   > menos de 8 letras, que acertarían dentro de cualquier frase. Con eso enlazan
+   > **unos 50 de 96**; el resto no son recetas, son cosas como "125 gramos de
+   > kéfir con canela".
+   >
+   > Ante la duda, **sin enlazar**: un plato sin receta se lee igual de bien, y
+   > uno enlazado a la receta equivocada es una mentira en pantalla.
 3. Guarda la dieta con `guardarDieta()`, con `instrucciones` puesto al nombre del
    menú (`"Menú 2"`), para que quede escrito de dónde salió.
 4. Repinta la semana y avisa **"Menú 2 puesto"** en el hueco de guardado que ya
@@ -126,7 +143,7 @@ aquí.
 |---|---|
 | Un desplegable, no cuatro botones | Cuatro botones ocupan la pantalla y no crecen bien si algún día hay ocho menús. |
 | Botón aparte, no aplicar al elegir | Elegir en un desplegable es demasiado fácil como para que pise una dieta sin preguntar. |
-| **Se reutiliza `semanaDesdeLaIa()`** | Ya empareja platos con recetas por nombre. Escribir otra función que haga lo mismo es garantizar que dentro de un mes solo una está arreglada — la misma lección que la 074 con la normalización. |
+| **`semanaDesdeMenu()` aparte, y no `semanaDesdeLaIa()`** | No es duplicar por duplicar: son dos problemas distintos. La IA devuelve nombres exactos; el papel, frases. Reutilizarla enlazaba 4 de 96. Lo que sí se comparte es `clave()`, la normalización, que ahora quita también las tildes. |
 | `instrucciones` guarda el nombre del menú | Deja escrito de dónde salió la dieta sin añadir un campo nuevo. |
 | No se mezclan menús | Complica la pantalla para un caso que nadie ha pedido. Editar a mano ya cubre el retoque. |
 
@@ -136,7 +153,8 @@ aquí.
 |---|---|
 | `index.html` | Desplegable y botón en el bloque de Mi dieta. |
 | `js/app.js` | Rellenar el desplegable desde `MENUS`, y aplicar el elegido. |
-| `css/estilos.css` | Nada, si las clases de `fila-alta` valen. |
+| `js/dietas.js` | `semanaDesdeMenu()` nueva, y `clave()` pasa a quitar tildes. |
+| `docs/specs/075-siembra-casos.mjs` | 8 casos más: que cada menú da una semana de siete días, que el domingo sigue vacío y que enlaza al menos 40 platos. |
 
 Estimación: **muy por debajo de las 300 líneas**. La mayor parte del trabajo lo
 hizo la 075 al dejar los menús ya montados con sus siete días.

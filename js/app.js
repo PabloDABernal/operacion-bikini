@@ -51,6 +51,7 @@ import {
   borrarDieta,
   guardarRecetasPropuestas,
   semanaDesdeLaIa,
+  semanaDesdeMenu,
   pedirDietaALaIa
 } from "./dietas.js";
 
@@ -132,7 +133,7 @@ import {
 } from "./material.js";
 
 import { hayQueSembrar, sembrar, olvidarLaSiembra } from "./siembra.js";
-import { VERSION as VERSION_DATOS_INICIALES } from "./datos-iniciales.js";
+import { VERSION as VERSION_DATOS_INICIALES, MENUS } from "./datos-iniciales.js";
 
 // Ingredientes de una receta recién creada que se parecen a algo que ya tenías
 // (spec 072). Se preguntan al terminar la dieta; hasta que se contesten, no se
@@ -3219,6 +3220,72 @@ id("btn-semana-blanco").addEventListener("click", async () => {
   }
 });
 
+// --- Elegir un menú en vez de pedírselo a la IA (spec 076) ---------------
+//
+// Los menús viven en js/datos-iniciales.js, ya con sus siete días montados: la
+// spec 075 los dejó así para que aquí no hubiera que convertir nada.
+//
+// Ni cupo, ni proxy, ni prompt. Elegir un menú es una escritura en Firestore.
+
+function rellenarMenus() {
+  const select = id("menu-elegido");
+  if (select.options.length) return;
+
+  const vacia = document.createElement("option");
+  vacia.value = "";
+  vacia.textContent = "Elige un menú…";
+  select.appendChild(vacia);
+
+  MENUS.forEach((menu) => {
+    const opcion = document.createElement("option");
+    opcion.value = String(menu.numero);
+    opcion.textContent = menu.nombre;
+    select.appendChild(opcion);
+  });
+}
+
+id("menu-elegido").addEventListener("change", (evento) => {
+  // El botón no se enciende hasta elegir: un desplegable es demasiado fácil de
+  // tocar sin querer como para que pise una dieta de un solo gesto.
+  id("btn-usar-menu").disabled = !evento.target.value;
+});
+
+id("btn-usar-menu").addEventListener("click", async () => {
+  const numero = Number(id("menu-elegido").value);
+  const menu = MENUS.find((m) => m.numero === numero);
+  if (!menu) return;
+
+  if (
+    dietaActiva &&
+    !confirm(`Esto sustituye tu dieta de la semana por el ${menu.nombre}. ¿Seguir?`)
+  ) {
+    return;
+  }
+
+  const error = id("error-semana");
+  const boton = id("btn-usar-menu");
+  error.textContent = "";
+  boton.disabled = true;
+
+  try {
+    // Primero la nueva y luego se borra la vieja, como en los otros dos
+    // caminos: al revés queda un instante sin ninguna dieta.
+    const anterior = dietaActiva;
+    await guardarDieta(
+      uidActual,
+      semanaDesdeMenu(menu.dias, recetasCargadas),
+      menu.nombre
+    );
+    if (anterior) await borrarDieta(uidActual, anterior.id);
+    await refrescarDieta();
+    avisarGuardado("guardado-dieta");
+  } catch {
+    error.textContent = "No se ha podido poner el menú. Comprueba tu conexión.";
+  } finally {
+    boton.disabled = false;
+  }
+});
+
 // Pide la semana a la IA, guarda las recetas que proponga y sustituye la
 // dieta que hubiera. El cupo es el mismo que el de los planes: 2 al día.
 // `aprovechar` llega solo desde el formulario de "Pedir" (spec 059). Los otros
@@ -3319,6 +3386,10 @@ async function registrosRecientes() {
 }
 
 async function refrescarDieta() {
+  // El desplegable de menús (spec 076) se llena una sola vez: los menús son
+  // estáticos, vienen del módulo y no dependen de la cuenta.
+  rellenarMenus();
+
   try {
     dietaActiva = await leerDietaActiva(uidActual);
   } catch {

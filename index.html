@@ -325,6 +325,22 @@
         semana. Puedes pedir dos al día.
       </p>
 
+      <!-- Los menús de la nutricionista (spec 076). Van aquí abajo, separados
+           del botón de la IA, para que se lean como la OTRA forma de tener una
+           semana y no como parte del formulario de "Pedir". No gastan cupo ni
+           llaman al proxy: elegir un menú es una escritura y nada más. -->
+      <div id="bloque-menus">
+        <label for="menu-elegido">O elige un menú</label>
+        <div class="fila-alta">
+          <select id="menu-elegido"></select>
+          <button type="button" id="btn-usar-menu" disabled>Usar este menú</button>
+        </div>
+        <p class="explicacion">
+          Los cuatro menús de tu nutricionista. No gastan cupo. El domingo va
+          vacío a propósito: es el día de descanso.
+        </p>
+      </div>
+
       <form id="form-plan-dieta" class="oculta">
         <label for="instrucciones-dieta">¿Algo que deba tener en cuenta?</label>
         <textarea id="instrucciones-dieta" rows="3" maxlength="500"

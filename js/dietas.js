@@ -87,15 +87,30 @@ export function borrarDieta(uid, dietaId) {
 // Para comparar nombres de plato: "Lentejas  con verduras" y "lentejas con
 // verduras" son la misma receta.
 function clave(texto) {
-  return String(texto || "").trim().toLowerCase().replace(/\s+/g, " ");
+  return String(texto || "")
+    .trim()
+    .toLowerCase()
+    // Sin tildes: los menús del papel escriben "Boquerones Asados" y la receta
+    // "boquerón", y una tilde de más no puede romper un enlace.
+    .normalize("NFD")
+    .replace(/\p{Mn}/gu, "")
+    .replace(/\s+/g, " ");
+}
+
+// El mapa de nombre a identificador con el que se enlazan los platos de una
+// semana con sus recetas.
+//
+// Se exporta para que elegir un menú (spec 076) pueda usar semanaDesdeLaIa()
+// sin pasar por la IA: allí no se guarda ninguna receta nueva —ya están todas
+// desde la 075—, solo hace falta el mapa de las que hay.
+export function mapaDeRecetas(recetas) {
+  return new Map((recetas || []).map((receta) => [clave(receta.nombre), receta.id]));
 }
 
 // Guarda las recetas que propone la IA, sin duplicar las que ya tienes, y
 // devuelve un mapa de nombre a identificador para poder enlazarlas.
 export async function guardarRecetasPropuestas(uid, propuestas, recetasActuales) {
-  const porNombre = new Map(
-    recetasActuales.map((receta) => [clave(receta.nombre), receta.id])
-  );
+  const porNombre = mapaDeRecetas(recetasActuales);
 
   for (const propuesta of propuestas) {
     const id = clave(propuesta.nombre);
@@ -125,6 +140,44 @@ export function semanaDesdeLaIa(dias, porNombre) {
     comidas: MOMENTOS_DIETA.map((momento) => {
       const texto = String(dia[momento] || "").trim();
       return { momento, texto, recetaId: porNombre.get(clave(texto)) || "" };
+    })
+  }));
+}
+
+// La semana de uno de los menús de la nutricionista (spec 076).
+//
+// No usa semanaDesdeLaIa() aunque lo parezca, y el motivo importa: aquella
+// empareja plato y receta por nombre EXACTO, porque la IA devuelve el nombre
+// tal cual lo acaba de inventar. Los menús del papel no: ahí un plato es una
+// frase entera, con cantidades y a veces dos cosas —"Pudding de chía y
+// mermelada sin azúcar", "125gr de arroz (hervido) con verduras. Muslo de pollo
+// asado"—. Comparando por igualdad enlazaban 4 de 96.
+//
+// Así que aquí se busca el nombre de la receta DENTRO del texto del plato. Se
+// prueban de la más larga a la más corta para que "Champiñones portobello en
+// salsa de soja" gane a "Champiñones", y se ignoran los nombres muy cortos, que
+// acertarían dentro de cualquier frase. Con esto enlazan unos 50 de 96; el
+// resto no son recetas, son cosas como "125 gramos de kéfir con canela".
+//
+// Ante la duda, sin enlazar: un plato sin receta se lee igual de bien, y uno
+// enlazado a la receta equivocada es una mentira en pantalla.
+const MINIMO_PARA_ENLAZAR = 8;
+
+export function semanaDesdeMenu(dias, recetas) {
+  const porLongitud = (recetas || [])
+    .map((receta) => ({ id: receta.id, clave: clave(receta.nombre) }))
+    .filter((receta) => receta.clave.length >= MINIMO_PARA_ENLAZAR)
+    .sort((uno, otro) => otro.clave.length - uno.clave.length);
+
+  return dias.map((dia) => ({
+    dia: dia.dia,
+    comidas: MOMENTOS_DIETA.map((momento) => {
+      const comida = dia.comidas.find((c) => c.momento === momento);
+      const texto = String(comida?.texto || "").trim();
+      const encontrada = texto
+        ? porLongitud.find((receta) => clave(texto).includes(receta.clave))
+        : null;
+      return { momento, texto, recetaId: encontrada ? encontrada.id : "" };
     })
   }));
 }

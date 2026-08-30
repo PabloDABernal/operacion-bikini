@@ -9,7 +9,9 @@ async function cargar(ruta, recorte) {
   let fuente = fs
     .readFileSync(ruta, "utf8")
     .replace(/^import[\s\S]*?from\s+"https:[^"]+";\s*$/gm, "")
-    .replace(/^import[\s\S]*?from\s+"\.\/firebase-config\.js";\s*$/gm, "");
+    // Y los relativos: js/dietas.js tira de js/recetas.js, que a su vez tira de
+    // Firebase. Aquí sólo interesan las funciones puras.
+    .replace(/^import[\s\S]*?from\s+"\.\/[^"]+";\s*$/gm, "");
   if (recorte) fuente = fuente.replace(recorte, "");
   return import(
     "data:text/javascript;base64," + Buffer.from(fuente, "utf8").toString("base64")
@@ -142,6 +144,68 @@ comprobar(
       .map((d) => JSON.stringify(d.comidas));
     return new Set(textos).size === 3;
   }),
+  true
+);
+
+// --- Elegir un menú enlaza sus platos con las recetas (spec 076) --------
+//
+// Se ejecuta semanaDesdeMenu() de verdad, la misma que usa el botón.
+
+const dietas = await cargar(
+  "js/dietas.js",
+  /export async function pedirDietaALaIa[\s\S]*$/m
+);
+
+// Las recetas como las tiene el usuario tras la siembra: con id.
+const recetasConId = datos.RECETAS.map((r, i) => ({ id: `r${i}`, nombre: r.nombre }));
+
+const semanas = datos.MENUS.map((m) =>
+  dietas.semanaDesdeMenu(m.dias, recetasConId)
+);
+
+comprobar(
+  "cada menú da una semana de siete días",
+  semanas.every((s) => s.length === 7),
+  true
+);
+
+comprobar(
+  "y cada día sus cuatro momentos",
+  semanas.every((s) => s.every((d) => d.comidas.length === 4)),
+  true
+);
+
+comprobar(
+  "el domingo sigue vacío y sin receta",
+  semanas.every((s) => {
+    const domingo = s.find((d) => d.dia === "domingo");
+    return domingo.comidas.every((c) => c.texto === "" && c.recetaId === "");
+  }),
+  true
+);
+
+const enlazados = semanas.flatMap((s) =>
+  s.flatMap((d) => d.comidas.filter((c) => c.recetaId))
+).length;
+
+// Emparejando por nombre exacto salían 4 de 96, que hacía inútil poder abrir
+// la receta desde la dieta. Por contención salen unos 50. El umbral está en 40
+// para que se note si alguien vuelve a la comparación estricta.
+comprobar("enlaza bastantes platos con su receta", enlazados >= 40, true);
+
+comprobar(
+  "sin recetas no revienta, sólo no enlaza",
+  dietas.semanaDesdeMenu(datos.MENUS[0].dias, []).every((d) =>
+    d.comidas.every((c) => c.recetaId === "")
+  ),
+  true
+);
+
+comprobar(
+  "un plato que no es receta se queda como texto",
+  semanas.some((s) =>
+    s.some((d) => d.comidas.some((c) => c.texto && !c.recetaId))
+  ),
   true
 );
 
