@@ -1,6 +1,6 @@
 # 074 — El armario: el material que tienes
 
-- **Estado:** revisada (`revisor-specs`, 30 de agosto de 2026)
+- **Estado:** 🚧 implementada y desplegada el 30 de agosto de 2026 (commit `6c250b3`), revisada por `revisor-specs` y `revisor-codigo`. **Pendiente de que el usuario la pruebe.**
 - **Fecha:** 2026-08-30
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (v13: el material, decidida el 30 de agosto de 2026)", primer punto.
 

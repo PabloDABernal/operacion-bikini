@@ -115,6 +115,7 @@ El 20 de agosto arrancó la **v4**, que sale de una auditoría de usabilidad hec
 | 071 | La IA deja de tirar respuestas buenas (v11) | ✅ completada |
 | 072 | La despensa con sensibilidad, y la receta con su icono (v8+) | ✅ completada |
 | 073 | La lista de la compra (v12) | ✅ completada |
+| 074 | El armario: el material que tienes (v13) | 🚧 implementada y desplegada, **sin probar** |
 | 064 | La semana de la dieta, en siete recuadros (v10) | ✅ completada |
 | 065 | Iconos en las acciones de fila (v10) | ✅ completada |
 | 066 | La barra con iconos, y Ajustes de vuelta (v10) | ✅ completada |
@@ -124,9 +125,18 @@ El 20 de agosto arrancó la **v4**, que sale de una auditoría de usabilidad hec
 
 ## Qué toca ahora
 
-**Nada empezado.** Al 30 de agosto de 2026, las specs **001 a 072 están
-implementadas, desplegadas y probadas por el usuario**. Las versiones v1 a v11
-están cerradas. La app se usa a diario en producción.
+**La spec 074, desplegada y sin probar.** Al 30 de agosto de 2026 las specs
+**001 a 073 están cerradas** y las versiones v1 a v12 terminadas. La app se usa
+a diario en producción.
+
+La **v13 (el material)** está en marcha, declarada en `docs/PRODUCTO.md` y
+partida en tres desde el inicio: **074 el armario** (hecha, sin probar), **075 el
+cruce con la tabla** y **076 el material que falta** (sin escribir todavía).
+
+**Las reglas de Firestore del bloque `usuarios/{uid}/material` SÍ están
+publicadas**, con la CLI y antes del commit `6c250b3`. Se anota porque no se ve
+en el repositorio y la duda cuesta una tarde de perseguir errores de permisos
+que parecen bugs.
 
 ### Lo que se cerró entre el 28 y el 30 de agosto
 
@@ -136,13 +146,17 @@ están cerradas. La app se usa a diario en producción.
 | **v9** | Lo que bebes y lo que acompaña: el agua (061), las bebidas (062), el acompañamiento (063) y que el análisis los cuente (070). |
 | **v10** | La semana en siete recuadros, los iconos de fila y la barra con Ajustes (064-067). |
 | **v11** | La IA deja de tirar respuestas buenas (071). |
-| **v12** | La lista de la compra (073). **Desplegada, sin probar.** |
+| **v12** | La lista de la compra (073). |
 
 ### Lo siguiente
 
-1. **Que el usuario pruebe la 073**, la lista de la compra. Es lo único
-   desplegado sin probar.
-2. Después, **elegir**.
+1. **Que el usuario pruebe la 074**, el armario. Es lo único desplegado sin
+   probar. El guion está al final de la spec.
+2. Al probarla, mirar con lupa **una decisión**: una pieza de material nace
+   MARCADA, al revés que un ingrediente de la despensa desde la spec 068. Está
+   razonado en `js/material.js`, pero deja dos pantallas gemelas comportándose
+   distinto. Si chirría al usarlo, se cambia en una línea.
+3. Después, **la spec 075**: el cruce de la tabla con el armario.
 
 **Elegir.** No hay nada a medias ni ninguna decisión pendiente. Las ideas viven
 en `docs/PRODUCTO.md`, apartado "Ideas para más adelante", y `docs/BACKLOG.md`
@@ -486,6 +500,3 @@ de vista si algún día se tocan la cabecera o la gráfica de peso:
   implementarlas.
 - **Qué se hace a continuación**, de las ideas de `docs/PRODUCTO.md`. Ver
   "Lo siguiente", más arriba.
-- `PRODUCTO.md` llama "collage de evolución" a lo que es una cuadrícula de
-  miniaturas. O se cambia la palabra, o se hace el collage de verdad. Lleva
-  pendiente desde la v2 y no molesta a nadie.

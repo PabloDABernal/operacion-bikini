@@ -583,7 +583,6 @@ apartado "Qué hará (v8…)" con sus specs.
 Verificado el 27 de agosto contra el código: todo esto sigue pendiente, y todo
 es cosmético.
 
-- Iconos en la barra de navegación inferior (la spec 009 la dejó solo con texto).
 - Llevar el formato de dos líneas con iconos de la spec 043 a las recetas, al
   catálogo de ejercicios y al histórico de operaciones. La 043 solo cambió las
   tres listas del diario.
