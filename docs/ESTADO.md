@@ -2,10 +2,45 @@
 
 Documento para retomar el trabajo en frío. Se actualiza al terminar cada spec.
 
-**Última actualización:** 30 de agosto de 2026 (traspaso a Claude Code web) (specs 001-072 **probadas y cerradas**, v1 a v11 terminadas; la **073 desplegada y SIN PROBAR**)
+**Última actualización:** 30 de agosto de 2026, noche (spec 074 implementada, en una rama sin fusionar, **pendiente publicar reglas de Firestore y probar**)
 
-> **Traspaso del 30 de agosto de 2026.** Se sigue en remoto desde Claude Code
-> web. `main` limpio y sincronizado con `origin/main`, último commit `2238bea`.
+> **Para cuando retomes esta noche en VSCode.** Se trabajó la tarde del 30 de
+> agosto en una sesión remota (Claude Code web), en la rama
+> **`claude/exercise-materials-routines-kfrpr0`** (todavía no fusionada a
+> `main`, así que si trabajas sobre `main` no la verás sin hacer
+> `git fetch`/`git checkout` de esa rama).
+>
+> **Se documentó y se implementó la v13: los materiales** (el equivalente a la
+> despensa, pero para material de entrenamiento), repartida en dos specs.
+> Está hecha la primera:
+>
+> - `docs/PRODUCTO.md`, apartado "Qué hará (v13: los materiales)".
+> - `docs/specs/074-los-materiales.md`: implementada y revisada por
+>   `revisor-codigo` (veredicto: cumple con observaciones — el comportamiento
+>   sigue la spec, solo se pasó del tope de líneas fijado sin avisar a mitad de
+>   camino; queda anotado en la propia spec).
+>
+> **Dos cosas pendientes antes de dar la 074 por buena:**
+>
+> 1. **Publicar las reglas de Firestore** — la sesión remota no tenía
+>    `firebase login` guardado, así que quedó sin publicar:
+>    `npx --yes firebase-tools deploy --only firestore:rules`. Sin esto, la
+>    sub-pestaña Materiales de Ejercicio dará errores de permisos.
+> 2. **Probar a mano.** El guion completo está al final de
+>    `docs/specs/074-los-materiales.md` (o pídeselo a Claude, ya se generó una
+>    vez con `qa-manual`).
+>
+> Cuando la pruebes y la confirmes, la siguiente es la **spec 075**: que la
+> tabla de ejercicios aproveche estos materiales al pedírsela a la IA, y que
+> el catálogo enseñe qué te falta.
+>
+> **La spec 073 (lista de la compra) sigue sin confirmar probada** (ver el
+> traspaso de abajo) — sin decisión pendiente, solo falta que el usuario diga
+> que la probó.
+
+> **Traspaso del 30 de agosto de 2026 (tarde).** Se sigue en remoto desde
+> Claude Code web. `main` limpio y sincronizado con `origin/main`, último
+> commit `2238bea`.
 >
 > **Lo primero al retomar: el usuario tiene que probar la spec 073** (la lista de
 > la compra). Está implementada y desplegada, con las reglas de Firestore ya
