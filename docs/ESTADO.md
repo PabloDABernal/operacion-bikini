@@ -2,7 +2,7 @@
 
 Documento para retomar el trabajo en frío. Se actualiza al terminar cada spec.
 
-**Última actualización:** 29 de agosto de 2026 (la 064 desplegada, sin probar; la 062 tampoco está probada) (specs 001-061 **probadas y cerradas**, v1 a v8 terminadas; la **062 implementada y pendiente de prueba**, la **063** a medias a propósito)
+**Última actualización:** 30 de agosto de 2026 (**specs 001-072 probadas y cerradas**, v1 a v11 terminadas; nada a medias, toca elegir lo siguiente)
 
 > **Traspaso del 27 de agosto de 2026.** Se sigue en remoto desde Claude Code web. Estado al cerrar la sesión del PC: nada a medias, `main` limpio y sincronizado con `origin/main`. No hay spec abierta. **`docs/BACKLOG.md` está vacío a propósito desde hoy**: sus veintidós entradas se repartieron entre `docs/PRODUCTO.md` (apartado "Ideas para más adelante", que es de donde se elige la próxima versión), este documento (las trampas, aquí abajo) y el propio backlog (lo cerrado, para que no vuelva a proponerse). **Lo siguiente son evolutivos nuevos**: se elige una idea de `PRODUCTO.md`, se decide si es una versión partida en varias specs, y se escribe con `/nueva-spec` antes de tocar código. Antes de nada, leer "Cosas que hay que saber antes de tocar nada" de más abajo: las trampas del modelo de IA, la publicación de reglas de Firestore y que se prueba SIEMPRE en producción con push.
 
@@ -105,97 +105,47 @@ El 20 de agosto arrancó la **v4**, que sale de una auditoría de usabilidad hec
 
 ## Qué toca ahora
 
-**Nada empezado, y el backlog vacío a propósito.** Al 27 de agosto de 2026 las
-specs 001 a 057 están implementadas, desplegadas y confirmadas por el usuario, y
-las versiones v1 a v7 están cerradas. La app se usa a diario en producción.
+**Nada empezado.** Al 30 de agosto de 2026, las specs **001 a 072 están
+implementadas, desplegadas y probadas por el usuario**. Las versiones v1 a v11
+están cerradas. La app se usa a diario en producción.
 
-Ese día el usuario dijo "vamos a vaciar ese backlog, cierra lo que tengas que
-cerrar; la aplicación ya está bien, lo próximo serán nuevos evolutivos". Se
-auditaron sus veintidós entradas contra el código y se repartieron: las ideas a
-`docs/PRODUCTO.md` ("Ideas para más adelante"), las trampas a este documento, y
-lo aceptado o descartado se quedó cerrado en `docs/BACKLOG.md`. De paso se
-arregló el único bug de verdad que había dentro (el cierre del alta prometía
-planes que nadie iba a crear) y se borró la herramienta de sembrar datos falsos,
-que seguía viva en producción.
+### Lo que se cerró entre el 28 y el 30 de agosto
 
-**La v8 ya está elegida y escrita, sin implementar** (28 de agosto). El usuario
-pidió mejorar la sección de Comidas: una **despensa** de ingredientes que puedas
-marcar según los tengas en casa, y que la dieta los aproveche al generarse. Está
-en `docs/PRODUCTO.md` ("Qué hará (v8)") y repartida en dos specs, partidas desde
-el inicio: **058** (la despensa) y **059** (la dieta que la aprovecha).
+| Versión | Qué |
+|---|---|
+| **v8** | La despensa (058-060), y su ampliación: se llena sola desde las recetas, con buscador y con sensibilidad para no duplicar (068, 069, 072). |
+| **v9** | Lo que bebes y lo que acompaña: el agua (061), las bebidas (062), el acompañamiento (063) y que el análisis los cuente (070). |
+| **v10** | La semana en siete recuadros, los iconos de fila y la barra con Ajustes (064-067). |
+| **v11** | La IA deja de tirar respuestas buenas (071). |
 
-De la misma conversación salió la **v9, decidida pero sin escribir**: el contador
-de vasos de agua, las bebidas apuntadas y el acompañamiento dentro de la comida
-("3 trozos de pan"). Se aparcó para cerrar la v8 antes de abrir otro frente.
+### Lo siguiente
 
-**`revisor-specs` ya ha pasado por las dos** (28 de agosto). La 058 salió sin
-bloqueantes. La 059 salió con dos, los dos resueltos antes de tocar código:
+**Elegir.** No hay nada a medias ni ninguna decisión pendiente. Las ideas viven
+en `docs/PRODUCTO.md`, apartado "Ideas para más adelante", y `docs/BACKLOG.md`
+tiene su buzón con lo que fue saliendo.
 
-- **La regla del cruce se contradecía.** Pedía que `tomate` acertara en
-  `2 tomates maduros` y que `sal` no acertara en `salmón`, y con "límite de
-  palabra" a secas eso es imposible. La regla ahora está escrita exacta —límite
-  estricto por la izquierda, sufijo `s`/`es` por la derecha— y **verificada sobre
-  17 casos**. Al implementarla, esos casos van en un test.
-- **La 059 daba por hecha una pantalla que no existe.** Se creía que una receta
-  se podía leer desde Mi dieta; `filaDeComida()` solo pinta el momento y el
-  texto. Se sacó a la **spec 060** antes de implementar nada, no después.
+Lo que más se ha nombrado sin hacerse:
 
-**La v8 está cerrada del todo** (29 de agosto): specs 058, 059 y 060,
-implementadas, revisadas y probadas por el usuario. La despensa está en uso, la
-dieta la aprovecha y las recetas se abren desde la semana.
+- **La lista de la compra** de la semana. Lleva desde la spec 026 en la lista, y
+  ahora está a un paso: el cruce despensa/receta ya existe (059) y la despensa se
+  llena sola (068). Sería juntar lo que falta de todas las recetas de la dieta.
+- **Un tercer proveedor de IA**, si los dos actuales siguen quedándose cortos. La
+  071 arregló el fallo que había; si vuelve a fallar, ahora se sabría por qué.
+- **La tira de siete días en más sitios**, y el resto del pulido visual de
+  `docs/PRODUCTO.md`.
 
-**La v9 está escrita y sin implementar.** Sale de la misma conversación que la
-v8. Son tres specs, partidas desde el inicio: **061** (el agua), **062** (las
-bebidas) y **063** (el acompañamiento).
+### Tres cosas que este tramo dejó aprendidas
 
-**Ojo: la 062 y la 063 están a medias A PROPÓSITO.** Se escribieron con la v9
-para fijar el reparto desde el inicio y no partir nada a posteriori, pero cada
-una deja dos decisiones abiertas que hay que llevarle al usuario **antes** de
-implementarlas. No rellenarlas con suposiciones:
+1. **Cuando algo se sale de su sitio, es más barato fijarle el sitio que
+   convencer al contenido de que no crezca.** El descuadre de la dieta costó
+   cuatro intentos: tres peleando con el texto y uno poniendo una rejilla.
+2. **Un `const` no se puede leer antes de su declaración, y eso tumba el módulo
+   entero.** La spec 066 dejó la app en "Cargando…" por pintar unos iconos
+   demasiado arriba. La decoración va en `try/catch`.
+3. **Una prueba automática con la expectativa mal puesta es peor que no tenerla.**
+   El caso `"sal y pimienta"` estaba escrito desde el 28 de agosto, dado por
+   acierto correcto, y tapó el fallo que el usuario encontró a mano.
 
-- **062**: ¿una bebida es un momento más de `MOMENTOS` o una colección propia? ¿y
-  da puntos? (El argumento que dejó al agua fuera —es el registro más barato— no
-  le aplica igual a una bebida escrita.)
-- **063**: ¿el acompañamiento entra en el análisis nutricional? Aquí el "no" de
-  las bebidas **no aguanta igual**: tres trozos de pan son cereales y son
-  calorías, así que dejarlos fuera hace que el análisis diga menos de lo que
-  comiste.
-
-**Lo siguiente, por orden:**
-
-1. **Que el usuario pruebe la 062.** La regresión a vigilar es que las bebidas
-   NO se cuelen donde no deben: ni en el análisis nutricional, ni en los puntos,
-   ni en el calendario de constancia.
-2. Cerrar con el usuario las dos decisiones de la **063** —sobre todo si el
-   acompañamiento entra en el análisis nutricional, que es la pregunta incómoda
-   de la v9— y entonces implementarla.
-
-Lo ya hecho de la v9:
-
-- **061 (el agua)**: completada y probada.
-- **062 (las bebidas)**: desplegada, sin probar. Colección propia `bebidas`, no
-  un momento de `comidas`. El motivo salió de mirar el código: `comidasDeHoy()`
-  manda **todas** las comidas del día al análisis nutricional, así que con las
-  bebidas dentro, cada cerveza habría entrado en el análisis. Con colección
-  propia quedan fuera por construcción.
-
-**Lo que ya salió de las revisiones de la v9**, para no repetir el trabajo:
-
-- `revisor-specs` cazó **un bloqueante en la 061**: la spec decía que el agua no
-  necesitaba casilla propia en Reiniciar datos, y era falso. `borrarOperacion()`
-  solo vacía `operaciones/{id}/{colección}`, **nunca** las colecciones de primer
-  nivel donde vive la operación en curso. Sin casilla propia, el agua del ciclo
-  en marcha se habría quedado huérfana en Firestore sin que nadie se enterara.
-  **Lo mismo aplica a `bebidas`**, y por eso también lleva casilla propia.
-- **Puntos, racha, calendario y resumen de la operación se sostienen solos.**
-  `calcularPuntos()`, `calcularResumen()` y `calendarioDeConstancia()` nombran
-  sus colecciones a mano, no iteran `COLECCIONES`. Añadir `agua` o `bebidas` ahí
-  no puede colarlas en ningún sitio. Es imposible por construcción, no por
-  cuidado — y conviene no romper esa propiedad.
-
-**Lección de la v8 que aplica aquí**: la 058 estimó 250-300 líneas y salió en 408
-de JavaScript. La 061 estima lo mismo con el mismo método, así que ese número se
-mira con desconfianza.
 
 ## Historia
 
@@ -506,9 +456,11 @@ de vista si algún día se tocan la cabecera o la gráfica de peso:
 
 ## Pendiente de decidir por el usuario
 
-- `PRODUCTO.md` llama "collage de evolución" a lo que es una cuadrícula de miniaturas. O se cambia la palabra, o se hace el collage de verdad.
-- **Nada, de momento.** El 28 de agosto el usuario eligió la v8 (la despensa) y decidió la v9 (bebidas y acompañamientos). Lo siguiente no es decidir, es revisar e implementar las specs 058 y 059.
-- Cuando la v8 esté cerrada: **qué evolutivo se aborda después**, de la lista "Ideas para más adelante" de `docs/PRODUCTO.md`. Ya no se elige del backlog, que es solo el buzón de lo que surge a mitad de spec.
-- **Si la próxima es "guardar varias dietas y varias tablas", hay que partirla desde el inicio.** Cambia el modelo de datos y las reglas de Firestore: no cabe en una spec, y las specs no se parten a posteriori.
-
-Las ideas están en `docs/PRODUCTO.md`. `docs/BACKLOG.md` es el buzón de lo que surja a mitad de una spec, y se vuelve a vaciar al cerrar cada versión.
+- **Nada bloqueante.** Al 30 de agosto no queda ninguna decisión abierta: las
+  cuatro de la v9 y las tres de la v10 se cerraron con el usuario antes de
+  implementarlas.
+- **Qué se hace a continuación**, de las ideas de `docs/PRODUCTO.md`. Ver
+  "Lo siguiente", más arriba.
+- `PRODUCTO.md` llama "collage de evolución" a lo que es una cuadrícula de
+  miniaturas. O se cambia la palabra, o se hace el collage de verdad. Lleva
+  pendiente desde la v2 y no molesta a nadie.
