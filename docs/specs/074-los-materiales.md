@@ -1,6 +1,6 @@
 # 074 — Los materiales: lo que tienes para entrenar
 
-- **Estado:** borrador
+- **Estado:** en implementación (revisada por `revisor-codigo`: cumple con observaciones)
 - **Fecha:** 2026-08-30
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (v13: los materiales, decidida el 30 de agosto de 2026)", primera spec de las dos.
 
@@ -211,6 +211,18 @@ avisar** (regla 4 de `CLAUDE.md`).
 - Que guardar un ejercicio en el catálogo con un material nuevo lo añada solo a
   esta lista, como hace la despensa con las recetas (spec 068).
 - Categorías de materiales, si la lista se hace larga de verdad.
+
+## 8 bis. Lo que salió al implementarla
+
+**Se pasó de las 400 líneas** que fijaba esta misma spec como tope: salió en
+~437 (258 en `js/app.js`, 114 en `js/materiales.js`, y el resto repartido
+entre `index.html`, `styles.css`, `firestore.rules` y `js/reinicio.js`).
+`revisor-codigo` lo señaló como incumplimiento de proceso: la regla 4 de
+`CLAUDE.md` pide **parar y avisar** al notarlo, no documentarlo después en el
+mensaje de commit. Se avisa aquí ahora, y queda para la próxima vez: el corte
+de las 400 debería comprobarse **antes de escribir el bloque grande de
+`js/app.js`**, no al terminar. El comportamiento en sí no tiene fallos: la
+única observación de fondo de `revisor-codigo` fue esta.
 
 ## ✅ Para probar a mano
 
