@@ -508,6 +508,40 @@ Qué NO hace:
 |---|---|
 | 073 | La lista de la compra |
 
+## Qué hará (v13: los materiales, decidida el 30 de agosto de 2026)
+
+La despensa de la v8, pero para el material de entrenamiento en vez de para la
+comida.
+
+- **Una lista de materiales tuya, en Ejercicio.** Igual que la despensa: se
+  escribe una vez ("mancuernas", "banda elástica", "banco", "esterilla") y se
+  queda.
+- **Cada material se marca o se desmarca**, según lo tengas ahora mismo o no.
+  Sin cantidades, sin pesos ni variantes, sin caducidad: el mismo motivo que la
+  despensa — un inventario que hay que mantener acaba mintiendo.
+- **Al pedir una tabla puedes decir "aprovecha mi material".** Con esa casilla,
+  la IA recibe lo que tienes marcado y construye la semana priorizándolo. No es
+  una obligación: si con lo tuyo no basta, completa con lo que haga falta.
+- **Al abrir un ejercicio del catálogo ves si te falta su material**, comparando
+  el material que pide el ejercicio con tu lista marcada en ese momento — igual
+  que la receta enseña qué ingrediente te falta.
+
+Qué NO hace la v13, para que quede escrito:
+
+- **No lleva cantidades ni variantes** ("mancuernas de 8 kg"): una entrada,
+  "mancuernas", como la despensa lleva "tomate" y no "3 tomates".
+- **No entra en la generación de un ejercicio suelto**: hoy no existe pedirle a
+  la IA un ejercicio individual, solo tablas completas (spec 029). Si algún día
+  se añade, se decide entonces.
+- **No rellena la lista sola** desde el material de un ejercicio guardado, a
+  diferencia de la despensa (spec 068): se decide si hace falta al ver cómo se
+  usa la lista con la primera spec ya en producción.
+
+| Spec | Qué |
+|---|---|
+| 074 | Los materiales: la sub-pestaña, la lista y las casillas de "lo tengo" |
+| 075 | La tabla aprovecha los materiales, y el ejercicio del catálogo enseña qué te falta |
+
 ## Ideas para más adelante (27 de agosto de 2026)
 
 El 27 de agosto se vació `docs/BACKLOG.md`: la app está terminada y en uso
