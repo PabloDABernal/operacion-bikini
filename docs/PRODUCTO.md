@@ -538,8 +538,54 @@ Qué NO hace:
 | Spec | Qué |
 |---|---|
 | 074 | El armario: el material que tienes |
-| 075 | La tabla aprovecha tu material |
-| 076 | El material que te falta |
+| 077 | La tabla aprovecha tu material |
+| 078 | El material que te falta |
+
+> Las dos que faltan eran la 075 y la 076. Cedieron el número a la v14 el 30 de
+> agosto, estando declaradas y **sin escribir**: renumerar una spec que no
+> existe no le rompe nada a nadie, y la alternativa era dejar la v14 con
+> números salteados para siempre.
+
+## Qué hará (v14: los menús de la nutricionista, decidida el 30 de agosto de 2026)
+
+El usuario tiene cuatro menús semanales reales, de su nutricionista, con sus
+recetas y sus ingredientes. Hasta ahora la única forma de tener una dieta en la
+app era pedírsela a la IA, que se la inventa razonablemente bien pero se la
+inventa. Esto mete comida de verdad en la app, y de paso deja de partir de cero
+a quien entra nuevo.
+
+- **La app viene con recetas e ingredientes puestos.** Al entrar, quien no los
+  tenga se los encuentra ya cargados: las recetas de los cuatro menús y los
+  ingredientes que piden, en la despensa, **sin marcar** — que estén apuntados
+  no significa que los tengas.
+- **Son tuyos en cuanto entran.** Se copian a tu cuenta, así que puedes
+  editarlos y borrarlos como cualquier receta que hubieras escrito tú.
+- **Al hacer la dieta, puedes elegir menú en vez de pedírselo a la IA.** Un
+  desplegable con los cuatro menús: eliges uno y la semana se rellena con él,
+  con sus platos enlazados a sus recetas.
+- **Pedirle la dieta a la IA sigue estando**, igual que hasta ahora. El
+  desplegable es una alternativa, no un sustituto.
+
+Qué NO hace:
+
+- **No añade la franja de media mañana.** La dieta de la app tiene cuatro
+  momentos y los menús del papel tienen cinco: lo de media mañana —casi siempre
+  una infusión y una pieza de fruta— se pega al desayuno. Añadir un quinto
+  momento tocaría la dieta, el registro de comidas, el análisis nutricional y
+  las dietas ya guardadas de todo el mundo; es otra spec, y no es esta.
+- **No guarda la tabla nutricional del papel.** La app ya calcula la suya
+  (spec 030), y tener dos números para lo mismo es pedir que se contradigan.
+- **No convierte los menús en algo que la IA lea.** Elegir un menú es rellenar
+  la semana, no pasarle nada al proxy.
+- **No los deja de solo lectura ni en una colección común.** Se descartó: obliga
+  a fusionar dos fuentes en el recetario, el cruce con la despensa, la lista de
+  la compra y la dieta. Mucho más código y muchos más sitios donde romper algo,
+  para un grupo de usuarios que cabe en una mano.
+
+| Spec | Qué |
+|---|---|
+| 075 | Las recetas y los ingredientes, ya puestos |
+| 076 | Elegir menú en vez de pedírselo a la IA |
 
 ## Ideas para más adelante (27 de agosto de 2026)
 
