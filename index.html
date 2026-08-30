@@ -197,15 +197,18 @@
       <!-- Sub-pestañas (spec 035). Comidas y Ejercicio tienen la misma forma
            a propósito: se aprenden una sola vez. -->
       <div class="subpestanas" data-de="comidas">
-        <button type="button" class="subpestana activa" data-subseccion="apuntar" aria-current="true">Apuntar</button>
-        <button type="button" class="subpestana" data-subseccion="dieta">Mi dieta</button>
-        <button type="button" class="subpestana" data-subseccion="recetas">Recetas</button>
-        <button type="button" class="subpestana" data-subseccion="despensa">Despensa</button>
-        <button type="button" class="subpestana" data-subseccion="compra">Compra</button>
+        <button type="button" class="subpestana activa" data-subseccion="apuntar" data-icono="apuntar" aria-current="true"><span class="etiqueta">Apuntar</span></button>
+        <button type="button" class="subpestana" data-subseccion="dieta" data-icono="dieta"><span class="etiqueta">Mi dieta</span></button>
+        <button type="button" class="subpestana" data-subseccion="recetas" data-icono="recetas"><span class="etiqueta">Recetas</span></button>
+        <button type="button" class="subpestana" data-subseccion="despensa" data-icono="despensa"><span class="etiqueta">Despensa</span></button>
       </div>
 
       <!-- Sub-pestaña: Apuntar -->
       <div class="subseccion activa" data-subseccion="apuntar">
+      <!-- Dos columnas en escritorio (spec 079), con el mismo patrón que Hoy y
+           Peso: a la izquierda lo que apuntas, a la derecha lo apuntado. En
+           móvil no hacen nada y se sigue leyendo en una sola columna. -->
+      <div class="columna">
       <h2>Nueva comida</h2>
       <form id="form-comida">
         <label for="comida-texto">Qué has comido</label>
@@ -251,6 +254,43 @@
       <p id="error-comida" class="error" role="alert"></p>
       <p id="guardado-comida" class="guardado" role="status"></p>
 
+      <!-- Las bebidas (spec 062). Colección propia y bloque propio: una cerveza
+           no es una cena, y así no se confunden ni en pantalla ni en los datos.
+           El agua no está aquí: es un contador y vive en Hoy (spec 061).
+
+           PLEGADA desde la spec 079: es lo que menos se apunta y se comía media
+           pantalla en el móvil. Mismo patrón que "Cambiar fecha y hora". -->
+      <button type="button" id="btn-desplegar-bebida" class="enlace">¿Has bebido algo?</button>
+      <div id="bloque-bebida" class="oculta">
+        <p class="explicacion">
+          El café, la caña, el refresco. El agua no: esa se cuenta en Hoy.
+        </p>
+        <form id="form-bebida">
+          <label for="bebida-texto">Qué has bebido</label>
+          <input type="text" id="bebida-texto" maxlength="200" placeholder="caña con Jose">
+
+          <div id="bloque-bebidas-frecuentes" class="oculta">
+            <div id="bebidas-frecuentes" class="chips"></div>
+          </div>
+
+          <button type="button" id="btn-fecha-hora-bebida" class="enlace">Cambiar fecha y hora</button>
+          <div id="campos-fecha-hora-bebida" class="oculta">
+            <label for="bebida-fecha">Fecha</label>
+            <input type="date" id="bebida-fecha">
+
+            <label for="bebida-hora">Hora</label>
+            <input type="time" id="bebida-hora">
+          </div>
+
+          <button type="submit" id="btn-guardar-bebida">Guardar bebida</button>
+        </form>
+
+        <p id="error-bebida" class="error" role="alert"></p>
+        <p id="guardado-bebida" class="guardado" role="status"></p>
+      </div>
+      </div>
+
+      <div class="columna">
       <!-- El diario. Se llama igual que su gemelo de Ejercicio (spec 035). -->
       <h2>Lo que llevo apuntado</h2>
       <div class="filtro-dia">
@@ -264,36 +304,6 @@
       <ul id="lista-comidas"></ul>
       <button type="button" id="btn-desplegar-comidas" class="desplegar oculta"></button>
 
-      <!-- Las bebidas (spec 062). Colección propia y bloque propio: una cerveza
-           no es una cena, y así no se confunden ni en pantalla ni en los datos.
-           El agua no está aquí: es un contador y vive en Hoy (spec 061). -->
-      <h2>¿Has bebido algo?</h2>
-      <p class="explicacion">
-        El café, la caña, el refresco. El agua no: esa se cuenta en Hoy.
-      </p>
-      <form id="form-bebida">
-        <label for="bebida-texto">Qué has bebido</label>
-        <input type="text" id="bebida-texto" maxlength="200" placeholder="caña con Jose">
-
-        <div id="bloque-bebidas-frecuentes" class="oculta">
-          <div id="bebidas-frecuentes" class="chips"></div>
-        </div>
-
-        <button type="button" id="btn-fecha-hora-bebida" class="enlace">Cambiar fecha y hora</button>
-        <div id="campos-fecha-hora-bebida" class="oculta">
-          <label for="bebida-fecha">Fecha</label>
-          <input type="date" id="bebida-fecha">
-
-          <label for="bebida-hora">Hora</label>
-          <input type="time" id="bebida-hora">
-        </div>
-
-        <button type="submit" id="btn-guardar-bebida">Guardar bebida</button>
-      </form>
-
-      <p id="error-bebida" class="error" role="alert"></p>
-      <p id="guardado-bebida" class="guardado" role="status"></p>
-
       <h2>Lo que llevo bebido</h2>
       <div class="filtro-dia">
         <label for="filtro-bebidas">Ver un día</label>
@@ -305,6 +315,8 @@
       <button type="button" id="btn-reintentar-bebidas" class="oculta">Reintentar</button>
       <ul id="lista-bebidas"></ul>
       <button type="button" id="btn-desplegar-bebidas" class="desplegar oculta"></button>
+      </div>
+
       </div>
 
       <!-- Sub-pestaña: Mi dieta -->
@@ -392,6 +404,17 @@
       <h2>Mis recetas</h2>
       <p id="estado-recetas" class="explicacion"></p>
 
+      <!-- Buscador (spec 079). Con las 73 recetas de la 075 dentro, leer la
+           lista dejó de ser viable. Busca en el nombre Y en los ingredientes:
+           "pollo" encuentra las que lo llevan aunque no lo digan en el nombre. -->
+      <div id="bloque-buscar-recetas" class="oculta">
+        <label for="buscar-recetas">Buscar</label>
+        <div class="fila-alta">
+          <input type="text" id="buscar-recetas" placeholder="pollo, lentejas…" autocomplete="off">
+          <button type="button" id="btn-limpiar-busqueda-recetas" class="enlace">Limpiar</button>
+        </div>
+      </div>
+
       <button type="button" id="btn-nueva-receta">Nueva receta</button>
 
       <form id="form-receta" class="oculta">
@@ -428,6 +451,11 @@
       <div class="subseccion" data-subseccion="despensa">
       <!-- La despensa (spec 058). No es un inventario: no lleva cantidades ni
            caducidades. Marcar y desmarcar es todo el mantenimiento que pide. -->
+      <!-- La compra dejó de ser sub-pestaña (spec 079): se usa una vez por
+           semana y le quitaba sitio a lo diario. Se llega desde aquí, con el
+           número de lo que falta. -->
+      <button type="button" id="btn-ir-a-compra" class="ir-a-compra"></button>
+
       <h2>Mi despensa</h2>
       <p id="estado-despensa" class="explicacion"></p>
 
@@ -464,6 +492,8 @@
            columna y no había forma de leerlo. Desde la 075-bis tiene
            sub-pestaña propia: son dos cosas distintas —lo que tienes y lo que
            hay que comprar— y ahora se ven como tales. -->
+      <button type="button" id="btn-volver-despensa" class="enlace">← Volver a la despensa</button>
+
       <h2>Lista de la compra</h2>
       <p id="estado-compra" class="explicacion"></p>
       <div id="lista-compra"></div>

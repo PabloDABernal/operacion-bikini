@@ -587,6 +587,34 @@ Qué NO hace:
 | 075 | Las recetas y los ingredientes, ya puestos |
 | 076 | Elegir menú en vez de pedírselo a la IA |
 
+## Qué hará (v15: Comidas, que se lea, decidida el 31 de agosto de 2026)
+
+Comidas ha ido creciendo spec a spec y nunca se ha rehecho la pantalla. Con las
+73 recetas de la v14 dentro, se rompió: cinco sub-pestañas que no caben en un
+móvil, un Apuntar con cuatro bloques apilados y un recetario de 73 nombres sin
+forma de buscar. Esto no añade funciones: recoloca las que hay.
+
+- **Sub-pestañas con icono.** En el móvil, solo el dibujo; en escritorio, dibujo
+  y texto.
+- **La lista de la compra, detrás de un botón** dentro de Despensa, con el
+  número de cosas que faltan. Deja de ocupar una pestaña: se usa una vez por
+  semana.
+- **Apuntar, sin scroll infinito.** La bebida se pliega tras un botón, y en
+  escritorio las altas van a la izquierda y lo apuntado a la derecha.
+- **Buscador en las recetas**, por nombre y por ingrediente a la vez. Escribes
+  "pollo" y salen las que lo llevan, aunque no lo digan en el nombre.
+
+Qué NO hace:
+
+- **No cambia lo que hace ninguna pantalla.** Solo dónde está.
+- **No toca Ejercicio ni Ajustes.** Sus barras caben; cuando molesten, el patrón
+  ya estará hecho.
+- **No pagina el recetario.** Con buscador, la lista larga deja de molestar.
+
+| Spec | Qué |
+|---|---|
+| 079 | Comidas, que se lea |
+
 ## Ideas para más adelante (27 de agosto de 2026)
 
 El 27 de agosto se vació `docs/BACKLOG.md`: la app está terminada y en uso

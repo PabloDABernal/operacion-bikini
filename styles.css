@@ -183,6 +183,28 @@ header {
   cursor: pointer;
 }
 
+/* Las sub-pestañas de Comidas llevan icono desde la spec 079: cinco palabras no
+   cabían en 320 px. El texto sigue en el HTML, dentro de .etiqueta, y se
+   esconde SIN display:none para que el lector de pantalla lo siga leyendo: un
+   botón que solo contiene un dibujo no se anuncia como nada. */
+.subpestana .etiqueta {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.subpestana[data-icono] {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Más alto que una pestaña de texto: aquí el dibujo es todo lo que hay que
+     acertar con el dedo. */
+  padding: var(--e3) var(--e2);
+}
+
 .subpestana.activa {
   color: var(--acento);
   /* Además del color, la línea: el color solo no basta para distinguirla. */
@@ -1121,6 +1143,14 @@ button:disabled {
 .casilla-reinicio .cuenta {
   color: var(--tinta-suave);
   font-size: 0.85rem;
+}
+
+/* El botón que lleva a la lista de la compra desde la despensa (spec 079). Va
+   arriba del todo y ancho: es el único camino a la compra desde que dejó de ser
+   sub-pestaña. */
+.ir-a-compra {
+  width: 100%;
+  margin-bottom: var(--e4);
 }
 
 /* "Todo" manda sobre las demás, así que se lee como un encabezado y no como
@@ -2142,17 +2172,36 @@ button:disabled {
 
   .seccion[data-seccion="comidas"] .subseccion[data-subseccion="dieta"] {
     grid-column: 2;
-    grid-row: 1 / span 2;
+    grid-row: 1;
   }
 
-  .seccion[data-seccion="comidas"] .subseccion[data-subseccion="recetas"] {
+  /* La DESPENSA va arriba de su columna desde la spec 079. Estaba debajo de
+     Recetas, y con las 73 recetas de la spec 075 quedó enterrada a media
+     pantalla de scroll: lo que se mira a diario es qué tienes, no la lista
+     entera del recetario. Lo pidió el usuario el 31 de agosto.
+
+     Y la Compra va con ella, justo debajo. En escritorio se ven las dos a la
+     vez, así que aquí no hace falta el botón que lleva de una a otra. */
+  .seccion[data-seccion="comidas"] .subseccion[data-subseccion="despensa"] {
     grid-column: 3;
     grid-row: 1;
   }
 
-  .seccion[data-seccion="comidas"] .subseccion[data-subseccion="despensa"] {
+  .seccion[data-seccion="comidas"] .subseccion[data-subseccion="compra"] {
     grid-column: 3;
     grid-row: 2;
+  }
+
+  .seccion[data-seccion="comidas"] .subseccion[data-subseccion="recetas"] {
+    grid-column: 2;
+    grid-row: 2;
+  }
+
+  /* Los dos botones de ida y vuelta sobran cuando las dos cosas se ven a la
+     vez: llevarían a un sitio donde ya estás. */
+  #btn-ir-a-compra,
+  #btn-volver-despensa {
+    display: none;
   }
 
   /* Hoy y Peso: dos columnas. En Peso la izquierda es la más ancha porque

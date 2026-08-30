@@ -150,6 +150,7 @@ El 20 de agosto arrancó la **v4**, que sale de una auditoría de usabilidad hec
 | 074 | El armario: el material que tienes (v13) | 🚧 implementada y desplegada, **sin probar** |
 | 075 | Las recetas y los ingredientes, ya puestos (v14) | 🚧 implementada y desplegada, **sin probar** |
 | 076 | Elegir menú en vez de pedírselo a la IA (v14) | 🚧 implementada y desplegada, **sin probar** |
+| 079 | Comidas, que se lea (v15) | 🚧 implementada y desplegada, **sin probar** |
 | 064 | La semana de la dieta, en siete recuadros (v10) | ✅ completada |
 | 065 | Iconos en las acciones de fila (v10) | ✅ completada |
 | 066 | La barra con iconos, y Ajustes de vuelta (v10) | ✅ completada |

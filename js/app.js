@@ -351,12 +351,22 @@ function abrirSubpestana(seccion, nombre) {
   }
 
   // La compra se recalcula al entrar, no se guarda: es la despensa cruzada con
-  // las recetas de la dieta (spec 073). Desde que tiene sub-pestaña propia hay
-  // que repintarla aquí, porque ya no se ve al abrir Despensa.
+  // las recetas de la dieta (spec 073).
   if (seccion === "comidas" && nombre === "compra") {
     pintarCompra();
   }
 }
+
+// La compra ya no tiene botón en la barra (spec 079): se llega desde la despensa
+// y se vuelve desde ella. `abrirSubpestana` no necesita que exista el botón,
+// solo la subsección, así que esto basta.
+id("btn-ir-a-compra").addEventListener("click", () => {
+  abrirSubpestana("comidas", "compra");
+});
+
+id("btn-volver-despensa").addEventListener("click", () => {
+  abrirSubpestana("comidas", "despensa");
+});
 
 // La barra de navegación desaparecía en Ejercicio, en móvil. Confirmado con
 // un panel de diagnóstico en pantalla (21 de agosto): al entrar en Ejercicio,
@@ -865,6 +875,13 @@ const TRAZOS_DE_ICONO = {
   ejercicio: ["M6 8v8", "M18 8v8", "M3 10v4", "M21 10v4", "M6 12h12"],
   fotos: ["M3 8h4l2-3h6l2 3h4v12H3Z", "M12 17a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z"],
   consulta: ["M21 12a8 8 0 0 1-11.6 7.1L3 21l1.9-6.4A8 8 0 1 1 21 12Z"],
+  // Los de las sub-pestañas de Comidas (spec 079). Mismo criterio que los de la
+  // barra: a 24 px, un dibujo con detalle es una mancha.
+  apuntar: ["M12 20h9", "M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"],
+  dieta: ["M3 5h18v16H3Z", "M3 9h18", "M8 3v4", "M16 3v4"],
+  recetas: ["M4 4h9a3 3 0 0 1 3 3v13a2 2 0 0 0-2-2H4Z", "M20 4h-4a3 3 0 0 0-3 3v13a2 2 0 0 1 2-2h5Z"],
+  despensa: ["M5 3h14v18H5Z", "M5 12h14", "M9 7v2", "M9 16v2"],
+  compra: ["M3 4h2l2.4 11.4a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.6L21 8H6", "M9 21a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z", "M18 21a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z"],
   ajustes: [
     "M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z",
     "M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-1.8-.3 1.6 1.6 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.6 1.6 0 0 0-1-1.5 1.6 1.6 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.6 1.6 0 0 0 .3-1.8 1.6 1.6 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.6 1.6 0 0 0 1.5-1 1.6 1.6 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.6 1.6 0 0 0 1.8.3H9a1.6 1.6 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.6 1.6 0 0 0 1 1.5 1.6 1.6 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0-.3 1.8V9a1.6 1.6 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1Z"
@@ -934,8 +951,19 @@ try {
     boton.appendChild(iconoDeAccion(boton.dataset.icono));
     boton.title = boton.getAttribute("aria-label");
   });
+
+  // Las sub-pestañas de Comidas (spec 079). El dibujo va DELANTE del texto, que
+  // sigue en el HTML dentro de un <span class="etiqueta">: el CSS lo esconde en
+  // el móvil, pero el lector de pantalla lo lee siempre y en escritorio sale
+  // sin que JavaScript tenga que ponerlo.
+  document.querySelectorAll(".subpestana[data-icono]").forEach((boton) => {
+    const etiqueta = boton.querySelector(".etiqueta");
+    boton.insertBefore(iconoDeAccion(boton.dataset.icono), boton.firstChild);
+    // El title es lo único que dice qué es cuando solo se ve el dibujo.
+    if (etiqueta) boton.title = etiqueta.textContent;
+  });
 } catch (fallo) {
-  console.error("No se han podido pintar los iconos de la barra:", fallo);
+  console.error("No se han podido pintar los iconos:", fallo);
 }
 
 
@@ -1620,6 +1648,39 @@ let recetaAbierta = null;
 let recetaEditando = null;
 let recetasDesplegadas = false;
 
+// Lo escrito en el buscador de recetas (spec 079). Filtra lo que se pinta, no
+// lo que hay.
+let busquedaRecetas = "";
+
+// Las recetas que coinciden, cada una con POR QUÉ ha entrado.
+//
+// Busca en el nombre y en los ingredientes a la vez, normalizado —sin tildes ni
+// mayúsculas— con la misma función que usan la despensa, el armario y el cruce.
+//
+// El "porqué" no es un adorno: ver "Crema de calabaza" al buscar "pollo" parece
+// un error hasta que la tarjeta dice que lleva pollo.
+function recetasQueCoinciden() {
+  if (!busquedaRecetas) {
+    return recetasCargadas.map((receta) => ({ receta, porIngrediente: "" }));
+  }
+
+  const buscado = normalizarIngrediente(busquedaRecetas);
+  const encontradas = [];
+
+  recetasCargadas.forEach((receta) => {
+    if (normalizarIngrediente(receta.nombre).includes(buscado)) {
+      encontradas.push({ receta, porIngrediente: "" });
+      return;
+    }
+    const ingrediente = (receta.ingredientes || []).find((linea) =>
+      normalizarIngrediente(linea).includes(buscado)
+    );
+    if (ingrediente) encontradas.push({ receta, porIngrediente: ingrediente });
+  });
+
+  return encontradas;
+}
+
 function pintarRecetas() {
   const contenedor = id("lista-recetas");
   const boton = id("btn-desplegar-recetas");
@@ -1630,17 +1691,41 @@ function pintarRecetas() {
     ? ""
     : "Aún no tienes recetas. Guarda las que cocinas a menudo y podrás montar dietas con ellas.";
 
+  // El buscador solo aparece cuando hay lista que buscar, igual que el de la
+  // despensa (spec 069): con cinco recetas es un campo que sobra.
+  id("bloque-buscar-recetas").classList.toggle(
+    "oculta",
+    recetasCargadas.length < MINIMO_PARA_BUSCAR
+  );
+
+  const coinciden = recetasQueCoinciden();
+
   const visibles = recetasDesplegadas
-    ? recetasCargadas
-    : recetasCargadas.slice(0, RECETAS_SIN_DESPLEGAR);
+    ? coinciden
+    : coinciden.slice(0, RECETAS_SIN_DESPLEGAR);
 
-  visibles.forEach((receta) => contenedor.appendChild(tarjetaDeReceta(receta)));
+  visibles.forEach(({ receta, porIngrediente }) => {
+    const tarjeta = tarjetaDeReceta(receta);
+    // Solo cuando ha entrado por un ingrediente: si coincide el nombre, ya se ve.
+    if (porIngrediente) {
+      tarjeta.appendChild(celda(`lleva ${porIngrediente}`, "explicacion"));
+    }
+    contenedor.appendChild(tarjeta);
+  });
 
-  const hayEscondidas = visibles.length < recetasCargadas.length;
+  // Buscar algo que no está no es un error, pero hay que decirlo: si no, la
+  // lista se queda vacía sin explicación.
+  if (busquedaRecetas && coinciden.length === 0) {
+    contenedor.appendChild(
+      celda(`Ninguna receta contiene "${busquedaRecetas}".`, "explicacion")
+    );
+  }
+
+  const hayEscondidas = visibles.length < coinciden.length;
   boton.classList.toggle("oculta", !hayEscondidas && !recetasDesplegadas);
   boton.textContent = recetasDesplegadas
     ? "Ver menos"
-    : `Ver todas (${recetasCargadas.length})`;
+    : `Ver todas (${coinciden.length})`;
   botonArriba.classList.toggle("oculta", !hayEscondidas && !recetasDesplegadas);
   botonArriba.textContent = boton.textContent;
 }
@@ -1965,7 +2050,24 @@ function comidasSinReceta() {
   return nombres;
 }
 
+// El botón que lleva a la compra desde la despensa (spec 079), con lo que falta.
+//
+// Se ve SIEMPRE, también con la lista vacía: esconder el sitio donde se mira es
+// peor que enseñarlo vacío. Sin nada que comprar dice solo "Ver lista de la
+// compra", sin un "(0)" que parece un error.
+function pintarBotonDeCompra() {
+  const cuantas =
+    loQueFalta(recetasDeLaDieta(), despensaCargada).length + apuntesDeCompra.length;
+  id("btn-ir-a-compra").textContent = cuantas
+    ? `Ver lista de la compra (${cuantas})`
+    : "Ver lista de la compra";
+}
+
 function pintarCompra() {
+  // El botón vive en la despensa pero cuenta lo mismo que esta lista, así que se
+  // repinta con ella y nunca se quedan diciendo cosas distintas.
+  pintarBotonDeCompra();
+
   const contenedor = id("lista-compra");
   const estado = id("estado-compra");
   const aviso = id("sin-receta-compra");
@@ -2463,6 +2565,25 @@ async function refrescarDespensa() {
   // cambiar la despensa la cambia (spec 073).
   pintarCompra();
 }
+
+id("buscar-recetas").addEventListener("input", (evento) => {
+  busquedaRecetas = evento.target.value.trim();
+  pintarRecetas();
+});
+
+id("btn-limpiar-busqueda-recetas").addEventListener("click", () => {
+  busquedaRecetas = "";
+  id("buscar-recetas").value = "";
+  pintarRecetas();
+  id("buscar-recetas").focus();
+});
+
+// La bebida, plegada (spec 079). Mismo patrón que "Cambiar fecha y hora": el
+// botón desaparece al abrirla, porque una vez abierta ya no hay nada que pulsar.
+id("btn-desplegar-bebida").addEventListener("click", () => {
+  id("bloque-bebida").classList.remove("oculta");
+  id("btn-desplegar-bebida").classList.add("oculta");
+});
 
 id("buscar-despensa").addEventListener("input", (evento) => {
   busquedaDespensa = evento.target.value.trim();
