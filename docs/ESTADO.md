@@ -2,7 +2,7 @@
 
 Documento para retomar el trabajo en frío. Se actualiza al terminar cada spec.
 
-**Última actualización:** 30 de agosto de 2026, noche (spec 074 implementada, en una rama sin fusionar, **pendiente publicar reglas de Firestore y probar**)
+**Última actualización:** 30 de agosto de 2026, noche (specs 073 rehecha y 074 implementadas, en una rama sin fusionar, **pendiente publicar reglas de Firestore y probar las dos**)
 
 > **Para cuando retomes esta noche en VSCode.** Se trabajó la tarde del 30 de
 > agosto en una sesión remota (Claude Code web), en la rama
@@ -34,9 +34,19 @@ Documento para retomar el trabajo en frío. Se actualiza al terminar cada spec.
 > tabla de ejercicios aproveche estos materiales al pedírsela a la IA, y que
 > el catálogo enseñe qué te falta.
 >
-> **La spec 073 (lista de la compra) sigue sin confirmar probada** (ver el
-> traspaso de abajo) — sin decisión pendiente, solo falta que el usuario diga
-> que la probó.
+> **La spec 073 (lista de la compra) se REHIZO esta misma noche, antes de que
+> el usuario la probara.** La primera versión (la del traspaso de la tarde, más
+> abajo) ponía un bloque fijo encima de la despensa con apuntes a mano; al
+> usuario no le gustó cómo había quedado y se cambió por un botón **"Ver qué me
+> falta de la compra"** debajo de la lista de ingredientes, que despliega y
+> pliega, sin apuntes a mano. Se borró `js/compra.js` entero, su colección de
+> Firestore y su casilla de reinicio — la reescritura quita más código del que
+> añade. Revisada por `revisor-codigo`: **cumple**, sin observaciones. Detalle
+> completo en `docs/specs/073-la-lista-de-la-compra.md`, apartado 0.
+>
+> **Ni la 073 (rehecha) ni la 074 se han probado todavía.** Las dos están en la
+> misma rama, esperando el mismo paso previo (publicar las reglas) y luego la
+> prueba a mano.
 
 > **Traspaso del 30 de agosto de 2026 (tarde).** Se sigue en remoto desde
 > Claude Code web. `main` limpio y sincronizado con `origin/main`, último
