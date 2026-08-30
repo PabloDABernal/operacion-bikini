@@ -508,6 +508,39 @@ Qué NO hace:
 |---|---|
 | 073 | La lista de la compra |
 
+## Qué hará (v13: el material, decidida el 30 de agosto de 2026)
+
+Lo mismo que la despensa hizo con la comida, ahora con el ejercicio. Hoy cada
+ejercicio del catálogo dice qué material necesita (spec 029), pero es una frase
+suelta que no se cruza con nada: la app no sabe si tienes banco.
+
+- **Tu material, apuntado.** Ejercicio → Material: una lista de lo que tienes,
+  que se marca y se desmarca. Espejo de Comidas → Despensa.
+- **La tabla lo aprovecha.** Al pedir tabla, una casilla "aprovechar el material
+  que tengo"; y al abrir un ejercicio, cada pieza sale como la tienes o te falta,
+  con su "Tienes 2 de 3".
+- **Y lo que te falta, junto.** El material que piden los ejercicios de tu tabla
+  y no tienes, en una lista, como la compra de la v12.
+- **El material del ejercicio pasa a ser una lista**, no una frase: la IA lo
+  devuelve ya en piezas. Los ejercicios ya guardados se parten por comas al
+  vuelo, sin tocar lo que hay en Firestore.
+
+Qué NO hace:
+
+- **No lleva cantidades.** "Mancuernas", no "dos mancuernas de 8 kg". Igual que
+  la despensa.
+- **No es una jaula.** La IA prefiere tu material, no se limita a él — como la
+  casilla de la dieta en la spec 059.
+- **Revoca una decisión de la spec 059**, que dejó escrito que la tabla usara la
+  despensa "no tiene sentido". Sigue sin tenerlo: la despensa es comida. Esto es
+  un armario distinto, con sus propios datos.
+
+| Spec | Qué |
+|---|---|
+| 074 | El armario: el material que tienes |
+| 075 | La tabla aprovecha tu material |
+| 076 | El material que te falta |
+
 ## Ideas para más adelante (27 de agosto de 2026)
 
 El 27 de agosto se vació `docs/BACKLOG.md`: la app está terminada y en uso
