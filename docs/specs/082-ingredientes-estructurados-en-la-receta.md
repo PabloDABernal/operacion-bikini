@@ -62,6 +62,13 @@ forma nueva sin que nada más cambie todavía.
     allá de los ingredientes que enlazaste o creaste línea a línea: no
     aparece nada raro ni ningún ingrediente con un nombre roto tipo
     "[object Object]".
+11. Pedirle una dieta a la IA sigue guardando las recetas que propone,
+    exactamente igual que hoy (en formato de texto libre, porque la IA no
+    conoce los ids de tu despensa): esta spec no rompe ese camino.
+12. El buscador del Recetario (por nombre o por ingrediente) sigue
+    encontrando una receta con ingredientes estructurados si buscas por
+    uno de sus ingredientes, con el mismo comportamiento de siempre (te
+    dice por qué ha salido: "lleva pollo").
 
 ## 3. Alcance
 
@@ -77,6 +84,20 @@ forma nueva sin que nada más cambie todavía.
   adaptados para leer la forma nueva CUANDO la receta la tiene, y seguir
   leyendo la forma vieja (texto libre, con la heurística actual) cuando no.
 - Crear un ingrediente de despensa desde dentro del formulario de receta.
+- El buscador de recetas por nombre e ingrediente (spec 079,
+  `recetasQueCoinciden()` en `js/app.js`, líneas ~1733-1753): hoy compara
+  cada línea como texto (`normalizarIngrediente(linea)`); con una línea
+  estructurada eso compararía un objeto y produciría "[object Object]",
+  rompiendo la búsqueda por ingrediente en cualquier receta ya migrada. Se
+  adapta para usar el mismo helper de "leer el nombre de una línea" que el
+  resto de funciones (ver más abajo).
+- Un helper compartido en `js/despensa.js` para no repetir la
+  distinción vieja/nueva en cada función que toca `receta.ingredientes`
+  (`cruzarConLaDespensa()`, `loQueFalta()`, `recetasQueCoinciden()`,
+  `cuerpoDeReceta()`): algo como `nombreDeLinea(linea)` (devuelve `linea`
+  tal cual si es un string, o `linea.ingredienteNombre` si es un objeto) y
+  `esLineaEstructurada(linea)` (`typeof linea === "object"`). El nombre
+  exacto de estas funciones es libre en implementación.
 - El formulario de editar receta pasa a ser el MISMO editor estructurado
   para cualquier receta, esté en el formato que esté (ver criterio 5): deja
   de existir un modo de edición en texto libre.
@@ -94,6 +115,19 @@ forma nueva sin que nada más cambie todavía.
 - Migrar de golpe las 73 recetas sembradas ni las que el usuario ya tenga y
   nadie edite a mano: spec 083. (Editar una a mano SÍ la migra, como dice
   el criterio 5 — eso es parte de esta spec, no de la 083.)
+- El camino de las recetas que PROPONE la IA al generar una dieta
+  (`generarDieta()` → `guardarRecetasPropuestas()` en `js/dietas.js`, línea
+  ~119, que también llama a `validarReceta()`): la IA no conoce los `id`
+  de la despensa del usuario, así que sus recetas siguen llegando y
+  guardándose en formato de texto libre, tal cual hoy. Por eso
+  `validarReceta()` NO cambia de firma sin más: pasa a aceptar los DOS
+  formatos de entrada —un string de texto libre con un ingrediente por
+  línea (el que ya usa `guardarRecetasPropuestas()`, sin tocar) y un array
+  de líneas estructuradas (el que usa el editor nuevo)— y devuelve
+  `receta.ingredientes` en la forma que corresponda a lo que recibió: un
+  `string[]` si vino de texto, el array de objetos si vino estructurado.
+  Se distingue mirando el tipo de `ingredientesBruto` al entrar
+  (`typeof ... === "string"` vs. `Array.isArray(...)`).
 - Editar una receta desde el día de la dieta (spec 084 en el orden
   acordado).
 - Apuntar una comida con un ingrediente suelto, sin receta (spec 085 en el
@@ -178,6 +212,12 @@ con sentido en vez de un hueco. El cruce con la despensa, para saber si
 "lo tienes ahora", siempre mira el `ingredienteId` contra la despensa
 actual — nunca el nombre copiado.
 
+**Ojo con el nombre repetido:** la receta YA tiene un campo `preparacion` a
+su propio nivel (cómo se hace la receta entera, spec 026). El
+`preparacion` de cada línea de ingrediente es un campo DISTINTO, a otro
+nivel (`ingredientes[].preparacion`, el matiz de ESE ingrediente). Mismo
+nombre, dos conceptos — no confundirlos al implementar.
+
 ## 6. Casos límite
 
 - El ingrediente enlazado se borra de la despensa después: la receta sigue
@@ -204,28 +244,44 @@ actual — nunca el nombre copiado.
   guardar la receta entera) aunque la receta no se guarde. Es el mismo
   comportamiento que ya tiene la despensa hoy: dar de alta un ingrediente
   es un acto aparte de usarlo en algo.
+- El usuario escribe texto en el campo de ingrediente de una línea pero no
+  llega a confirmar ni una sugerencia existente ni "crear nuevo" (lo deja a
+  medias y le da a Guardar): esa línea se trata igual que una línea vieja
+  sin enlazar — sin `ingredienteId`, bloquea el guardado con el mismo
+  mensaje de validación ("cada línea necesita un ingrediente").
 
 ## 7. Archivos afectados
 
-- `js/recetas.js`: `validarReceta()` cambia de firma. Con el editor nuevo
-  como ÚNICO modo de edición (criterio 5), deja de existir un envío en
-  texto de textarea: la función pasa a recibir siempre el array de líneas
-  estructuradas `{ ingredienteId, ingredienteNombre, cantidad,
-  preparacion }[]`, valida que cada línea tenga `ingredienteId` y que haya
-  al menos una línea, y recorta `cantidad`/`preparacion` a sus topes.
+- `js/recetas.js`: `validarReceta()` pasa a aceptar los DOS formatos de
+  entrada de `ingredientesBruto` (ver "Alcance" → "NO entra" para el
+  motivo): un `string` de texto libre (un ingrediente por línea, tal cual
+  hoy, usado por `guardarRecetasPropuestas()` en `js/dietas.js` con las
+  recetas que propone la IA) o un `Array` de líneas estructuradas
+  `{ ingredienteId, ingredienteNombre, cantidad, preparacion }[]` (usado
+  por el editor nuevo). Valida cada forma con su propia regla — la vieja
+  igual que hoy; la nueva exige `ingredienteId` en cada línea y al menos
+  una línea, y recorta `cantidad`/`preparacion` a sus topes — y devuelve
+  `receta.ingredientes` en la MISMA forma que recibió.
 - `js/app.js`:
   - El formulario de receta (`abrirFormularioDeReceta()`, líneas
-    ~1888-1975 hoy): reescrito para el editor de líneas. Cuando la receta a
-    editar viene en formato viejo, cada línea del array de texto se
-    precarga como una fila sin `ingredienteId` (pendiente de enlazar).
+    ~1888-1975 hoy): reescrito para el editor de líneas, que SIEMPRE manda
+    a `validarReceta()` el array estructurado (nunca el string). Cuando la
+    receta a editar viene en formato viejo, cada línea del array de texto
+    se precarga como una fila sin `ingredienteId` (pendiente de enlazar).
   - El `submit` de `form-receta`: quita la llamada a
     `llenarDespensaDesde([resultado])` (ver "Alcance").
   - `cuerpoDeReceta()` (línea ~1811): enseña la forma nueva; sigue
     enseñando la vieja tal cual para una receta que aún no se haya editado.
-- `js/despensa.js`: `cruzarConLaDespensa()`, `loQueFalta()`, para
-  distinguir línea vieja/nueva. `guardarIngredientesDeReceta()` y
-  `clasificarIngredientes()` NO se tocan (las sigue usando el camino de la
-  IA, ver "Alcance").
+  - `recetasQueCoinciden()` (líneas ~1733-1753, spec 079): usa el helper
+    compartido para leer el nombre de cada línea, sea del formato que sea,
+    en vez de comparar la línea entera como texto.
+- `js/despensa.js`: `cruzarConLaDespensa()`, `loQueFalta()`, y el helper
+  nuevo compartido (`nombreDeLinea()`/`esLineaEstructurada()` o
+  equivalente) para distinguir línea vieja/nueva en un solo sitio.
+  `guardarIngredientesDeReceta()` y `clasificarIngredientes()` NO se
+  tocan (las sigue usando el camino de la IA, sin cambios).
+- `js/dietas.js`: sin cambios — `guardarRecetasPropuestas()` sigue
+  mandando un string a `validarReceta()`, que sigue aceptándolo.
 - `styles.css`: estilos de las líneas del formulario nuevo y de la vista de
   una línea estructurada.
 
@@ -282,3 +338,8 @@ acordado (083, 084, 085, 086).
 8. Prueba el caso del tomate: crea "Tomate triturado" como ingrediente
    nuevo aunque ya tengas "Tomate" en la despensa, y comprueba que quedan
    como dos ingredientes distintos, no fundidos.
+9. Pide una dieta a la IA (Comidas → Mi dieta → Pedir dieta) y comprueba
+   que las recetas que trae se guardan sin error, como siempre.
+10. En el buscador del Recetario, busca por un ingrediente de una receta ya
+    estructurada (una de las que migraste en el paso 7) y comprueba que
+    aparece, con el motivo ("lleva...") correcto.
