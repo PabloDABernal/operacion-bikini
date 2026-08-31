@@ -667,6 +667,18 @@ Ya no salen de una lista planificada: salen de usar la app cada día.
 |---|---|
 | 085 | Recetario: un solo apartado con recetas e ingredientes |
 
+- **Al apuntar un ejercicio se puede decir cuántos kilómetros** has hecho, en un
+  campo opcional junto a los minutos. Salió el primer día de uso real: apuntas
+  "andar por el paseo, 45 minutos" y la app no guardaba lo que más interesa
+  mirar al cabo de un mes. No es obligatorio, no da puntos ni racha —la
+  gamificación cuenta días con actividad, no cuánto— y no calcula ritmo ni
+  calorías.
+
+| Spec | Qué |
+|---|---|
+| 086 | La distancia, al apuntar |
+| 087 | Cuánto llevas andado (estadísticas; sin escribir) |
+
 ## Ideas para más adelante (27 de agosto de 2026)
 
 El 27 de agosto se vació `docs/BACKLOG.md`: la app está terminada y en uso

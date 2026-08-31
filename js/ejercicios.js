@@ -4,6 +4,7 @@ import {
   collection,
   addDoc,
   deleteDoc,
+  deleteField,
   updateDoc,
   doc,
   getDocs,
@@ -19,6 +20,11 @@ import { campoHora } from "./pesajes.js";
 const MAX_CARACTERES = 200;
 const MINUTOS_MIN = 1;
 const MINUTOS_MAX = 600;
+
+// La distancia, opcional (spec 086). Por debajo de 0,1 no es un ejercicio; por
+// encima de 500 es un dedo que ha resbalado.
+const DISTANCIA_MIN = 0.1;
+const DISTANCIA_MAX = 500;
 
 export const INTENSIDADES = [
   { valor: "suave", etiqueta: "Suave" },
@@ -37,8 +43,41 @@ function coleccionDe(uid) {
   return collection(db, "usuarios", uid, "ejercicios");
 }
 
-// Devuelve { texto, minutos, intensidad, fecha } o { error }.
-export function validarEjercicio(textoBruto, minutosBruto, intensidad, fecha, hora) {
+// La distancia en kilómetros (spec 086). Devuelve { distanciaKm } o { error }.
+//
+// VACÍO ES VÁLIDO y devuelve `null`: el campo es opcional, y no haberlo
+// rellenado no es equivocarse. Quien llama distingue null (no lo apuntó) de un
+// número, y por eso el campo no se guarda cuando no hay distancia: un 0 diría
+// que anduvo cero kilómetros, que es otra cosa.
+export function validarDistancia(distanciaBruta) {
+  const limpio = String(distanciaBruta ?? "").trim().replace(",", ".");
+  if (limpio === "") return { distanciaKm: null };
+
+  const distancia = Number(limpio);
+  if (
+    !Number.isFinite(distancia) ||
+    distancia < DISTANCIA_MIN ||
+    distancia > DISTANCIA_MAX
+  ) {
+    return {
+      error: `La distancia debe estar entre ${String(DISTANCIA_MIN).replace(".", ",")} y ${DISTANCIA_MAX} km.`
+    };
+  }
+
+  // Un decimal: más precisión que esa es ruido en un paseo. Se redondea en
+  // silencio, igual que ya se hace con los minutos.
+  return { distanciaKm: Math.round(distancia * 10) / 10 };
+}
+
+// Devuelve { texto, minutos, intensidad, fecha, distanciaKm } o { error }.
+export function validarEjercicio(
+  textoBruto,
+  minutosBruto,
+  intensidad,
+  fecha,
+  hora,
+  distanciaBruta
+) {
   const texto = String(textoBruto ?? "").trim();
 
   if (texto === "") {
@@ -67,19 +106,37 @@ export function validarEjercicio(textoBruto, minutosBruto, intensidad, fecha, ho
     return { error: errorHora };
   }
 
+  const distancia = validarDistancia(distanciaBruta);
+  if (distancia.error) {
+    return { error: distancia.error };
+  }
+
   // Los decimales se redondean en silencio: 45,6 -> 46
   return {
     texto,
     minutos: Math.round(minutos),
     intensidad,
     fecha,
-    hora: hora || ""
+    hora: hora || "",
+    distanciaKm: distancia.distanciaKm
   };
 }
 
-export function guardarEjercicio(uid, texto, minutos, intensidad, fecha, hora) {
+export function guardarEjercicio(
+  uid,
+  texto,
+  minutos,
+  intensidad,
+  fecha,
+  hora,
+  distanciaKm
+) {
   const ejercicio = { texto, minutos, intensidad, fecha, creadoEn: serverTimestamp() };
   if (hora) ejercicio.hora = hora;
+  // Si no hay distancia, no hay campo. Mismo criterio que la hora: lo que no has
+  // dicho, no está. Un 0 sería una afirmación falsa, y las estadísticas de la
+  // spec 087 tendrían que distinguirlo de "no lo apunté".
+  if (distanciaKm != null) ejercicio.distanciaKm = distanciaKm;
   return addDoc(coleccionDe(uid), ejercicio);
 }
 
@@ -92,7 +149,8 @@ export function actualizarEjercicio(
   minutos,
   intensidad,
   fecha,
-  hora
+  hora,
+  distanciaKm
 ) {
   return updateDoc(doc(db, "usuarios", uid, "ejercicios", ejercicioId), {
     texto,
@@ -100,6 +158,10 @@ export function actualizarEjercicio(
     intensidad,
     fecha,
     hora: campoHora(hora),
+    // Vaciar el campo tiene que BORRAR la distancia, no dejarla como estaba.
+    // deleteField() y no undefined: updateDoc ignora undefined, así que el dato
+    // viejo sobreviviría a una edición que quería quitarlo.
+    distanciaKm: distanciaKm == null ? deleteField() : distanciaKm,
     editadoEn: serverTimestamp()
   });
 }

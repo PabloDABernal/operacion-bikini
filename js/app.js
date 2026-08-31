@@ -5018,28 +5018,40 @@ const listaEjercicios = crearLista({
     detalles: [
       formatearFechaConHora(ejercicio.fecha, ejercicio.hora),
       `${ejercicio.minutos} min`,
+      // La distancia solo si la hay (spec 086): un ejercicio sin ella se ve
+      // exactamente como antes. filter(Boolean) quita el hueco.
+      ejercicio.distanciaKm != null
+        ? `${String(ejercicio.distanciaKm).replace(".", ",")} km`
+        : "",
       etiquetaDeIntensidad(ejercicio.intensidad)
-    ]
+    ].filter(Boolean)
   }),
   campos: (ejercicio) => {
     const fecha = campoFecha(ejercicio.fecha);
     const hora = campoHoraEdicion(ejercicio.hora);
     const texto = campoTexto(ejercicio.texto, "edicion-texto");
     const minutos = campoTexto(String(ejercicio.minutos), "edicion-minutos", "numeric");
+    // Vacío si no la tenía. Vaciarlo a mano BORRA la distancia (spec 086).
+    const distancia = campoTexto(
+      ejercicio.distanciaKm == null ? "" : String(ejercicio.distanciaKm).replace(".", ","),
+      "edicion-distancia",
+      "decimal"
+    );
     const intensidad = campoDesplegable(
       INTENSIDADES,
       ejercicio.intensidad,
       "edicion-intensidad"
     );
     return {
-      elementos: [fecha, hora, texto, minutos, intensidad],
+      elementos: [fecha, hora, texto, minutos, distancia, intensidad],
       validar: () =>
         validarEjercicio(
           texto.value,
           minutos.value,
           intensidad.value,
           fecha.value,
-          hora.value
+          hora.value,
+          distancia.value
         )
     };
   },
@@ -5051,7 +5063,8 @@ const listaEjercicios = crearLista({
       valores.minutos,
       valores.intensidad,
       valores.fecha,
-      valores.hora
+      valores.hora,
+      valores.distanciaKm
     )
 });
 
@@ -5114,7 +5127,8 @@ id("form-ejercicio").addEventListener("submit", async (evento) => {
     id("ejercicio-minutos").value,
     id("ejercicio-intensidad").value,
     id("ejercicio-fecha").value,
-    id("ejercicio-hora").value
+    id("ejercicio-hora").value,
+    id("ejercicio-distancia").value
   );
   if (resultado.error) {
     error.textContent = resultado.error;
@@ -5130,11 +5144,13 @@ id("form-ejercicio").addEventListener("submit", async (evento) => {
       resultado.minutos,
       resultado.intensidad,
       resultado.fecha,
-      resultado.hora
+      resultado.hora,
+      resultado.distanciaKm
     );
     avisarGuardado("guardado-ejercicio");
     id("ejercicio-texto").value = "";
     id("ejercicio-minutos").value = "";
+    id("ejercicio-distancia").value = "";
     id("ejercicio-intensidad").value = INTENSIDAD_POR_DEFECTO;
     id("ejercicio-fecha").value = hoyISO();
     id("ejercicio-hora").value = horaActual();

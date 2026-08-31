@@ -2,7 +2,7 @@
 
 Documento para retomar el trabajo en frío. Se actualiza al terminar cada spec.
 
-**Última actualización:** 31 de agosto de 2026 (primer día de operación bikini de verdad). Specs 001-073 cerradas (v1 a v12). Hoy se cerraron, probadas por el usuario en producción: **080 y 081** (texto recortado desplegable) y **082, 083, 084 y 085** (ingredientes estructurados en la receta, editar la receta desde el día, apuntar con un ingrediente suelto, y fundir Recetas+Despensa en un solo Recetario). Las **074, 075, 076 y 079 siguen desplegadas y SIN PROBAR** (v13 a medias, v14 y v15 enteras).
+**Última actualización:** 31 de agosto de 2026 (primer día de operación bikini de verdad). Specs 001-073 cerradas (v1 a v12). Hoy se cerraron, probadas por el usuario en producción: **080 y 081** (texto recortado desplegable) y **082, 083, 084 y 085** (ingredientes estructurados en la receta, editar la receta desde el día, apuntar con un ingrediente suelto, y fundir Recetas+Despensa en un solo Recetario). Las **074, 075, 076 y 079 siguen desplegadas y SIN PROBAR** (v13 a medias, v14 y v15 enteras), y se les suma la **086** (la distancia al apuntar un ejercicio), hecha desde el PC ese mismo día.
 
 > **Traspaso del 31 de agosto de 2026.** Se sigue en remoto desde Claude Code
 > web. `main` limpio y sincronizado con `origin/main`.
@@ -38,6 +38,12 @@ Documento para retomar el trabajo en frío. Se actualiza al terminar cada spec.
 > por el usuario en producción. Nuevo patrón reutilizable en `js/app.js`:
 > `celdaDesplegable()` y `cabeceraDesplegable()`.
 >
+> **OJO CON TRABAJAR EN DOS SITIOS A LA VEZ.** El 31 de agosto se hicieron las
+> specs 080-085 desde Claude Code web y, a la vez, la de la distancia desde el
+> PC. Las dos ramas cogieron el número 080 y el push del PC salió rechazado. Se
+> resolvió sin perder nada —la del PC pasó a ser la **086**—, pero la forma de
+> evitarlo es **`git pull` antes de empezar**, no al ir a subir.
+
 > **Cuatro specs más, cerradas el mismo día: 082, 083, 084 y 085.** El
 > usuario pidió, de una vez, cuatro cambios relacionados en Comidas: que los
 > ingredientes de una receta fueran estructurados (ingrediente enlazado a la
@@ -247,6 +253,8 @@ El 20 de agosto arrancó la **v4**, que sale de una auditoría de usabilidad hec
 | 075 | Las recetas y los ingredientes, ya puestos (v14) | 🚧 implementada y desplegada, **sin probar** |
 | 076 | Elegir menú en vez de pedírselo a la IA (v14) | 🚧 implementada y desplegada, **sin probar** |
 | 079 | Comidas, que se lea (v15) | 🚧 implementada y desplegada, **sin probar** |
+| 086 | La distancia, al apuntar | 🚧 implementada y desplegada, **sin probar** |
+| 087 | Cuánto llevas andado (estadísticas) | 📝 sin escribir |
 | 064 | La semana de la dieta, en siete recuadros (v10) | ✅ completada |
 | 065 | Iconos en las acciones de fila (v10) | ✅ completada |
 | 066 | La barra con iconos, y Ajustes de vuelta (v10) | ✅ completada |

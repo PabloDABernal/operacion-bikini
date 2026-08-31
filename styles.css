@@ -1677,6 +1677,25 @@ button:disabled {
   align-items: stretch;
 }
 
+/* Dos campos con su etiqueta, uno al lado del otro (spec 086): minutos y
+   distancia. En 320 px caben porque los dos son cortos; si algún día hicieran
+   falta tres, esto pide un wrap. */
+.fila-campos {
+  display: flex;
+  gap: var(--e3);
+}
+
+.fila-campos > div {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Las etiquetas de dentro no llevan el margen suelto de las de fuera: aquí van
+   pegadas a su campo, que es lo que las distingue de la de al lado. */
+.fila-campos label {
+  display: block;
+}
+
 .fila-alta input {
   flex: 1;
   min-width: 0;

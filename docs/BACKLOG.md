@@ -40,6 +40,12 @@ apunten al mismo sitio, eso será la próxima versión.
 
 ## En el buzón
 
+- **La distancia, también en el resumen de Hoy y en el contexto de la IA**
+  (spec 086). Hoy solo se ve en la fila del diario de Ejercicio. Se dejó fuera
+  a propósito: la spec guarda el dato, y dónde más enseñarlo se decide cuando
+  se vea si se usa.
+- **Ritmo (min/km)** a partir de los minutos y la distancia (spec 086).
+
 - **Que el día abierto de la dieta se recuerde** al volver a la pestaña
   (spec 064). Hoy siempre se abre en el día de hoy, a propósito.
 
