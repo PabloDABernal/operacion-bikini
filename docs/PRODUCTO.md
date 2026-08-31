@@ -626,7 +626,8 @@ Ya no salen de una lista planificada: salen de usar la app cada día.
 
 | Spec | Qué |
 |---|---|
-| 080 | El texto recortado se despliega al tocarlo |
+| 080 | El texto recortado se despliega al tocarlo (Mi dieta, Mi tabla, Histórico) |
+| 081 | Recetario y Catálogo: el nombre se despliega dentro de la cabecera |
 
 ## Ideas para más adelante (27 de agosto de 2026)
 

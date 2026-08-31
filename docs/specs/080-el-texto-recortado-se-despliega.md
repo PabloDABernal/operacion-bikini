@@ -6,9 +6,14 @@
 
 ## 1. Objetivo
 
-En cualquier pantalla donde un nombre o título se recorta con puntos
-suspensivos por no caber en su fila, tocarlo lo despliega entero en su sitio
-—sin entrar en modo edición—, y volver a tocarlo lo contrae.
+En Mi dieta, Mi tabla y el detalle de una operación archivada, un nombre o
+título que se recorta con puntos suspensivos por no caber en su fila se
+puede desplegar entero en su sitio al tocarlo —sin entrar en modo edición—,
+y volver a tocarlo lo contrae.
+
+(El Recetario y el Catálogo de ejercicios tienen el mismo problema pero un
+conflicto técnico distinto —el nombre vive dentro de un `<button>` que ya
+hace otra cosa al tocarlo—, así que van en la spec 081.)
 
 ## 2. Criterio de "esto funciona"
 
@@ -25,15 +30,9 @@ suspensivos por no caber en su fila, tocarlo lo despliega entero en su sitio
 4. En Histórico → abrir una operación archivada, una comida o un ejercicio
    con texto largo se ve cortado a una línea. Al tocarlo, se despliega
    entero; al volver a tocarlo, se recorta.
-5. En Comidas → Recetario, el nombre de una receta largo se ve cortado a una
-   línea en la cabecera de su tarjeta, tanto cerrada como abierta. Tocar el
-   nombre lo despliega entero sin cerrar ni abrir la tarjeta (eso lo sigue
-   haciendo tocar el resto de la cabecera, como hoy).
-6. En Ejercicio → Catálogo de ejercicios, lo mismo que el punto 5 pero con el
-   nombre del ejercicio.
-7. En cualquiera de las pantallas de arriba, pueden estar varios nombres
+5. En cualquiera de las tres pantallas, pueden estar varios nombres
    desplegados a la vez sin que desplegar uno contraiga los demás.
-8. Un nombre que ya cabe entero (no está recortado) se puede tocar igual y no
+6. Un nombre que ya cabe entero (no está recortado) se puede tocar igual y no
    pasa nada visible: no hay error ni parpadeo.
 
 ## 3. Alcance
@@ -45,13 +44,14 @@ suspensivos por no caber en su fila, tocarlo lo despliega entero en su sitio
   (`filaDeSesion()` en `js/app.js`).
 - Histórico → operación archivada: comidas y ejercicios listados con
   `.registro-texto` (dentro de la vista de detalle del histórico).
-- Comidas → Recetario y Ejercicio → Catálogo de ejercicios: ambos comparten
-  la clase `.receta-nombre` (`tarjetaDeReceta()` y `tarjetaDeEjercicio()` en
-  `js/app.js`), así que se arreglan juntos con el mismo cambio.
 - Un estado de "desplegado" por elemento, independiente entre sí y de
   cualquier otro estado de la pantalla (receta abierta, edición, etc.).
 
 ### NO entra (explícitamente fuera)
+- Comidas → Recetario y Ejercicio → Catálogo de ejercicios: mismo problema,
+  spec propia (081), porque ahí el nombre vive dentro de un `<button>` que
+  ya abre/cierra la tarjeta, y resolver ese conflicto es un cambio técnico
+  aparte.
 - El diario del día a día (Comidas/Ejercicio, lista de "hoy" o del rango de
   fechas): ya no se recorta, se parte en varias líneas desde una spec
   anterior.
@@ -75,21 +75,22 @@ suspensivos por no caber en su fila, tocarlo lo despliega entero en su sitio
   de cada sitio (2 líneas en Mi dieta, 1 línea en los demás).
 - En Mi dieta, el nombre y el icono de receta son dos zonas tocables
   independientes: tocar una no afecta al estado de la otra.
-- En Recetario y Catálogo de ejercicios, el nombre es una zona tocable
-  independiente DENTRO de la cabecera, que a su vez sigue siendo tocable
-  para abrir/cerrar la tarjeta entera. Tocar el nombre no debe además
-  abrir/cerrar la tarjeta (evitar que el toque se propague al botón de la
-  cabecera).
 - Sin marcador visual de "esto se puede desplegar" más allá de lo que ya
   exista (los `<button>` que ya avisan de que reaccionan); si se decide
   añadir alguno, es una decisión de diseño a tomar en revisión, no algo que
   se dé por hecho al implementar.
+- Identidad de cada elemento en el estado de "desplegado" (para no confundir
+  uno con otro al repintar): en Mi dieta y Mi tabla, la clave día+comida (o
+  día+sesión) que ya usan `recetaDeDietaAbierta`/`celdaEditando`. En el
+  histórico, el `id` del documento del registro (Firestore), NUNCA su
+  posición en la lista: el orden puede cambiar entre repintados y un índice
+  desplegaría el registro equivocado.
 
 ## 5. Modelo de datos
 
-Ninguno. Es estado de interfaz en memoria (equivalente a `recetaDeDietaAbierta`
-o `recetaAbierta`, pero puede haber varios desplegados a la vez, así que es un
-conjunto/Set de claves en vez de una sola clave).
+Ninguno. Es estado de interfaz en memoria: un Set de claves desplegadas (una
+por pantalla), en vez de una única clave como `recetaDeDietaAbierta`, porque
+aquí puede haber varias a la vez.
 
 ## 6. Casos límite
 
@@ -101,18 +102,14 @@ conjunto/Set de claves en vez de una sola clave).
 - Mi dieta: un plato sin receta enlazada (el caso normal, ~46 de 96) se
   comporta igual que uno con receta: el nombre se despliega igual, solo que
   no hay icono de receta al lado.
-- Recetario/Catálogo: tocar el nombre cuando la tarjeta ya está abierta debe
-  desplegar el nombre sin cerrar la tarjeta; tocarlo con la tarjeta cerrada
-  debe desplegarlo sin abrirla.
 
 ## 7. Archivos afectados
 
-- `js/app.js`: `filaDeComida()`, `nombreDelPlato()`, `filaDeSesion()`,
-  `tarjetaDeReceta()`, `tarjetaDeEjercicio()`, la vista de detalle del
-  histórico, y el estado nuevo (un Set de claves desplegadas, o uno por
-  pantalla).
-- `styles.css`: `.plato-nombre`, `.registro-texto`, `.receta-nombre`, y una
-  clase nueva de "desplegado" que anule el recorte de cada una.
+- `js/app.js`: `filaDeComida()`, `nombreDelPlato()`, `filaDeSesion()`, la
+  vista de detalle del histórico, y el estado nuevo (un Set de claves
+  desplegadas por pantalla).
+- `styles.css`: `.plato-nombre`, `.registro-texto`, y una clase nueva de
+  "desplegado" que anule el recorte de cada una.
 
 ## 8. Decisiones tomadas
 
@@ -122,10 +119,11 @@ conjunto/Set de claves en vez de una sola clave).
   independiente: no hay coste de pantalla como el de abrir una receta entera
   (ingredientes y pasos), así que no hace falta limitarlo a uno. Decisión del
   usuario.
-- **Alcance: las cuatro pantallas con el problema, más el Catálogo de
-  ejercicios** (que comparte clase con el Recetario y sale gratis al
-  arreglar una). El diario del día a día queda fuera porque ya está
-  arreglado. Decisión del usuario.
+- **Spec partida en dos** (080 y 081) porque el `revisor-specs` señaló que el
+  reparto de dificultad no es uniforme entre las cinco pantallas: tres son
+  una conversión directa sin conflicto, y dos (Recetario, Catálogo) requieren
+  además resolver un anidamiento de elementos tocables. Decisión del usuario,
+  tras la revisión.
 - **En Mi dieta, desplegar el nombre y abrir la receta son dos acciones
   separadas** (no un único gesto que haga las dos cosas). Decisión del
   usuario.
@@ -149,10 +147,5 @@ Ninguna.
 4. Repite en Ejercicio → Mi tabla con un título de sesión largo.
 5. Cierra una operación y ábrela desde el Histórico; busca una comida o
    ejercicio con texto largo y comprueba que se despliega igual.
-6. En Comidas → Recetario, busca una receta de nombre largo. Tócalo: debe
-   desplegarse sin abrir la tarjeta. Toca el resto de la cabecera: debe abrir
-   la tarjeta (con el nombre otra vez recortado si no lo tocaste a él).
-7. Repite en Ejercicio → Catálogo de ejercicios con un ejercicio de nombre
-   largo.
-8. Despliega dos o tres nombres a la vez en la misma pantalla y comprueba
+6. Despliega dos o tres nombres a la vez en la misma pantalla y comprueba
    que los que no tocaste siguen recortados.
