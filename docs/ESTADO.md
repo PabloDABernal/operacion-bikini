@@ -2,7 +2,49 @@
 
 Documento para retomar el trabajo en frío. Se actualiza al terminar cada spec.
 
-**Última actualización:** 30 de agosto de 2026 — **fin de la fase de construcción**. Specs 001-073 cerradas (v1 a v12), la 074 desplegada. **Desde el 31 de agosto el proyecto entra en fase productiva.**
+**Última actualización:** 31 de agosto de 2026 (traspaso a Claude Code web). Specs 001-073 cerradas (v1 a v12). Las **074, 075, 076 y 079 están desplegadas y SIN PROBAR** (v13 a medias, v14 y v15 enteras). **Hoy empieza la operación bikini de verdad.**
+
+> **Traspaso del 31 de agosto de 2026.** Se sigue en remoto desde Claude Code
+> web. `main` limpio y sincronizado con `origin/main`.
+>
+> **Hoy empieza la operación bikini de verdad.** La app pasa a usarse a diario y
+> el trabajo entra por lo que el usuario se encuentre, no por una lista de
+> versiones. Lo de abajo, sobre cómo se trabaja en fase productiva, sigue en pie.
+>
+> **Cuatro specs desplegadas y sin probar.** No se cierran con una sesión de
+> pruebas: se validan usándolas. Sus guiones están al final de cada una.
+>
+> | Spec | Qué | Dónde mirar |
+> |---|---|---|
+> | **074** | El armario: el material que tienes | Ejercicio → Material |
+> | **075** | 73 recetas y 133 ingredientes ya puestos | Comidas → Recetas y Despensa |
+> | **076** | Elegir menú en vez de pedírselo a la IA | Comidas → Mi dieta |
+> | **079** | Comidas, que se lea | Toda la pestaña Comidas |
+>
+> **Tres cosas concretas a las que mirar con lupa al usarlas:**
+>
+> 1. **Una pieza de material nace MARCADA** (074), al revés que un ingrediente
+>    de la despensa desde la 068. Está razonado en `js/material.js`, pero deja
+>    dos pantallas gemelas comportándose distinto. Si chirría, es una línea.
+> 2. **Los menús enlazan unos 50 platos de 96 con su receta** (076). El resto no
+>    son recetas ("125 gramos de kéfir con canela"). Si alguno que sí lo es se
+>    queda sin enlazar, el sitio es `semanaDesdeMenu()` en `js/dietas.js`.
+> 3. **La transcripción de los PDF se hizo a ojo** y ya salió una errata
+>    ("triigueros"). Si una receta dice algo raro, se corrige en
+>    `docs/menus/recetas-transcritas.json` y se regenera con
+>    `node docs/menus/generar-datos-iniciales.mjs`.
+>
+> **Lo que queda escrito y sin implementar:** las specs **077** (la tabla
+> aprovecha tu material) y **078** (el material que falta), que cierran la v13.
+> No son un compromiso: se hacen si al usar el armario se echan de menos.
+>
+> **Las cuatro suites de pruebas pasan.** Se ejecutan con `node`:
+> `docs/specs/059-cruce-casos.mjs`, `061-agua-casos.mjs`,
+> `068-limpieza-casos.mjs` y `075-siembra-casos.mjs` (34 casos, cubre la siembra
+> y los menús).
+>
+> **Reglas de Firestore publicadas**, incluido el bloque `material`. Las specs
+> 075, 076 y 079 no las tocan.
 
 > **Fase productiva desde el 31 de agosto de 2026.** Se acabó construir a
 > ciclos. Mañana empieza la operación bikini de verdad y **la app pasa a usarse
