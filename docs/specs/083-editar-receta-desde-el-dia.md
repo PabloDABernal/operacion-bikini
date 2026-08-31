@@ -56,21 +56,36 @@ el mismo editor de líneas de esa spec, sin cambios.
 
 ## 4. Comportamiento detallado
 
+- `abrirFormularioDeReceta()` (`js/app.js`, línea ~2064 — la usan tanto
+  "Nueva receta" como `editarReceta()`) apaga la variable de módulo
+  `volverAMiDietaTrasEditar` a `null` AL PRINCIPIO, siempre, pase lo que
+  pase: es el único sitio por el que se abre el formulario, sea cual sea
+  el camino, así que es el punto natural para que cualquier apertura nueva
+  "olvide" un recordatorio de una edición anterior sin terminar (ver
+  "Casos límite").
 - `recetaDesplegada()` añade un botón "Editar" (estilo de fila, igual que
   "Editar"/"Borrar" en `tarjetaDeReceta()`) que, al tocarlo:
-  1. Guarda en una variable de módulo (p. ej. `volverAMiDietaTrasEditar`)
-     que la edición viene de Mi dieta, y el día que se estaba viendo
-     (`diaDietaAbierto` ya existe y sirve para esto).
-  2. Cambia de sección con `abrirPestana("comidas", "recetas")` (ya
+  1. Cambia de sección con `abrirPestana("comidas", "recetas")` (ya
      existe, es la misma función que usan los enlaces internos de la app).
-  3. Llama a `editarReceta(receta)` (ya existe, abre el formulario con esa
-     receta cargada).
-- El `submit` de `form-receta` y `cerrarFormularioDeReceta()` (Cancelar),
-  al terminar, comprueban si `volverAMiDietaTrasEditar` está activo: si lo
-  está, lo apagan y llaman a `abrirPestana("comidas", "dieta")` seguido de
-  `pintarDieta()` (para que la receta recién guardada se vea actualizada,
-  ya que `cuerpoDeReceta()` lee de `recetasCargadas`, que `refrescarRecetas()`
-  ya deja al día tras guardar). Si no está activo (edición normal desde el
+  2. Llama a `editarReceta(receta)` (ya existe, abre el formulario con esa
+     receta cargada — y de paso apaga `volverAMiDietaTrasEditar`, como
+     cualquier apertura del formulario).
+  3. SOLO DESPUÉS de eso, pone `volverAMiDietaTrasEditar` al día que se
+     estaba viendo (`diaDietaAbierto` ya existe y sirve para esto). El
+     orden importa: si se pusiera antes de `editarReceta()`, el reseteo
+     del paso anterior se lo comería.
+- `cerrarFormularioDeReceta()` es el único sitio que necesita comprobar la
+  variable: el `submit` de `form-receta`, al guardar con éxito, YA llama a
+  `cerrarFormularioDeReceta()` (así lo hace hoy), así que basta con tocar
+  esa función una vez para cubrir Guardar y Cancelar a la vez — no hace
+  falta duplicar la comprobación en el `submit`. Si
+  `volverAMiDietaTrasEditar` no es `null` al llamarla: se apaga, y en vez
+  de dejar la pantalla en Recetas (lo de siempre) se llama a
+  `abrirPestana("comidas", "dieta")` seguido de `pintarDieta()` (para que
+  la receta recién guardada se vea actualizada, ya que `cuerpoDeReceta()`
+  lee de `recetasCargadas`, que `refrescarRecetas()` ya deja al día tras
+  guardar — ver "Casos límite" sobre el orden de estas dos llamadas). Si
+  la variable es `null` (edición normal desde el
   Recetario), el comportamiento es exactamente el de hoy.
 
 ## 5. Modelo de datos
@@ -88,18 +103,38 @@ Ninguno. Es navegación y estado de interfaz en memoria.
   se abrió el plato: al volver a Mi dieta, `recetaDeLaComida()` la sigue
   encontrando por `recetaId` (no cambia con la edición), así que el plato
   sigue enlazado y muestra la receta actualizada.
-- Entrar a Editar desde Mi dieta, y ANTES de guardar, navegar a mano a
-  otra pestaña (Ajustes, por ejemplo) y volver a Comidas: se pierde el
-  "recordatorio" de volver a Mi dieta (variable en memoria, no persistida)
-  y guardar deja en el Recetario, como una edición normal. No es un fallo:
-  es el mismo criterio que ya usa el resto del estado de navegación de la
-  app.
+- Entrar a Editar desde Mi dieta, y ANTES de guardar o cancelar, navegar a
+  mano a otra pestaña (Ajustes, por ejemplo) SIN cerrar el formulario
+  (sigue abierto, solo oculto tras la sección): el recordatorio SIGUE
+  puesto, porque nada lo ha tocado. Si vuelves a Comidas → Recetas y
+  terminas esa misma edición (Guardar o Cancelar), te lleva a Mi dieta —
+  es la misma edición que empezaste, solo que con un rodeo por otra
+  pantalla en medio. Esto es intencional, no un fallo.
+- Entrar a Editar desde Mi dieta, abandonarlo (como arriba), y luego abrir
+  el formulario OTRA VEZ para algo distinto —"Nueva receta", o editar
+  cualquier receta desde el Recetario—: como `abrirFormularioDeReceta()`
+  apaga el recordatorio al principio SIEMPRE, esa apertura nueva "gana":
+  guardar o cancelar esa segunda edición se comporta como una edición
+  normal, sin arrastrar el rodeo a Mi dieta de la que se abandonó. Esto es
+  justo lo que evita que una edición a medias "contamine" una edición
+  distinta y posterior.
+- Al volver a Mi dieta tras guardar: `cerrarFormularioDeReceta()` llama a
+  `abrirPestana()` y `pintarDieta()` justo después de `avisarGuardado()`,
+  pero `refrescarRecetas()` (que deja `recetasCargadas` al día) es
+  asíncrona y puede no haber terminado todavía en ese instante exacto.
+  Puede verse un parpadeo brevísimo con la receta sin el cambio, corregido
+  enseguida por el `pintarDieta()` que ya hace `refrescarRecetas()` al
+  terminar. No es un fallo, es un detalle a no confundir con uno al
+  probarlo a mano.
 
 ## 7. Archivos afectados
 
-- `js/app.js`: `recetaDesplegada()` (botón nuevo), el `submit` de
-  `form-receta`, `cerrarFormularioDeReceta()`, y una variable de módulo
-  nueva para recordar el origen.
+- `js/app.js`: `recetaDesplegada()` (botón nuevo), `abrirFormularioDeReceta()`
+  (apaga el recordatorio al principio, siempre), `cerrarFormularioDeReceta()`
+  (la única función que necesita comprobarlo — el `submit` de `form-receta`
+  no necesita tocarse aparte, porque ya llama a `cerrarFormularioDeReceta()`
+  al guardar con éxito), y una variable de módulo nueva
+  (`volverAMiDietaTrasEditar`) para recordar el origen.
 - `styles.css`: si hace falta, un ajuste menor de espaciado para el botón
   nuevo dentro de `.receta-en-dieta` (mismo patrón que `.receta-acciones`).
 
