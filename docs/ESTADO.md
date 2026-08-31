@@ -2,7 +2,7 @@
 
 Documento para retomar el trabajo en frío. Se actualiza al terminar cada spec.
 
-**Última actualización:** 31 de agosto de 2026 (primer día de operación bikini de verdad). Specs 001-073 cerradas (v1 a v12). Las **080 y 081 se cerraron hoy** (texto recortado desplegable, en las cinco pantallas que lo tenían). Las **074, 075, 076 y 079 siguen desplegadas y SIN PROBAR** (v13 a medias, v14 y v15 enteras).
+**Última actualización:** 31 de agosto de 2026 (primer día de operación bikini de verdad). Specs 001-073 cerradas (v1 a v12). Hoy se cerraron, probadas por el usuario en producción: **080 y 081** (texto recortado desplegable) y **082, 083, 084 y 085** (ingredientes estructurados en la receta, editar la receta desde el día, apuntar con un ingrediente suelto, y fundir Recetas+Despensa en un solo Recetario). Las **074, 075, 076 y 079 siguen desplegadas y SIN PROBAR** (v13 a medias, v14 y v15 enteras).
 
 > **Traspaso del 31 de agosto de 2026.** Se sigue en remoto desde Claude Code
 > web. `main` limpio y sincronizado con `origin/main`.
@@ -37,6 +37,33 @@ Documento para retomar el trabajo en frío. Se actualiza al terminar cada spec.
 > implementadas, revisadas por `revisor-codigo` sin hallazgos, y confirmadas
 > por el usuario en producción. Nuevo patrón reutilizable en `js/app.js`:
 > `celdaDesplegable()` y `cabeceraDesplegable()`.
+>
+> **Cuatro specs más, cerradas el mismo día: 082, 083, 084 y 085.** El
+> usuario pidió, de una vez, cuatro cambios relacionados en Comidas: que los
+> ingredientes de una receta fueran estructurados (ingrediente enlazado a la
+> despensa + cantidad + preparación aparte, en vez de una línea de texto
+> libre), poder editar la receta desde el día en que sale en Mi dieta,
+> apuntar una comida con un ingrediente suelto de la despensa sin tener que
+> montar una receta de uno solo, y fundir Recetas+Despensa en un único
+> "Recetario" con interruptor interno (esta última se adelantó por
+> urgencia, antes que la 084). Se hicieron cuatro specs en el orden acordado
+> con el usuario — **082** (ingredientes estructurados, la base: tres
+> rondas de `revisor-specs`, cuatro bloqueantes cerrados — el más
+> importante, `llenarDespensaDesde()` rompía con líneas estructuradas y
+> otros dos llamadores de `validarReceta()`/`receta.ingredientes` que no se
+> habían visto a la primera), **083** (editar desde el día: cuatro rondas,
+> tres bloqueantes — la variable de "volver a Mi dieta" tenía que
+> distinguir "no puesto" de "vista de semana entera", y también apagarse
+> ante las acciones disruptivas de Ajustes que refrescan todo), **085**
+> (fusión visual del Recetario: un bloqueante, el reordenado de la despensa
+> al entrar colgaba de un hook que la fusión eliminaba) y **084** (apuntar
+> con ingrediente suelto: un bloqueante, qué hacer con la despensa sin
+> ningún ingrediente marcado). Las cuatro implementadas, revisadas por
+> `revisor-codigo` sin hallazgos, y confirmadas por el usuario en
+> producción. Patrón nuevo reutilizable: `.panel-recetario-boton`/
+> `.subpestanas-internas` (interruptor de dos paneles dentro de un
+> formulario o pantalla), ya usado tres veces (Recetario, y el modo
+> Escribir/Elegir de mi despensa al apuntar una comida).
 >
 > **Cuatro specs desplegadas y sin probar.** No se cierran con una sesión de
 > pruebas: se validan usándolas. Sus guiones están al final de cada una.

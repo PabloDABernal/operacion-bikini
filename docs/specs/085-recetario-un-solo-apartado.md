@@ -1,6 +1,6 @@
 # 085 — Recetario: un solo apartado con recetas e ingredientes
 
-- **Estado:** 🚧 implementada y desplegada el 31 de agosto de 2026 (commit `cd4a58f`), revisada por `revisor-specs` y `revisor-codigo` (CUMPLE). **Pendiente de que el usuario la pruebe.**
+- **Estado:** ✅ completada el 31 de agosto de 2026 (commit `cd4a58f`), revisada por `revisor-specs` y `revisor-codigo` (CUMPLE), probada por el usuario en producción.
 - **Fecha:** 2026-08-31
 - **Referencia en PRODUCTO.md:** "Qué hará (evolutivos de la fase productiva, desde el 31 de agosto de 2026)"
 
