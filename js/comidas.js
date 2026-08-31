@@ -92,8 +92,14 @@ function coleccionDe(uid) {
   return collection(db, "usuarios", uid, "comidas");
 }
 
-// Devuelve { texto, momento, fecha } o { error }.
-export function validarComida(textoBruto, momento, fecha, hora, acompanamientos = []) {
+// Devuelve { texto, momento, fecha, ingredienteId } o { error }.
+//
+// `ingredienteId` (spec 084) es opcional: viene puesto cuando la comida se
+// apuntó eligiendo un ingrediente de la despensa (modo "Elegir de mi
+// despensa"), y vacío cuando se escribió a mano. Es un id de Firestore que
+// ya viene validado por quien construye el desplegable: no hace falta
+// comprobar su forma aquí.
+export function validarComida(textoBruto, momento, fecha, hora, acompanamientos = [], ingredienteId = "") {
   const texto = String(textoBruto ?? "").trim();
 
   if (texto === "") {
@@ -117,17 +123,21 @@ export function validarComida(textoBruto, momento, fecha, hora, acompanamientos 
     momento,
     fecha,
     hora: hora || "",
-    acompanamientos: acompanamientosDe({ acompanamientos })
+    acompanamientos: acompanamientosDe({ acompanamientos }),
+    ingredienteId: String(ingredienteId ?? "").trim()
   };
 }
 
-export function guardarComida(uid, texto, momento, fecha, hora, acompanamientos = []) {
+export function guardarComida(uid, texto, momento, fecha, hora, acompanamientos = [], ingredienteId = "") {
   const comida = { texto, momento, fecha, creadoEn: serverTimestamp() };
   if (hora) comida.hora = hora;
   // Solo si hay algo: una comida sin acompañamientos se guarda exactamente como
   // se guardaba antes de la spec 063, sin un array vacío de relleno.
   const lista = acompanamientosDe({ acompanamientos });
   if (lista.length) comida.acompanamientos = lista;
+  // Igual con el enlace (spec 084): una comida escrita a mano se guarda
+  // exactamente como antes, sin el campo.
+  if (ingredienteId) comida.ingredienteId = ingredienteId;
   return addDoc(coleccionDe(uid), comida);
 }
 

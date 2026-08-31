@@ -2962,6 +2962,9 @@ async function refrescarDespensa() {
   // Y las sugerencias del editor de receta (spec 082): un ingrediente nuevo
   // tiene que poder sugerirse sin recargar la página.
   actualizarSugerenciasDespensa();
+  // Y el modo "Elegir de mi despensa" al apuntar una comida (spec 084): la
+  // lista de marcados, y si hay alguno, pueden cambiar sin recargar.
+  actualizarModoComida();
 }
 
 id("buscar-recetas").addEventListener("input", (evento) => {
@@ -4739,17 +4742,100 @@ id("btn-fecha-hora-comida").addEventListener("click", () => {
   id("btn-fecha-hora-comida").classList.add("oculta");
 });
 
+// --- Apuntar con un ingrediente suelto de la despensa (spec 084) ---------
+//
+// "Escribir" es el modo de siempre; "Elegir de mi despensa" enlaza la
+// comida a un ingrediente real, sin tener que montar una receta de uno
+// solo. No es una sub-pestaña ni un panel del Recetario: es un interruptor
+// propio de este formulario, con el mismo aspecto (reutiliza
+// `.panel-recetario-boton`, spec 085).
+let modoComida = "escribir";
+
+function ingredientesMarcados() {
+  return despensaCargada.filter((ingrediente) => ingrediente.tengo);
+}
+
+// Repinta el interruptor y el panel activo. Se llama al cargar, al cambiar
+// de modo, y cada vez que la despensa se refresca (un ingrediente puede
+// dejar de estar marcado, o dejar de haber ninguno, sin recargar la
+// página).
+function actualizarModoComida() {
+  const marcados = ingredientesMarcados();
+  const botonDespensa = id("btn-modo-comida-despensa");
+
+  // Sin ningún ingrediente marcado, el modo se deshabilita y se fuerza
+  // "Escribir": nunca hay un modo activo en el que no se pueda guardar.
+  botonDespensa.disabled = marcados.length === 0;
+  botonDespensa.title = marcados.length
+    ? ""
+    : "No tienes ningún ingrediente marcado en tu despensa.";
+  if (marcados.length === 0) modoComida = "escribir";
+
+  document.querySelectorAll("[data-modo-comida]").forEach((boton) => {
+    const puesta = boton.dataset.modoComida === modoComida;
+    boton.classList.toggle("activa", puesta);
+    if (puesta) {
+      boton.setAttribute("aria-current", "true");
+    } else {
+      boton.removeAttribute("aria-current");
+    }
+  });
+
+  id("panel-comida-escribir").classList.toggle("oculta", modoComida !== "escribir");
+  id("panel-comida-despensa").classList.toggle("oculta", modoComida !== "despensa");
+
+  if (modoComida === "despensa") {
+    const select = id("comida-ingrediente");
+    select.innerHTML = "";
+    ordenarDespensa(marcados).forEach((ingrediente) => {
+      const opcion = document.createElement("option");
+      opcion.value = ingrediente.id;
+      opcion.textContent = ingrediente.nombre;
+      select.appendChild(opcion);
+    });
+  }
+}
+
+document.querySelectorAll("[data-modo-comida]").forEach((boton) => {
+  boton.addEventListener("click", () => {
+    if (boton.disabled) return;
+    modoComida = boton.dataset.modoComida;
+    actualizarModoComida();
+  });
+});
+
+// Estado inicial: despensaCargada aún puede estar vacía (nadie ha entrado
+// todavía), así que esto se repite al refrescar la despensa. Sin esta
+// llamada, el botón se vería habilitado un instante antes de la primera
+// carga.
+actualizarModoComida();
+
 id("form-comida").addEventListener("submit", async (evento) => {
   evento.preventDefault();
   const error = id("error-comida");
   error.textContent = "";
 
+  // En modo "Elegir de mi despensa", el texto se construye aquí
+  // ("Ingrediente (cantidad)", o solo el nombre sin cantidad) y se manda
+  // además el id del ingrediente elegido (spec 084). En "Escribir" es
+  // exactamente lo de siempre.
+  let textoBruto = id("comida-texto").value;
+  let ingredienteId = "";
+  if (modoComida === "despensa") {
+    const select = id("comida-ingrediente");
+    const nombre = select.options[select.selectedIndex]?.textContent || "";
+    const cantidad = id("comida-cantidad").value.trim();
+    textoBruto = cantidad ? `${nombre} (${cantidad})` : nombre;
+    ingredienteId = select.value;
+  }
+
   const resultado = validarComida(
-    id("comida-texto").value,
+    textoBruto,
     id("comida-momento").value,
     id("comida-fecha").value,
     id("comida-hora").value,
-    acompanamientosNuevos
+    acompanamientosNuevos,
+    ingredienteId
   );
   if (resultado.error) {
     error.textContent = resultado.error;
@@ -4765,10 +4851,17 @@ id("form-comida").addEventListener("submit", async (evento) => {
       resultado.momento,
       resultado.fecha,
       resultado.hora,
-      resultado.acompanamientos
+      resultado.acompanamientos,
+      resultado.ingredienteId
     );
     avisarGuardado("guardado-comida");
     id("comida-texto").value = "";
+    id("comida-cantidad").value = "";
+    // Vuelve a "Escribir" tras guardar: elegir un ingrediente es la
+    // excepción, no lo que se espera la próxima vez que se abre el
+    // formulario (spec 084).
+    modoComida = "escribir";
+    actualizarModoComida();
     // El campo de acompañamiento se vacía con la comida: son de esa comida, no
     // de la siguiente.
     acompanamientosNuevos = [];
@@ -6715,11 +6808,19 @@ function rellenarDesplegable(elementoId, opciones, porDefecto) {
 function limpiarFormularios() {
   acompanamientosNuevos = [];
   pintarAcompanamientosNuevos();
-  ["peso", "comida-texto", "comida-acompanamiento", "ejercicio-texto", "ejercicio-minutos", "bebida-texto"].forEach(
-    (campo) => {
-      id(campo).value = "";
-    }
-  );
+  modoComida = "escribir";
+  actualizarModoComida();
+  [
+    "peso",
+    "comida-texto",
+    "comida-cantidad",
+    "comida-acompanamiento",
+    "ejercicio-texto",
+    "ejercicio-minutos",
+    "bebida-texto"
+  ].forEach((campo) => {
+    id(campo).value = "";
+  });
   ["fecha", "comida-fecha", "ejercicio-fecha", "bebida-fecha"].forEach((campo) => {
     id(campo).value = hoyISO();
   });

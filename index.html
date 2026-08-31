@@ -210,8 +210,28 @@
       <div class="columna">
       <h2>Nueva comida</h2>
       <form id="form-comida">
-        <label for="comida-texto">Qué has comido</label>
+        <label id="etiqueta-comida-texto">Qué has comido</label>
+
+        <!-- El interruptor Escribir/Elegir de mi despensa (spec 084). Mismas
+             clases que el interruptor Recetas/Ingredientes del Recetario
+             (spec 085): mismo concepto, dos opciones dentro de un formulario,
+             sin inventar un estilo nuevo. -->
+        <div class="subpestanas-internas" aria-labelledby="etiqueta-comida-texto">
+          <button type="button" class="panel-recetario-boton activa" data-modo-comida="escribir" aria-current="true">Escribir</button>
+          <button type="button" class="panel-recetario-boton" id="btn-modo-comida-despensa" data-modo-comida="despensa">Elegir de mi despensa</button>
+        </div>
+
+        <div id="panel-comida-escribir">
         <textarea id="comida-texto" rows="2" placeholder="lentejas y una manzana"></textarea>
+        </div>
+
+        <div id="panel-comida-despensa" class="oculta">
+        <label for="comida-ingrediente">Ingrediente</label>
+        <select id="comida-ingrediente"></select>
+
+        <label for="comida-cantidad">Cantidad (opcional)</label>
+        <input type="text" id="comida-cantidad" maxlength="40" placeholder="200 g">
+        </div>
 
         <!-- "Lo de siempre" (spec 013), integrado junto al alta desde la
              spec 037: antes era un bloque propio al final de la pantalla y
