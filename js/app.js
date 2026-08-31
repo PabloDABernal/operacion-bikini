@@ -843,6 +843,35 @@ function celda(texto, clase) {
   return elemento;
 }
 
+// Un texto que se recorta se despliega entero al tocarlo, y se vuelve a
+// recortar si se vuelve a tocar (spec 080). `desplegados` es el Set de la
+// pantalla que lo llama (puede haber varios desplegados a la vez, cada uno
+// independiente); `clave` identifica a ESTE texto dentro de ese Set;
+// `repintar` es la función que vuelve a pintar la pantalla tras el cambio.
+//
+// Es un <button> y no un <span> con listener, para que entre con el
+// tabulador y se active con Enter — pero sin marcador visual de que
+// reacciona, más allá del cursor: la clase `texto-desplegable` le quita todo
+// lo que un botón trae de serie.
+function celdaDesplegable(texto, clase, clave, desplegados, repintar) {
+  const elemento = document.createElement("button");
+  elemento.type = "button";
+  elemento.className = `${clase} texto-desplegable`;
+  elemento.textContent = texto;
+
+  const desplegado = desplegados.has(clave);
+  elemento.classList.toggle("desplegado", desplegado);
+  elemento.setAttribute("aria-expanded", String(desplegado));
+
+  elemento.addEventListener("click", () => {
+    if (desplegados.has(clave)) desplegados.delete(clave);
+    else desplegados.add(clave);
+    repintar();
+  });
+
+  return elemento;
+}
+
 function botonDeFila(texto, alPulsar) {
   const elemento = document.createElement("button");
   elemento.type = "button";
@@ -2938,6 +2967,11 @@ let celdaEditando = null;
 // 060). Una sola, igual que `recetaAbierta` en el recetario.
 let recetaDeDietaAbierta = null;
 
+// Qué nombres de plato están desplegados enteros, como "indiceDia-indiceComida"
+// (spec 080). Un Set y no una sola clave: aquí, a diferencia de la receta, no
+// hay coste de pantalla en tener varios a la vez.
+let platosDesplegados = new Set();
+
 // Qué día de la semana se está mirando, 0 = lunes (spec 064). `null` significa
 // "la semana entera", que es como se veía antes de esta spec y sigue estando
 // disponible: la vista de un día sirve para lo diario, la de la semana para
@@ -3126,7 +3160,7 @@ function filaDeComida(indiceDia, indiceComida, comida) {
 
   fila.append(
     celda(etiquetaDeMomento(comida.momento), "resumen-etiqueta"),
-    nombreDelPlato(comida)
+    nombreDelPlato(comida, `${indiceDia}-${indiceComida}`)
   );
 
   // El icono de la receta, en su columna fija (spec 072). Solo si esa comida
@@ -3203,8 +3237,14 @@ function filaDeComida(indiceDia, indiceComida, comida) {
 //
 // Ahora todos los platos se ven igual y lo que se toca para abrir la receta es
 // un icono aparte, en su columna. Menos listo y mucho más predecible.
-function nombreDelPlato(comida) {
-  return celda(comida.texto || "—", "plato-nombre");
+//
+// Vuelve a ser un <button> desde la spec 080, pero sin el subrayado de
+// entonces: el toque despliega el nombre recortado, no abre la receta —eso lo
+// sigue haciendo solo el icono aparte— así que no hace falta distinguirlo.
+// Un plato vacío ("—") nunca se recorta: no hace falta que sea tocable.
+function nombreDelPlato(comida, clave) {
+  if (!comida.texto) return celda("—", "plato-nombre");
+  return celdaDesplegable(comida.texto, "plato-nombre", clave, platosDesplegados, pintarDieta);
 }
 
 // La receta enlazada a una comida de la semana, o null.
@@ -3730,6 +3770,10 @@ let diaEditando = null;
 // separado y ver el lunes en la dieta no obliga a ver el lunes en la tabla.
 let diaTablaAbierto = 0;
 
+// Qué títulos de sesión están desplegados enteros, por índice de día (spec
+// 080). Hermano de `platosDesplegados` en la dieta.
+let sesionesDesplegadas = new Set();
+
 function pintarTabla() {
   const contenedor = id("semana-tabla");
   const estado = id("estado-tabla");
@@ -3814,7 +3858,7 @@ function filaDeSesion(indiceDia, sesion) {
   }
 
   fila.append(
-    celda(sesion.titulo, "registro-texto"),
+    celdaDesplegable(sesion.titulo, "registro-texto", indiceDia, sesionesDesplegadas, pintarTabla),
     celda(
       `${sesion.minutos} min · ${etiquetaDeIntensidad(sesion.intensidad)}`,
       "registro-detalle"
@@ -5721,6 +5765,11 @@ async function abrirArchivo(operacion) {
       contenido.appendChild(titulo);
     };
 
+    // Qué comidas/ejercicios de este archivo están desplegados enteros, por
+    // `registro.id` (spec 080). Propio de esta apertura del histórico: no
+    // hace falta que sobreviva a cerrar y volver a abrir.
+    const desplegadosArchivo = new Set();
+
     ["pesajes", "comidas", "ejercicios"].forEach((nombre) => {
       const registros = [...(porNombre[nombre] || [])].sort(
         compararPorFechaYCreacion
@@ -5732,20 +5781,38 @@ async function abrirArchivo(operacion) {
       const lista = document.createElement("ul");
       lista.className = "lista-archivo";
 
-      registros.forEach((registro) => {
-        const fila = document.createElement("li");
-        const detalle =
-          nombre === "pesajes"
-            ? kg(registro.pesoKg)
-            : nombre === "comidas"
-              ? registro.texto
-              : `${registro.texto} · ${registro.minutos} min`;
-        fila.append(
-          celda(formatearFechaConHora(registro.fecha, registro.hora), "pesaje-fecha"),
-          celda(detalle, "registro-texto")
-        );
-        lista.appendChild(fila);
-      });
+      // Repinta solo esta lista, no el archivo entero: no hace falta volver a
+      // leer Firestore para desplegar un texto.
+      const pintarFilas = () => {
+        lista.innerHTML = "";
+        registros.forEach((registro) => {
+          const fila = document.createElement("li");
+          const detalle =
+            nombre === "pesajes"
+              ? kg(registro.pesoKg)
+              : nombre === "comidas"
+                ? registro.texto
+                : `${registro.texto} · ${registro.minutos} min`;
+          // El peso es un número corto que nunca se recorta: no hace falta
+          // que sea tocable.
+          const celdaTexto =
+            nombre === "pesajes"
+              ? celda(detalle, "registro-texto")
+              : celdaDesplegable(
+                  detalle,
+                  "registro-texto",
+                  registro.id,
+                  desplegadosArchivo,
+                  pintarFilas
+                );
+          fila.append(
+            celda(formatearFechaConHora(registro.fecha, registro.hora), "pesaje-fecha"),
+            celdaTexto
+          );
+          lista.appendChild(fila);
+        });
+      };
+      pintarFilas();
 
       contenido.appendChild(lista);
     });
