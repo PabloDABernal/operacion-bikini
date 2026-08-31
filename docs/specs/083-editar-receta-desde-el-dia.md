@@ -1,6 +1,6 @@
 # 083 — Editar la receta desde el día
 
-- **Estado:** borrador
+- **Estado:** revisada por `revisor-specs` (cuatro rondas, tres bloqueantes cerrados), lista para implementar
 - **Fecha:** 2026-08-31
 - **Referencia en PRODUCTO.md:** "Qué hará (evolutivos de la fase productiva, desde el 31 de agosto de 2026)"
 
@@ -170,9 +170,9 @@ Ninguno. Es navegación y estado de interfaz en memoria.
   pero `refrescarRecetas()` (que deja `recetasCargadas` al día) es
   asíncrona y puede no haber terminado todavía en ese instante exacto.
   Puede verse un parpadeo brevísimo con la receta sin el cambio, corregido
-  enseguida por el `pintarDieta()` que ya hace `refrescarRecetas()` al
-  terminar. No es un fallo, es un detalle a no confundir con uno al
-  probarlo a mano.
+  enseguida por el segundo `pintarDieta()` que ya hace `refrescarRecetas()`
+  al terminar (`js/app.js:2138`, `if (dietaActiva) pintarDieta();`). No es
+  un fallo, es un detalle a no confundir con uno al probarlo a mano.
 
 ## 7. Archivos afectados
 
