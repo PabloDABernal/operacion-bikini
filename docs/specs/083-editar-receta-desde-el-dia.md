@@ -68,12 +68,25 @@ el mismo editor de líneas de esa spec, sin cambios.
   Los dos casos se confundirían: editar una receta estando en vista de
   semana completa habría quedado indistinguible de una edición normal
   desde el Recetario. No hace falta guardar el día en absoluto: nada
-  cambia `diaDietaAbierto` mientras el formulario de receta está abierto
-  (verificado — solo lo tocan la tira de días y el botón "Ver la semana
-  entera"/"Ver un solo día", ninguno alcanzable desde ahí), así que al
-  volver y repintar, `pintarDieta()` ya respeta el valor que
-  `diaDietaAbierto` tuviera, sea un día concreto o la semana entera. Con
-  un booleano basta.
+  cambia `diaDietaAbierto` mientras el formulario de receta está abierto Y
+  A LA VISTA (Comidas → Recetas). SÍ puede cambiar, aunque el formulario
+  siga abierto de fondo (oculto, sin cerrar — el caso de "navegar a mano a
+  otra pestaña" de más abajo): `refrescarDieta()` (`js/app.js:3805`) pone
+  `diaDietaAbierto` al día de HOY sin condiciones, y se llama desde
+  `refrescarTodo()`, que a su vez SOLO se llama desde tres acciones de
+  Ajustes/Consulta ("Finalizar operación", "Reintentar archivado",
+  "Borrar datos definitivamente" — los tres, disruptivos a propósito). Por
+  eso `refrescarTodo()` TAMBIÉN apaga `volverAMiDietaTrasEditar` (ver
+  siguiente punto): esas tres acciones ya cambian de raíz lo que hay que
+  ver en Mi dieta, así que intentar "volver a donde estabas" tras una de
+  ellas dejaría de tener sentido — mejor que se comporte como una edición
+  normal (te deja en Recetas) que enseñar un día que ya no es el que
+  mirabas.
+- `refrescarTodo()` (`js/app.js:5877`) apaga `volverAMiDietaTrasEditar` a
+  `false` al principio, por el motivo de arriba. Cubre las tres acciones
+  de Ajustes/Consulta que la llaman, y también la que se dispara al hacer
+  login (irrelevante aquí: no puede haber un formulario de receta abierto
+  en ese momento).
 - `abrirFormularioDeReceta()` (`js/app.js`, línea ~2064 — la usan tanto
   "Nueva receta" como `editarReceta()`) apaga
   `volverAMiDietaTrasEditar` a `false` AL PRINCIPIO, siempre, pase lo que
@@ -124,11 +137,21 @@ Ninguno. Es navegación y estado de interfaz en memoria.
   sigue enlazado y muestra la receta actualizada.
 - Entrar a Editar desde Mi dieta, y ANTES de guardar o cancelar, navegar a
   mano a otra pestaña (Ajustes, por ejemplo) SIN cerrar el formulario
-  (sigue abierto, solo oculto tras la sección): el recordatorio SIGUE
-  puesto, porque nada lo ha tocado. Si vuelves a Comidas → Recetas y
-  terminas esa misma edición (Guardar o Cancelar), te lleva a Mi dieta —
-  es la misma edición que empezaste, solo que con un rodeo por otra
-  pantalla en medio. Esto es intencional, no un fallo.
+  (sigue abierto, solo oculto tras la sección) y SIN tocar nada que
+  dispare `refrescarTodo()`: el recordatorio SIGUE puesto, porque nada lo
+  ha tocado. Si vuelves a Comidas → Recetas y terminas esa misma edición
+  (Guardar o Cancelar), te lleva a Mi dieta — es la misma edición que
+  empezaste, solo que con un rodeo por otra pantalla en medio. Esto es
+  intencional, no un fallo.
+- Lo mismo que el punto anterior, pero en el rodeo SÍ se pulsa una de las
+  tres acciones que llaman a `refrescarTodo()` ("Finalizar operación",
+  "Reintentar archivado", o "Borrar datos definitivamente", en Ajustes o
+  Consulta): esas acciones cambian de raíz lo que hay que ver en Mi
+  dieta (una operación distinta, un día distinto, datos borrados...), así
+  que el recordatorio se apaga ahí (ver "Comportamiento detallado"). Al
+  volver a Recetas y terminar la edición, se comporta como una edición
+  normal: te deja en Recetas, no te lleva a Mi dieta con un día que ya no
+  es el que mirabas.
 - Entrar a Editar desde Mi dieta, abandonarlo (como arriba), y luego abrir
   el formulario OTRA VEZ para algo distinto —"Nueva receta", o editar
   cualquier receta desde el Recetario—: como `abrirFormularioDeReceta()`
@@ -157,8 +180,10 @@ Ninguno. Es navegación y estado de interfaz en memoria.
   (apaga el recordatorio al principio, siempre), `cerrarFormularioDeReceta()`
   (la única función que necesita comprobarlo — el `submit` de `form-receta`
   no necesita tocarse aparte, porque ya llama a `cerrarFormularioDeReceta()`
-  al guardar con éxito), y una variable de módulo nueva
-  (`volverAMiDietaTrasEditar`) para recordar el origen.
+  al guardar con éxito), `refrescarTodo()` (línea ~5877, también apaga el
+  recordatorio al principio — ver "Comportamiento detallado" sobre por
+  qué), y una variable de módulo nueva (`volverAMiDietaTrasEditar`) para
+  recordar el origen.
 - `styles.css`: si hace falta, un ajuste menor de espaciado para el botón
   nuevo dentro de `.receta-en-dieta` (mismo patrón que `.receta-acciones`).
 
@@ -198,3 +223,9 @@ Ninguna nueva.
    Recetario. Edita una receta DISTINTA y guarda: debes quedarte en
    Recetas (no debe llevarte a Mi dieta arrastrado de la edición
    abandonada).
+7. En Mi dieta, en un día que NO sea hoy, abre una receta y toca "Editar".
+   Sin guardar ni cancelar, ve a Ajustes → Zona de peligro y pulsa
+   "Reintentar archivado" (o "Finalizar operación", si hay una en marcha).
+   Vuelve a Comidas → Recetario, termina esa edición y guarda: debes
+   quedarte en Recetas, no volver a Mi dieta con un día que ya no es el
+   que mirabas.
