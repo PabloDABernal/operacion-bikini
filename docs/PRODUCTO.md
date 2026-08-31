@@ -629,6 +629,17 @@ Ya no salen de una lista planificada: salen de usar la app cada día.
 | 080 | El texto recortado se despliega al tocarlo (Mi dieta, Mi tabla, Histórico) |
 | 081 | Recetario y Catálogo: el nombre se despliega dentro de la cabecera |
 
+- **Los ingredientes de una receta se escriben estructurados** (el
+  ingrediente, enlazado a la despensa; la cantidad; y la preparación aparte,
+  "triturado", "en rodajas"...), no como una línea de texto suelta. Es la
+  base de tres evolutivos más: editar la receta desde el día, apuntar una
+  comida con un ingrediente suelto sin receta, y reorganizar
+  Recetario/Despensa en un solo apartado.
+
+| Spec | Qué |
+|---|---|
+| 082 | Ingredientes estructurados en la receta |
+
 ## Ideas para más adelante (27 de agosto de 2026)
 
 El 27 de agosto se vació `docs/BACKLOG.md`: la app está terminada y en uso
