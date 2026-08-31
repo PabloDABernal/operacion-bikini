@@ -1,6 +1,6 @@
 # 084 — Apuntar una comida con un ingrediente suelto de la despensa
 
-- **Estado:** revisada por `revisor-specs` (dos rondas, un bloqueante cerrado), lista para implementar
+- **Estado:** 🚧 implementada y desplegada el 31 de agosto de 2026 (commit `6f0a8c5`), revisada por `revisor-specs` (dos rondas) y `revisor-codigo` (CUMPLE). **Pendiente de que el usuario la pruebe.**
 - **Fecha:** 2026-08-31
 - **Referencia en PRODUCTO.md:** "Qué hará (evolutivos de la fase productiva, desde el 31 de agosto de 2026)"
 
