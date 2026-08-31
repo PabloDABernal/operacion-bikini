@@ -1,6 +1,6 @@
 # 082 — Ingredientes estructurados en la receta
 
-- **Estado:** borrador
+- **Estado:** revisada por `revisor-specs` (tres rondas, cuatro bloqueantes cerrados), lista para implementar
 - **Fecha:** 2026-08-31
 - **Referencia en PRODUCTO.md:** "Qué hará (evolutivos de la fase productiva, desde el 31 de agosto de 2026)"
 
@@ -174,6 +174,15 @@ forma nueva sin que nada más cambie todavía.
   línea pequeña: detalle de diseño a resolver en implementación, sin
   inventar una jerarquía visual nueva más allá de lo que ya usa
   `.receta-ingredientes`).
+- `cuerpoDeReceta()` construye este texto leyendo `receta.ingredientes`
+  directamente a través del helper compartido (`nombreDeLinea()` y
+  compañía) — NO a partir del campo `texto` que hoy devuelve
+  `cruzarConLaDespensa()` para cada línea (ese campo sigue existiendo y
+  sigue diciendo si la tienes marcada, pero no es de ahí de donde sale lo
+  que se lee).
+- Es la MISMA función que abre la receta desde Mi dieta (spec 060): no
+  hace falta ningún cambio aparte ahí, pero conviene probarlo desde los dos
+  sitios (ver guion de prueba).
 
 **Cruce con la despensa y lista de la compra:**
 - Para una línea estructurada, "¿la tienes?" es una comprobación directa:
@@ -343,3 +352,5 @@ acordado (083, 084, 085, 086).
 10. En el buscador del Recetario, busca por un ingrediente de una receta ya
     estructurada (una de las que migraste en el paso 7) y comprueba que
     aparece, con el motivo ("lleva...") correcto.
+11. Esa misma receta estructurada, enlázala a un día de Mi dieta y ábrela
+    desde ahí (icono de receta): debe leerse igual que desde el Recetario.
