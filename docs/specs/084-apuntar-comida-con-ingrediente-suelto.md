@@ -1,6 +1,6 @@
 # 084 — Apuntar una comida con un ingrediente suelto de la despensa
 
-- **Estado:** borrador
+- **Estado:** revisada por `revisor-specs` (dos rondas, un bloqueante cerrado), lista para implementar
 - **Fecha:** 2026-08-31
 - **Referencia en PRODUCTO.md:** "Qué hará (evolutivos de la fase productiva, desde el 31 de agosto de 2026)"
 
@@ -79,9 +79,9 @@ visual de Comidas queda para otra sesión aparte).
 - Modo "Elegir de mi despensa":
   - Un `<select>` con los ingredientes de `despensaCargada` que tengan
     `tengo: true`, ordenados igual que ya hace `ordenarDespensa()`.
-  - Un campo de texto de cantidad, opcional (mismo criterio que la
-    cantidad de una línea de receta, spec 082: texto libre, sin validar
-    formato).
+  - Un campo de texto de cantidad, opcional, máximo 40 caracteres (mismo
+    criterio y tope que la cantidad de una línea de receta, spec 082:
+    texto libre, sin validar formato).
   - Si `despensaCargada.filter(i => i.tengo)` está vacío: el botón "Elegir
     de mi despensa" del interruptor se deshabilita (`disabled`), con un
     `title`/texto explicando que no tienes ningún ingrediente marcado, y
