@@ -24,14 +24,18 @@ el mismo editor de líneas de esa spec, sin cambios.
    tarjeta en el Recetario.
 3. Editas lo que haga falta (nombre, ingredientes, cantidades,
    preparación...) y guardas.
-4. Al guardar con éxito, la app vuelve a Comidas → Mi dieta, al mismo día
-   que estabas viendo, con la receta del plato mostrando ya los cambios.
+4. Al guardar con éxito, la app vuelve a Comidas → Mi dieta, viendo lo
+   mismo que estabas viendo (el mismo día concreto, o la semana entera si
+   estabas ahí), con la receta del plato mostrando ya los cambios.
 5. Si en vez de guardar cancelas, la app vuelve igualmente a Comidas → Mi
-   dieta, al mismo día, sin cambios en la receta.
+   dieta, viendo lo mismo, sin cambios en la receta.
 6. Si entras a editar una receta desde el Recetario directamente (como
    hoy), guardar o cancelar se comporta exactamente igual que hasta ahora
    (te deja en el Recetario): el "volver a Mi dieta" solo pasa cuando
    viniste de ahí.
+7. Lo mismo que los puntos 1-4, pero abriendo la receta estando en "Ver la
+   semana entera" en vez de un día concreto: al volver, sigues viendo la
+   semana entera, no un día suelto.
 
 ## 3. Alcance
 
@@ -56,9 +60,23 @@ el mismo editor de líneas de esa spec, sin cambios.
 
 ## 4. Comportamiento detallado
 
+- **La variable es un booleano, `volverAMiDietaTrasEditar`, NO el día.**
+  La primera redacción de esta spec guardaba ahí el valor de
+  `diaDietaAbierto` (el día que se estaba viendo), pero `diaDietaAbierto`
+  también vale `null` cuando se está viendo "la semana entera" (spec 064)
+  — el mismo valor que se pensaba usar para "no hay recordatorio puesto".
+  Los dos casos se confundirían: editar una receta estando en vista de
+  semana completa habría quedado indistinguible de una edición normal
+  desde el Recetario. No hace falta guardar el día en absoluto: nada
+  cambia `diaDietaAbierto` mientras el formulario de receta está abierto
+  (verificado — solo lo tocan la tira de días y el botón "Ver la semana
+  entera"/"Ver un solo día", ninguno alcanzable desde ahí), así que al
+  volver y repintar, `pintarDieta()` ya respeta el valor que
+  `diaDietaAbierto` tuviera, sea un día concreto o la semana entera. Con
+  un booleano basta.
 - `abrirFormularioDeReceta()` (`js/app.js`, línea ~2064 — la usan tanto
-  "Nueva receta" como `editarReceta()`) apaga la variable de módulo
-  `volverAMiDietaTrasEditar` a `null` AL PRINCIPIO, siempre, pase lo que
+  "Nueva receta" como `editarReceta()`) apaga
+  `volverAMiDietaTrasEditar` a `false` AL PRINCIPIO, siempre, pase lo que
   pase: es el único sitio por el que se abre el formulario, sea cual sea
   el camino, así que es el punto natural para que cualquier apertura nueva
   "olvide" un recordatorio de una edición anterior sin terminar (ver
@@ -70,8 +88,7 @@ el mismo editor de líneas de esa spec, sin cambios.
   2. Llama a `editarReceta(receta)` (ya existe, abre el formulario con esa
      receta cargada — y de paso apaga `volverAMiDietaTrasEditar`, como
      cualquier apertura del formulario).
-  3. SOLO DESPUÉS de eso, pone `volverAMiDietaTrasEditar` al día que se
-     estaba viendo (`diaDietaAbierto` ya existe y sirve para esto). El
+  3. SOLO DESPUÉS de eso, pone `volverAMiDietaTrasEditar = true`. El
      orden importa: si se pusiera antes de `editarReceta()`, el reseteo
      del paso anterior se lo comería.
 - `cerrarFormularioDeReceta()` es el único sitio que necesita comprobar la
@@ -79,14 +96,16 @@ el mismo editor de líneas de esa spec, sin cambios.
   `cerrarFormularioDeReceta()` (así lo hace hoy), así que basta con tocar
   esa función una vez para cubrir Guardar y Cancelar a la vez — no hace
   falta duplicar la comprobación en el `submit`. Si
-  `volverAMiDietaTrasEditar` no es `null` al llamarla: se apaga, y en vez
-  de dejar la pantalla en Recetas (lo de siempre) se llama a
+  `volverAMiDietaTrasEditar` es `true` al llamarla: se apaga (`= false`),
+  y en vez de dejar la pantalla en Recetas (lo de siempre) se llama a
   `abrirPestana("comidas", "dieta")` seguido de `pintarDieta()` (para que
   la receta recién guardada se vea actualizada, ya que `cuerpoDeReceta()`
   lee de `recetasCargadas`, que `refrescarRecetas()` ya deja al día tras
-  guardar — ver "Casos límite" sobre el orden de estas dos llamadas). Si
-  la variable es `null` (edición normal desde el
-  Recetario), el comportamiento es exactamente el de hoy.
+  guardar — ver "Casos límite" sobre el orden de estas dos llamadas; y
+  para que la vista respete el día o la semana entera que se estuviera
+  viendo, sin necesidad de haberlo guardado aparte). Si la variable es
+  `false` (edición normal desde el Recetario), el comportamiento es
+  exactamente el de hoy.
 
 ## 5. Modelo de datos
 
@@ -118,6 +137,11 @@ Ninguno. Es navegación y estado de interfaz en memoria.
   normal, sin arrastrar el rodeo a Mi dieta de la que se abandonó. Esto es
   justo lo que evita que una edición a medias "contamine" una edición
   distinta y posterior.
+- Editar una receta estando en "Ver la semana entera" (no un día
+  concreto): al volver, se ve igual la semana entera, no un día suelto —
+  porque `diaDietaAbierto` no se ha tocado durante el rodeo (ver
+  "Comportamiento detallado" sobre por qué la variable es un booleano y no
+  el día).
 - Al volver a Mi dieta tras guardar: `cerrarFormularioDeReceta()` llama a
   `abrirPestana()` y `pintarDieta()` justo después de `avisarGuardado()`,
   pero `refrescarRecetas()` (que deja `recetasCargadas` al día) es
@@ -166,3 +190,11 @@ Ninguna nueva.
    volver a Mi dieta igual, sin el cambio.
 4. Desde el Recetario (sin pasar por Mi dieta), edita una receta
    cualquiera y guarda: debes quedarte en Recetas, como siempre.
+5. En Mi dieta, toca "Ver la semana entera" y desde ahí abre una receta y
+   edítala. Al guardar, debes volver viendo la semana entera, no un solo
+   día.
+6. En Mi dieta, abre una receta y toca "Editar" (paso 1). Sin guardar ni
+   cancelar, navega a mano a otra pestaña (Ajustes) y vuelve a Comidas →
+   Recetario. Edita una receta DISTINTA y guarda: debes quedarte en
+   Recetas (no debe llevarte a Mi dieta arrastrado de la edición
+   abandonada).
