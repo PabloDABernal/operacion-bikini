@@ -640,6 +640,14 @@ Ya no salen de una lista planificada: salen de usar la app cada día.
 |---|---|
 | 082 | Ingredientes estructurados en la receta |
 
+- **La receta de un plato se puede editar directamente desde el día en que
+  sale** (Mi dieta → ver receta → Editar): lleva al mismo editor del
+  Recetario y, al guardar o cancelar, vuelve a donde estabas viendo el día.
+
+| Spec | Qué |
+|---|---|
+| 083 | Editar la receta desde el día |
+
 ## Ideas para más adelante (27 de agosto de 2026)
 
 El 27 de agosto se vació `docs/BACKLOG.md`: la app está terminada y en uso
