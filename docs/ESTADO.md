@@ -11,6 +11,20 @@ Documento para retomar el trabajo en frío. Se actualiza al terminar cada spec.
 > el trabajo entra por lo que el usuario se encuentre, no por una lista de
 > versiones. Lo de abajo, sobre cómo se trabaja en fase productiva, sigue en pie.
 >
+> **Arreglo del mismo día: la entrevista de bienvenida tardaba más de los 55 s
+> que espera el navegador** ("La IA está tardando demasiado"), justo al intentar
+> empezar la primera operación. La causa: `llamarAGemini()` en `api/_ia.js`
+> forzaba siempre `maxOutputTokens: 8192` sin importar lo que pidiera quien
+> llamaba, y con ese margen tan amplio `gemini-flash-latest` (que no admite
+> desactivar su razonamiento, ver más abajo) puede "pensar" más de la cuenta
+> antes de responder. Se cambió para que respete el `maxOutputTokens` que
+> mande la llamada, y `api/consulta.js` pide ahora 2048 en vez de los 8192 por
+> defecto: le sobra de margen para el cierre (200 palabras) y los campos
+> cortos, y acota cuánto puede tardar. `api/dieta.js`, `api/tabla.js` y
+> `api/analisis.js` siguen con el margen de 8192, que sí necesitan. **Sin
+> probar en producción todavía** — desplegar y reintentar el alta es el
+> siguiente paso.
+>
 > **Cuatro specs desplegadas y sin probar.** No se cierran con una sesión de
 > pruebas: se validan usándolas. Sus guiones están al final de cada una.
 >

@@ -12,6 +12,14 @@ const { peticionAutorizada, describirRegistros, generarJson } = require("./_ia")
 
 const MAXIMO_PREGUNTAS = 25;
 
+// El texto más largo que puede salir de aquí es el cierre (200 palabras) más
+// unos pocos campos cortos: no hace falta el margen de 8192 tokens que sí
+// necesitan la dieta y la tabla. Un margen más corto acota cuánto puede
+// "pensar" gemini-flash-latest antes de responder, que es lo que estaba
+// haciendo tardar la entrevista de bienvenida más de los 55 s que espera el
+// navegador.
+const MAXIMO_TOKENS_DE_SALIDA = 2048;
+
 // Cuántas veces puede repreguntar el alta antes de tener que cerrar (spec 057).
 // El comité de bienvenida recibe la ficha entera de golpe, así que preguntar es
 // la excepción: si falta algo, tres tirones y a cerrar con lo que haya. Sin
@@ -296,7 +304,8 @@ module.exports = async (req, res) => {
         contents: partes,
         generationConfig: {
           responseMimeType: "application/json",
-          responseSchema: ESQUEMA
+          responseSchema: ESQUEMA,
+          maxOutputTokens: MAXIMO_TOKENS_DE_SALIDA
         }
       },
       etiqueta,

@@ -121,7 +121,11 @@ async function llamarAGemini(cuerpo, etiqueta) {
   let ultimaRespuesta;
 
   for (const modelo of MODELOS) {
-    // Margen de salida amplio para que quepan los dos bloques del plan.
+    // Margen de salida amplio por defecto, para que quepan los dos bloques del
+    // plan. Quien llama puede pedir uno más corto (la entrevista de bienvenida
+    // lo hace: solo necesita un texto breve, y un margen enorme le da a
+    // gemini-flash-latest más sitio para "pensar" antes de responder, lo que
+    // la hace tardar más de la cuenta).
     //
     // Aquí hubo un intento de desactivar el razonamiento con thinkingConfig
     // para ahorrar tokens: gemini-flash-latest lo rechaza con un 400, así que
@@ -131,7 +135,7 @@ async function llamarAGemini(cuerpo, etiqueta) {
       ...cuerpo,
       generationConfig: {
         ...cuerpo.generationConfig,
-        maxOutputTokens: 8192
+        maxOutputTokens: (cuerpo.generationConfig && cuerpo.generationConfig.maxOutputTokens) || 8192
       }
     };
 
