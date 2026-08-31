@@ -2,7 +2,7 @@
 
 Documento para retomar el trabajo en frío. Se actualiza al terminar cada spec.
 
-**Última actualización:** 31 de agosto de 2026 (traspaso a Claude Code web). Specs 001-073 cerradas (v1 a v12). Las **074, 075, 076 y 079 están desplegadas y SIN PROBAR** (v13 a medias, v14 y v15 enteras). **Hoy empieza la operación bikini de verdad.**
+**Última actualización:** 31 de agosto de 2026 (primer día de operación bikini de verdad). Specs 001-073 cerradas (v1 a v12). Las **080 y 081 se cerraron hoy** (texto recortado desplegable, en las cinco pantallas que lo tenían). Las **074, 075, 076 y 079 siguen desplegadas y SIN PROBAR** (v13 a medias, v14 y v15 enteras).
 
 > **Traspaso del 31 de agosto de 2026.** Se sigue en remoto desde Claude Code
 > web. `main` limpio y sincronizado con `origin/main`.
@@ -24,6 +24,19 @@ Documento para retomar el trabajo en frío. Se actualiza al terminar cada spec.
 > `api/analisis.js` siguen con el margen de 8192, que sí necesitan. **Desplegado
 > a `main` y confirmado por el usuario en producción: la entrevista ya no da
 > timeout.**
+>
+> **Primeros dos evolutivos de la fase productiva, cerrados hoy mismo: specs
+> 080 y 081.** Al usar la app de verdad, el usuario notó que el nombre de un
+> plato/receta/ejercicio/sesión largo se cortaba con puntos suspensivos sin
+> forma de verlo entero salvo entrando en modo edición. Se creó una spec
+> (080), `revisor-specs` encontró un bloqueante técnico (el Recetario y el
+> Catálogo de ejercicios anidaban el nombre dentro de un `<button>` que ya
+> hacía otra cosa, HTML inválido), y se partió en dos: **080** (Mi dieta, Mi
+> tabla, Histórico — sin conflicto) y **081** (Recetario y Catálogo, con la
+> cabecera pasada de `<button>` a `<div role="button">`). Las dos,
+> implementadas, revisadas por `revisor-codigo` sin hallazgos, y confirmadas
+> por el usuario en producción. Nuevo patrón reutilizable en `js/app.js`:
+> `celdaDesplegable()` y `cabeceraDesplegable()`.
 >
 > **Cuatro specs desplegadas y sin probar.** No se cierran con una sesión de
 > pruebas: se validan usándolas. Sus guiones están al final de cada una.
