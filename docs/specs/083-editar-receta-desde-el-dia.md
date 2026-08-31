@@ -1,6 +1,6 @@
 # 083 — Editar la receta desde el día
 
-- **Estado:** revisada por `revisor-specs` (cuatro rondas, tres bloqueantes cerrados), lista para implementar
+- **Estado:** 🚧 implementada y desplegada el 31 de agosto de 2026 (commit `913835f`), revisada por `revisor-specs` (cuatro rondas) y `revisor-codigo` (CUMPLE). **Pendiente de que el usuario la pruebe.**
 - **Fecha:** 2026-08-31
 - **Referencia en PRODUCTO.md:** "Qué hará (evolutivos de la fase productiva, desde el 31 de agosto de 2026)"
 
