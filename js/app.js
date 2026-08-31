@@ -2061,7 +2061,28 @@ id("btn-anadir-linea-receta").addEventListener("click", () => {
   pintarLineasReceta();
 });
 
+// Si el editor de receta se abrió desde el botón "Editar" de Mi dieta (spec
+// 083), guardar/cancelar tiene que volver ahí en vez de dejarte en Recetas.
+//
+// Es un booleano, NO el día que se estaba viendo: `diaDietaAbierto` también
+// vale `null` en la vista de "semana entera", así que guardarlo ahí
+// confundiría los dos casos. No hace falta: nada cambia `diaDietaAbierto`
+// mientras el formulario sigue VISIBLE, así que `pintarDieta()` ya respeta
+// lo que hubiera al volver.
+//
+// Se apaga en dos sitios, no solo al terminar la edición: al abrir CUALQUIER
+// formulario de receta (para que una edición abandonada no "contamine" una
+// posterior y distinta), y en refrescarTodo() (para que las acciones
+// disruptivas de Ajustes —que sí pueden cambiar `diaDietaAbierto` de fondo,
+// vía refrescarDieta()— no dejen el recordatorio apuntando a un día que ya
+// no es el que se miraba).
+let volverAMiDietaTrasEditar = false;
+
 function abrirFormularioDeReceta(receta) {
+  // Cualquier apertura del formulario —nueva, o editar desde el Recetario o
+  // desde Mi dieta— empieza "de cero": solo el botón nuevo de Mi dieta la
+  // vuelve a encender, y lo hace DESPUÉS de esta llamada.
+  volverAMiDietaTrasEditar = false;
   recetaEditando = receta ? receta.id : null;
 
   id("receta-nombre").value = receta ? receta.nombre : "";
@@ -2098,11 +2119,31 @@ function cerrarFormularioDeReceta() {
   id("form-receta").classList.add("oculta");
   id("btn-nueva-receta").classList.remove("oculta");
   id("error-receta").textContent = "";
+
+  // El submit de form-receta llama a esta función al guardar con éxito, así
+  // que cubre Guardar y Cancelar a la vez: no hace falta comprobarlo en el
+  // submit por separado (spec 083).
+  if (volverAMiDietaTrasEditar) {
+    volverAMiDietaTrasEditar = false;
+    abrirPestana("comidas", "dieta");
+    pintarDieta();
+  }
 }
 
 function editarReceta(receta) {
   abrirFormularioDeReceta(receta);
   id("form-receta").scrollIntoView({ block: "center" });
+}
+
+// El botón "Editar" de la receta desplegada en Mi dieta (spec 083): abre el
+// mismo editor que el Recetario, cambiando de sub-pestaña, y deja dicho que
+// hay que volver aquí al terminar.
+function editarRecetaDesdeElDia(receta) {
+  abrirPestana("comidas", "recetas");
+  editarReceta(receta);
+  // Después de editarReceta(): abrirFormularioDeReceta(), que llama por
+  // dentro, apaga esta variable al principio. Ponerla antes se la comería.
+  volverAMiDietaTrasEditar = true;
 }
 
 async function borrarLaReceta(receta) {
@@ -3535,6 +3576,12 @@ function recetaDesplegada(comida) {
   caja.appendChild(cabecera);
 
   caja.appendChild(cuerpoDeReceta(receta));
+
+  const acciones = document.createElement("div");
+  acciones.className = "receta-acciones";
+  acciones.appendChild(botonDeFila("Editar", () => editarRecetaDesdeElDia(receta)));
+  caja.appendChild(acciones);
+
   return caja;
 }
 
@@ -5875,6 +5922,12 @@ id("archivo-foto").addEventListener("change", async (evento) => {
 // Refresca todas las listas de la app. Se usa al entrar y después de un
 // borrado, para que ninguna pestaña siga enseñando datos que ya no existen.
 function refrescarTodo() {
+  // Solo la llaman tres acciones disruptivas de Ajustes/Consulta (finalizar
+  // operación, reintentar archivado, borrar datos) y el login: las tres
+  // cambian de raíz lo que hay que ver en Mi dieta, así que un "volver a
+  // donde estabas editando" ya no tiene sentido (spec 083).
+  volverAMiDietaTrasEditar = false;
+
   return Promise.all([
     listaPeso.refrescar(),
     listaComidas.refrescar(),
