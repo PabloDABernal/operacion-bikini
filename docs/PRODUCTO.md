@@ -657,6 +657,16 @@ Ya no salen de una lista planificada: salen de usar la app cada día.
 |---|---|
 | 084 | Apuntar una comida con un ingrediente suelto de la despensa |
 
+- **Recetas y Despensa se funden en un solo apartado, "Recetario"**, con
+  un interruptor arriba para cambiar entre Recetas e Ingredientes. Los
+  ingredientes se paginan como las recetas (unos pocos + "ver todos"). En
+  escritorio, el Recetario va arriba a la derecha (tercera columna), con
+  la lista de la compra debajo.
+
+| Spec | Qué |
+|---|---|
+| 085 | Recetario: un solo apartado con recetas e ingredientes |
+
 ## Ideas para más adelante (27 de agosto de 2026)
 
 El 27 de agosto se vació `docs/BACKLOG.md`: la app está terminada y en uso
