@@ -70,8 +70,22 @@ Minutos        Distancia (km)
 [ 45 ]         [ 5,2        ]  ← opcional
 ```
 
-La etiqueta dice **"Distancia (km) — opcional"**. Sin esa palabra, un campo
-vacío junto a uno obligatorio parece que falta rellenarlo.
+La etiqueta dice **"Distancia (km)"** y, debajo y en pequeño, **"opcional"**.
+Sin esa palabra, un campo vacío junto a uno obligatorio parece que falta
+rellenarlo.
+
+> **Arreglado al probarlo.** Se puso primero como `Distancia (km) — opcional`,
+> todo en la misma línea. Dos cosas salieron mal y las vio el usuario en la
+> primera captura:
+>
+> 1. **La etiqueta partía en dos líneas** y eso bajaba su campo un renglón, así
+>    que los dos campos quedaban a distinta altura. Se arregla con
+>    `align-items: end` en la fila —alinea los campos, no las cajas— y sacando
+>    "opcional" a su propia línea en pequeño.
+> 2. **El campo se salía de la columna** y se montaba encima de la de al lado.
+>    Los `input` de este formulario se estiran porque son hijos de un `form` en
+>    `flex-column`; metidos en un `div` normal dejan de serlo y se quedan con su
+>    ancho por defecto. La fila pasa a ser `flex-column` también.
 
 `inputmode="decimal"`, para que en el móvil salga el teclado numérico con coma.
 

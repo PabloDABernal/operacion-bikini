@@ -1679,21 +1679,46 @@ button:disabled {
 
 /* Dos campos con su etiqueta, uno al lado del otro (spec 086): minutos y
    distancia. En 320 px caben porque los dos son cortos; si algún día hicieran
-   falta tres, esto pide un wrap. */
+   falta tres, esto pide un wrap.
+
+   align-items: end alinea los DOS CAMPOS abajo, no las cajas arriba. Sin esto,
+   basta con que una etiqueta ocupe dos líneas para que su campo baje un renglón
+   y los dos queden a distinta altura. Pasó al estrenarlo. */
 .fila-campos {
   display: flex;
   gap: var(--e3);
+  align-items: end;
 }
 
+/* Columna flex, y no un div a secas: los input de este formulario se estiran
+   porque son hijos de un `form` en flex-column. Dentro de un div normal dejan
+   de serlo, se quedan con su ancho por defecto (el del atributo `size`) y se
+   salen de la columna. Se veía al estrenarlo: el campo de distancia se montaba
+   encima de la columna de al lado. */
 .fila-campos > div {
   flex: 1;
   min-width: 0;
+  display: flex;
+  flex-direction: column;
 }
 
-/* Las etiquetas de dentro no llevan el margen suelto de las de fuera: aquí van
-   pegadas a su campo, que es lo que las distingue de la de al lado. */
+/* Cinturón y tirantes: aunque la columna ya los estira, dejarlo dicho evita que
+   el próximo que meta un input aquí se encuentre el mismo desbordamiento. */
+.fila-campos input {
+  width: 100%;
+}
+
 .fila-campos label {
   display: block;
+}
+
+/* "opcional" en pequeño y en su línea: en la misma que el nombre del campo, la
+   etiqueta partía en dos y era justo lo que descuadraba la fila. */
+.fila-campos .opcional {
+  display: block;
+  font-weight: 400;
+  font-size: 0.75rem;
+  color: var(--tinta-suave);
 }
 
 .fila-alta input {
