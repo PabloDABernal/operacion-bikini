@@ -1481,6 +1481,58 @@ button:disabled {
   font-size: 0.85rem;
 }
 
+/* La preparación de UN ingrediente ("triturado", "en rodajas"), aparte del
+   nombre (spec 082). No confundir con `.receta-preparacion`, de arriba: esa
+   es cómo se hace la receta ENTERA, esto es el matiz de una sola línea. */
+.receta-ingrediente-preparacion {
+  margin-left: var(--e2);
+  color: var(--tinta-suave);
+  font-style: italic;
+  font-size: 0.85em;
+}
+
+.receta-ingrediente-preparacion::before {
+  content: "· ";
+}
+
+/* El editor de ingredientes de una receta (spec 082): una fila por
+   ingrediente, con su nombre (enlazado a la despensa), cantidad y
+   preparación. */
+#receta-lineas {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e2);
+  margin: var(--e2) 0;
+}
+
+.receta-linea-editor {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e2);
+  align-items: center;
+  padding: var(--e2);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio-s);
+}
+
+.receta-linea-editor input {
+  flex: 1 1 8rem;
+  min-width: 0;
+}
+
+/* Una línea sin ingrediente enlazado —recién añadida, o una línea vieja
+   todavía sin migrar— se marca para que se note que hay que resolverla
+   antes de poder guardar (mismo mensaje de validación de siempre). */
+.receta-linea-editor input.linea-sin-enlazar {
+  border-color: var(--error);
+}
+
+.receta-linea-crear {
+  flex: 1 1 100%;
+  font-size: 0.85rem;
+  text-align: left;
+}
+
 /* Los acompañamientos de una comida, como chips con su aspa (spec 063). El
    aspa va dentro del propio texto del chip, no como segundo botón: un botón
    dentro de otro no es HTML válido, y a 44 px un chip entero ya es zona táctil

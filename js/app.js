@@ -110,7 +110,9 @@ import {
   guardarIngredientesDeReceta,
   normalizar as normalizarIngrediente,
   mismoIngrediente,
-  loQueFalta
+  loQueFalta,
+  esLineaEstructurada,
+  nombreDeLinea
 } from "./despensa.js";
 
 import {
@@ -1743,10 +1745,14 @@ function recetasQueCoinciden() {
       encontradas.push({ receta, porIngrediente: "" });
       return;
     }
+    // nombreDeLinea() lee el nombre sea cual sea el formato de la línea
+    // (spec 082): una línea vieja es texto, una nueva es un objeto
+    // enlazado, y comparar el objeto entero como texto daría
+    // "[object Object]".
     const ingrediente = (receta.ingredientes || []).find((linea) =>
-      normalizarIngrediente(linea).includes(buscado)
+      normalizarIngrediente(nombreDeLinea(linea)).includes(buscado)
     );
-    if (ingrediente) encontradas.push({ receta, porIngrediente: ingrediente });
+    if (ingrediente) encontradas.push({ receta, porIngrediente: nombreDeLinea(ingrediente) });
   });
 
   return encontradas;
@@ -1828,17 +1834,41 @@ function cuerpoDeReceta(receta) {
 
   const ingredientes = document.createElement("ul");
   ingredientes.className = "receta-ingredientes";
-  cruzados.forEach(({ texto, tengo }) => {
-    const linea = document.createElement("li");
-    linea.textContent = texto;
+  // `cruzados` es paralelo a `receta.ingredientes`: mismo orden, misma
+  // longitud (cruzarConLaDespensa() mapea uno a uno). El texto que se lee
+  // sale de la línea de verdad, no del campo `texto` de `cruzados` (spec
+  // 082): ese campo solo dice si la tienes, no cómo se enseña.
+  cruzados.forEach(({ tengo }, indice) => {
+    const linea = receta.ingredientes[indice];
+    const elemento = document.createElement("li");
+
+    if (esLineaEstructurada(linea)) {
+      const principal = document.createElement("span");
+      principal.textContent = linea.cantidad
+        ? `${nombreDeLinea(linea)} (${linea.cantidad})`
+        : nombreDeLinea(linea);
+      elemento.appendChild(principal);
+
+      // La preparación ("triturado", "en rodajas") va aparte, nunca pegada
+      // al nombre del ingrediente: es justo lo que pedía esta spec.
+      if (linea.preparacion) {
+        const preparacionLinea = document.createElement("span");
+        preparacionLinea.className = "receta-ingrediente-preparacion";
+        preparacionLinea.textContent = linea.preparacion;
+        elemento.appendChild(preparacionLinea);
+      }
+    } else {
+      elemento.textContent = linea;
+    }
+
     // Sin despensa, la receta se ve exactamente como antes de la spec 059.
     if (marcando) {
-      linea.classList.add(tengo ? "lo-tengo" : "me-falta");
+      elemento.classList.add(tengo ? "lo-tengo" : "me-falta");
       // El "✓" lo pone el CSS y la opacidad no la lee nadie: sin este título,
       // quien no ve la pantalla no se entera de la despensa.
-      linea.title = tengo ? "Lo tienes en casa" : "Te falta";
+      elemento.title = tengo ? "Lo tienes en casa" : "Te falta";
     }
-    ingredientes.appendChild(linea);
+    ingredientes.appendChild(elemento);
   });
   trozo.appendChild(ingredientes);
 
@@ -1884,13 +1914,171 @@ function tarjetaDeReceta(receta) {
   return tarjeta;
 }
 
+// Las líneas del editor mientras se rellena el formulario (spec 082). Cada
+// una: { ingredienteId, ingredienteNombre, cantidad, preparacion }.
+// `ingredienteId` es `null` mientras no está enlazada a nada de la despensa
+// —una línea recién añadida, o una línea vieja (texto libre) todavía sin
+// migrar—, y eso es lo que impide guardar (ver `validarReceta()`).
+let lineasRecetaEnEdicion = [];
+
+function lineaRecetaVacia() {
+  return { ingredienteId: null, ingredienteNombre: "", cantidad: "", preparacion: "" };
+}
+
+// El desplegable de sugerencias del campo de ingrediente: las opciones de un
+// <datalist> se leen contra la despensa cada vez que esta cambia, para que
+// crear un ingrediente nuevo lo deje disponible sin recargar la página.
+function actualizarSugerenciasDespensa() {
+  const lista = id("sugerencias-despensa");
+  lista.innerHTML = "";
+  ordenarDespensa(despensaCargada).forEach((ingrediente) => {
+    const opcion = document.createElement("option");
+    opcion.value = ingrediente.nombre;
+    lista.appendChild(opcion);
+  });
+}
+
+function pintarLineasReceta() {
+  const contenedor = id("receta-lineas");
+  contenedor.innerHTML = "";
+  lineasRecetaEnEdicion.forEach((linea, indice) => {
+    contenedor.appendChild(filaDeIngredienteReceta(linea, indice));
+  });
+}
+
+// Una fila del editor. El campo de ingrediente se resuelve al SALIR de él
+// (evento "change", que en un <input> de texto dispara al perder el foco o
+// al pulsar Enter): repintar en cada tecla perdería el foco de las demás
+// filas a cada pulsación, así que solo se repinta cuando hace falta —al
+// añadir/quitar una línea, o al crear un ingrediente nuevo.
+function filaDeIngredienteReceta(linea, indice) {
+  const fila = document.createElement("div");
+  fila.className = "receta-linea-editor";
+
+  const campoIngrediente = document.createElement("input");
+  campoIngrediente.type = "text";
+  campoIngrediente.placeholder = "ingrediente";
+  campoIngrediente.setAttribute("list", "sugerencias-despensa");
+  campoIngrediente.setAttribute("aria-label", "Ingrediente");
+  campoIngrediente.maxLength = MAX_NOMBRE_INGREDIENTE;
+  campoIngrediente.value = linea.ingredienteNombre;
+  campoIngrediente.classList.toggle("linea-sin-enlazar", !linea.ingredienteId);
+
+  const crear = document.createElement("button");
+  crear.type = "button";
+  crear.className = "enlace receta-linea-crear oculta";
+
+  const resolverIngrediente = () => {
+    const texto = campoIngrediente.value.trim();
+    linea.ingredienteNombre = texto;
+    linea.ingredienteId = null;
+    crear.classList.add("oculta");
+    campoIngrediente.classList.toggle("linea-sin-enlazar", Boolean(texto));
+
+    if (!texto) return;
+
+    const existente = despensaCargada.find((ingrediente) =>
+      mismoIngrediente(ingrediente.nombre, texto)
+    );
+    if (existente) {
+      linea.ingredienteId = existente.id;
+      linea.ingredienteNombre = existente.nombre;
+      campoIngrediente.value = existente.nombre;
+      campoIngrediente.classList.remove("linea-sin-enlazar");
+      return;
+    }
+
+    crear.textContent = `Crear "${texto}" en tu despensa`;
+    crear.classList.remove("oculta");
+  };
+
+  campoIngrediente.addEventListener("change", resolverIngrediente);
+  // Enter en un campo de texto envía el formulario entero por defecto: aquí
+  // solo tiene que resolver la línea, como al perder el foco.
+  campoIngrediente.addEventListener("keydown", (evento) => {
+    if (evento.key !== "Enter") return;
+    evento.preventDefault();
+    resolverIngrediente();
+  });
+
+  crear.addEventListener("click", async () => {
+    const validado = validarIngrediente(linea.ingredienteNombre);
+    if (validado.error) {
+      id("error-receta").textContent = validado.error;
+      return;
+    }
+    crear.disabled = true;
+    try {
+      const referencia = await guardarIngrediente(uidActual, validado.nombre);
+      await refrescarDespensa();
+      linea.ingredienteId = referencia.id;
+      linea.ingredienteNombre = validado.nombre;
+      id("error-receta").textContent = "";
+      pintarLineasReceta();
+    } catch {
+      id("error-receta").textContent =
+        "No se ha podido crear el ingrediente. Comprueba tu conexión.";
+      crear.disabled = false;
+    }
+  });
+
+  const campoCantidad = document.createElement("input");
+  campoCantidad.type = "text";
+  campoCantidad.placeholder = "cantidad";
+  campoCantidad.setAttribute("aria-label", "Cantidad");
+  campoCantidad.maxLength = 40;
+  campoCantidad.value = linea.cantidad;
+  campoCantidad.addEventListener("input", () => {
+    linea.cantidad = campoCantidad.value;
+  });
+
+  const campoPreparacion = document.createElement("input");
+  campoPreparacion.type = "text";
+  campoPreparacion.placeholder = "preparación (opcional)";
+  campoPreparacion.setAttribute("aria-label", "Preparación");
+  campoPreparacion.maxLength = 200;
+  campoPreparacion.value = linea.preparacion;
+  campoPreparacion.addEventListener("input", () => {
+    linea.preparacion = campoPreparacion.value;
+  });
+
+  const quitar = botonDeIcono("papelera", "Quitar este ingrediente", () => {
+    lineasRecetaEnEdicion.splice(indice, 1);
+    pintarLineasReceta();
+  });
+
+  fila.append(campoIngrediente, crear, campoCantidad, campoPreparacion, quitar);
+  return fila;
+}
+
+id("btn-anadir-linea-receta").addEventListener("click", () => {
+  lineasRecetaEnEdicion.push(lineaRecetaVacia());
+  pintarLineasReceta();
+});
+
 function abrirFormularioDeReceta(receta) {
   recetaEditando = receta ? receta.id : null;
 
   id("receta-nombre").value = receta ? receta.nombre : "";
   id("receta-raciones").value = receta ? receta.raciones : "";
-  id("receta-ingredientes").value = receta ? (receta.ingredientes || []).join("\n") : "";
   id("receta-preparacion").value = receta ? receta.preparacion || "" : "";
+
+  // Una receta nueva empieza con una línea vacía, lista para escribir. Una
+  // receta que ya tiene ingredientes recupera una fila por cada uno: si es
+  // vieja (texto libre), cada línea entra SIN ingredienteId, precargada con
+  // su texto tal cual — editar una receta vieja es, de paso, la forma de
+  // migrarla (spec 082).
+  const ingredientesDeReceta = receta ? receta.ingredientes || [] : [];
+  lineasRecetaEnEdicion = ingredientesDeReceta.length
+    ? ingredientesDeReceta.map((linea) =>
+        esLineaEstructurada(linea)
+          ? { ...linea }
+          : { ...lineaRecetaVacia(), ingredienteNombre: nombreDeLinea(linea) }
+      )
+    : [lineaRecetaVacia()];
+
+  actualizarSugerenciasDespensa();
+  pintarLineasReceta();
 
   id("error-receta").textContent = "";
   id("form-receta").classList.remove("oculta");
@@ -1900,6 +2088,8 @@ function abrirFormularioDeReceta(receta) {
 
 function cerrarFormularioDeReceta() {
   recetaEditando = null;
+  lineasRecetaEnEdicion = [];
+  id("receta-lineas").innerHTML = "";
   id("form-receta").classList.add("oculta");
   id("btn-nueva-receta").classList.remove("oculta");
   id("error-receta").textContent = "";
@@ -1966,10 +2156,20 @@ id("form-receta").addEventListener("submit", async (evento) => {
   const error = id("error-receta");
   error.textContent = "";
 
+  // El editor manda SIEMPRE el array estructurado (spec 082), nunca el texto
+  // libre de antes: cada línea ya viene enlazada (o no) a un ingrediente
+  // real de la despensa. validarReceta() rechaza cualquier línea sin
+  // ingredienteId — igual una recién añadida y vacía que una vieja que
+  // todavía no se ha enlazado.
   const resultado = validarReceta(
     id("receta-nombre").value,
     id("receta-raciones").value,
-    id("receta-ingredientes").value,
+    lineasRecetaEnEdicion.map((linea) => ({
+      ingredienteId: linea.ingredienteId,
+      ingredienteNombre: linea.ingredienteNombre,
+      cantidad: linea.cantidad,
+      preparacion: linea.preparacion
+    })),
     id("receta-preparacion").value
   );
 
@@ -1990,9 +2190,14 @@ id("form-receta").addEventListener("submit", async (evento) => {
     avisarGuardado("guardado-receta");
     cerrarFormularioDeReceta();
     await refrescarRecetas();
-    // También cuando la escribes tú: si la has puesto en una receta, cocinas
-    // con ello (spec 068).
-    await llenarDespensaDesde([resultado]);
+    // Ya NO se llama a llenarDespensaDesde() aquí (spec 082): con el editor
+    // nuevo, cada ingrediente quedó enlazado o creado línea a línea MIENTRAS
+    // se editaba, así que volver a analizar la receta guardada sería
+    // trabajo repetido — y con líneas ya estructuradas, esa llamada
+    // esperaba texto y habría roto la despensa con basura tipo
+    // "[object Object]". Sigue haciendo falta para las recetas que
+    // propone la IA (texto libre): eso pasa por generarDieta(), no por
+    // aquí.
   } catch {
     error.textContent = "No se ha podido guardar. Comprueba tu conexión.";
   } finally {
@@ -2636,6 +2841,9 @@ async function refrescarDespensa() {
   // La lista de la compra sale de cruzar la despensa con las recetas, así que
   // cambiar la despensa la cambia (spec 073).
   pintarCompra();
+  // Y las sugerencias del editor de receta (spec 082): un ingrediente nuevo
+  // tiene que poder sugerirse sin recargar la página.
+  actualizarSugerenciasDespensa();
 }
 
 id("buscar-recetas").addEventListener("input", (evento) => {

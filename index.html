@@ -424,13 +424,15 @@
         <label for="receta-raciones">Para cuántas personas</label>
         <input type="text" id="receta-raciones" inputmode="numeric" placeholder="2">
 
-        <label for="receta-ingredientes">Ingredientes (uno solo por línea)</label>
-        <textarea id="receta-ingredientes" rows="5"
-          placeholder="200 g de lentejas&#10;1 cebolla&#10;sal&#10;pimienta"></textarea>
+        <label id="etiqueta-receta-lineas">Ingredientes</label>
         <p class="explicacion">
-          Uno en cada línea, sin juntar dos: "sal y pimienta" van separados. Así
-          la receta puede decirte cuál tienes en la despensa y cuál te falta.
+          Cada ingrediente enlazado a tu despensa, con su cantidad y, si hace
+          falta, cómo se prepara ("triturado", "en rodajas"…) aparte del
+          nombre.
         </p>
+        <div id="receta-lineas" aria-labelledby="etiqueta-receta-lineas"></div>
+        <datalist id="sugerencias-despensa"></datalist>
+        <button type="button" id="btn-anadir-linea-receta">Añadir ingrediente</button>
 
         <label for="receta-preparacion">Preparación</label>
         <textarea id="receta-preparacion" rows="4"

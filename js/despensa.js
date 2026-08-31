@@ -141,6 +141,28 @@ export function ordenar(ingredientes) {
   });
 }
 
+// --- Líneas de receta: texto libre o estructuradas (spec 082) -------------
+//
+// Una línea de `receta.ingredientes` puede ser un string de texto libre
+// (recetas de antes de esta spec, incluidas las 73 sembradas) o un objeto
+// enlazado a un ingrediente real de la despensa (recetas creadas o editadas
+// con el editor nuevo). Estas dos funciones son el único sitio que decide
+// cuál es cuál: todo lo demás pregunta aquí en vez de mirar el tipo por su
+// cuenta, para no repetir la distinción en cada función que toca una línea.
+
+export function esLineaEstructurada(linea) {
+  return Boolean(linea) && typeof linea === "object";
+}
+
+// El nombre legible de una línea, sea del formato que sea. Para una línea
+// estructurada es el nombre del ingrediente —nunca la cantidad ni la
+// preparación—; para una vieja, la línea entera.
+export function nombreDeLinea(linea) {
+  return esLineaEstructurada(linea)
+    ? String(linea.ingredienteNombre ?? "")
+    : String(linea ?? "");
+}
+
 // --- De línea de receta a ingrediente de despensa (spec 068) --------------
 //
 // Una receta escribe "200 g de lentejas" o "2 dientes de ajo". En la despensa
@@ -341,6 +363,18 @@ export function cruzarConLaDespensa(lineas, despensa) {
   const gastados = new Set();
 
   return (lineas || []).map((linea) => {
+    // Línea estructurada (spec 082): el enlace ya dice exactamente a qué
+    // ingrediente se refiere, así que "¿la tienes?" es una comprobación
+    // directa por id — nada de regex ni de partir la línea por comas.
+    if (esLineaEstructurada(linea)) {
+      const tengo =
+        Boolean(linea.ingredienteId) &&
+        !gastados.has(linea.ingredienteId) &&
+        disponibles.some((ingrediente) => ingrediente.id === linea.ingredienteId);
+      if (tengo) gastados.add(linea.ingredienteId);
+      return { texto: nombreDeLinea(linea), tengo };
+    }
+
     const partes = partesDeLinea(linea);
 
     // TODAS las partes tienen que estar. Es el arreglo del 29 de agosto: antes
@@ -403,6 +437,31 @@ export function loQueFalta(recetas, despensa) {
 
   (recetas || []).forEach((receta) => {
     (receta.ingredientes || []).forEach((linea) => {
+      // Línea estructurada (spec 082): el enlace ya dice a qué ingrediente
+      // de tu despensa se refiere, así que no hace falta adivinar nada.
+      if (esLineaEstructurada(linea)) {
+        if (!linea.ingredienteId) return;
+
+        const nombre = nombreDeLinea(linea).slice(0, MAX_NOMBRE);
+        if (!nombre || yaEsta(nombre)) return;
+
+        const enDespensa = despensa.find(
+          (ingrediente) => ingrediente.id === linea.ingredienteId
+        );
+
+        // Si lo tienes marcado, no hay nada que comprar. Si el ingrediente
+        // enlazado ya no existe en la despensa (se borró), se cuenta igual
+        // como que falta: el nombre copiado en la línea es lo único que
+        // queda de él.
+        if (enDespensa && enDespensa.tengo) return;
+
+        faltan.push({
+          nombre: enDespensa ? enDespensa.nombre : nombre,
+          ingredienteId: enDespensa ? enDespensa.id : null
+        });
+        return;
+      }
+
       const nombre = ingredienteDeLinea(linea).slice(0, MAX_NOMBRE);
       if (!nombre || yaEsta(nombre)) return;
 
