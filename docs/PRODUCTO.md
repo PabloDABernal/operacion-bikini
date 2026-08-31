@@ -615,6 +615,19 @@ Qué NO hace:
 |---|---|
 | 079 | Comidas, que se lea |
 
+## Qué hará (evolutivos de la fase productiva, desde el 31 de agosto de 2026)
+
+Ya no salen de una lista planificada: salen de usar la app cada día.
+
+- **El texto que se recorta se puede desplegar.** Donde un nombre de plato,
+  título de sesión de ejercicio, o nombre de receta/ejercicio se corta con
+  puntos suspensivos por no caber en su fila, tocarlo lo despliega entero en
+  su sitio, sin entrar en modo edición. Vuelve a tocarlo para contraerlo.
+
+| Spec | Qué |
+|---|---|
+| 080 | El texto recortado se despliega al tocarlo |
+
 ## Ideas para más adelante (27 de agosto de 2026)
 
 El 27 de agosto se vació `docs/BACKLOG.md`: la app está terminada y en uso
