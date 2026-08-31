@@ -211,6 +211,35 @@ header {
   box-shadow: inset 0 -2px 0 var(--acento);
 }
 
+/* El interruptor Recetas/Ingredientes del Recetario (spec 085). Mismo
+   aspecto que `.subpestanas`/`.subpestana`, pero clase propia: a diferencia
+   de esas, esto NO se esconde en escritorio (aquí no hay tres columnas donde
+   quepan las dos cosas a la vez) y no lo recorre `abrirSubpestana()`. */
+.subpestanas-internas {
+  display: flex;
+  gap: var(--e1);
+  margin-bottom: var(--e4);
+  border-bottom: 1px solid var(--borde);
+}
+
+.panel-recetario-boton {
+  flex: 1;
+  min-width: 0;
+  padding: var(--e3) var(--e2);
+  background: none;
+  border: none;
+  border-radius: 0;
+  color: var(--tinta-suave);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.panel-recetario-boton.activa {
+  color: var(--acento);
+  box-shadow: inset 0 -2px 0 var(--acento);
+}
+
 .subseccion {
   display: none;
 }
@@ -2259,14 +2288,15 @@ button:disabled {
     align-items: start;
   }
 
-  /* Comidas tiene CUATRO sub-pestañas desde la spec 058, y la rejilla se diseñó
-     para tres. La Despensa caía en una segunda fila, debajo de Apuntar y lejos
-     de las Recetas, que es con lo que se usa: miras qué tienes y montas la
-     receta. En móvil no se notaba, porque ahí las pestañas siguen siendo
-     pestañas.
+  /* Comidas tiene TRES sub-pestañas (el Recetario fundió Recetas y Despensa
+     en la spec 085). Se colocan a mano.
 
-     Se colocan a mano las cuatro. La Despensa va DEBAJO de Recetas, en la misma
-     columna, que es donde el usuario esperaba encontrarla (29 de agosto). */
+     El Recetario va arriba a la derecha (columna 3, fila 1): con su
+     interruptor Recetas/Ingredientes y los ingredientes paginados, es un
+     bloque corto — ya no hace falta esconderlo debajo de Mi dieta ni
+     apilarlo con la Despensa como antes. La Compra va justo debajo, en la
+     misma columna: al acortarse el Recetario, deja de quedar enterrada al
+     final de la página. */
   .seccion[data-seccion="comidas"] .subseccion[data-subseccion="apuntar"] {
     grid-column: 1;
     grid-row: 1 / span 2;
@@ -2277,25 +2307,13 @@ button:disabled {
     grid-row: 1;
   }
 
-  /* La DESPENSA va arriba de su columna desde la spec 079. Estaba debajo de
-     Recetas, y con las 73 recetas de la spec 075 quedó enterrada a media
-     pantalla de scroll: lo que se mira a diario es qué tienes, no la lista
-     entera del recetario. Lo pidió el usuario el 31 de agosto.
-
-     Y la Compra va con ella, justo debajo. En escritorio se ven las dos a la
-     vez, así que aquí no hace falta el botón que lleva de una a otra. */
-  .seccion[data-seccion="comidas"] .subseccion[data-subseccion="despensa"] {
+  .seccion[data-seccion="comidas"] .subseccion[data-subseccion="recetas"] {
     grid-column: 3;
     grid-row: 1;
   }
 
   .seccion[data-seccion="comidas"] .subseccion[data-subseccion="compra"] {
     grid-column: 3;
-    grid-row: 2;
-  }
-
-  .seccion[data-seccion="comidas"] .subseccion[data-subseccion="recetas"] {
-    grid-column: 2;
     grid-row: 2;
   }
 

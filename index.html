@@ -199,8 +199,7 @@
       <div class="subpestanas" data-de="comidas">
         <button type="button" class="subpestana activa" data-subseccion="apuntar" data-icono="apuntar" aria-current="true"><span class="etiqueta">Apuntar</span></button>
         <button type="button" class="subpestana" data-subseccion="dieta" data-icono="dieta"><span class="etiqueta">Mi dieta</span></button>
-        <button type="button" class="subpestana" data-subseccion="recetas" data-icono="recetas"><span class="etiqueta">Recetas</span></button>
-        <button type="button" class="subpestana" data-subseccion="despensa" data-icono="despensa"><span class="etiqueta">Despensa</span></button>
+        <button type="button" class="subpestana" data-subseccion="recetas" data-icono="recetas"><span class="etiqueta">Recetario</span></button>
       </div>
 
       <!-- Sub-pestaña: Apuntar -->
@@ -398,10 +397,27 @@
       <p id="guardado-dieta" class="guardado" role="status"></p>
       </div>
 
-      <!-- Sub-pestaña: Recetas -->
+      <!-- Sub-pestaña: Recetario (spec 085, fusión de Recetas y Despensa) -->
       <div class="subseccion" data-subseccion="recetas">
+      <h2>Recetario</h2>
+
+      <!-- El interruptor interno: Recetas / Ingredientes. No es una
+           sub-pestaña de primer nivel (esas las gestiona abrirSubpestana());
+           lo gestiona mostrarPanelDeRecetario() en js/app.js. -->
+      <!-- Clases propias, no `.subpestanas`/`.subpestana`: ese primer
+           selector se ESCONDE en escritorio (spec 041, las sub-pestañas de
+           primer nivel sobran si los bloques se ven a la vez), y aquí SÍ hace
+           falta verlo siempre — Recetas e Ingredientes no se ven a la vez, ni
+           en móvil ni en escritorio. El segundo lo recorre abrirSubpestana()
+           por toda la sección y le quitaría `.activa` a estos botones en
+           cualquier navegación ajena, porque no llevan `data-subseccion`. -->
+      <div class="subpestanas-internas">
+        <button type="button" class="panel-recetario-boton activa" data-panel-recetario="recetas" aria-current="true">Recetas</button>
+        <button type="button" class="panel-recetario-boton" data-panel-recetario="ingredientes">Ingredientes</button>
+      </div>
+
+      <div id="panel-recetario-recetas">
       <!-- Recetario (spec 026) -->
-      <h2>Mis recetas</h2>
       <p id="estado-recetas" class="explicacion"></p>
 
       <!-- Buscador (spec 079). Con las 73 recetas de la 075 dentro, leer la
@@ -450,7 +466,7 @@
       <button type="button" id="btn-desplegar-recetas" class="desplegar oculta"></button>
       </div>
 
-      <div class="subseccion" data-subseccion="despensa">
+      <div id="panel-recetario-ingredientes" class="oculta">
       <!-- La despensa (spec 058). No es un inventario: no lleva cantidades ni
            caducidades. Marcar y desmarcar es todo el mantenimiento que pide. -->
       <!-- La compra dejó de ser sub-pestaña (spec 079): se usa una vez por
@@ -458,7 +474,6 @@
            número de lo que falta. -->
       <button type="button" id="btn-ir-a-compra" class="ir-a-compra"></button>
 
-      <h2>Mi despensa</h2>
       <p id="estado-despensa" class="explicacion"></p>
 
       <form id="form-ingrediente">
@@ -485,7 +500,11 @@
           <button type="button" id="btn-limpiar-busqueda" class="enlace">Limpiar</button>
         </div>
       </div>
+
+      <button type="button" id="btn-desplegar-despensa-arriba" class="desplegar oculta"></button>
       <div id="lista-despensa"></div>
+      <button type="button" id="btn-desplegar-despensa" class="desplegar oculta"></button>
+      </div>
       </div>
 
       <div class="subseccion" data-subseccion="compra">
@@ -494,7 +513,7 @@
            columna y no había forma de leerlo. Desde la 075-bis tiene
            sub-pestaña propia: son dos cosas distintas —lo que tienes y lo que
            hay que comprar— y ahora se ven como tales. -->
-      <button type="button" id="btn-volver-despensa" class="enlace">← Volver a la despensa</button>
+      <button type="button" id="btn-volver-despensa" class="enlace">← Volver a los ingredientes</button>
 
       <h2>Lista de la compra</h2>
       <p id="estado-compra" class="explicacion"></p>

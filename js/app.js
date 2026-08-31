@@ -340,11 +340,13 @@ function abrirSubpestana(seccion, nombre) {
     }
   });
 
-  // La despensa recoloca sus filas AQUÍ, al entrar, y en ningún otro momento
-  // (spec 058). Marcar no reordena: la fila saltaría bajo el dedo justo cuando
-  // estás marcando varias seguidas.
-  if (seccion === "comidas" && nombre === "despensa") {
-    reordenarDespensa();
+  // El Recetario aterriza SIEMPRE en el panel Recetas (spec 085): sea la
+  // pestaña misma, o editarRecetaDesdeElDia() de la spec 083. Quien quiera
+  // Ingredientes en concreto (volver de la compra) lo pide DESPUÉS, con
+  // mostrarPanelDeRecetario() — esta llamada no se lo puede comer porque las
+  // dos son síncronas y en orden.
+  if (seccion === "comidas" && nombre === "recetas") {
+    mostrarPanelDeRecetario("recetas");
   }
 
   // El armario, igual y por lo mismo (spec 074).
@@ -359,15 +361,50 @@ function abrirSubpestana(seccion, nombre) {
   }
 }
 
-// La compra ya no tiene botón en la barra (spec 079): se llega desde la despensa
-// y se vuelve desde ella. `abrirSubpestana` no necesita que exista el botón,
-// solo la subsección, así que esto basta.
+// El interruptor Recetas/Ingredientes dentro del Recetario (spec 085, fusión
+// de las sub-pestañas Recetas y Despensa). No es una sub-pestaña de primer
+// nivel: abrirSubpestana() no sabe nada de esto, y viceversa.
+function mostrarPanelDeRecetario(modo) {
+  id("panel-recetario-recetas").classList.toggle("oculta", modo !== "recetas");
+  id("panel-recetario-ingredientes").classList.toggle("oculta", modo !== "ingredientes");
+
+  document.querySelectorAll(".panel-recetario-boton").forEach((boton) => {
+    const puesta = boton.dataset.panelRecetario === modo;
+    boton.classList.toggle("activa", puesta);
+    if (puesta) {
+      boton.setAttribute("aria-current", "true");
+    } else {
+      boton.removeAttribute("aria-current");
+    }
+  });
+
+  // La despensa recoloca sus filas AL ENTRAR en Ingredientes, y en ningún
+  // otro momento (spec 058): antes este hook colgaba de la sub-pestaña
+  // "despensa", que la spec 085 se lleva por delante al fundirla aquí.
+  // Marcar no reordena: la fila saltaría bajo el dedo justo cuando estás
+  // marcando varias seguidas.
+  if (modo === "ingredientes") {
+    reordenarDespensa();
+  }
+}
+
+document.querySelectorAll(".panel-recetario-boton").forEach((boton) => {
+  boton.addEventListener("click", () => mostrarPanelDeRecetario(boton.dataset.panelRecetario));
+});
+
+// La compra ya no tiene botón en la barra (spec 079): se llega desde
+// Ingredientes y se vuelve a Ingredientes. `abrirSubpestana` no necesita que
+// exista el botón, solo la subsección, así que esto basta.
 id("btn-ir-a-compra").addEventListener("click", () => {
   abrirSubpestana("comidas", "compra");
 });
 
 id("btn-volver-despensa").addEventListener("click", () => {
-  abrirSubpestana("comidas", "despensa");
+  // Al Recetario primero (aterriza en Recetas por defecto, ver arriba), y
+  // LUEGO a Ingredientes: el orden importa, si no el reseteo de arriba se
+  // comería este paso.
+  abrirSubpestana("comidas", "recetas");
+  mostrarPanelDeRecetario("ingredientes");
 });
 
 // La barra de navegación desaparecía en Ejercicio, en móvil. Confirmado con
@@ -2197,6 +2234,19 @@ id("btn-desplegar-recetas-arriba").addEventListener("click", () => {
   pintarRecetas();
 });
 
+id("btn-desplegar-despensa").addEventListener("click", () => {
+  despensaDesplegada = !despensaDesplegada;
+  pintarDespensa();
+  if (!despensaDesplegada) {
+    id("btn-desplegar-despensa").scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
+});
+
+id("btn-desplegar-despensa-arriba").addEventListener("click", () => {
+  despensaDesplegada = !despensaDesplegada;
+  pintarDespensa();
+});
+
 id("form-receta").addEventListener("submit", async (evento) => {
   evento.preventDefault();
   const error = id("error-receta");
@@ -2558,9 +2608,17 @@ let busquedaDespensa = "";
 // campo solo estorba.
 const MINIMO_PARA_BUSCAR = 8;
 
+// La lista deja de salir entera de golpe (spec 085): mismo patrón que las
+// recetas (RECETAS_SIN_DESPLEGAR), con más margen porque una fila de
+// ingrediente es mucho más compacta que una tarjeta de receta.
+const DESPENSA_SIN_DESPLEGAR = 10;
+let despensaDesplegada = false;
+
 function pintarDespensa() {
   const contenedor = id("lista-despensa");
   const recuento = id("recuento-despensa");
+  const boton = id("btn-desplegar-despensa");
+  const botonArriba = id("btn-desplegar-despensa-arriba");
 
   contenedor.innerHTML = "";
 
@@ -2580,18 +2638,32 @@ function pintarDespensa() {
     despensaCargada.length < MINIMO_PARA_BUSCAR
   );
 
-  const visibles = ingredientesQueCoinciden();
+  // El buscador filtra sobre TODOS los ingredientes, no solo los visibles:
+  // mismo criterio que ya usa el buscador de recetas con recetasDesplegadas.
+  const coinciden = ingredientesQueCoinciden();
+  const visibles = despensaDesplegada
+    ? coinciden
+    : coinciden.slice(0, DESPENSA_SIN_DESPLEGAR);
+
   visibles.forEach((ingrediente) =>
     contenedor.appendChild(filaDeIngrediente(ingrediente))
   );
 
   // Buscar algo que no está no es un error, pero hay que decirlo: si no, la
   // lista se queda vacía sin explicación.
-  if (busquedaDespensa && visibles.length === 0) {
+  if (busquedaDespensa && coinciden.length === 0) {
     contenedor.appendChild(
       celda(`Ningún ingrediente contiene "${busquedaDespensa}".`, "explicacion")
     );
   }
+
+  const hayEscondidos = visibles.length < coinciden.length;
+  boton.classList.toggle("oculta", !hayEscondidos && !despensaDesplegada);
+  boton.textContent = despensaDesplegada
+    ? "Ver menos"
+    : `Ver todos (${coinciden.length})`;
+  botonArriba.classList.toggle("oculta", !hayEscondidos && !despensaDesplegada);
+  botonArriba.textContent = boton.textContent;
 }
 
 // Se compara normalizado, como todo lo demás de la despensa: buscar "jamon"
