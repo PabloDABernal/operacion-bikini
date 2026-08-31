@@ -1962,7 +1962,12 @@ function filaDeIngredienteReceta(linea, indice) {
   campoIngrediente.setAttribute("aria-label", "Ingrediente");
   campoIngrediente.maxLength = MAX_NOMBRE_INGREDIENTE;
   campoIngrediente.value = linea.ingredienteNombre;
-  campoIngrediente.classList.toggle("linea-sin-enlazar", !linea.ingredienteId);
+  // Una línea recién añadida y vacía no está "mal": solo lo está una que
+  // tiene texto (típicamente una línea vieja precargada) sin enlazar.
+  campoIngrediente.classList.toggle(
+    "linea-sin-enlazar",
+    !linea.ingredienteId && Boolean(linea.ingredienteNombre)
+  );
 
   const crear = document.createElement("button");
   crear.type = "button";
