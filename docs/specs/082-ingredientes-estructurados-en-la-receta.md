@@ -33,22 +33,35 @@ forma nueva sin que nada más cambie todavía.
 4. Al guardar, la receta queda con sus ingredientes en la forma nueva. Al
    volver a abrirla para editar, el formulario recupera cada línea con su
    ingrediente, cantidad y preparación tal como se guardaron.
-5. Al ver la receta (no editarla), cada línea se lee como
+5. Al editar una receta que TODAVÍA está en formato viejo (texto libre,
+   como las 73 sembradas): se abre el mismo editor nuevo, con una línea por
+   cada elemento del array de texto, mostrando el texto tal cual pero SIN
+   ingrediente enlazado todavía. Antes de poder guardar hay que enlazar (o
+   crear) el ingrediente de cada línea, igual que en una receta nueva. Al
+   guardar, esa receta pasa a formato nuevo entera. Editar una receta vieja
+   es, de paso, la forma de migrarla una a una — la spec 083 solo hace
+   falta para las que nadie edite a mano.
+6. Al ver la receta (no editarla), cada línea se lee como
    "Ingrediente (cantidad)" y, si hay preparación, se lee aparte, sin
    mezclarse en el nombre. Ejemplo del usuario: "Ajo (4 g)" con "triturado"
    a un lado, no "Ajo triturado (4 g)".
-6. El cruce con la despensa (qué ingredientes de la receta ya tienes
+7. El cruce con la despensa (qué ingredientes de la receta ya tienes
    marcados) y la lista de la compra (qué te falta) siguen funcionando con
    una receta nueva, ahora por el enlace directo al ingrediente, no por
    adivinar el texto.
-7. Una receta de las 73 ya sembradas, o cualquiera creada antes de esta
-   spec (formato de texto libre, un array de líneas), se sigue viendo y
-   funcionando exactamente igual que hoy: esta spec no las toca ni las
-   rompe. (Migrarlas es la spec 083.)
-8. Puedes crear dos ingredientes de despensa que se parecen pero quieres
+8. Una receta de las 73 ya sembradas, o cualquiera creada antes de esta
+   spec, que NADIE HA EDITADO TODAVÍA (formato de texto libre, un array de
+   líneas), se sigue viendo y funcionando exactamente igual que hoy: esta
+   spec no la toca ni la rompe mientras nadie la abra para editar. (Migrar
+   de golpe las que nadie edite a mano es la spec 083.)
+9. Puedes crear dos ingredientes de despensa que se parecen pero quieres
    distinguir (ejemplo del usuario: "Tomate triturado" y "Tomate natural"):
    el formulario te deja crear el segundo como un ingrediente nuevo y
    distinto, sin fundirlo con el primero.
+10. Guardar una receta (nueva o editada) NO deja restos en la despensa más
+    allá de los ingredientes que enlazaste o creaste línea a línea: no
+    aparece nada raro ni ningún ingrediente con un nombre roto tipo
+    "[object Object]".
 
 ## 3. Alcance
 
@@ -64,10 +77,23 @@ forma nueva sin que nada más cambie todavía.
   adaptados para leer la forma nueva CUANDO la receta la tiene, y seguir
   leyendo la forma vieja (texto libre, con la heurística actual) cuando no.
 - Crear un ingrediente de despensa desde dentro del formulario de receta.
+- El formulario de editar receta pasa a ser el MISMO editor estructurado
+  para cualquier receta, esté en el formato que esté (ver criterio 5): deja
+  de existir un modo de edición en texto libre.
+- Quitar la llamada a `llenarDespensaDesde([resultado])` tras guardar una
+  receta (`js/app.js`, dentro del `submit` de `form-receta`, hoy en la
+  línea ~1995): con el editor nuevo, cada ingrediente ya quedó enlazado o
+  creado línea a línea MIENTRAS se editaba, así que volver a analizar la
+  receta guardada para "meter lo que falte en la despensa" es trabajo
+  repetido — y con ingredientes ya estructurados (objetos, no texto) esa
+  llamada rompería: `guardarIngredientesDeReceta()` → `clasificarIngredientes()`
+  → `ingredienteDeLinea()` esperan una línea de texto, y con un objeto
+  producirían basura tipo `"[object Object]"`.
 
 ### NO entra (explícitamente fuera)
-- Migrar las 73 recetas sembradas ni las que el usuario ya tenga en formato
-  de texto libre: spec 083.
+- Migrar de golpe las 73 recetas sembradas ni las que el usuario ya tenga y
+  nadie edite a mano: spec 083. (Editar una a mano SÍ la migra, como dice
+  el criterio 5 — eso es parte de esta spec, no de la 083.)
 - Editar una receta desde el día de la dieta (spec 084 en el orden
   acordado).
 - Apuntar una comida con un ingrediente suelto, sin receta (spec 085 en el
@@ -75,11 +101,14 @@ forma nueva sin que nada más cambie todavía.
 - Reorganizar Recetario/Despensa visualmente (spec 086 en el orden
   acordado).
 - Cambiar `guardarIngredientesDeReceta()`/`clasificarIngredientes()` (spec
-  072, el reparto "nuevos/dudas" al guardar una receta): con ingredientes ya
-  enlazados al escribir la línea, esa clasificación deja de hacer falta
-  para una receta nueva. Se deja intacta porque las recetas en formato
-  viejo (sembradas o del usuario) la siguen necesitando hasta que se
-  migren en la 083.
+  072, el reparto "nuevos/dudas"): se dejan intactas TAL CUAL, porque las
+  sigue usando otro sitio que esta spec no toca — las recetas que llegan en
+  texto libre desde la IA al generar una dieta (`generarDieta()`,
+  `js/app.js` línea ~3536, `llenarDespensaDesde(respuesta.recetas)`). Ese
+  camino sigue produciendo recetas en formato viejo (la IA no conoce los
+  `id` de tu despensa) y sigue necesitando la heurística de siempre. Lo
+  único que deja de llamarlas es el guardado manual de una receta desde el
+  Recetario (ver más arriba).
 
 ## 4. Comportamiento detallado
 
@@ -163,22 +192,40 @@ actual — nunca el nombre copiado.
   de uno ya existente ("Tomates" contra "tomate"): se ofrece el existente
   primero (misma regla de `mismoIngrediente()`), no se crea uno duplicado
   por descuido. Si el usuario quiere de verdad un ingrediente distinto
-  (caso 8, "tomate triturado" aparte de "tomate"), puede escribirlo entero
+  (criterio 9, "tomate triturado" aparte de "tomate"), puede escribirlo entero
   y confirmarlo como nuevo.
-- Editar una receta en formato viejo (texto libre): el formulario la
-  enseña con el cuadro de texto de siempre (no se fuerza a estructurar algo
-  que no lo está); si el usuario la reescribe entera con el editor nuevo,
-  pasa a formato nuevo al guardar. No hay conversión automática de una
-  línea de texto a estructurada: eso es exactamente el trabajo de la 083.
+- Editar una receta en formato viejo (texto libre) y cerrar sin guardar
+  (Cancelar): la receta se queda tal cual estaba, en formato viejo. Abrir
+  para editar y no terminar de enlazar todas las líneas no migra nada — la
+  migración ocurre solo al guardar con éxito.
+- Se cancela un formulario a medio enlazar y se crearon ingredientes nuevos
+  de paso (al elegir "crear nuevo" en alguna línea antes de cancelar): esos
+  ingredientes SÍ quedan en la despensa (se crean al confirmarlos, no al
+  guardar la receta entera) aunque la receta no se guarde. Es el mismo
+  comportamiento que ya tiene la despensa hoy: dar de alta un ingrediente
+  es un acto aparte de usarlo en algo.
 
 ## 7. Archivos afectados
 
-- `js/recetas.js`: `validarReceta()` cambia de firma (ya no recibe un
-  string de textarea, recibe el array de líneas estructuradas).
-- `js/app.js`: el formulario de receta (`abrirFormularioDeReceta()` y el
-  guardado, líneas ~1888-1975), `cuerpoDeReceta()` (línea ~1811).
+- `js/recetas.js`: `validarReceta()` cambia de firma. Con el editor nuevo
+  como ÚNICO modo de edición (criterio 5), deja de existir un envío en
+  texto de textarea: la función pasa a recibir siempre el array de líneas
+  estructuradas `{ ingredienteId, ingredienteNombre, cantidad,
+  preparacion }[]`, valida que cada línea tenga `ingredienteId` y que haya
+  al menos una línea, y recorta `cantidad`/`preparacion` a sus topes.
+- `js/app.js`:
+  - El formulario de receta (`abrirFormularioDeReceta()`, líneas
+    ~1888-1975 hoy): reescrito para el editor de líneas. Cuando la receta a
+    editar viene en formato viejo, cada línea del array de texto se
+    precarga como una fila sin `ingredienteId` (pendiente de enlazar).
+  - El `submit` de `form-receta`: quita la llamada a
+    `llenarDespensaDesde([resultado])` (ver "Alcance").
+  - `cuerpoDeReceta()` (línea ~1811): enseña la forma nueva; sigue
+    enseñando la vieja tal cual para una receta que aún no se haya editado.
 - `js/despensa.js`: `cruzarConLaDespensa()`, `loQueFalta()`, para
-  distinguir línea vieja/nueva.
+  distinguir línea vieja/nueva. `guardarIngredientesDeReceta()` y
+  `clasificarIngredientes()` NO se tocan (las sigue usando el camino de la
+  IA, ver "Alcance").
 - `styles.css`: estilos de las líneas del formulario nuevo y de la vista de
   una línea estructurada.
 
@@ -196,9 +243,13 @@ actual — nunca el nombre copiado.
   distintos: la heurística actual para eso falla a menudo, y no vale la
   pena forzar una estructura que no cubre "al gusto" o fracciones. Decisión
   del usuario.
-- **Las recetas ya existentes (sembradas o del usuario) NO se migran en
-  esta spec.** Quedan en su formato de texto libre, conviviendo con las
-  nuevas. Decisión del usuario, que abre la spec 083.
+- **Las recetas ya existentes (sembradas o del usuario) NO se migran de
+  golpe en esta spec.** Pero editar CUALQUIER receta —vieja o nueva— abre
+  siempre el mismo editor estructurado; si es vieja, sus líneas de texto se
+  precargan sin enlazar y hay que enlazarlas antes de poder guardar. Editar
+  a mano migra esa receta de paso. Decisión del usuario, tras la revisión
+  de `revisor-specs`: migrar de golpe las que nadie edite queda para la
+  spec 083, pero editar deja de tener un modo "texto libre" aparte.
 
 ## 9. Fuera de spec: ideas apuntadas
 
@@ -221,8 +272,13 @@ acordado (083, 084, 085, 086).
    el nombre.
 5. Marca en tu despensa alguno de los ingredientes de esa receta como que
    lo tienes, y comprueba que la receta lo refleja (cruce despensa/receta).
-6. Comprueba que una receta de las 73 ya puestas se sigue viendo y
-   comportando exactamente igual que antes de esta spec.
-7. Prueba el caso del tomate: crea "Tomate triturado" como ingrediente
+6. Comprueba que una receta de las 73 ya puestas se sigue viendo IGUAL que
+   antes de esta spec, mientras no la edites.
+7. Abre esa misma receta para editar: debe salir el editor nuevo con sus
+   líneas de texto sin enlazar. Enlaza o crea cada ingrediente, guarda, y
+   comprueba que ahora se lee estructurada ("Ingrediente (cantidad)").
+   Comprueba también que tu despensa no se ha llenado de basura tipo
+   "[object Object]" ni de ingredientes repetidos.
+8. Prueba el caso del tomate: crea "Tomate triturado" como ingrediente
    nuevo aunque ya tengas "Tomate" en la despensa, y comprueba que quedan
    como dos ingredientes distintos, no fundidos.
