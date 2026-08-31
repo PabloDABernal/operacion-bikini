@@ -853,6 +853,12 @@ function celda(texto, clase) {
 // tabulador y se active con Enter — pero sin marcador visual de que
 // reacciona, más allá del cursor: la clase `texto-desplegable` le quita todo
 // lo que un botón trae de serie.
+//
+// El click no se propaga (spec 081): en el Recetario y el Catálogo este
+// botón vive dentro de la cabecera de una tarjeta, que es OTRO elemento
+// tocable (abre/cierra la tarjeta); sin cortar la propagación, tocar el
+// nombre activaría también la cabecera. En las demás pantallas no hay nada
+// escuchando por encima, así que cortarla ahí no cambia nada.
 function celdaDesplegable(texto, clase, clave, desplegados, repintar) {
   const elemento = document.createElement("button");
   elemento.type = "button";
@@ -863,13 +869,44 @@ function celdaDesplegable(texto, clase, clave, desplegados, repintar) {
   elemento.classList.toggle("desplegado", desplegado);
   elemento.setAttribute("aria-expanded", String(desplegado));
 
-  elemento.addEventListener("click", () => {
+  elemento.addEventListener("click", (evento) => {
+    evento.stopPropagation();
     if (desplegados.has(clave)) desplegados.delete(clave);
     else desplegados.add(clave);
     repintar();
   });
 
   return elemento;
+}
+
+// La cabecera de una tarjeta de receta/ejercicio se toca para abrirla o
+// cerrarla (Recetario, Catálogo). Desde la spec 081 ya no es un <button>
+// nativo: el nombre de dentro es TAMBIÉN tocable por su cuenta
+// (celdaDesplegable), y un <button> no puede llevar otro <button> anidado
+// dentro — es HTML inválido y el navegador cierra el de fuera al toparse con
+// el de dentro.
+//
+// `role="button"` y `tabindex="0"` la anuncian y la hacen alcanzable con el
+// tabulador igual que un botón nativo; el keydown reproduce a mano su
+// activación con Enter y Espacio. El guardia `evento.target !== cabecera`
+// es lo que evita que pulsar Enter con el foco en el nombre (un <button> de
+// verdad, que gestiona su propio Enter) dispare TAMBIÉN el toggle de la
+// cabecera: el keydown burbujea igual que cualquier evento, así que sin este
+// guardia un solo Enter haría las dos cosas a la vez.
+function cabeceraDesplegable(alPulsar) {
+  const cabecera = document.createElement("div");
+  cabecera.setAttribute("role", "button");
+  cabecera.tabIndex = 0;
+  cabecera.addEventListener("click", alPulsar);
+  cabecera.addEventListener("keydown", (evento) => {
+    if (evento.target !== cabecera) return;
+    if (evento.key !== "Enter" && evento.key !== " ") return;
+    // Espacio hace scroll de página por defecto en un elemento que no es un
+    // <button> de verdad; Enter no, pero da igual prevenirlo en los dos.
+    evento.preventDefault();
+    alPulsar();
+  });
+  return cabecera;
 }
 
 function botonDeFila(texto, alPulsar) {
@@ -1677,6 +1714,11 @@ let recetaAbierta = null;
 let recetaEditando = null;
 let recetasDesplegadas = false;
 
+// Qué nombres de receta están desplegados enteros dentro de su cabecera, por
+// id (spec 081). Independiente de `recetaAbierta`: cerrar la tarjeta no
+// contrae el nombre, y viceversa.
+let nombresRecetaDesplegados = new Set();
+
 // Lo escrito en el buscador de recetas (spec 079). Filtra lo que se pinta, no
 // lo que hay.
 let busquedaRecetas = "";
@@ -1814,14 +1856,15 @@ function tarjetaDeReceta(receta) {
   const tarjeta = document.createElement("article");
   tarjeta.className = "receta";
 
-  const cabecera = botonDeFila("", () => {
+  const cabecera = cabeceraDesplegable(() => {
     // Tocar la tarjeta la abre; volver a tocarla la cierra.
     recetaAbierta = recetaAbierta === receta.id ? null : receta.id;
     pintarRecetas();
   });
   cabecera.className = "receta-cabecera";
+  cabecera.setAttribute("aria-expanded", String(recetaAbierta === receta.id));
   cabecera.append(
-    celda(receta.nombre, "receta-nombre"),
+    celdaDesplegable(receta.nombre, "receta-nombre", receta.id, nombresRecetaDesplegados, pintarRecetas),
     celda(`para ${receta.raciones}`, "registro-detalle")
   );
   tarjeta.appendChild(cabecera);
@@ -3584,6 +3627,10 @@ let ejercicioAbierto = null;
 let ejercicioEditando = null;
 let catalogoDesplegado = false;
 
+// Qué nombres de ejercicio están desplegados enteros dentro de su cabecera,
+// por id (spec 081). Hermano de `nombresRecetaDesplegados` en el Recetario.
+let nombresEjercicioDesplegados = new Set();
+
 function pintarCatalogo() {
   const contenedor = id("lista-catalogo");
   const boton = id("btn-desplegar-catalogo");
@@ -3615,14 +3662,15 @@ function tarjetaDeEjercicio(ejercicio) {
   const tarjeta = document.createElement("article");
   tarjeta.className = "receta";
 
-  const cabecera = botonDeFila("", () => {
+  const cabecera = cabeceraDesplegable(() => {
     // Tocar la tarjeta la abre; volver a tocarla la cierra.
     ejercicioAbierto = ejercicioAbierto === ejercicio.id ? null : ejercicio.id;
     pintarCatalogo();
   });
   cabecera.className = "receta-cabecera";
+  cabecera.setAttribute("aria-expanded", String(ejercicioAbierto === ejercicio.id));
   cabecera.append(
-    celda(ejercicio.nombre, "receta-nombre"),
+    celdaDesplegable(ejercicio.nombre, "receta-nombre", ejercicio.id, nombresEjercicioDesplegados, pintarCatalogo),
     celda(ejercicio.material || "sin material", "registro-detalle")
   );
   tarjeta.appendChild(cabecera);
