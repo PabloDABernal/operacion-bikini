@@ -648,6 +648,15 @@ Ya no salen de una lista planificada: salen de usar la app cada día.
 |---|---|
 | 083 | Editar la receta desde el día |
 
+- **Apuntar una comida se puede hacer eligiendo un ingrediente de tu
+  despensa** (de los que tienes marcados) en vez de escribirlo, sin tener
+  que crear una receta de un solo ingrediente. La comida queda enlazada de
+  verdad a ese ingrediente, pensando en cruces futuros.
+
+| Spec | Qué |
+|---|---|
+| 084 | Apuntar una comida con un ingrediente suelto de la despensa |
+
 ## Ideas para más adelante (27 de agosto de 2026)
 
 El 27 de agosto se vació `docs/BACKLOG.md`: la app está terminada y en uso
