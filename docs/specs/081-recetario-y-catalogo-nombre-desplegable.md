@@ -1,6 +1,6 @@
 # 081 — Recetario y Catálogo: el nombre se despliega dentro de la cabecera
 
-- **Estado:** borrador
+- **Estado:** 🚧 implementada y desplegada el 31 de agosto de 2026 (commit `0bd2cda`), revisada por `revisor-specs` y `revisor-codigo`. **Pendiente de que el usuario la pruebe.**
 - **Fecha:** 2026-08-31
 - **Referencia en PRODUCTO.md:** "Qué hará (evolutivos de la fase productiva, desde el 31 de agosto de 2026)"
 
