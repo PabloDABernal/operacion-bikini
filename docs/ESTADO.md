@@ -21,9 +21,9 @@ Documento para retomar el trabajo en frío. Se actualiza al terminar cada spec.
 > mande la llamada, y `api/consulta.js` pide ahora 2048 en vez de los 8192 por
 > defecto: le sobra de margen para el cierre (200 palabras) y los campos
 > cortos, y acota cuánto puede tardar. `api/dieta.js`, `api/tabla.js` y
-> `api/analisis.js` siguen con el margen de 8192, que sí necesitan. **Sin
-> probar en producción todavía** — desplegar y reintentar el alta es el
-> siguiente paso.
+> `api/analisis.js` siguen con el margen de 8192, que sí necesitan. **Desplegado
+> a `main` y confirmado por el usuario en producción: la entrevista ya no da
+> timeout.**
 >
 > **Cuatro specs desplegadas y sin probar.** No se cierran con una sesión de
 > pruebas: se validan usándolas. Sus guiones están al final de cada una.
