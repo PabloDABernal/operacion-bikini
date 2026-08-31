@@ -34,9 +34,10 @@ visual de Comidas queda para otra sesión aparte).
 5. Si vuelves a "Escribir" tras haber elegido un ingrediente, se olvida la
    elección: guardar en modo "Escribir" nunca lleva un ingrediente
    enlazado, aunque hubieras tocado el desplegable un momento antes.
-6. Si no tienes NINGÚN ingrediente marcado en tu despensa, el modo "Elegir
-   de mi despensa" lo dice (no un desplegable vacío y mudo) y te deja
-   seguir escribiendo libremente sin fricción.
+6. Si no tienes NINGÚN ingrediente marcado en tu despensa, el botón
+   "Elegir de mi despensa" del interruptor está deshabilitado (con una
+   nota de por qué) y el formulario se queda en "Escribir", sin
+   fricción.
 7. Repetir con "Lo de siempre" (los chips de comidas repetidas) sigue
    funcionando igual: son atajos de texto, y no interfieren con el modo
    nuevo.
@@ -68,9 +69,11 @@ visual de Comidas queda para otra sesión aparte).
 
 ## 4. Comportamiento detallado
 
-- El interruptor (dos botones tipo pestaña, o un `<select>` de dos
-  opciones — detalle de implementación libre) vive junto al `<label>`
-  "Qué has comido", antes del campo en sí.
+- El interruptor: dos botones tipo pestaña, con la clase `panel-recetario-boton`
+  que ya trae la spec 085 para el interruptor Recetas/Ingredientes del
+  Recetario — mismo concepto (dos opciones dentro de un panel), mismo
+  aspecto, sin inventar un estilo nuevo. Vive junto al `<label>` "Qué has
+  comido", antes del campo en sí.
 - Modo "Escribir" (por defecto, y al cargar la pantalla): el textarea de
   siempre, comportamiento sin cambios.
 - Modo "Elegir de mi despensa":
@@ -79,13 +82,11 @@ visual de Comidas queda para otra sesión aparte).
   - Un campo de texto de cantidad, opcional (mismo criterio que la
     cantidad de una línea de receta, spec 082: texto libre, sin validar
     formato).
-  - Si `despensaCargada.filter(i => i.tengo)` está vacío: el `<select>` se
-    sustituye por un aviso ("No tienes ningún ingrediente marcado en tu
-    despensa.") y el interruptor puede seguir en este modo, pero no se
-    puede guardar así — o, más simple, el modo "Elegir de mi despensa" se
-    deshabilita y se fuerza "Escribir" con una nota. Cualquiera de las dos
-    es válida siempre que no deje al usuario bloqueado sin poder apuntar
-    nada.
+  - Si `despensaCargada.filter(i => i.tengo)` está vacío: el botón "Elegir
+    de mi despensa" del interruptor se deshabilita (`disabled`), con un
+    `title`/texto explicando que no tienes ningún ingrediente marcado, y
+    el formulario se queda forzado en modo "Escribir". Nunca hay un modo
+    activo en el que no se pueda guardar. Decisión del usuario.
 - Al guardar (`submit` de `form-comida`): si el modo activo es "Elegir de
   mi despensa" y hay un ingrediente elegido, el texto que se manda a
   `validarComida()` se construye como `nombre` o `` `${nombre} (${cantidad})` ``
@@ -133,8 +134,9 @@ conserva su texto tal cual, sin verse afectada.
 - `js/app.js`: el formulario "Nueva comida" (interruptor, desplegable,
   campo de cantidad, y el `submit`).
 - `index.html`: el HTML del interruptor y el desplegable nuevo.
-- `styles.css`: estilos del interruptor (puede reutilizar el patrón de
-  `.subpestanas`/`.subpestana` si encaja, o algo más simple).
+- `styles.css`: reutiliza `.subpestanas-internas`/`.panel-recetario-boton`
+  (spec 085) para el interruptor; sin estilos nuevos salvo que algo no
+  encaje.
 
 ## 8. Decisiones tomadas
 
@@ -145,6 +147,10 @@ conserva su texto tal cual, sin verse afectada.
   añade al texto ya escrito. Decisión del usuario.
 - **Solo los ingredientes marcados (`tengo: true`)** salen en el
   desplegable. Decisión del usuario.
+- **Con la despensa sin ningún ingrediente marcado, el botón "Elegir de mi
+  despensa" se deshabilita** y el formulario se queda en "Escribir" —
+  nunca hay un modo activo en el que no se pueda guardar. Decisión del
+  usuario, tras la revisión de `revisor-specs`.
 - **Editar una comida ya apuntada no lleva el interruptor**: sigue siendo
   texto libre, para mantener la spec pequeña. Decisión del usuario (alcance).
 
@@ -172,5 +178,7 @@ conserva su texto tal cual, sin verse afectada.
    o si hace falta con las herramientas de desarrollo) que esa comida NO
    lleva `ingredienteId`.
 6. Desmarca todos los ingredientes de tu despensa (o bórralos) y vuelve a
-   Apuntar: el modo "Elegir de mi despensa" debe avisar de que no hay
-   ninguno, sin dejarte bloqueado para apuntar por texto.
+   Apuntar: el botón "Elegir de mi despensa" debe salir deshabilitado, con
+   una nota de por qué, y el formulario en "Escribir" — puedes apuntar por
+   texto sin fricción. Vuelve a marcar alguno para dejar la despensa como
+   estaba.
