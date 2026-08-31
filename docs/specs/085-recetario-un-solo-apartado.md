@@ -34,7 +34,10 @@ relacionadas de hoy (082, 083, 084 ya cerradas o en marcha).
 5. En escritorio (≥64rem), el Recetario (con su interruptor) va arriba a
    la derecha, en la tercera columna, primera fila — donde antes estaba
    la Despensa sola. La lista de la compra sigue debajo, en la misma
-   columna. La columna del medio se queda solo con Mi dieta.
+   columna. La columna del medio se queda solo con Mi dieta. A diferencia
+   de hoy, Recetas e Ingredientes YA NO se ven a la vez en escritorio (hoy
+   son dos bloques separados y visibles a un tiempo): es el mismo
+   interruptor de un solo panel que en móvil, en las dos anchuras.
 6. Entrar en Recetario, sea desde la pestaña o desde "Editar" en una
    receta vista desde Mi dieta (spec 083), siempre aterriza en el panel
    "Recetas" (no en "Ingredientes"), igual que hoy.
@@ -94,6 +97,17 @@ relacionadas de hoy (082, 083, 084 ya cerradas o en marcha).
   navega ahí (la pestaña misma, o `editarRecetaDesdeElDia()` de la spec
   083) aterriza siempre en el panel correcto, sin arrastrar un
   "Ingredientes" que se hubiera quedado activo de antes.
+- **El reordenado de la despensa al entrar (spec 058) no se pierde.** Hoy
+  `abrirSubpestana()` llama a `reordenarDespensa()` SOLO cuando activa la
+  sub-pestaña `despensa` de `comidas` (línea ~346-348: "poner arriba lo
+  que has marcado desde la última vez que entraste"). Con la fusión, esa
+  sub-pestaña deja de activarse nunca (ni desde la pestaña de primer
+  nivel, ni desde "volver de la compra", que ahora pasan por `recetas` +
+  el interruptor interno). Por eso `mostrarPanelDeRecetario("ingredientes")`
+  tiene que llamar a `reordenarDespensa()` cada vez que activa el panel de
+  Ingredientes — es el hook que sustituye al de hoy, para que marcar
+  varios ingredientes y volver a entrar en el panel los siga reordenando
+  igual que ahora.
 - **Volver de la lista de la compra**: el botón "← Volver a la despensa"
   pasa a decir "← Volver a los ingredientes" (o similar) y, en vez de
   `abrirSubpestana("comidas", "despensa")` (que ya no existe como
@@ -132,6 +146,10 @@ Ninguno. Es reorganización de interfaz.
 - Buscar un ingrediente en Ingredientes con la lista colapsada: el
   buscador filtra sobre TODOS los ingredientes (no solo los visibles),
   igual que ya hace el buscador de recetas hoy con `recetasDesplegadas`.
+- Marcar varios ingredientes seguidos dentro del panel Ingredientes: la
+  fila NO se reordena bajo el dedo (mismo criterio que ya tiene la
+  despensa hoy); solo se reordena al volver a entrar en el panel
+  (`reordenarDespensa()`, ver "Comportamiento detallado").
 - Con 0 ingredientes en la despensa: el aviso de "aquí van los
   ingredientes..." se sigue viendo igual; el paginado no aparece (no hay
   nada que desplegar).
@@ -144,11 +162,13 @@ Ninguno. Es reorganización de interfaz.
 - `index.html`: fusión de las sub-pestañas Recetas/Despensa en una,
   interruptor interno nuevo, reubicación del HTML de la despensa dentro
   del contenedor de Recetario.
-- `js/app.js`: `mostrarPanelDeRecetario()` (nueva), `abrirSubpestana()`
-  (para aterrizar siempre en "Recetas"), el listener de
-  `btn-volver-despensa`, `pintarDespensa()` y `ingredientesQueCoinciden()`
-  (paginado, mismo patrón que `pintarRecetas()`), nuevas
-  constante/variable de paginado.
+- `js/app.js`: `mostrarPanelDeRecetario()` (nueva — también llama a
+  `reordenarDespensa()` al activar Ingredientes), `abrirSubpestana()`
+  (para aterrizar siempre en "Recetas", y para quitar la llamada vieja a
+  `reordenarDespensa()` atada a la sub-pestaña `despensa`, que ya no
+  existe), el listener de `btn-volver-despensa`, `pintarDespensa()` y
+  `ingredientesQueCoinciden()` (paginado, mismo patrón que
+  `pintarRecetas()`), nuevas constante/variable de paginado.
 - `styles.css`: rejilla de escritorio (columna/fila de `recetas` y
   eliminar la de `despensa`), estilos del interruptor interno.
 
@@ -198,3 +218,7 @@ Ninguna nueva.
    debajo, y que la columna del medio solo tiene Mi dieta.
 7. Comprueba que crear, editar, borrar y marcar recetas e ingredientes
    sigue funcionando exactamente igual que antes.
+8. En Ingredientes, marca uno que esté abajo de la lista (sin marcar).
+   Sal del Recetario (a otra pestaña) y vuelve a entrar en Ingredientes:
+   el que acabas de marcar debe haber subido arriba (mismo reordenado de
+   siempre).
