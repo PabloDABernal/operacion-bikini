@@ -1,6 +1,8 @@
 # 078 — El material que te falta
 
-- **Estado:** borrador
+- **Estado:** revisada — `revisor-specs` sin bloqueantes; **no se puede
+  implementar antes que la 077**, de la que depende para que
+  `ejercicio.material` ya sea una lista de piezas.
 - **Fecha:** 2026-09-01
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (v13: el material, decidida el 30 de agosto de 2026)", tercer punto ("Y lo que te falta, junto").
 - **Depende de:** la spec 074 (el armario) y la 077 (la tabla aprovecha tu
@@ -72,9 +74,13 @@ Dos cosas en una sola lista:
 
 - **Lo que falta de la tabla**: cada pieza de material de los ejercicios de
   tu tabla activa (recorriendo `dias[].sesion.ejercicios[]`, cada uno con
-  su `ejercicioId` si está enlazado al catálogo), cruzada contra tu
-  armario, que no esté marcada. Se calcula **al vuelo**, sin guardar nada
-  — igual que la 073 con la dieta.
+  su `ejercicioId` si está enlazado al catálogo — un día de descanso tiene
+  `sesion: null` y simplemente no aporta nada, sin caso especial que
+  tratar), cruzada contra tu armario, que no esté marcada. Se calcula **al
+  vuelo**, sin guardar nada — igual que la 073 con la dieta. Resolver cada
+  `ejercicioId` contra su material usa `listarEjerciciosCatalogo(uid)`
+  (`js/ejercicios-catalogo.js`), el mismo catálogo que ya se carga para
+  Ejercicio → Catálogo.
 - **Lo que has apuntado a mano**, que sí se guarda.
 
 Los repetidos se juntan con la misma regla de normalización que ya usa el
@@ -124,6 +130,9 @@ nivel.
 ## 6. Casos límite
 
 - **Sin tabla activa**: solo salen los apuntes a mano, y se dice.
+- **Un día de descanso** (`sesion: null`): no aporta nada a la lista, sin
+  caso especial que tratar — simplemente no hay ejercicios que recorrer
+  ese día.
 - **Tabla sin ejercicios enlazados al catálogo** (todo texto suelto): la
   lista solo tiene apuntes, sin aviso adicional (a diferencia de la 073,
   ver sección 3).
@@ -148,7 +157,7 @@ nivel.
 | `index.html` | El bloque de la lista dentro de Ejercicio → Material. |
 | `js/app.js` | Pintado, alta, marcado y borrado. |
 | `firestore.rules` | Bloque de `materialCompra`. **Publicar con la CLI antes de probar.** |
-| `js/reinicio.js` | Casilla "material que falta" (o el nombre que se le dé), junto a la de "material" que ya existe desde la 074 — **casillas distintas**: una es tu armario, la otra son los apuntes sueltos, igual que `despensa` y `compra` son casillas separadas. |
+| `js/reinicio.js` | Casilla nueva, etiqueta **"material que falta"**, junto a la de "material" que ya existe desde la 074 — **casillas distintas**: una es tu armario, la otra son los apuntes sueltos, igual que `despensa` y `compra` son casillas separadas. |
 | `styles.css` | Reutilizar lo de la compra si vale. |
 
 **Aviso de tamaño:** por precedente (la 073, el mismo patrón para comida,
