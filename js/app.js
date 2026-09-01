@@ -22,7 +22,7 @@ import {
 
 import { pesosPorDia, mediaMovil, calendarioDeConstancia } from "./grafica.js";
 
-import { estadisticasDePeso } from "./estadisticas.js";
+import { estadisticasDePeso, estadisticasDeDistancia } from "./estadisticas.js";
 
 import { dibujarGrafica, dibujarCalendario } from "./grafica-svg.js";
 
@@ -133,7 +133,8 @@ import {
   borrarMaterial,
   listarMaterial,
   ordenar as ordenarMaterial,
-  loQueTengo as loQueTengoDelArmario
+  loQueTengo as loQueTengoDelArmario,
+  materialQueFalta
 } from "./material.js";
 
 import { hayQueSembrar, sembrar, olvidarLaSiembra } from "./siembra.js";
@@ -1667,9 +1668,56 @@ async function refrescarAnalisis() {
 
 // Las tres listas avisan aquí cuando cargan, guardan, editan o borran. Todo
 // sale de lo que ya trajeron: ninguna consulta nueva a Firestore.
+//
+// Lo comparten las cuatro listas, así que los kilómetros (spec 087) se
+// recalculan también al guardar un pesaje o una comida. Es correcto y no es un
+// efecto raro: pasa ya con la gráfica, no cuesta nada porque es cálculo sobre
+// memoria, y evita cuatro enganches donde basta uno.
 function refrescarPantallas() {
   refrescarGrafica();
   refrescarHoy();
+  pintarDistanciaRecorrida();
+}
+
+// Cuánto llevas andado (spec 087).
+//
+// obtenerRegistros() devuelve el array COMPLETO: `recortarPorDias` solo decide
+// qué se PINTA, no qué se guarda. Es lo mismo de lo que ya tira refrescarGrafica()
+// para el historial entero de pesajes, así que aquí no hay lectura nueva.
+function pintarDistanciaRecorrida() {
+  const lista = id("distancia-estadisticas");
+  const vacio = id("distancia-vacia");
+  const { hoy, siete, treinta, total } = estadisticasDeDistancia(
+    listaEjercicios.obtenerRegistros(),
+    hoyISO()
+  );
+
+  lista.innerHTML = "";
+
+  // Sin un solo kilómetro apuntado, cuatro ceros no informan de nada y hacen
+  // pensar que la app está rota. Una frase y ya.
+  if (total.sesiones === 0) {
+    vacio.textContent =
+      "Cuando apuntes kilómetros en un ejercicio, aquí verás cuánto llevas.";
+    return;
+  }
+  vacio.textContent = "";
+
+  // Dentro de una ventana, un cero SÍ dice algo: que esta semana no has salido.
+  const km = (valor) => `${valor.toFixed(1).replace(".", ",")} km`;
+  const media = (ventana) =>
+    ventana.media === null ? "" : `${km(ventana.media)} de media`;
+
+  lista.append(
+    lineaDeEstadistica("De hoy", km(hoy.km)),
+    lineaDeEstadistica("Últimos 7 días", km(siete.km), media(siete)),
+    lineaDeEstadistica("Últimos 30 días", km(treinta.km), media(treinta)),
+    lineaDeEstadistica(
+      "Desde que empezaste",
+      km(total.km),
+      `en ${total.sesiones} ${total.sesiones === 1 ? "sesión" : "sesiones"}`
+    )
+  );
 }
 
 // --- Peso ----------------------------------------------------------------
@@ -3097,6 +3145,87 @@ function pintarMaterial() {
   materialCargado.forEach((pieza) =>
     contenedor.appendChild(filaDeMaterial(pieza))
   );
+
+  // Lo que falta cuelga de lo que tienes, así que se repinta con ello: así
+  // cubre de una vez el alta, el renombrado y el borrado, que pasan todos por
+  // aquí. El único camino que NO pasa es marcarEnElArmario(), que a propósito
+  // no repinta el armario para no mover la fila bajo el dedo; ese llama solo a
+  // pintarMaterialQueFalta().
+  pintarMaterialQueFalta();
+}
+
+// Lo que pide tu tabla y no tienes (spec 078).
+//
+// Cálculo SÍNCRONO sobre lo que ya está en memoria —`tablaActiva`,
+// `catalogoCargado` y `materialCargado`—, sin ninguna lectura nueva a
+// Firestore. Es lo mismo que hace pintarCompra(), y por lo mismo: un fallo al
+// cargar la tabla ya se cuenta donde se carga, en refrescarTabla().
+function pintarMaterialQueFalta() {
+  const contenedor = id("lista-material-falta");
+  const estado = id("estado-material-falta");
+
+  contenedor.innerHTML = "";
+
+  const faltan = materialQueFalta(tablaActiva, catalogoCargado, materialCargado);
+
+  estado.textContent = faltan.length
+    ? "Lo que pide tu tabla y no tienes marcado. Tócalo cuando lo consigas."
+    : tablaActiva
+      ? "Tienes todo lo que pide tu tabla."
+      : "Cuando tengas una tabla, aquí sale el material que te pide y no tienes.";
+
+  faltan.forEach((falta) => contenedor.appendChild(filaDeMaterialQueFalta(falta)));
+}
+
+function filaDeMaterialQueFalta(falta) {
+  const fila = document.createElement("div");
+  fila.className = "ingrediente";
+
+  const tengo = botonDeIcono("comido", `Ya lo tengo: ${falta.nombre}`, () =>
+    conseguirMaterial(falta, tengo)
+  );
+  tengo.classList.add("boton-comido");
+
+  fila.append(
+    tengo,
+    celda(falta.nombre, "ingrediente-nombre"),
+    document.createElement("div")
+  );
+  return fila;
+}
+
+// "Ya lo tengo": si la pieza está en tu armario desmarcada, se marca; si no
+// está, se crea — y nace marcada, que es lo que hace guardarMaterial() desde la
+// spec 074. Tocar el botón ya es decir que lo tienes; pedir un segundo gesto
+// para marcarlo sería la incoherencia que esa spec evita.
+async function conseguirMaterial(falta, boton) {
+  limpiarAvisosMaterial();
+  // Solo el botón tocado: son N botones independientes y bloquear los demás
+  // sería castigar al que va con prisa.
+  boton.disabled = true;
+
+  try {
+    // El armario puede llevar rato cargado: si mientras tanto la pieza ya
+    // existe, se marca la que hay en vez de crear una gemela. Misma defensa
+    // que el alta a mano.
+    const yaEstaba =
+      (falta.materialId &&
+        materialCargado.find((pieza) => pieza.id === falta.materialId)) ||
+      materialIgual(materialCargado, falta.nombre);
+
+    if (yaEstaba) {
+      await marcarMaterial(uidActual, yaEstaba.id, true);
+    } else {
+      await guardarMaterial(uidActual, falta.nombre);
+    }
+  } catch {
+    // Se queda en la lista: no se pinta como conseguido algo que no se guardó.
+    boton.disabled = false;
+    errorEnMaterial("No se ha podido guardar. Comprueba tu conexión.");
+    return;
+  }
+
+  await refrescarMaterial();
 }
 
 function filaDeMaterial(pieza) {
@@ -3176,6 +3305,11 @@ async function marcarEnElArmario(pieza, casilla) {
   casilla.closest(".ingrediente").classList.toggle("sin-existencias", !ahora);
   limpiarAvisosMaterial();
   actualizarRecuentoMaterial();
+  // Solo el bloque de lo que falta, NO pintarMaterial(): repintar el armario
+  // aquí movería la fila bajo el dedo, que es justo lo que evita esta función
+  // desde la spec 074. Pero marcar "banco" tiene que sacarlo de la lista de lo
+  // que te falta en el momento (spec 078).
+  pintarMaterialQueFalta();
 
   try {
     await marcarMaterial(uidActual, pieza.id, ahora);
@@ -3185,6 +3319,7 @@ async function marcarEnElArmario(pieza, casilla) {
     casilla.checked = antes;
     casilla.closest(".ingrediente").classList.toggle("sin-existencias", !antes);
     actualizarRecuentoMaterial();
+    pintarMaterialQueFalta();
     errorEnMaterial("No se ha podido guardar. Comprueba tu conexión.");
   }
 }
@@ -3270,7 +3405,13 @@ async function borrarLaPieza(pieza) {
 
 // Se llama al entrar en la sub-pestaña. Reordena lo ya cargado, sin ir a la red.
 function reordenarMaterialCargado() {
-  if (!materialCargado.length) return;
+  // Con el armario vacío no hay nada que reordenar, pero "lo que te falta" sí
+  // tiene algo que decir —de hecho, entonces te falta TODO lo de tu tabla—, así
+  // que se pinta igual (spec 078).
+  if (!materialCargado.length) {
+    pintarMaterialQueFalta();
+    return;
+  }
   materialCargado = ordenarMaterial(materialCargado);
   pintarMaterial();
 }

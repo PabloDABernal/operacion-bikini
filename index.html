@@ -631,6 +631,14 @@
       <button type="button" id="btn-reintentar-ejercicios" class="oculta">Reintentar</button>
       <ul id="lista-ejercicios"></ul>
       <button type="button" id="btn-desplegar-ejercicios" class="desplegar oculta"></button>
+
+      <!-- Cuánto llevas andado (spec 087). Los kilómetros que apunta la 086,
+           mirados juntos. Mismas ventanas que Peso → Estadísticas (015), y su
+           misma forma: se aprende una vez. Cálculo puro sobre lo que la lista
+           de ejercicios ya tiene en memoria. -->
+      <h2>Cuánto llevas andado</h2>
+      <p id="distancia-vacia" class="explicacion"></p>
+      <ul id="distancia-estadisticas" class="resumen"></ul>
       </div>
 
       <!-- Sub-pestaña: Mi tabla -->
@@ -743,6 +751,13 @@
            las recetas la llenan sola y crece sin que la escribas; el armario lo
            escribes tú entero y tiene diez cosas. -->
       <div id="lista-material"></div>
+
+      <!-- Lo que te falta (spec 078). La lista de la compra, pero de gimnasio:
+           lo que piden los ejercicios de tu tabla y no tienes marcado. Se
+           calcula al vuelo sobre lo que ya está en memoria, como pintarCompra(). -->
+      <h2>Lo que te falta</h2>
+      <p id="estado-material-falta" class="explicacion"></p>
+      <div id="lista-material-falta"></div>
       </div>
 
       </div>

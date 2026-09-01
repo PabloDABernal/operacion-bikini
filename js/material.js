@@ -32,6 +32,10 @@ import { db } from "./firebase-config.js";
 // arreglada.
 import { normalizar, mismoIngrediente } from "./despensa.js";
 
+// El material del ejercicio, leído en piezas (spec 077). Sin esto no se puede
+// decir qué te falta: "mancuernas, banco" es una frase, no dos cosas.
+import { piezasDeMaterial } from "./ejercicios-catalogo.js";
+
 export const MAX_NOMBRE = 60;
 
 function coleccionDe(uid) {
@@ -118,6 +122,54 @@ export function ordenar(armario) {
 // dieta desde la spec 059.
 export function loQueTengo(armario) {
   return armario.filter((pieza) => pieza.tengo).map((pieza) => pieza.nombre);
+}
+
+// Lo que pide tu tabla y no tienes marcado (spec 078). La lista de la compra,
+// pero de gimnasio.
+//
+// Se calcula AL VUELO, como loQueFalta() de la spec 073 y por lo mismo:
+// guardarla obligaría a mantenerla al día cada vez que cambia la tabla, el
+// catálogo o el armario, y a decidir quién gana cuando se contradicen.
+//
+// Devuelve [{ nombre, materialId }]:
+// - materialId con valor: la pieza está en tu armario, DESMARCADA. Se marca.
+// - materialId a null: no está. Se crea, y nace marcada.
+export function materialQueFalta(tabla, catalogo, armario) {
+  if (!tabla) return [];
+
+  const porId = new Map((catalogo || []).map((ejercicio) => [ejercicio.id, ejercicio]));
+  const faltan = [];
+
+  (tabla.dias || []).forEach((dia) => {
+    // Un día sin sesión es descanso y no pide nada.
+    ((dia.sesion && dia.sesion.ejercicios) || []).forEach((linea) => {
+      // Sin enlace al catálogo no se sabe qué material pide: la línea es solo
+      // texto ("Sentadillas 4x12"). Se salta, en vez de adivinar.
+      const ejercicio = porId.get(linea.ejercicioId);
+      if (!ejercicio) return;
+
+      piezasDeMaterial(ejercicio.material).forEach((nombre) => {
+        const enElArmario = (armario || []).find((pieza) =>
+          mismoIngrediente(pieza.nombre, nombre)
+        );
+
+        // Marcada: no falta.
+        if (enElArmario && enElArmario.tengo) return;
+
+        // La misma pieza en dos ejercicios sale una sola vez.
+        if (faltan.some((falta) => mismoIngrediente(falta.nombre, nombre))) return;
+
+        // El nombre de TU armario manda sobre el del ejercicio, igual que en
+        // loQueFalta(): lo que tú escribiste es lo que reconoces.
+        faltan.push({
+          nombre: enElArmario ? enElArmario.nombre : nombre,
+          materialId: enElArmario ? enElArmario.id : null
+        });
+      });
+    });
+  });
+
+  return faltan;
 }
 
 export async function listarMaterial(uid) {
