@@ -288,7 +288,56 @@ claramente de las 600 líneas, no antes.
 
 ## ✅ Para probar a mano
 
-*(lo rellena/afina el agente `qa-manual` antes de la prueba, siguiendo el
-criterio de la sección 2 — caso concreto acordado: pedir tabla con la
-casilla "Aprovechar mi material" marcada, y por separado, abrir un
-ejercicio del Catálogo y comprobar "Tienes N de M")*
+Antes de nada: en Ejercicio → Material, ten al menos 2-3 piezas marcadas
+(banco, mancuernas, esterilla...) — si no tienes ninguna, añádelas primero.
+
+**Camino feliz**
+
+1. Ejercicio → Mi tabla → Pedir: junto a las instrucciones debe aparecer
+   la casilla "Aprovechar mi material", con "N piezas marcadas" debajo.
+2. Márcala y pide tabla. Al terminar, abre alguno de los ejercicios
+   propuestos en el Catálogo: debería reconocer algo de tu material en al
+   menos uno.
+3. Pide tabla otra vez, esta vez SIN marcar la casilla. Abre un ejercicio:
+   no debe haber marcas ni resumen en su material, como antes de esta spec.
+
+**El cruce en el Catálogo**
+
+4. Abre un ejercicio que pida material que tienes marcado: debe verse
+   "Tienes N de M" arriba, y esa pieza con su marca de "la tienes".
+5. Desmarca esa pieza en Ejercicio → Material y vuelve a abrir el mismo
+   ejercicio (sin recargar la página): el recuento debe bajar y la pieza
+   pasar a "te falta".
+
+**Crear y editar a mano**
+
+6. Catálogo → Nuevo ejercicio, con material `banco, mancuernas, esterilla`.
+   Guarda y ábrelo: deben verse las tres piezas por separado, cada una
+   cruzada con tu armario.
+7. Crea otro con material `barra y discos` (con "y" en vez de coma): debe
+   partirse igualmente en dos piezas, no quedar como una sola.
+8. Si tienes algún ejercicio guardado antes de hoy con material en frase
+   libre (o crea uno escribiendo `banco y mancuernas` para el caso): se
+   debe ver y cruzar bien, y en la cabecera de su tarjeta el material se
+   lee legible (no como texto de array). Edítalo: el campo del formulario
+   debe precargarse legible (`banco, mancuernas`), no de otra forma.
+
+**Sin armario**
+
+9. Desmarca TODO tu armario en Ejercicio → Material y ve a Mi tabla →
+   Pedir: la casilla no debe aparecer. Abre un ejercicio con material: se
+   ve "Tienes 0 de N" con todo apagado (si tienes piezas aunque
+   desmarcadas) — la casilla y el cruce son dos cosas distintas.
+10. Borra TODAS las piezas de tu armario (no solo desmarcar): al abrir un
+    ejercicio con material, no debe haber marcas ni resumen, exactamente
+    como se veía antes de esta spec. Vuelve a añadir tus piezas al acabar.
+
+**Regresión — que la despensa no se haya roto**
+
+11. Comidas → Recetas: abre una receta con ingredientes marcados en tu
+    despensa. Debe seguir mostrando "Tienes N de M" y las marcas igual que
+    siempre — esta spec reutiliza el mismo código (`js/despensa.js`), así
+    que es la comprobación de que no se ha tocado sin querer.
+
+Si todo sale como se describe, la spec queda lista para marcarse como
+completada (cambiar el Estado a "✅ completada").
