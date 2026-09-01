@@ -296,5 +296,64 @@ ahora sobre una estimación.
 
 ## ✅ Para probar a mano
 
-*(lo rellena/afina el agente `qa-manual` antes de la prueba, siguiendo el
-criterio de la sección 2)*
+Prepárate una comida con dos platos y solo uno enlazado (el caso real de la
+captura: "Crema de zanahoria. 1 hamburguesa de ternera", con la hamburguesa
+enlazada) — si no tienes una a mano, edita cualquier celda para dejarla así.
+
+**Camino feliz — varias recetas/ingredientes en una celda**
+
+1. En Comidas → Mi dieta, pulsa el lápiz de esa celda. Debe verse una línea
+   con "Hamburguesa de ternera" ya enlazada y un botón "Añadir otra línea".
+2. Pulsa "Añadir otra línea", cambia el tipo a "Ingrediente de la despensa"
+   y elige "Crema de zanahoria" (esté marcada o no en tu despensa).
+3. Guarda. El texto de la celda debe pasar a "Crema de zanahoria.
+   Hamburguesa de ternera" (sustituyendo lo que hubiera antes).
+4. Vuelve a abrir el lápiz: deben verse las dos líneas guardadas.
+5. Borra el texto a mano y escribe otra cosa, sin tocar las líneas; guarda.
+   Debe quedarse con lo que escribiste, no con la suma.
+6. En la fila, el icono de "ver receta" debe seguir estando. Tócalo: debe
+   desplegar una lista con los dos nombres, no abrir directo.
+7. Toca "Crema de zanahoria" en esa lista: debe abrir una ficha mínima con
+   su nombre y "Lo tienes."/"Te falta." según tu despensa ahora mismo.
+8. Toca "Hamburguesa de ternera": debe abrir la ficha de receta de siempre
+   (ingredientes, preparación, botón Editar).
+9. Pulsa "Me lo he comido" en esa celda. En el diario de Comidas debe salir
+   **un solo registro** con el texto sumado, no dos.
+
+**Casos límite**
+
+10. Una celda con una sola receta o ingrediente enlazado: el icono debe
+    seguir abriendo la ficha directamente, sin lista intermedia (no debe
+    haber cambiado respecto a como funcionaba antes).
+11. Añade la misma receta dos veces en una celda: debe dejarte, sin avisar
+    de duplicado.
+12. Quita todas las líneas del editor de una celda con enlaces y guarda sin
+    tocar el texto: el texto que hubiera se queda tal cual, y desaparece el
+    icono de "ver receta".
+13. Abre (sin editar) una comida que ya tuvieras guardada de antes de esta
+    sesión: debe verse y editarse exactamente igual que una nueva, sin
+    errores. Guárdala (aunque sea sin cambios) y confirma que sigue
+    funcionando después.
+14. Enlaza un ingrediente suelto de la despensa que tengas SIN marcar a una
+    celda de Mi dieta. Ve a Comidas → Despensa → lista de la compra: ese
+    ingrediente debe salir en "lo que falta", aunque no venga de ninguna
+    receta.
+15. Esa misma celda (solo con el ingrediente suelto, sin receta) NO debe
+    aparecer en el aviso "estas comidas no tienen receta" de la lista de la
+    compra — sí se sabe qué es.
+16. Borra desde el Recetario una receta que esté enlazada a una celda con
+    más de un enlace. Al abrir el icono de esa celda, la lista debe seguir
+    mostrando el resto de nombres sin romperse; la receta borrada no debe
+    quedar tocable.
+
+**Regresión** (que nada de lo anterior se haya roto)
+
+17. Una comida sin ningún enlace (texto suelto de siempre) sigue sin icono
+    de "ver receta".
+18. Pedir dieta a la IA o elegir uno de los cuatro menús (spec 076) sigue
+    enlazando los platos con su receta con normalidad.
+19. La lista de la compra sigue contando lo que falta de las recetas de tu
+    dieta, igual que antes de esta spec.
+
+Si algo no coincide con lo descrito, anota el paso y qué viste en su lugar
+antes de dar la spec por probada.
