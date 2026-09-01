@@ -151,3 +151,36 @@ export function cruzarConElArmario(piezas, armario) {
     return { texto: pieza, tengo: Boolean(encontrada) };
   });
 }
+
+// El material que te falta (spec 078): equivalente a loQueFalta() de
+// despensa.js, simplificado porque aquí cada pieza ya llega como un
+// nombre suelto (el catálogo la guarda partida desde la 077) — no hace
+// falta repartir una línea, solo cruzar nombre contra nombre.
+//
+// Devuelve, por cada una, el nombre que se enseña y la pieza de tu
+// armario a la que corresponde si ya la tienes apuntada (marcada o no):
+// quien la marque como conseguida necesita saber a cuál marcar.
+export function loQueFalta(piezas, armario) {
+  const faltan = [];
+
+  const yaEsta = (nombre) => faltan.some((falta) => mismoIngrediente(falta.nombre, nombre));
+
+  (piezas || []).forEach((nombre) => {
+    const recortado = String(nombre || "").trim().slice(0, MAX_NOMBRE);
+    if (!recortado || yaEsta(recortado)) return;
+
+    const enArmario = armario.find((pieza) => mismoIngrediente(pieza.nombre, recortado));
+
+    // Si la tienes marcada, no hay nada que conseguir.
+    if (enArmario && enArmario.tengo) return;
+
+    faltan.push({
+      // El nombre de tu armario manda sobre el de la sesión: es como tú lo
+      // llamas.
+      nombre: enArmario ? enArmario.nombre : recortado,
+      materialId: enArmario ? enArmario.id : null
+    });
+  });
+
+  return faltan;
+}

@@ -89,6 +89,16 @@ export const TIPOS = [
   // te sabes no son las cosas que tienes, y juntarlas obligaría a borrar las
   // dos para borrar una.
   { clave: "material", etiqueta: "material", colecciones: ["material"] },
+  // El material que te falta (spec 078). Casilla propia y OBLIGATORIA, por lo
+  // mismo que la lista de la compra: borrarOperacion() nunca toca las
+  // colecciones de primer nivel, así que sin ella se quedaría huérfana. Y
+  // separada de "material" porque son cosas distintas: lo que tienes y lo
+  // que hay que conseguir.
+  {
+    clave: "materialCompra",
+    etiqueta: "material que falta",
+    colecciones: ["materialCompra"]
+  },
   // Las operaciones van aparte: no son una colección del día a día, sino los
   // ciclos con todo lo que llevan dentro (spec 019). Desde la spec 056 incluye
   // también la que esté en marcha, que se tira sin archivar.

@@ -133,8 +133,16 @@ import {
   listarMaterial,
   ordenar as ordenarMaterial,
   loQueTengo as loQueTengoDelArmario,
-  cruzarConElArmario
+  cruzarConElArmario,
+  loQueFalta as loQueFaltaDeMaterial
 } from "./material.js";
+
+import {
+  validarApunte as validarApunteMaterial,
+  guardarApunte as guardarApunteMaterial,
+  borrarApunte as borrarApunteMaterial,
+  listarMaterialCompra
+} from "./material-compra.js";
 
 import { hayQueSembrar, sembrar, olvidarLaSiembra } from "./siembra.js";
 import { VERSION as VERSION_DATOS_INICIALES, MENUS } from "./datos-iniciales.js";
@@ -3310,6 +3318,8 @@ async function refrescarMaterial() {
   // quedarse sin marcas hasta el siguiente repintado. Con material cargado,
   // se repinta aquí.
   if (catalogoCargado.length) pintarCatalogo();
+  // Y lo que falta (spec 078), que sale de cruzar la tabla con el armario.
+  pintarFaltaMaterial();
 }
 
 id("form-material").addEventListener("submit", async (evento) => {
@@ -3359,6 +3369,165 @@ id("form-material").addEventListener("submit", async (evento) => {
   campo.value = "";
   await refrescarMaterial();
   // Lo normal al estrenar esto es meter cinco o seis seguidas.
+  campo.focus();
+});
+
+// --- El material que te falta (spec 078) ----------------------------------
+//
+// Espejo de la lista de la compra (073), para el armario en vez de la
+// despensa: lo que piden los ejercicios de tu tabla y no tienes, más lo que
+// apuntes a mano. Marcar como conseguido marca en el armario —conseguir
+// algo es tenerlo— y, como el armario nace ya marcado (spec 074, al revés
+// que la despensa), crear una pieza nueva basta: no hace falta un segundo
+// paso para marcarla.
+
+let apuntesMaterialCompra = [];
+
+// El material de los ejercicios de tu tabla activa, sin repetir. Un día de
+// descanso tiene `sesion: null` y no aporta nada; un ejercicio de la sesión
+// sin `ejercicioId` (texto suelto, sin enlazar al catálogo) tampoco, porque
+// no hay de dónde sacar su material.
+function materialDeLaTabla() {
+  if (!tablaActiva) return [];
+
+  const piezas = [];
+  tablaActiva.dias.forEach((dia) => {
+    if (!dia.sesion) return;
+    dia.sesion.ejercicios.forEach((ejercicio) => {
+      if (!ejercicio.ejercicioId) return;
+      const delCatalogo = catalogoCargado.find((e) => e.id === ejercicio.ejercicioId);
+      if (!delCatalogo) return;
+      piezas.push(...delCatalogo.material);
+    });
+  });
+
+  return piezas;
+}
+
+function pintarFaltaMaterial() {
+  const contenedor = id("lista-material-compra");
+  const estado = id("estado-material-compra");
+
+  contenedor.innerHTML = "";
+
+  const faltan = loQueFaltaDeMaterial(materialDeLaTabla(), materialCargado);
+  const todo = [
+    ...faltan.map((falta) => ({ ...falta, apunteId: null })),
+    ...apuntesMaterialCompra.map((apunte) => ({
+      nombre: apunte.texto,
+      materialId: null,
+      apunteId: apunte.id
+    }))
+  ];
+
+  estado.textContent = todo.length
+    ? ""
+    : tablaActiva
+      ? "No te falta nada de tu tabla. Puedes apuntar aquí lo que necesites."
+      : "Aún no tienes tabla, así que aquí solo saldrá lo que apuntes a mano.";
+
+  todo.forEach((cosa) => contenedor.appendChild(filaDeMaterialQueFalta(cosa)));
+}
+
+function filaDeMaterialQueFalta(cosa) {
+  const fila = document.createElement("div");
+  fila.className = "ingrediente";
+
+  const conseguido = botonDeIcono("comido", `Ya lo tengo: ${cosa.nombre}`, () =>
+    marcarMaterialConseguido(cosa)
+  );
+  conseguido.classList.add("boton-comido");
+
+  const acciones = document.createElement("div");
+  acciones.className = "ingrediente-acciones";
+
+  // Solo los apuntes a mano se quitan a mano: lo que falta de la tabla no se
+  // borra, se deja de necesitar.
+  if (cosa.apunteId) {
+    acciones.appendChild(
+      botonDeIcono("papelera", `Quitar ${cosa.nombre} de la lista`, () =>
+        quitarApunteMaterial(cosa)
+      )
+    );
+  }
+
+  fila.append(conseguido, celda(cosa.nombre, "ingrediente-nombre"), acciones);
+  return fila;
+}
+
+// Conseguir algo es tenerlo. Una pieza se marca en el armario; un apunte a
+// mano se borra.
+async function marcarMaterialConseguido(cosa) {
+  id("error-material-compra").textContent = "";
+
+  try {
+    if (cosa.apunteId) await borrarApunteMaterial(uidActual, cosa.apunteId);
+
+    if (cosa.materialId) {
+      await marcarMaterial(uidActual, cosa.materialId, true);
+    } else if (!cosa.apunteId) {
+      // No estaba en tu armario todavía. Al revés que un ingrediente de
+      // despensa (que nace sin marcar, spec 068), guardarMaterial() ya nace
+      // MARCADO (spec 074): con crearla basta, sin un segundo paso.
+      await guardarMaterial(uidActual, cosa.nombre);
+    }
+
+    await refrescarMaterialCompra();
+    await refrescarMaterial();
+  } catch {
+    id("error-material-compra").textContent =
+      "No se ha podido guardar. Comprueba tu conexión.";
+  }
+}
+
+async function quitarApunteMaterial(cosa) {
+  id("error-material-compra").textContent = "";
+  try {
+    await borrarApunteMaterial(uidActual, cosa.apunteId);
+    await refrescarMaterialCompra();
+  } catch {
+    id("error-material-compra").textContent =
+      "No se ha podido borrar. Comprueba tu conexión.";
+  }
+}
+
+async function refrescarMaterialCompra() {
+  try {
+    apuntesMaterialCompra = await listarMaterialCompra(uidActual);
+  } catch {
+    apuntesMaterialCompra = [];
+    id("error-material-compra").textContent =
+      "No se ha podido cargar el material que falta.";
+  }
+  pintarFaltaMaterial();
+}
+
+id("form-apunte-material").addEventListener("submit", async (evento) => {
+  evento.preventDefault();
+
+  const campo = id("apunte-material-texto");
+  const error = id("error-material-compra");
+  error.textContent = "";
+
+  const resultado = validarApunteMaterial(campo.value, apuntesMaterialCompra);
+  if (resultado.error) {
+    error.textContent = resultado.error;
+    return;
+  }
+
+  const boton = id("btn-anadir-apunte-material");
+  boton.disabled = true;
+  try {
+    await guardarApunteMaterial(uidActual, resultado.texto);
+  } catch {
+    error.textContent = "No se ha podido guardar. Comprueba tu conexión.";
+    return;
+  } finally {
+    boton.disabled = false;
+  }
+
+  campo.value = "";
+  await refrescarMaterialCompra();
   campo.focus();
 });
 
@@ -4326,6 +4495,9 @@ async function refrescarCatalogo() {
     return;
   }
   pintarCatalogo();
+  // Lo que falta (spec 078) también depende del catálogo: es de ahí de
+  // donde sale el material de cada ejercicio de la tabla.
+  pintarFaltaMaterial();
 }
 
 id("btn-nuevo-ejercicio-catalogo").addEventListener("click", () =>
@@ -4752,6 +4924,8 @@ async function refrescarTabla() {
   // mirando ya es otra cosa.
   diaTablaAbierto = diaDeLaSemana(hoyISO());
   pintarTabla();
+  // Lo que falta (spec 078) también depende de la tabla activa.
+  pintarFaltaMaterial();
 }
 
 // --- Comidas -------------------------------------------------------------
@@ -6385,6 +6559,7 @@ function refrescarTodo() {
     refrescarDespensa(),
     refrescarCompra(),
     refrescarMaterial(),
+    refrescarMaterialCompra(),
     refrescarDieta(),
     refrescarCatalogo(),
     refrescarTabla(),

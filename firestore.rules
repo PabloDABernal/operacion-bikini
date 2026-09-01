@@ -86,6 +86,17 @@ service cloud.firestore {
       allow read, write: if autorizado() && request.auth.uid == uid;
     }
 
+    // El material que te falta (spec 078): SOLO los apuntes a mano. Lo que
+    // falta de la tabla no se guarda, se calcula cruzando la tabla activa y
+    // el armario.
+    //
+    // Colección propia y no el armario a propósito, por lo mismo que la
+    // compra con la despensa: el armario se le manda a la IA al pedir tabla,
+    // y un apunte suelto acabaría en el prompt como material que ya tienes.
+    match /usuarios/{uid}/materialCompra/{apunteId} {
+      allow read, write: if autorizado() && request.auth.uid == uid;
+    }
+
     // La lista de la compra (spec 073): SOLO los apuntes a mano. Lo que falta
     // de la dieta no se guarda, se calcula cruzando recetas y despensa.
     //

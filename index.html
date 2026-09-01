@@ -716,9 +716,27 @@
       </div>
 
       <div class="subseccion" data-subseccion="material">
+      <!-- El material que te falta (spec 078). Espejo de la lista de la
+           compra (073): lo que piden los ejercicios de tu tabla y no tienes,
+           más lo que apuntes a mano. Dentro de Material y no en sub-pestaña
+           propia: es el mismo asunto, qué tienes y qué falta. -->
+      <h2>Material que te falta</h2>
+      <p id="estado-material-compra" class="explicacion"></p>
+      <div id="lista-material-compra"></div>
+
+      <form id="form-apunte-material">
+        <label for="apunte-material-texto">Apuntar algo más</label>
+        <div class="fila-alta">
+          <input type="text" id="apunte-material-texto" maxlength="60"
+            placeholder="comprar un banco nuevo" autocomplete="off">
+          <button type="submit" id="btn-anadir-apunte-material">Apuntar</button>
+        </div>
+      </form>
+      <p id="error-material-compra" class="error" role="alert"></p>
+
       <!-- El armario (spec 074). Espejo de Comidas → Despensa: lo que tienes
-           para entrenar, para que la tabla pueda aprovecharlo (eso será la
-           075). No lleva cantidades ni kilos, igual que la despensa. -->
+           para entrenar, para que la tabla pueda aprovecharlo (spec 077).
+           No lleva cantidades ni kilos, igual que la despensa. -->
       <h2>Mi material</h2>
       <p id="estado-material" class="explicacion"></p>
 
