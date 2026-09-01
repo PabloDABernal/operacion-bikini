@@ -1,6 +1,6 @@
 # 088 — Varias recetas o ingredientes por comida
 
-- **Estado:** borrador (v3, corregida tras la segunda revisión de `revisor-specs`)
+- **Estado:** revisada — `revisor-specs` sin bloqueantes tras tres rondas
 - **Fecha:** 2026-09-01
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (evolutivos de la fase productiva, desde el 31 de agosto de 2026)", entrada "Una comida puede tener varias recetas o ingredientes sueltos"
 
@@ -89,9 +89,13 @@ aparte, tomada por el usuario al escribir esta spec.
   false`) entra en la lista igual que uno que falte de una receta. Nueva
   función `ingredientesSueltosDeLaDieta()`, ver sección 4.
   `comidasSinReceta()` cambia de criterio: hoy enseña una comida si NO
-  tiene receta enlazada; pasa a enseñarla si NO tiene NINGÚN enlace (ni
-  receta ni ingrediente) — una celda enlazada solo a un ingrediente ya no
-  cuenta como "no sé qué lleva" (criterio de aceptación, punto 9).
+  tiene receta enlazada; pasa a enseñarla si NO tiene NINGÚN enlace que
+  **resuelva** a algo real (ni receta ni ingrediente) — una celda enlazada
+  solo a un ingrediente ya no cuenta como "no sé qué lleva" (criterio de
+  aceptación, punto 9), pero una celda cuyo único enlace apunta a una
+  receta o ingrediente ya borrado SÍ sigue contando como "sin receta":
+  igual que hoy hace `recetaDeLaComida()` (comprueba que la receta exista,
+  no solo que haya un id), un enlace roto no dice de verdad qué se come.
 - **Migración por lectura, sin script aparte**: `leerDietaActiva()`
   (`js/dietas.js`) normaliza cada comida al leerla — si trae `recetaId`
   (formato antiguo) lo convierte a `enlaces: [{tipo: "receta", id:
@@ -203,6 +207,11 @@ nada vuelve a leer `recetaId` salvo esa normalización de entrada.
   en "comidas sin receta" (ya tiene receta) y su ingrediente sí entra en
   el cálculo de la compra — las dos cosas conviven sin conflicto porque
   son listas independientes, no un único campo excluyente.
+- Una celda cuyo único enlace apunta a una receta o ingrediente ya
+  borrado: SÍ cuenta como "sin receta" en el aviso de la compra, igual que
+  hoy. Decisión del usuario, 2026-09-01, tras la tercera revisión de
+  `revisor-specs`: un enlace que no resuelve a nada real no dice qué se
+  come.
 
 ## 7. Archivos afectados
 
@@ -267,6 +276,9 @@ ahora sobre una estimación.
   de antemano**: si al codificar se dispara claramente por encima de las
   ~300 líneas, se para y se propone partir en ese momento. Decisión del
   usuario, 2026-09-01.
+- **Un enlace roto (receta/ingrediente borrado) sigue contando como "sin
+  receta"** en el aviso de la compra, igual que hoy. Decisión del usuario,
+  2026-09-01.
 
 ## 9. Fuera de spec: ideas apuntadas
 
