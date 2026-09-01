@@ -674,10 +674,16 @@ Ya no salen de una lista planificada: salen de usar la app cada día.
   gamificación cuenta días con actividad, no cuánto— y no calcula ritmo ni
   calorías.
 
+- **Cuánto llevas andado.** Dentro de Ejercicio, dos números: los
+  kilómetros de este mes y los acumulados desde que empezaste a apuntar
+  distancia (spec 086), sumando los ejercicios que la llevan. Sin gráfica
+  ni comparativa con el mes anterior — eso se deja para si con el tiempo
+  hace falta.
+
 | Spec | Qué |
 |---|---|
 | 086 | La distancia, al apuntar |
-| 087 | Cuánto llevas andado (estadísticas; sin escribir) |
+| 087 | Cuánto llevas andado (estadísticas de distancia) |
 
 - **Una comida puede tener varias recetas o ingredientes sueltos**, no solo
   uno. Salió de usarla: hay comidas con dos platos (una crema y una

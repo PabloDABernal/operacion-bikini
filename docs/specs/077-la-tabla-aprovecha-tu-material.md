@@ -120,14 +120,39 @@ por todos los usuarios) — mismo criterio que la 059.
 - **El formulario manual** ("Nuevo ejercicio" en el Catálogo) sigue siendo
   un único campo de texto (no se convierte en líneas repetibles al estilo
   de la 082: aquí no hace falta cantidad ni preparación, solo nombres). Al
-  guardar, el texto se parte por comas y por "y"/"e" en piezas, se recorta
-  cada una y se guarda como lista — mismo criterio de partido que el cruce
-  de la despensa (spec 059, corrección del "sal y pimienta").
+  guardar, el texto se parte en piezas con **la función que ya existe para
+  esto**: `partesDeLinea()` de `js/despensa.js` (línea ~410), que ya parte
+  por comas y por "y"/"e" — no se escribe una nueva. **Ojo con un caso de
+  esa función**: con una entrada vacía, `partesDeLinea("")` devuelve `[""]`
+  (una lista de un elemento vacío), no `[]` — es su comportamiento normal
+  para una línea de receta, donde una línea siempre existe. Aquí hay que
+  aplicar un `.filter(Boolean)` extra después de llamarla, para que un
+  campo de material vacío guarde `material: []` y no `material: [""]`.
 - **Un ejercicio guardado antes de esta spec** trae `material` como string.
-  Al leerlo, si no es una lista, se parte al vuelo con la misma regla
-  (comas y "y"/"e") y se trata como si ya fuera una lista, sin reescribir
-  nada en Firestore. Se escribe ya como lista la próxima vez que ese
-  ejercicio se guarde (editado a mano, o vuelto a proponer por la IA).
+  Al leerlo, si no es una lista, se parte al vuelo con `partesDeLinea()` y
+  se trata como si ya fuera una lista, sin reescribir nada en Firestore. Se
+  escribe ya como lista la próxima vez que ese ejercicio se guarde (editado
+  a mano, o vuelto a proponer por la IA).
+- **`validarEjercicioCatalogo()` siempre devuelve una lista limpia**: tanto
+  si la entrada es un array (de la IA) como si es un string partido a
+  mano, se recorta cada pieza y se descartan las vacías; los duplicados
+  **no** se deduplican (una pieza repetida dos veces no rompe nada y no
+  merece la complicación de detectarla aquí).
+- **Dos sitios ya existentes pintan `ejercicio.material` como texto plano y
+  se romperían con el array tal cual** (encontrado por `revisor-specs`):
+  - `js/app.js` (~línea 4209), la cabecera plegada de la tarjeta del
+    Catálogo: hoy hace `ejercicio.material || "sin material"`. Con un
+    array, `[] || "sin material"` **no cae al fallback** (un array vacío
+    es *truthy*), y un array con piezas se pintaría unido sin espacios
+    (`"mancuernas,banco"`, por `toString()` implícito). Pasa a usar una
+    función nueva y pequeña, `materialLegible(ejercicio)`, que hace
+    `ejercicio.material.length ? ejercicio.material.join(", ") : "sin
+    material"`.
+  - `js/app.js` (~línea 4238), la precarga de `catalogo-material` al
+    editar: `id("catalogo-material").value = ejercicio.material || ""`
+    tiene el mismo problema. Pasa a `ejercicio.material.join(", ")`.
+  Ambos sitios estaban fuera de la primera versión de esta spec; quedan
+  añadidos aquí y en la sección 7.
 
 ### El cruce, al pintar un ejercicio del catálogo
 
@@ -185,7 +210,9 @@ documento de forma que afecte a las reglas.
 - **La IA ignora el armario**: no es un error, no se reintenta — igual que
   la 059.
 - **Ejercicio sin material** (uno editado a mano hasta vaciarlo, o de
-  peso corporal): sin marcas ni resumen, no revienta. `material: []`.
+  peso corporal): sin marcas ni resumen, no revienta. `material: []`. En
+  la cabecera del Catálogo y al editar, se lee "sin material" (ver
+  `materialLegible()` en la sección 4), no una celda vacía.
 - **Pieza de armario muy corta** ("banco") cruzada contra una frase con una
   palabra parecida: mismo filo que ya resolvió la despensa: aquí se cruza
   pieza contra pieza normalizada, no una pieza dentro de una frase larga,
@@ -203,11 +230,11 @@ documento de forma que afecte a las reglas.
 
 | Archivo | Qué |
 |---|---|
-| `js/ejercicios-catalogo.js` | `validarEjercicioCatalogo()`: `material` pasa a lista, aceptando string o array a la entrada; función de partir una frase en piezas (comas y "y"/"e"). |
-| `js/despensa.js` | Reutilizar `normalizar()`/`mismoIngrediente()` tal cual (ya lo hace `material.js` desde la 074). Sin cambios. |
+| `js/ejercicios-catalogo.js` | `validarEjercicioCatalogo()`: `material` pasa a lista, aceptando string o array a la entrada; usa `partesDeLinea()` de `js/despensa.js` para partir un string, recorta y descarta vacíos. |
+| `js/despensa.js` | Reutilizar `normalizar()`/`mismoIngrediente()`/`partesDeLinea()` tal cual. Sin cambios. |
 | `js/material.js` | Sin cambios de fondo; puede necesitar una función de cruce si no se reutiliza directo la de la despensa. |
 | `js/tablas.js` | `guardarEjerciciosPropuestos()`: pasar `propuesta.material` (ya lista) tal cual. Pasar `material` (piezas marcadas) en la petición al proxy. |
-| `js/app.js` | Casilla al pedir tabla (leer, mandar, recuento); pintar marcas y resumen en el Catálogo; el formulario "Nuevo ejercicio" parte el texto en piezas al guardar. |
+| `js/app.js` | Casilla al pedir tabla (leer, mandar, recuento); pintar marcas y resumen en el Catálogo; el formulario "Nuevo ejercicio" parte el texto en piezas al guardar; **`materialLegible()` nueva**, y arreglar los dos sitios que hoy leen `ejercicio.material` como texto (línea ~4209, cabecera de la tarjeta del Catálogo; línea ~4238, precarga del campo al editar). |
 | `api/tabla.js` | Esquema `ejercicios[].material` de STRING a ARRAY de STRING; prompt pidiendo piezas sueltas en vez de "ninguno"; aceptar `material` en el cuerpo de la petición y meterlo en el prompt, recortado a 80. |
 | `index.html` | Casilla y recuento en Mi tabla. El campo `catalogo-material` puede cambiar su `placeholder`/texto de ayuda para pedir piezas separadas por comas. |
 | `styles.css` | Reutilizar las clases de marca/resumen de la despensa/recetario si valen; lo mínimo si no. |
@@ -240,6 +267,11 @@ claramente de las 600 líneas, no antes.
   nada.
 - **Se acepta de antemano superar las ~300 líneas**, con el mismo criterio
   que la 074: parar solo si se dispara claramente por encima de las 600.
+- **Se reutiliza `partesDeLinea()` de `js/despensa.js`** en vez de escribir
+  una función nueva para partir el material en piezas. Encontrado por
+  `revisor-specs`: ya existe con exactamente esa regla, y duplicarla
+  repetiría el error que la propia spec 074 se advirtió a sí misma de no
+  cometer.
   Decisión del usuario, 2026-09-01.
 
 ## 9. Fuera de spec: ideas apuntadas
