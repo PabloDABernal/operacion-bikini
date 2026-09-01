@@ -113,6 +113,13 @@ export function ordenar(armario) {
   });
 }
 
+// Los nombres de lo que tienes marcado, para mandárselo a la IA al pedir tabla
+// (spec 077). Espejo de loQueTengo() de la despensa, que hace lo mismo para la
+// dieta desde la spec 059.
+export function loQueTengo(armario) {
+  return armario.filter((pieza) => pieza.tengo).map((pieza) => pieza.nombre);
+}
+
 export async function listarMaterial(uid) {
   const instantanea = await getDocs(coleccionDe(uid));
 

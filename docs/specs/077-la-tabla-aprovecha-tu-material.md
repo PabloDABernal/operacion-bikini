@@ -1,6 +1,6 @@
 # 077 — La tabla aprovecha tu material
 
-- **Estado:** 📝 escrita el 1 de septiembre de 2026, revisada por `revisor-specs` (un bloqueante de producto, cerrado por el usuario: PRODUCTO.md corregido). **Pendiente de implementar.**
+- **Estado:** 🚧 implementada y desplegada el 1 de septiembre de 2026, revisada por `revisor-specs` (un bloqueante de producto, cerrado por el usuario: PRODUCTO.md corregido) y `revisor-codigo` (CUMPLE, sin hallazgos). **Pendiente de que el usuario la pruebe.**
 - **Fecha:** 2026-09-01
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (v13: el material, decidida el 30 de agosto de 2026)", segundo y cuarto puntos.
 

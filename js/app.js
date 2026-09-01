@@ -71,7 +71,8 @@ import {
   guardarEjercicioCatalogo,
   actualizarEjercicioCatalogo,
   listarEjerciciosCatalogo,
-  borrarEjercicioCatalogo
+  borrarEjercicioCatalogo,
+  cruzarConElArmario
 } from "./ejercicios-catalogo.js";
 
 // Con alias: la dieta ya ocupa esos nombres y son funciones distintas.
@@ -131,7 +132,8 @@ import {
   marcarMaterial,
   borrarMaterial,
   listarMaterial,
-  ordenar as ordenarMaterial
+  ordenar as ordenarMaterial,
+  loQueTengo as loQueTengoDelArmario
 } from "./material.js";
 
 import { hayQueSembrar, sembrar, olvidarLaSiembra } from "./siembra.js";
@@ -352,6 +354,14 @@ function abrirSubpestana(seccion, nombre) {
   // El armario, igual y por lo mismo (spec 074).
   if (seccion === "ejercicio" && nombre === "material") {
     reordenarMaterialCargado();
+  }
+
+  // El catálogo se repinta al entrar porque su "Tienes 2 de 3" se cruza con el
+  // armario al vuelo (spec 077): marcas unas mancuernas en Mi material, vuelves
+  // aquí, y tiene que estar al día. Es lo mismo que hace la compra al entrar, y
+  // cuesta lo mismo: cálculo sobre lo que ya está en memoria.
+  if (seccion === "ejercicio" && nombre === "catalogo") {
+    pintarCatalogo();
   }
 
   // La compra se recalcula al entrar, no se guarda: es la despensa cruzada con
@@ -4004,13 +4014,45 @@ function tarjetaDeEjercicio(ejercicio) {
   });
   cabecera.className = "receta-cabecera";
   cabecera.setAttribute("aria-expanded", String(ejercicioAbierto === ejercicio.id));
+  // El material, cruzado con tu armario (spec 077). En la cabecera solo cabe
+  // el resumen, que es una línea; la lista pieza a pieza va en el cuerpo.
+  const cruce = cruzarConElArmario(ejercicio.material, materialCargado);
+
   cabecera.append(
     celdaDesplegable(ejercicio.nombre, "receta-nombre", ejercicio.id, nombresEjercicioDesplegados, pintarCatalogo),
-    celda(ejercicio.material || "sin material", "registro-detalle")
+    celda(
+      cruce.total === 0 ? "Sin material" : `Tienes ${cruce.tengo} de ${cruce.total}`,
+      "registro-detalle"
+    )
   );
   tarjeta.appendChild(cabecera);
 
   if (ejercicioAbierto !== ejercicio.id) return tarjeta;
+
+  // "Tienes 0 de 0" no dice nada, así que sin piezas no hay bloque: la cabecera
+  // ya ha dicho "Sin material".
+  if (cruce.total > 0) {
+    const bloque = document.createElement("div");
+    bloque.className = "material-del-ejercicio";
+
+    const titulo = document.createElement("p");
+    titulo.className = "registro-detalle";
+    titulo.textContent = `Material · Tienes ${cruce.tengo} de ${cruce.total}`;
+    bloque.appendChild(titulo);
+
+    const lista = document.createElement("ul");
+    lista.className = "material-piezas";
+    cruce.piezas.forEach((pieza) => {
+      const fila = document.createElement("li");
+      // Una pieza apuntada pero DESMARCADA cuenta como que te falta: tenerla
+      // escrita no es tenerla.
+      fila.className = pieza.tengo ? "pieza-tengo" : "pieza-falta";
+      fila.textContent = `${pieza.tengo ? "✅" : "⬜"} ${pieza.nombre}`;
+      lista.appendChild(fila);
+    });
+    bloque.appendChild(lista);
+    tarjeta.appendChild(bloque);
+  }
 
   if (ejercicio.comoSeHace) {
     const como = document.createElement("p");
@@ -4442,7 +4484,11 @@ id("btn-semana-blanco-tabla").addEventListener("click", async () => {
 
 // Pide la semana a la IA, guarda los ejercicios que proponga y sustituye la
 // tabla que hubiera. El cupo es el mismo que el de los planes: 2 al día.
-async function generarTabla(instrucciones) {
+// `aprovechar` llega solo desde el formulario de "Pedir" (spec 077), igual que
+// en generarDieta(): la propuesta de una revisión y el comité de bienvenida
+// generan tabla sin pasar por ahí, no tienen casilla que leer, y por eso el
+// parámetro es opcional. En esos caminos no se le menciona el material a la IA.
+async function generarTabla(instrucciones, aprovechar = false) {
   if (quedanPlanesHoy(planesCargados, "ejercicio") === 0) {
     throw Object.assign(new Error("Sin cupo"), { codigo: "limite-planes" });
   }
@@ -4457,7 +4503,11 @@ async function generarTabla(instrucciones) {
   const respuesta = await pedirTablaALaIa(uidActual, instrucciones, registros, {
     nombre: ajustes.nombre || "",
     perfil: ajustes.perfil || "",
-    proveedor: ajustes.proveedorIa || "automatico"
+    proveedor: ajustes.proveedorIa || "automatico",
+    // Se lee AQUÍ y no al pintar la casilla, por lo mismo que la despensa: el
+    // número de al lado puede ir retrasado si has ido a Mi material y has
+    // vuelto, pero lo que se manda es siempre lo que hay marcado ahora.
+    material: aprovechar ? loQueTengoDelArmario(materialCargado) : []
   });
 
   // Primero los ejercicios: la semana los enlaza por nombre, así que tienen
@@ -5831,6 +5881,30 @@ function pintarAprovecharDespensa() {
   id("dieta-aprovechar").checked = false;
 }
 
+// La casilla "aprovechar el material que tengo" (spec 077). Gemela de la de
+// arriba, con UNA diferencia deliberada: con el armario sin nada marcado, la de
+// la dieta esconde el bloque y esta lo deja visible y DESACTIVADO.
+//
+// No es un descuido. La despensa se llena sola desde las recetas, así que quien
+// pide dieta ya la tiene delante; el armario se escribe a mano y hay que
+// descubrirlo. Una casilla gris que dice dónde llenarlo lo enseña; esconderla
+// haría que no se descubriera nunca. Decisión del usuario del 1 de septiembre,
+// misma forma que el botón "Elegir de mi despensa" de la spec 084.
+function pintarAprovecharMaterial() {
+  const casilla = id("tabla-aprovechar");
+  const cuantos = loQueTengoDelArmario(materialCargado).length;
+
+  casilla.disabled = cuantos === 0;
+  casilla.checked = false;
+
+  id("aprovechar-material-cuantos").textContent =
+    cuantos === 0
+      ? "No tienes material marcado. Márcalo en Mi material."
+      : cuantos === 1
+        ? "1 cosa marcada"
+        : `${cuantos} cosas marcadas`;
+}
+
 function pintarEspecializadas() {
   Object.keys(TIPOS_ESPECIALIZADOS).forEach((tipo) => {
     const contenedor = id(`pedir-${tipo}`);
@@ -5847,6 +5921,7 @@ function pintarEspecializadas() {
       // La casilla de la despensa se decide al abrir el formulario, que es
       // cuando el usuario la va a mirar (spec 059).
       if (tipo === "dieta") pintarAprovecharDespensa();
+      if (tipo === "ejercicio") pintarAprovecharMaterial();
 
       // Las últimas instrucciones de este tipo, para no reescribirlas cada
       // vez (spec 040). planesCargados ya viene de más reciente a más
@@ -5898,7 +5973,10 @@ Object.keys(TIPOS_ESPECIALIZADOS).forEach((tipo) => {
       if (tipo === "dieta") {
         await generarDieta(id(`instrucciones-${tipo}`).value, id("dieta-aprovechar").checked);
       } else if (tipo === "ejercicio") {
-        await generarTabla(id(`instrucciones-${tipo}`).value);
+        await generarTabla(
+          id(`instrucciones-${tipo}`).value,
+          id("tabla-aprovechar").checked
+        );
       }
       id(`instrucciones-${tipo}`).value = "";
       // La casilla NO se recuerda entre peticiones, al revés que las
@@ -5906,6 +5984,7 @@ Object.keys(TIPOS_ESPECIALIZADOS).forEach((tipo) => {
       // un clic. Recordarla haría que un día te saliera una dieta condicionada
       // por tu despensa sin que supieras por qué.
       if (tipo === "dieta") id("dieta-aprovechar").checked = false;
+      if (tipo === "ejercicio") id("tabla-aprovechar").checked = false;
     } catch (fallo) {
       error.textContent = mensajeDeErrorDeConsulta(fallo.codigo);
     } finally {

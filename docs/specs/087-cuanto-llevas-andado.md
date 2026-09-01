@@ -98,14 +98,6 @@ red**.
 - **Ventanas fijas**, las mismas que las estadísticas de peso: hoy, los últimos
   **7** días y los últimos **30**, contando hacia atrás desde `hoy` (inclusive).
   No hay selector de rango: el de la gráfica es de la gráfica.
-
-> **Lo que se parece al peso son las ventanas, NO el algoritmo.**
-> `estadisticasDePeso()` tira de `compararVentanas()` (`js/grafica.js`), que
-> compara **dos ventanas consecutivas** para sacar una diferencia: sirve para
-> *"cuánto has variado"*. Aquí hace falta una **suma dentro de una sola
-> ventana**: *"cuánto llevas"*. `compararVentanas()` **no se reutiliza**; es una
-> función nueva y más simple. Lo avisó `revisor-specs` porque encajarla ahí a la
-> fuerza es el error fácil.
 - Razona **por días**, con la fecha ISO del ejercicio. La hora (spec 014) no
   interviene, igual que en las estadísticas de peso.
 - Los totales se **redondean a un decimal**, como los guarda la 086. Se suma
@@ -114,6 +106,14 @@ red**.
 - La **media** es el total de la ventana entre el **número de sesiones con
   distancia** de esa ventana. Con cero sesiones, media `null`, y quien pinta
   no la enseña.
+
+> **Lo que se parece al peso son las ventanas, NO el algoritmo.**
+> `estadisticasDePeso()` tira de `compararVentanas()` (`js/grafica.js`), que
+> compara **dos ventanas consecutivas** para sacar una diferencia: sirve para
+> *"cuánto has variado"*. Aquí hace falta una **suma dentro de una sola
+> ventana**: *"cuánto llevas"*. `compararVentanas()` **no se reutiliza**; es una
+> función nueva y más simple. Lo avisó `revisor-specs` porque encajarla ahí a la
+> fuerza es el error fácil.
 
 Devuelve:
 

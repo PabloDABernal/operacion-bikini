@@ -10,6 +10,11 @@ const { peticionAutorizada, describirRegistros, generarJson } = require("./_ia")
 
 const MAXIMO_INSTRUCCIONES = 500;
 
+// Cuántas piezas del armario caben en el prompt (spec 077). Menos que los 80 de
+// la despensa a propósito: nadie tiene ochenta cosas para entrenar, y el tope
+// existe por la lección del 413 de Groq de la spec 049.
+const MAXIMO_MATERIAL = 40;
+
 const DIAS = [
   "lunes",
   "martes",
@@ -93,6 +98,37 @@ function contexto(nombre, perfil) {
     "\n\n" +
     (nombre ? `Me llamo ${nombre}.` : "") +
     (perfil ? ` Esto es lo que ya sabes de mí: ${perfil}` : "")
+  );
+}
+
+// El material que el usuario tiene marcado (spec 077). Gemelo de
+// loQueTengoEnCasa() de api/dieta.js, y con el mismo reparto: va en el MENSAJE
+// y no en INSTRUCCIONES, porque es un dato de esta petición y no la constante
+// de sistema que comparten todas las peticiones de todo el mundo.
+//
+// Preferencia, NO restricción: es literalmente la decisión de la spec 059 con
+// la despensa. Una tabla pobre por no salirse de la lista no le sirve a nadie.
+function loQueTengoParaEntrenar(material) {
+  if (!Array.isArray(material)) return "";
+
+  const nombres = material
+    .map((nombre) => String(nombre || "").trim())
+    .filter(Boolean);
+
+  if (nombres.length === 0) return "";
+
+  const usados = nombres.slice(0, MAXIMO_MATERIAL);
+  const recortada = nombres.length > usados.length;
+
+  return (
+    "\n\nEsto es el material que tengo para entrenar" +
+    (recortada ? ` (te enseño ${usados.length} de ${nombres.length})` : "") +
+    ":\n" +
+    usados.join(", ") +
+    "\n\nApóyate en él todo lo que puedas y móntame la semana alrededor de lo" +
+    " que tengo. PERO NO te limites a él: si la semana necesita otra cosa," +
+    " propónmela igual. Esto es una preferencia, no una restricción, y una" +
+    " tabla pobre por no salirse de la lista no me sirve."
   );
 }
 
@@ -248,6 +284,7 @@ module.exports = async (req, res) => {
                 "Estos son mis registros de los últimos 14 días:\n\n" +
                 describirRegistros(cuerpo.registros || {}) +
                 contexto(cuerpo.nombre, cuerpo.perfil) +
+                loQueTengoParaEntrenar(cuerpo.material) +
                 loQuePide(cuerpo.instrucciones)
             }
           ]

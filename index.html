@@ -655,6 +655,20 @@
         <label for="instrucciones-ejercicio">¿Algo que deba tener en cuenta?</label>
         <textarea id="instrucciones-ejercicio" rows="3" maxlength="500"
           placeholder="el sábado juego al pádel, no me pongas nada ese día"></textarea>
+
+        <!-- Aprovechar el armario (spec 077). A diferencia de la casilla de la
+             dieta (059), que ESCONDE el bloque con la despensa vacía, esta se
+             queda visible y DESACTIVADA: el armario es una pantalla que no se
+             descubre sola, y una casilla gris que dice dónde llenarlo enseña
+             que la función existe. Decisión del usuario, como en la 084. -->
+        <div id="bloque-aprovechar-material">
+          <label class="casilla-linea" for="tabla-aprovechar">
+            <input type="checkbox" id="tabla-aprovechar">
+            <span>Aprovechar el material que tengo</span>
+          </label>
+          <p id="aprovechar-material-cuantos" class="registro-detalle"></p>
+        </div>
+
         <button type="submit" id="btn-pedir-ejercicio">Pedir</button>
         <button type="button" id="btn-cancelar-ejercicio" class="enlace">Cancelar</button>
       </form>
