@@ -2,7 +2,40 @@
 
 Documento para retomar el trabajo en frío. Se actualiza al terminar cada spec.
 
-**Última actualización:** 31 de agosto de 2026 (primer día de operación bikini de verdad). Specs 001-073 cerradas (v1 a v12). Hoy se cerraron, probadas por el usuario en producción: **080 y 081** (texto recortado desplegable) y **082, 083, 084 y 085** (ingredientes estructurados en la receta, editar la receta desde el día, apuntar con un ingrediente suelto, y fundir Recetas+Despensa en un solo Recetario). Las **074, 075, 076 y 079 siguen desplegadas y SIN PROBAR** (v13 a medias, v14 y v15 enteras), y se les suma la **086** (la distancia al apuntar un ejercicio), hecha desde el PC ese mismo día.
+**Última actualización:** 1 de septiembre de 2026. **Specs 001-086 cerradas y probadas por el usuario en producción; no queda nada desplegado sin probar.** Ese día se cerraron las cinco que arrastraban ese estado: **074** (el armario), **075** (73 recetas y 133 ingredientes ya puestos), **076** (elegir menú sin la IA), **079** (Comidas, que se lea) y **086** (la distancia al apuntar). Sin escribir y sin compromiso: **077**, **078** y **087**.
+
+> **Sesión del 1 de septiembre de 2026: limpieza de cierre.** El usuario
+> confirmó que ha probado en producción las cinco specs que quedaban desplegadas
+> sin probar — **074, 075, 076, 079 y 086** — y las dio por cerradas. Con eso
+> **no queda absolutamente nada desplegado y sin validar**, que era el único
+> frente abierto del proyecto.
+>
+> **Lo que se limpió:**
+>
+> - Las cinco specs pasan a `✅ completada … probada por el usuario en producción
+>   el 1 de septiembre de 2026` en su cabecera.
+> - La tabla de specs de este documento estaba **desordenada e incompleta**: le
+>   faltaban las filas 077, 078 y 080-085, y las 064-069 aparecían detrás de las
+>   074-087. Se reordenó por número y se completó.
+> - **`docs/BACKLOG.md` sigue vacío**, y esta vez sí por descuido de nadie: al
+>   usar la app estos días no salió ninguna idea que anotar. Es el buzón
+>   principal de la fase productiva; si no cae nada, se queda vacío.
+>
+> **Las cuatro suites de pruebas pasan** (ejecutadas ese día):
+> `node docs/specs/059-cruce-casos.mjs`, `061-agua-casos.mjs`,
+> `068-limpieza-casos.mjs` y `075-siembra-casos.mjs`.
+>
+> **Tres decisiones que quedaron validadas al probar** y que ya no hace falta
+> vigilar: que una pieza de material nace MARCADA al revés que un ingrediente de
+> la despensa (074), que los menús enlazan unos 50 platos de 96 con su receta
+> (076), y la transcripción a ojo de los PDF. Si aparece una errata en una
+> receta, se corrige en `docs/menus/recetas-transcritas.json` y se regenera con
+> `node docs/menus/generar-datos-iniciales.mjs`.
+>
+> **Lo siguiente sale del uso.** No hay versión en marcha ni spec abierta. Las
+> 077 (la tabla aprovecha tu material), 078 (el material que falta) y 087
+> (cuánto llevas andado) están declaradas y sin escribir: se escriben solo si al
+> usar la app se echan de menos.
 
 > **Traspaso del 31 de agosto de 2026.** Se sigue en remoto desde Claude Code
 > web. `main` limpio y sincronizado con `origin/main`.
@@ -71,37 +104,11 @@ Documento para retomar el trabajo en frío. Se actualiza al terminar cada spec.
 > formulario o pantalla), ya usado tres veces (Recetario, y el modo
 > Escribir/Elegir de mi despensa al apuntar una comida).
 >
-> **Cuatro specs desplegadas y sin probar.** No se cierran con una sesión de
-> pruebas: se validan usándolas. Sus guiones están al final de cada una.
->
-> | Spec | Qué | Dónde mirar |
-> |---|---|---|
-> | **074** | El armario: el material que tienes | Ejercicio → Material |
-> | **075** | 73 recetas y 133 ingredientes ya puestos | Comidas → Recetas y Despensa |
-> | **076** | Elegir menú en vez de pedírselo a la IA | Comidas → Mi dieta |
-> | **079** | Comidas, que se lea | Toda la pestaña Comidas |
->
-> **Tres cosas concretas a las que mirar con lupa al usarlas:**
->
-> 1. **Una pieza de material nace MARCADA** (074), al revés que un ingrediente
->    de la despensa desde la 068. Está razonado en `js/material.js`, pero deja
->    dos pantallas gemelas comportándose distinto. Si chirría, es una línea.
-> 2. **Los menús enlazan unos 50 platos de 96 con su receta** (076). El resto no
->    son recetas ("125 gramos de kéfir con canela"). Si alguno que sí lo es se
->    queda sin enlazar, el sitio es `semanaDesdeMenu()` en `js/dietas.js`.
-> 3. **La transcripción de los PDF se hizo a ojo** y ya salió una errata
->    ("triigueros"). Si una receta dice algo raro, se corrige en
->    `docs/menus/recetas-transcritas.json` y se regenera con
->    `node docs/menus/generar-datos-iniciales.mjs`.
->
-> **Lo que queda escrito y sin implementar:** las specs **077** (la tabla
-> aprovecha tu material) y **078** (el material que falta), que cierran la v13.
-> No son un compromiso: se hacen si al usar el armario se echan de menos.
->
-> **Las cuatro suites de pruebas pasan.** Se ejecutan con `node`:
-> `docs/specs/059-cruce-casos.mjs`, `061-agua-casos.mjs`,
-> `068-limpieza-casos.mjs` y `075-siembra-casos.mjs` (34 casos, cubre la siembra
-> y los menús).
+> **Cuatro specs quedaron desplegadas y sin probar ese día** — 074 (el
+> armario), 075 (las recetas y los ingredientes ya puestos), 076 (elegir menú
+> sin la IA) y 079 (Comidas, que se lea), más la 086 (la distancia al apuntar).
+> **Las cinco las cerró el usuario el 1 de septiembre**, probadas en producción;
+> ver el bloque de arriba.
 >
 > **Reglas de Firestore publicadas**, incluido el bloque `material`. Las specs
 > 075, 076 y 079 no las tocan.
@@ -121,22 +128,13 @@ Documento para retomar el trabajo en frío. Se actualiza al terminar cada spec.
 > - `docs/BACKLOG.md` vuelve a ser el buzón principal: es donde caen las cosas
 >   que se noten al usarla.
 >
-> **Lo que queda a medias, y es poco:**
+> **Lo que quedaba a medias entonces** (la 074 desplegada sin probar, y las
+> 077/078 declaradas y sin escribir) **se resolvió el 1 de septiembre**: la 074
+> la probó el usuario y quedó cerrada; las 077 y 078 siguen sin escribir, y sin
+> compromiso de escribirse.
 >
-> - La **spec 074 (el armario)** está desplegada y **sin probar formalmente**.
->   No se cierra con una sesión de pruebas: **se valida usándola**. Su guion
->   sigue al final de la spec por si hace falta.
-> - Al usarla, mirar **una decisión concreta**: una pieza de material nace
->   MARCADA, al revés que un ingrediente de la despensa desde la spec 068. Está
->   razonado en `js/material.js`, pero deja dos pantallas gemelas comportándose
->   distinto. Si chirría, se cambia en una línea.
-> - Las specs **075 (el cruce de la tabla con el armario)** y **076 (el material
->   que falta)** están declaradas en `docs/PRODUCTO.md` y **sin escribir**. No
->   son un compromiso: se escriben si al usar la 074 se echan de menos.
->
-> `main` limpio y sincronizado. Las tres suites de pruebas en verde (una llevaba
-> en rojo desde la spec 072 y se arregló hoy). Reglas de Firestore publicadas,
-> incluido el bloque `material`.
+> `main` limpio y sincronizado. Las suites de pruebas en verde. Reglas de
+> Firestore publicadas, incluido el bloque `material`.
 
 > **Cierre del 30 de agosto de 2026.** La **spec 073 (la lista de la compra)
 > queda cerrada** por decisión del usuario: está implementada, desplegada y con
@@ -249,29 +247,37 @@ El 20 de agosto arrancó la **v4**, que sale de una auditoría de usabilidad hec
 | 071 | La IA deja de tirar respuestas buenas (v11) | ✅ completada |
 | 072 | La despensa con sensibilidad, y la receta con su icono (v8+) | ✅ completada |
 | 073 | La lista de la compra (v12) | ✅ completada |
-| 074 | El armario: el material que tienes (v13) | 🚧 implementada y desplegada, **sin probar** |
-| 075 | Las recetas y los ingredientes, ya puestos (v14) | 🚧 implementada y desplegada, **sin probar** |
-| 076 | Elegir menú en vez de pedírselo a la IA (v14) | 🚧 implementada y desplegada, **sin probar** |
-| 079 | Comidas, que se lea (v15) | 🚧 implementada y desplegada, **sin probar** |
-| 086 | La distancia, al apuntar | 🚧 implementada y desplegada, **sin probar** |
-| 087 | Cuánto llevas andado (estadísticas) | 📝 sin escribir |
 | 064 | La semana de la dieta, en siete recuadros (v10) | ✅ completada |
 | 065 | Iconos en las acciones de fila (v10) | ✅ completada |
 | 066 | La barra con iconos, y Ajustes de vuelta (v10) | ✅ completada |
 | 067 | La tira de días, también en la tabla (v10) | ✅ completada |
 | 068 | La despensa se llena sola, y deja de mentir (v8+) | ✅ completada |
 | 069 | Buscar en la despensa (v8+) | ✅ completada |
+| 074 | El armario: el material que tienes (v13) | ✅ completada |
+| 075 | Las recetas y los ingredientes, ya puestos (v14) | ✅ completada |
+| 076 | Elegir menú en vez de pedírselo a la IA (v14) | ✅ completada |
+| 077 | La tabla aprovecha tu material (v13) | 📝 sin escribir |
+| 078 | El material que falta (v13) | 📝 sin escribir |
+| 079 | Comidas, que se lea (v15) | ✅ completada |
+| 080 | El texto recortado se despliega al tocarlo | ✅ completada |
+| 081 | Recetario y Catálogo: el nombre se despliega en la cabecera | ✅ completada |
+| 082 | Ingredientes estructurados en la receta | ✅ completada |
+| 083 | Editar la receta desde el día | ✅ completada |
+| 084 | Apuntar una comida con un ingrediente suelto | ✅ completada |
+| 085 | Recetario: un solo apartado con recetas e ingredientes | ✅ completada |
+| 086 | La distancia, al apuntar | ✅ completada |
+| 087 | Cuánto llevas andado (estadísticas) | 📝 sin escribir |
 
 ## Qué toca ahora
 
-**Usar la app.** Al 30 de agosto de 2026 las specs **001 a 073 están cerradas**
-y las versiones v1 a v12 terminadas. La 074 está desplegada y se valida con el
-uso. **Desde el 31 de agosto no hay una versión en marcha**: el trabajo entra
-por lo que se encuentre usándola.
+**Usar la app.** Al 1 de septiembre de 2026 las specs **001 a 086 están
+cerradas** y probadas por el usuario en producción. **No hay nada desplegado sin
+validar, ni versión en marcha, ni spec abierta.** El trabajo entra por lo que el
+usuario se encuentre usándola, y cae primero en `docs/BACKLOG.md`.
 
-La **v13 (el material)** está en marcha, declarada en `docs/PRODUCTO.md` y
-partida en tres desde el inicio: **074 el armario** (hecha, sin probar), **075 el
-cruce con la tabla** y **076 el material que falta** (sin escribir todavía).
+**Sin escribir y sin compromiso**: las specs **077** (la tabla aprovecha tu
+material) y **078** (el material que falta), que cerrarían la v13, y la **087**
+(cuánto llevas andado). Se escriben solo si al usar la app se echan de menos.
 
 **Las reglas de Firestore del bloque `usuarios/{uid}/material` SÍ están
 publicadas**, con la CLI y antes del commit `6c250b3`. Se anota porque no se ve
@@ -290,17 +296,12 @@ que parecen bugs.
 
 ### Lo siguiente
 
-1. **Usar la app**, que es lo que valida la 074 (el armario) y la 075 (las
-   recetas y los ingredientes ya puestos). Son lo único desplegado sin probar;
-   sus guiones están al final de cada spec.
-2. La **v14 está entera y desplegada** (075 y 076): las recetas y los
-   ingredientes ya puestos, y el desplegable para elegir uno de los cuatro
-   menús sin pasar por la IA. Falta probarlo todo.
-2. Al probarla, mirar con lupa **una decisión**: una pieza de material nace
-   MARCADA, al revés que un ingrediente de la despensa desde la spec 068. Está
-   razonado en `js/material.js`, pero deja dos pantallas gemelas comportándose
-   distinto. Si chirría al usarlo, se cambia en una línea.
-3. Después, **la spec 075**: el cruce de la tabla con el armario.
+1. **Usar la app.** Es lo único que genera trabajo ahora: lo que chirríe se
+   anota en `docs/BACKLOG.md`, en una línea.
+2. Cuando se junten varias anotaciones que apunten al mismo sitio, **eso será la
+   próxima versión**: se escribe con `/nueva-spec` antes de tocar código.
+3. Si al usar el armario se echan de menos, **las specs 077 y 078**; si se echa
+   de menos ver el acumulado de kilómetros, **la 087**.
 
 **Elegir.** No hay nada a medias ni ninguna decisión pendiente. Las ideas viven
 en `docs/PRODUCTO.md`, apartado "Ideas para más adelante", y `docs/BACKLOG.md`

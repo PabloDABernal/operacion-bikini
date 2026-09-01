@@ -38,6 +38,11 @@ Lo que cambia respecto a la fase de construcción: las ideas ya no salen de una
 lista de versiones planificadas, salen del uso. Cuando se junten varias que
 apunten al mismo sitio, eso será la próxima versión.
 
+**Repasado el 1 de septiembre de 2026 y sigue vacío.** Ese día el usuario cerró
+las cinco specs que quedaban desplegadas sin probar (074, 075, 076, 079 y 086) y
+no salió nada que anotar al usarlas. El buzón vacío es la señal de que no hay
+nada pendiente, no de que se haya olvidado apuntarlo.
+
 ## En el buzón
 
 - **La distancia, también en el resumen de Hoy y en el contexto de la IA**

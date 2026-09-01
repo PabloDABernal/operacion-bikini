@@ -1,6 +1,6 @@
 # 076 — Elegir menú en vez de pedírselo a la IA
 
-- **Estado:** 🚧 implementada y desplegada el 30 de agosto de 2026. **Pendiente de que el usuario la pruebe.**
+- **Estado:** ✅ completada el 30 de agosto de 2026, revisada por `revisor-specs` y `revisor-codigo`, probada por el usuario en producción el 1 de septiembre de 2026.
 - **Fecha:** 2026-08-30
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (v14: los menús de la nutricionista, decidida el 30 de agosto de 2026)", punto tercero.
 

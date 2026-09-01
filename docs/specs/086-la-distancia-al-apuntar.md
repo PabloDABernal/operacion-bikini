@@ -1,6 +1,6 @@
 # 086 — La distancia, al apuntar
 
-- **Estado:** 🚧 implementada y desplegada el 31 de agosto de 2026. **Pendiente de que el usuario la pruebe.**
+- **Estado:** ✅ completada el 31 de agosto de 2026 (commits `22816e0` y `38f1b5d`), probada por el usuario en producción el 1 de septiembre de 2026.
 - **Fecha:** 2026-08-31
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (evolutivos de la fase productiva, desde el 31 de agosto de 2026)", el evolutivo de los kilómetros.
 

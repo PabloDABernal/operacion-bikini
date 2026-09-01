@@ -1,6 +1,6 @@
 # 079 — Comidas, que se lea
 
-- **Estado:** 🚧 implementada y desplegada el 31 de agosto de 2026. **Pendiente de que el usuario la pruebe.**
+- **Estado:** ✅ completada el 31 de agosto de 2026, revisada por `revisor-specs` y `revisor-codigo`, probada por el usuario en producción el 1 de septiembre de 2026.
 - **Fecha:** 2026-08-31
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (v15: Comidas, que se lea, decidida el 31 de agosto de 2026)".
 
