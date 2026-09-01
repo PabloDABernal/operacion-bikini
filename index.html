@@ -655,6 +655,17 @@
         <label for="instrucciones-ejercicio">¿Algo que deba tener en cuenta?</label>
         <textarea id="instrucciones-ejercicio" rows="3" maxlength="500"
           placeholder="el sábado juego al pádel, no me pongas nada ese día"></textarea>
+
+        <!-- Aprovechar el armario (spec 077), espejo de bloque-aprovechar de
+             la dieta. Se esconde si no hay nada marcado. -->
+        <div id="bloque-aprovechar-material" class="oculta">
+          <label class="casilla-linea" for="tabla-aprovechar">
+            <input type="checkbox" id="tabla-aprovechar">
+            <span>Aprovechar mi material</span>
+          </label>
+          <p id="aprovechar-material-cuantos" class="registro-detalle"></p>
+        </div>
+
         <button type="submit" id="btn-pedir-ejercicio">Pedir</button>
         <button type="button" id="btn-cancelar-ejercicio" class="enlace">Cancelar</button>
       </form>
@@ -690,7 +701,7 @@
           placeholder="De pie, con un pie apoyado atrás en un banco. Bajas hasta que el muslo quede paralelo al suelo."></textarea>
 
         <label for="catalogo-material">Material</label>
-        <input type="text" id="catalogo-material" maxlength="200" placeholder="un banco o una silla">
+        <input type="text" id="catalogo-material" maxlength="200" placeholder="banco, mancuernas">
 
         <button type="submit" id="btn-guardar-ejercicio-catalogo">Guardar ejercicio</button>
         <button type="button" id="btn-cancelar-ejercicio-catalogo" class="enlace">Cancelar</button>

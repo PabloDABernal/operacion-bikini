@@ -9,6 +9,10 @@
 const { peticionAutorizada, describirRegistros, generarJson } = require("./_ia");
 
 const MAXIMO_INSTRUCCIONES = 500;
+// Cuántas piezas de material caben en el prompt (spec 077). Mismo tope y
+// mismo motivo que MAXIMO_DESPENSA en api/dieta.js: la lección del 413 de
+// Groq (spec 049).
+const MAXIMO_MATERIAL = 80;
 
 const DIAS = [
   "lunes",
@@ -44,7 +48,7 @@ Te piden la tabla de ejercicio de una semana entera, de lunes a domingo:
 
 Además, devuelve la EXPLICACIÓN de los ejercicios que uses:
 - Como mucho diez, los que más se repitan.
-- De cada uno: nombre exacto tal y como lo has escrito al principio de la línea, cómo se hace en dos o tres frases, y qué material hace falta (si no hace falta ninguno, escribe "ninguno").
+- De cada uno: nombre exacto tal y como lo has escrito al principio de la línea, cómo se hace en dos o tres frases, y una LISTA de las piezas de material que hacen falta, cada una un elemento suelto ("mancuernas", "banco"), o una lista vacía si no hace falta ninguna. Nunca un texto: si hacen falta mancuernas y banco, son DOS elementos de la lista, no uno.
 - El nombre tiene que coincidir LETRA POR LETRA con el que has puesto en la semana, o no se podrán enlazar.`;
 
 // Todos los campos obligatorios: con campos opcionales, Gemini se los salta
@@ -77,7 +81,7 @@ const ESQUEMA = {
         properties: {
           nombre: { type: "STRING" },
           comoSeHace: { type: "STRING" },
-          material: { type: "STRING" }
+          material: { type: "ARRAY", items: { type: "STRING" } }
         },
         required: ["nombre", "comoSeHace", "material"]
       }
@@ -93,6 +97,30 @@ function contexto(nombre, perfil) {
     "\n\n" +
     (nombre ? `Me llamo ${nombre}.` : "") +
     (perfil ? ` Esto es lo que ya sabes de mí: ${perfil}` : "")
+  );
+}
+
+// Lo que el usuario tiene en el armario (spec 077), espejo de
+// loQueTengoEnCasa() en api/dieta.js. Va en el MENSAJE, no en
+// INSTRUCCIONES: el armario es un dato de esta petición, no una regla fija
+// para todo el mundo.
+function loQueTengoDeMaterial(material) {
+  if (!Array.isArray(material)) return "";
+
+  const nombres = material.map((nombre) => String(nombre || "").trim()).filter(Boolean);
+  if (nombres.length === 0) return "";
+
+  const usados = nombres.slice(0, MAXIMO_MATERIAL);
+  const recortado = nombres.length > usados.length;
+
+  return (
+    "\n\nEsto es el material que tengo ahora mismo" +
+    (recortado ? ` (te enseño ${usados.length} de ${nombres.length})` : "") +
+    ":\n" +
+    usados.join(", ") +
+    "\n\nApóyate en él todo lo que puedas. PERO NO te limites a él: si hace" +
+    " falta algo que no tengo, propónmelo igual — es una preferencia, no una" +
+    " restricción."
   );
 }
 
@@ -248,6 +276,7 @@ module.exports = async (req, res) => {
                 "Estos son mis registros de los últimos 14 días:\n\n" +
                 describirRegistros(cuerpo.registros || {}) +
                 contexto(cuerpo.nombre, cuerpo.perfil) +
+                loQueTengoDeMaterial(cuerpo.material) +
                 loQuePide(cuerpo.instrucciones)
             }
           ]

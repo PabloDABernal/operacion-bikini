@@ -123,3 +123,31 @@ export async function listarMaterial(uid) {
     }))
   );
 }
+
+// La tabla lo aprovecha (spec 077): las piezas marcadas, para mandar a la
+// IA al pedir tabla — espejo exacto de loQueTengo() en despensa.js.
+export function loQueTengo(armario) {
+  return armario.filter((pieza) => pieza.tengo).map((pieza) => pieza.nombre);
+}
+
+// Cruza las piezas de material de un ejercicio contra tu armario (spec
+// 077). A diferencia de cruzarConLaDespensa() de despensa.js, aquí cada
+// pieza ya es un elemento suelto (el catálogo la guarda partida, no una
+// línea que puede llevar varias cosas dentro): no hace falta repartir por
+// comas ni "y"/"e", solo comparar nombre contra nombre.
+//
+// Una pieza del armario no se usa dos veces para dos piezas de material
+// distintas, igual que un ingrediente de la despensa no cuenta dos veces
+// para una receta que lo pide dos veces.
+export function cruzarConElArmario(piezas, armario) {
+  const disponibles = armario.filter((pieza) => pieza.tengo);
+  const gastadas = new Set();
+
+  return (piezas || []).map((pieza) => {
+    const encontrada = disponibles.find(
+      (delArmario) => !gastadas.has(delArmario.id) && mismoIngrediente(delArmario.nombre, pieza)
+    );
+    if (encontrada) gastadas.add(encontrada.id);
+    return { texto: pieza, tengo: Boolean(encontrada) };
+  });
+}
