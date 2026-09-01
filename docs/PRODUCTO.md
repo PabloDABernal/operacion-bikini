@@ -521,9 +521,17 @@ suelta que no se cruza con nada: la app no sabe si tienes banco.
   con su "Tienes 2 de 3".
 - **Y lo que te falta, junto.** El material que piden los ejercicios de tu tabla
   y no tienes, en una lista, como la compra de la v12.
-- **El material del ejercicio pasa a ser una lista**, no una frase: la IA lo
-  devuelve ya en piezas. Los ejercicios ya guardados se parten por comas al
-  vuelo, sin tocar lo que hay en Firestore.
+- **El material del ejercicio se lee como una lista**, no como una frase: se
+  parte por comas al vuelo, sin tocar lo que hay en Firestore. Vale igual para
+  los ejercicios ya guardados y para los que proponga la IA.
+
+  > Corregido el 1 de septiembre de 2026, al escribir la spec 077. Esta frase
+  > decía antes que "la IA lo devuelve ya en piezas", lo que obligaba a cambiar
+  > el esquema de `api/tabla.js` y dejaba el campo `material` con dos tipos
+  > posibles en Firestore para siempre — string en los ejercicios viejos, lista
+  > en los nuevos— y con ello el editor del catálogo y todo lo que lo lee.
+  > Decisión del usuario: se parte al leer, que da el mismo resultado en
+  > pantalla sin migración ni campo de dos tipos.
 
 Qué NO hace:
 
