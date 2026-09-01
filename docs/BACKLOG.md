@@ -43,6 +43,11 @@ las cinco specs que quedaban desplegadas sin probar (074, 075, 076, 079 y 086) y
 no salió nada que anotar al usarlas. El buzón vacío es la señal de que no hay
 nada pendiente, no de que se haya olvidado apuntarlo.
 
+**Y esa misma tarde se cerró la deuda de specs.** El usuario pidió hacer las
+tres que quedaban declaradas en `PRODUCTO.md` y sin escribir (077, 078 y 087).
+Con eso **no queda ninguna spec declarada sin escribir**, ni ninguna escrita sin
+implementar. A partir de aquí, todo lo que entre sale de este archivo.
+
 ## En el buzón
 
 - **La distancia, también en el resumen de Hoy y en el contexto de la IA**

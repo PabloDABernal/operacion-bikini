@@ -2,7 +2,65 @@
 
 Documento para retomar el trabajo en frío. Se actualiza al terminar cada spec.
 
-**Última actualización:** 1 de septiembre de 2026. **Specs 001-086 cerradas y probadas por el usuario en producción; no queda nada desplegado sin probar.** Ese día se cerraron las cinco que arrastraban ese estado: **074** (el armario), **075** (73 recetas y 133 ingredientes ya puestos), **076** (elegir menú sin la IA), **079** (Comidas, que se lea) y **086** (la distancia al apuntar). Sin escribir y sin compromiso: **077**, **078** y **087**.
+**Última actualización:** 1 de septiembre de 2026. **Specs 001 a 087 escritas y cerradas, sin ningún hueco.** Por la mañana se cerraron las cinco que arrastraban "desplegada sin probar" (074, 075, 076, 079 y 086), probadas por el usuario en producción. Por la tarde se escribieron, revisaron, implementaron y desplegaron las **tres últimas que quedaban declaradas y sin escribir**: **077** (la tabla aprovecha tu material), **078** (el material que te falta) y **087** (cuánto llevas andado). **Las tres están desplegadas y PENDIENTES de que el usuario las pruebe.**
+
+> **Sesión del 1 de septiembre de 2026, por la tarde: las tres últimas specs.**
+> El usuario pidió cerrar la deuda entera —"no quiero tener debes"— y se
+> escribieron, revisaron e implementaron las tres que quedaban declaradas en
+> `PRODUCTO.md` y sin escribir. Con la 077 y la 078 **se cierra la v13**, que
+> llevaba a medias desde el 30 de agosto.
+>
+> | Spec | Qué | Dónde mirar |
+> |---|---|---|
+> | **077** | La tabla aprovecha tu material | Ejercicio → Pedir tabla, y Catálogo |
+> | **078** | El material que te falta | Ejercicio → Material, abajo |
+> | **087** | Cuánto llevas andado | Ejercicio → Apuntar, abajo |
+>
+> **Se avisó de que estas tres no eran un compromiso** —este documento y
+> `PRODUCTO.md` decían que se escribían solo si al usar la app se echaban de
+> menos— y el usuario decidió hacerlas igual. Queda anotado por si alguna
+> resulta no usarse: no salieron del uso, salieron de cerrar la lista.
+>
+> **Tres decisiones de producto que tomó el usuario** al escribirlas:
+>
+> 1. **La casilla "aprovechar el material" se enseña DESACTIVADA** con el
+>    armario vacío, no escondida. Se aparta a propósito de la spec 059, que
+>    esconde la de la despensa, y sigue a la 084. El motivo: el armario no se
+>    descubre solo, y una casilla gris que dice dónde llenarlo lo enseña.
+> 2. **Lo que te falta se marca desde su propia lista**, sin ir al armario.
+> 3. **Los kilómetros van en Ejercicio**, no en Peso → Estadísticas, y **sin
+>    gráfica**: la de peso es SVG a mano y habría sido más código que todo lo
+>    demás junto.
+>
+> **Un bloqueante de producto, encontrado por `revisor-specs` y corregido en
+> `PRODUCTO.md`.** El apartado de la v13 decía a la vez que la IA devolviera el
+> material "ya en piezas" (un cambio de esquema) y que se partiera por comas al
+> vuelo "sin tocar lo que hay en Firestore" (lo contrario). El usuario eligió
+> **partir al leer**: mismo resultado en pantalla, sin dejar el campo `material`
+> con dos tipos posibles en Firestore para siempre. La frase está corregida, con
+> su nota al lado.
+>
+> **Las tres pasaron `revisor-codigo` con CUMPLE y sin hallazgos.**
+>
+> **Las suites de pruebas pasan de cuatro a OCHO**, con tres nuevas (077, 078 y
+> 087, 47 casos entre las tres). Se ejecutan con `node`:
+> `docs/specs/059-cruce-casos.mjs`, `061-agua-casos.mjs`,
+> `068-limpieza-casos.mjs`, `075-siembra-casos.mjs`, `077-material-casos.mjs`,
+> `078-material-falta-casos.mjs`, `086-distancia-casos.mjs` y
+> `087-distancia-estadisticas-casos.mjs`.
+>
+> **Reglas de Firestore: sin tocar.** Ninguna de las tres estrena colección ni
+> campo — todo sale de cruzar al vuelo lo que ya estaba.
+>
+> **Dos trampas que dejó este tramo:**
+>
+> 1. **`marcarEnElArmario()` no repinta el armario a propósito** (spec 074, para
+>    no mover la fila bajo el dedo). Cualquier bloque nuevo que dependa de lo
+>    marcado tiene que repintarse él solo desde ahí, o se queda atrasado. Le pasó
+>    a la 078 y lo cazó `revisor-specs`.
+> 2. **`obtenerRegistros()` devuelve la lista ENTERA**; `recortarPorDias` solo
+>    decide qué se pinta. Da miedo al leerlo por primera vez y es correcto: la
+>    gráfica ya tiraba de ahí.
 
 > **Sesión del 1 de septiembre de 2026: limpieza de cierre.** El usuario
 > confirmó que ha probado en producción las cinco specs que quedaban desplegadas
@@ -256,8 +314,8 @@ El 20 de agosto arrancó la **v4**, que sale de una auditoría de usabilidad hec
 | 074 | El armario: el material que tienes (v13) | ✅ completada |
 | 075 | Las recetas y los ingredientes, ya puestos (v14) | ✅ completada |
 | 076 | Elegir menú en vez de pedírselo a la IA (v14) | ✅ completada |
-| 077 | La tabla aprovecha tu material (v13) | 📝 sin escribir |
-| 078 | El material que falta (v13) | 📝 sin escribir |
+| 077 | La tabla aprovecha tu material (v13) | 🚧 implementada y desplegada, **sin probar** |
+| 078 | El material que te falta (v13) | 🚧 implementada y desplegada, **sin probar** |
 | 079 | Comidas, que se lea (v15) | ✅ completada |
 | 080 | El texto recortado se despliega al tocarlo | ✅ completada |
 | 081 | Recetario y Catálogo: el nombre se despliega en la cabecera | ✅ completada |
@@ -266,23 +324,26 @@ El 20 de agosto arrancó la **v4**, que sale de una auditoría de usabilidad hec
 | 084 | Apuntar una comida con un ingrediente suelto | ✅ completada |
 | 085 | Recetario: un solo apartado con recetas e ingredientes | ✅ completada |
 | 086 | La distancia, al apuntar | ✅ completada |
-| 087 | Cuánto llevas andado (estadísticas) | 📝 sin escribir |
+| 087 | Cuánto llevas andado (estadísticas) | 🚧 implementada y desplegada, **sin probar** |
 
 ## Qué toca ahora
 
-**Usar la app.** Al 1 de septiembre de 2026 las specs **001 a 086 están
-cerradas** y probadas por el usuario en producción. **No hay nada desplegado sin
-validar, ni versión en marcha, ni spec abierta.** El trabajo entra por lo que el
-usuario se encuentre usándola, y cae primero en `docs/BACKLOG.md`.
+**Probar las tres de la tarde del 1 de septiembre**: la **077**, la **078** y la
+**087**. Es lo único abierto. Están desplegadas, revisadas y con sus suites en
+verde, pero **build verde no es probado**: sus guiones están al final de cada
+spec.
 
-**Sin escribir y sin compromiso**: las specs **077** (la tabla aprovecha tu
-material) y **078** (el material que falta), que cerrarían la v13, y la **087**
-(cuánto llevas andado). Se escriben solo si al usar la app se echan de menos.
+Después, **usar la app**. Al 1 de septiembre las specs **001 a 087 están
+escritas**, sin ningún hueco, y con estas tres **se cierra la v13**, que llevaba
+a medias desde el 30 de agosto. **No queda nada declarado y sin escribir.** El
+trabajo entra por lo que el usuario se encuentre usándola, y cae primero en
+`docs/BACKLOG.md`.
 
 **Las reglas de Firestore del bloque `usuarios/{uid}/material` SÍ están
 publicadas**, con la CLI y antes del commit `6c250b3`. Se anota porque no se ve
 en el repositorio y la duda cuesta una tarde de perseguir errores de permisos
-que parecen bugs.
+que parecen bugs. Las specs 077, 078 y 087 **no las tocan**: ninguna estrena
+colección ni campo.
 
 ### Lo que se cerró entre el 28 y el 30 de agosto
 
@@ -296,12 +357,11 @@ que parecen bugs.
 
 ### Lo siguiente
 
-1. **Usar la app.** Es lo único que genera trabajo ahora: lo que chirríe se
-   anota en `docs/BACKLOG.md`, en una línea.
-2. Cuando se junten varias anotaciones que apunten al mismo sitio, **eso será la
+1. **Probar la 077, la 078 y la 087.** Lo único abierto.
+2. Después, **usar la app**: es lo único que genera trabajo ahora. Lo que
+   chirríe se anota en `docs/BACKLOG.md`, en una línea.
+3. Cuando se junten varias anotaciones que apunten al mismo sitio, **eso será la
    próxima versión**: se escribe con `/nueva-spec` antes de tocar código.
-3. Si al usar el armario se echan de menos, **las specs 077 y 078**; si se echa
-   de menos ver el acumulado de kilómetros, **la 087**.
 
 **Elegir.** No hay nada a medias ni ninguna decisión pendiente. Las ideas viven
 en `docs/PRODUCTO.md`, apartado "Ideas para más adelante", y `docs/BACKLOG.md`
