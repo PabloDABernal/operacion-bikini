@@ -2396,14 +2396,38 @@ function recetasDeLaDieta() {
   const ids = new Set();
   dietaActiva.dias.forEach((dia) => {
     dia.comidas.forEach((comida) => {
-      if (comida.recetaId) ids.add(comida.recetaId);
+      comida.enlaces.forEach((enlace) => {
+        if (enlace.tipo === "receta") ids.add(enlace.id);
+      });
     });
   });
 
   return recetasCargadas.filter((receta) => ids.has(receta.id));
 }
 
-// Las comidas de la semana que NO tienen receta enlazada, por su nombre.
+// Los ingredientes sueltos enlazados directamente a una comida (sin receta
+// de por medio), sin repetir (spec 088). Con su nombre, guardado junto al
+// enlace: si el ingrediente se borra de la despensa después, es lo único
+// que queda de él para poder seguir contándolo en la lista de la compra.
+function ingredientesSueltosDeLaDieta() {
+  if (!dietaActiva) return [];
+
+  const vistos = new Map();
+  dietaActiva.dias.forEach((dia) => {
+    dia.comidas.forEach((comida) => {
+      comida.enlaces.forEach((enlace) => {
+        if (enlace.tipo === "ingrediente" && !vistos.has(enlace.id)) {
+          vistos.set(enlace.id, enlace.nombre || "");
+        }
+      });
+    });
+  });
+
+  return [...vistos].map(([id, nombre]) => ({ id, nombre }));
+}
+
+// Las comidas de la semana que NO tienen ningún enlace que resuelva a algo
+// real (ni receta ni ingrediente), por su nombre.
 //
 // La lista no se limita a avisar de que no lo sabe todo: dice cuáles son, para
 // que el usuario pueda crearles una receta y enlazarla (specs 026 y 028). Un
@@ -2415,7 +2439,7 @@ function comidasSinReceta() {
   dietaActiva.dias.forEach((dia) => {
     dia.comidas.forEach((comida) => {
       if (!comida.texto) return;
-      if (recetaDeLaComida(comida)) return;
+      if (enlacesResueltos(comida).length) return;
       if (!nombres.includes(comida.texto)) nombres.push(comida.texto);
     });
   });
@@ -2430,7 +2454,8 @@ function comidasSinReceta() {
 // compra", sin un "(0)" que parece un error.
 function pintarBotonDeCompra() {
   const cuantas =
-    loQueFalta(recetasDeLaDieta(), despensaCargada).length + apuntesDeCompra.length;
+    loQueFalta(recetasDeLaDieta(), ingredientesSueltosDeLaDieta(), despensaCargada).length +
+    apuntesDeCompra.length;
   id("btn-ir-a-compra").textContent = cuantas
     ? `Ver lista de la compra (${cuantas})`
     : "Ver lista de la compra";
@@ -2447,7 +2472,7 @@ function pintarCompra() {
 
   contenedor.innerHTML = "";
 
-  const faltan = loQueFalta(recetasDeLaDieta(), despensaCargada);
+  const faltan = loQueFalta(recetasDeLaDieta(), ingredientesSueltosDeLaDieta(), despensaCargada);
   const todo = [
     ...faltan.map((falta) => ({ ...falta, apunteId: null })),
     ...apuntesDeCompra.map((apunte) => ({
@@ -3400,6 +3425,7 @@ function pintarDieta() {
       // día esa posición ya es otro plato.
       recetaDeDietaAbierta = null;
       celdaEditando = null;
+      lineasCeldaEnEdicion = [];
       pintarDieta();
     }
   });
@@ -3513,6 +3539,7 @@ id("btn-ver-semana").addEventListener("click", () => {
   diaDietaAbierto = diaDietaAbierto === null ? diaDeLaSemana(hoyISO()) : null;
   recetaDeDietaAbierta = null;
   celdaEditando = null;
+  lineasCeldaEnEdicion = [];
   pintarDieta();
 });
 
@@ -3536,9 +3563,9 @@ function filaDeComida(indiceDia, indiceComida, comida) {
   );
 
   // El icono de la receta, en su columna fija (spec 072). Solo si esa comida
-  // tiene una y sigue existiendo.
-  const receta = recetaDeLaComida(comida);
-  if (receta) {
+  // tiene al menos un enlace que sigue existiendo (spec 088: puede haber
+  // varios, receta o ingrediente).
+  if (enlacesResueltos(comida).length) {
     const clave = `${indiceDia}-${indiceComida}`;
     const abierta = recetaDeDietaAbierta === clave;
 
@@ -3549,6 +3576,7 @@ function filaDeComida(indiceDia, indiceComida, comida) {
         // Solo una abierta a la vez: con veintiocho comidas en pantalla, varias
         // desplegadas convierten la semana en un scroll sin fondo.
         recetaDeDietaAbierta = abierta ? null : clave;
+        enlaceAbierto = 0;
         pintarDieta();
       }
     );
@@ -3575,6 +3603,11 @@ function filaDeComida(indiceDia, indiceComida, comida) {
     comida.texto ? "Editar" : "Añadir comida",
     () => {
       celdaEditando = `${indiceDia}-${indiceComida}`;
+      // Las líneas de trabajo del editor: una por enlace ya guardado, o una
+      // vacía si no había ninguno (spec 088).
+      lineasCeldaEnEdicion = comida.enlaces.length
+        ? comida.enlaces.map((enlace) => ({ ...enlace }))
+        : [lineaCeldaVacia()];
       // Editar cierra la receta: el formulario ocupa el sitio de la fila y
       // dejar la receta colgando debajo la separaría de aquello a lo que
       // pertenece.
@@ -3619,31 +3652,74 @@ function nombreDelPlato(comida, clave) {
   return celdaDesplegable(comida.texto, "plato-nombre", clave, platosDesplegados, pintarDieta);
 }
 
-// La receta enlazada a una comida de la semana, o null.
-//
-// Devuelve null también cuando el `recetaId` apunta a una receta que ya no
-// existe —se borró desde el recetario—: el enlace se guarda en la dieta y nadie
-// lo limpia al borrar. Sin esta comprobación, el nombre saldría tocable y al
-// tocarlo no se abriría nada.
-function recetaDeLaComida(comida) {
-  if (!comida.texto || !comida.recetaId) return null;
-  return recetasCargadas.find((receta) => receta.id === comida.recetaId) || null;
+// Las recetas/ingredientes enlazados a una comida de la semana que siguen
+// existiendo (spec 088). Un enlace cuyo destino se borró —se borró la
+// receta del recetario, o el ingrediente de la despensa— se descarta: el
+// enlace se guarda en la dieta y nadie lo limpia al borrar el destino, así
+// que sin esta comprobación el icono saldría tocable y no abriría nada.
+function enlacesResueltos(comida) {
+  if (!comida.texto) return [];
+
+  return comida.enlaces
+    .map((enlace) => {
+      if (enlace.tipo === "receta") {
+        const receta = recetasCargadas.find((r) => r.id === enlace.id);
+        return receta ? { tipo: "receta", nombre: receta.nombre, objeto: receta } : null;
+      }
+      const ingrediente = despensaCargada.find((i) => i.id === enlace.id);
+      return ingrediente
+        ? { tipo: "ingrediente", nombre: ingrediente.nombre, objeto: ingrediente }
+        : null;
+    })
+    .filter(Boolean);
 }
 
-// La receta abierta bajo su fila. Solo se lee: para cambiarla está el recetario.
+// Qué enlace de la celda desplegada se está viendo, cuando hay varios (spec
+// 088). Se reinicia a 0 cada vez que se abre/cierra una celda.
+let enlaceAbierto = 0;
+
+// La receta o el ingrediente abierto bajo su fila. Solo se lee: para
+// cambiarlos está el editor de la celda.
 function recetaDesplegada(comida) {
   const caja = document.createElement("div");
   caja.className = "receta-en-dieta";
 
-  const receta = recetaDeLaComida(comida);
+  const enlaces = enlacesResueltos(comida);
 
-  // No debería pasar —el nombre solo se vuelve tocable si la receta existe—,
-  // pero si se borra la receta con la dieta abierta en otra pestaña, mejor
+  // No debería pasar —el icono solo sale si hay al menos un enlace real—,
+  // pero si se borran todos con la dieta abierta en otra pestaña, mejor
   // decirlo que enseñar un hueco.
-  if (!receta) {
-    caja.appendChild(celda("Esta receta ya no existe.", "explicacion"));
+  if (!enlaces.length) {
+    caja.appendChild(celda("Esto ya no está enlazado a nada.", "explicacion"));
     return caja;
   }
+
+  // Con varias, una lista de nombres para elegir cuál ver; con una sola, se
+  // va directa a su ficha, como antes de esta spec.
+  if (enlaces.length > 1) {
+    const lista = document.createElement("div");
+    lista.className = "enlaces-dieta-lista";
+    enlaces.forEach((enlace, indice) => {
+      const boton = botonDeFila(enlace.nombre, () => {
+        enlaceAbierto = indice;
+        pintarDieta();
+      });
+      boton.classList.toggle("enlace-activo", indice === enlaceAbierto);
+      lista.appendChild(boton);
+    });
+    caja.appendChild(lista);
+  }
+
+  const enlace = enlaces[enlaceAbierto] || enlaces[0];
+  caja.appendChild(
+    enlace.tipo === "receta" ? fichaDeReceta(enlace.objeto) : fichaDeIngrediente(enlace.objeto)
+  );
+
+  return caja;
+}
+
+function fichaDeReceta(receta) {
+  const caja = document.createElement("div");
 
   const cabecera = document.createElement("p");
   cabecera.className = "receta-en-dieta-cabecera";
@@ -3660,40 +3736,105 @@ function recetaDesplegada(comida) {
   return caja;
 }
 
+// Ficha mínima de un ingrediente suelto enlazado (spec 088): su nombre y si
+// lo tienes marcado en la despensa AHORA MISMO, no como estaba cuando se
+// enlazó — mismo criterio "en vivo" que ya usa la ficha de receta desde la
+// spec 058. Sin botón para marcarlo desde aquí: para eso está la Despensa.
+function fichaDeIngrediente(ingrediente) {
+  const caja = document.createElement("div");
+
+  const cabecera = document.createElement("p");
+  cabecera.className = "receta-en-dieta-cabecera";
+  cabecera.textContent = ingrediente.nombre;
+  caja.appendChild(cabecera);
+
+  caja.appendChild(celda(ingrediente.tengo ? "Lo tienes." : "Te falta.", "explicacion"));
+
+  return caja;
+}
+
+// Las líneas de trabajo del editor de la celda que esté abierta (spec 088).
+// Un único global porque, igual que `recetaDeDietaAbierta`, solo hay una
+// celda editándose a la vez — mismo patrón que `lineasRecetaEnEdicion` del
+// editor de receta.
+let lineasCeldaEnEdicion = [];
+
+function lineaCeldaVacia() {
+  return { tipo: "receta", id: "" };
+}
+
+// El nombre de lo que apunta una línea, o null si no tiene nada elegido o
+// apunta a algo que ya no existe.
+function nombreDeLineaCelda(linea) {
+  if (!linea.id) return null;
+  if (linea.tipo === "receta") {
+    const receta = recetasCargadas.find((r) => r.id === linea.id);
+    return receta ? receta.nombre : null;
+  }
+  const ingrediente = despensaCargada.find((i) => i.id === linea.id);
+  return ingrediente ? ingrediente.nombre : null;
+}
+
 function filaEnEdicion(indiceDia, indiceComida, comida) {
   const fila = document.createElement("div");
   fila.className = "comida-dieta fila-edicion";
 
   const texto = campoTexto(comida.texto, "edicion-texto");
 
-  // El desplegable rellena el texto con el nombre de la receta y la deja
-  // enlazada: escribirlo a mano y que coincida letra por letra sería absurdo.
-  const recetas = campoDesplegable(
-    [
-      { valor: "", etiqueta: "o usa una receta tuya…" },
-      ...recetasCargadas.map((receta) => ({
-        valor: receta.id,
-        etiqueta: receta.nombre
-      }))
-    ],
-    comida.recetaId || "",
-    "edicion-momento"
-  );
+  // El texto se rellena con la suma de los nombres elegidos, separados por
+  // ". " — pero sigue siendo un campo editable a mano por encima: quien
+  // quiera otra cosa la escribe después de que esto lo rellene.
+  const actualizarTextoDesdeLineas = () => {
+    const nombres = lineasCeldaEnEdicion.map(nombreDeLineaCelda).filter(Boolean);
+    if (nombres.length) texto.value = nombres.join(". ");
+  };
 
-  recetas.addEventListener("change", () => {
-    const receta = recetasCargadas.find((otra) => otra.id === recetas.value);
-    if (receta) texto.value = receta.nombre;
+  // Contenedor propio de las líneas: se repinta solo él al añadir/quitar o
+  // cambiar una línea, sin pasar por pintarDieta(). Repintar la pantalla
+  // entera recrearía este formulario desde `comida.texto` (el guardado) y
+  // se perdería lo que el usuario ya hubiera tocado en el campo de texto.
+  const contenedorLineas = document.createElement("div");
+  contenedorLineas.className = "celda-lineas";
+
+  const pintarLineasCelda = () => {
+    contenedorLineas.innerHTML = "";
+    lineasCeldaEnEdicion.forEach((linea, indice) => {
+      contenedorLineas.appendChild(filaDeEnlaceCelda(linea, indice, pintarLineasCelda, () => {
+        actualizarTextoDesdeLineas();
+      }));
+    });
+  };
+  pintarLineasCelda();
+
+  const anadirLinea = botonDeFila("Añadir otra línea", () => {
+    lineasCeldaEnEdicion.push(lineaCeldaVacia());
+    pintarLineasCelda();
   });
+  anadirLinea.className = "enlace";
 
   fila.append(
     celda(etiquetaDeMomento(comida.momento), "resumen-etiqueta"),
     texto,
-    recetas,
-    botonDeFila("Guardar", () =>
-      guardarCelda(indiceDia, indiceComida, texto.value, recetas.value)
-    ),
+    contenedorLineas,
+    anadirLinea,
+    botonDeFila("Guardar", () => {
+      // El nombre solo se guarda para un ingrediente suelto: es el único
+      // caso donde, si se borra después, hace falta un respaldo para
+      // seguir sabiendo qué era (lista de la compra). Una receta no lo
+      // necesita: sin ella, la comida deja de contar como "con receta" y
+      // punto, no hace falta decir cuál era.
+      const enlaces = lineasCeldaEnEdicion
+        .filter((linea) => linea.id)
+        .map((linea) =>
+          linea.tipo === "ingrediente"
+            ? { tipo: linea.tipo, id: linea.id, nombre: nombreDeLineaCelda(linea) }
+            : { tipo: linea.tipo, id: linea.id }
+        );
+      guardarCelda(indiceDia, indiceComida, texto.value, enlaces);
+    }),
     botonDeFila("Cancelar", () => {
       celdaEditando = null;
+      lineasCeldaEnEdicion = [];
       pintarDieta();
     })
   );
@@ -3701,7 +3842,58 @@ function filaEnEdicion(indiceDia, indiceComida, comida) {
   return fila;
 }
 
-async function guardarCelda(indiceDia, indiceComida, texto, recetaId) {
+// Una línea del editor: tipo (receta o ingrediente de la despensa) y el
+// selector correspondiente. `repintarLineas` reconstruye solo el contenedor
+// de líneas (añadir/quitar, o cambiar de tipo); `alCambiar` recalcula el
+// texto sumado sin tocar nada más.
+function filaDeEnlaceCelda(linea, indice, repintarLineas, alCambiar) {
+  const fila = document.createElement("div");
+  fila.className = "celda-linea-editor";
+
+  const tipo = campoDesplegable(
+    [
+      { valor: "receta", etiqueta: "Receta" },
+      { valor: "ingrediente", etiqueta: "Ingrediente de la despensa" }
+    ],
+    linea.tipo,
+    "celda-linea-tipo"
+  );
+  tipo.addEventListener("change", () => {
+    linea.tipo = tipo.value;
+    linea.id = "";
+    repintarLineas();
+    alCambiar();
+  });
+
+  const opciones =
+    linea.tipo === "receta"
+      ? recetasCargadas.map((receta) => ({ valor: receta.id, etiqueta: receta.nombre }))
+      : ordenarDespensa(despensaCargada).map((ingrediente) => ({
+          valor: ingrediente.id,
+          etiqueta: ingrediente.nombre
+        }));
+
+  const elegido = campoDesplegable(
+    [{ valor: "", etiqueta: "— elige —" }, ...opciones],
+    linea.id,
+    "celda-linea-elegido"
+  );
+  elegido.addEventListener("change", () => {
+    linea.id = elegido.value;
+    alCambiar();
+  });
+
+  const quitar = botonDeIcono("papelera", "Quitar esta línea", () => {
+    lineasCeldaEnEdicion.splice(indice, 1);
+    repintarLineas();
+    alCambiar();
+  });
+
+  fila.append(tipo, elegido, quitar);
+  return fila;
+}
+
+async function guardarCelda(indiceDia, indiceComida, texto, enlaces) {
   const error = id("error-semana");
   error.textContent = "";
 
@@ -3710,9 +3902,7 @@ async function guardarCelda(indiceDia, indiceComida, texto, recetaId) {
   const dias = dietaActiva.dias.map((dia, i) => ({
     ...dia,
     comidas: dia.comidas.map((comida, j) =>
-      i === indiceDia && j === indiceComida
-        ? { ...comida, texto: texto.trim(), recetaId: recetaId || "" }
-        : comida
+      i === indiceDia && j === indiceComida ? { ...comida, texto: texto.trim(), enlaces } : comida
     )
   }));
 
@@ -3720,6 +3910,7 @@ async function guardarCelda(indiceDia, indiceComida, texto, recetaId) {
     await actualizarDieta(uidActual, dietaActiva.id, dias);
     dietaActiva = { ...dietaActiva, dias };
     celdaEditando = null;
+    lineasCeldaEnEdicion = [];
     pintarDieta();
   } catch {
     error.textContent = "No se ha podido guardar. Comprueba tu conexión.";
@@ -3938,6 +4129,7 @@ async function refrescarDieta() {
     return;
   }
   celdaEditando = null;
+  lineasCeldaEnEdicion = [];
   // La receta desplegada se guarda por posición ("2-1"), no por identidad. Si la
   // semana cambia —otra dieta, o una celda editada—, esa posición ya es otro
   // plato: dejarla abierta enseñaría la receta de una comida que no es.

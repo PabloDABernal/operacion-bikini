@@ -158,15 +158,19 @@ const recetas = [
   { ingredientes: ["2 cebollas", "aceite de oliva"] }
 ];
 
+// Desde la spec 088, loQueFalta() lleva un parámetro más en medio —los
+// ingredientes sueltos enlazados directamente desde Mi dieta, sin receta—,
+// que esta suite no cubre (es de la 059): siempre vacío aquí.
+
 comprobar(
   "junta los repetidos y respeta el plural",
-  loQueFalta(recetas, []).map((f) => f.nombre),
+  loQueFalta(recetas, [], []).map((f) => f.nombre),
   ["lentejas", "cebolla", "sal", "aceite de oliva"]
 );
 
 comprobar(
   "lo que tienes marcado no hay que comprarlo",
-  loQueFalta(recetas, [
+  loQueFalta(recetas, [], [
     { id: "1", nombre: "sal", tengo: true },
     { id: "2", nombre: "cebolla", tengo: true }
   ]).map((f) => f.nombre),
@@ -175,23 +179,23 @@ comprobar(
 
 comprobar(
   "lo que esta en la despensa SIN marcar si hay que comprarlo",
-  loQueFalta(recetas, [{ id: "1", nombre: "sal", tengo: false }]).map((f) => f.nombre),
+  loQueFalta(recetas, [], [{ id: "1", nombre: "sal", tengo: false }]).map((f) => f.nombre),
   ["lentejas", "cebolla", "sal", "aceite de oliva"]
 );
 
 comprobar(
   "y trae el id, para poder marcarlo al comprarlo",
-  loQueFalta([{ ingredientes: ["sal"] }], [{ id: "abc", nombre: "sal", tengo: false }]),
+  loQueFalta([{ ingredientes: ["sal"] }], [], [{ id: "abc", nombre: "sal", tengo: false }]),
   [{ nombre: "sal", ingredienteId: "abc" }]
 );
 
 comprobar(
   "el nombre de TU despensa manda sobre el de la receta",
-  loQueFalta([{ ingredientes: ["2 cebollas"] }], [
+  loQueFalta([{ ingredientes: ["2 cebollas"] }], [], [
     { id: "1", nombre: "Cebolla", tengo: false }
   ]).map((f) => f.nombre),
   ["Cebolla"]
 );
 
-comprobar("sin recetas no hay nada que comprar", loQueFalta([], []), []);
-comprobar("sin nada, tampoco revienta", loQueFalta(undefined, []), []);
+comprobar("sin recetas no hay nada que comprar", loQueFalta([], [], []), []);
+comprobar("sin nada, tampoco revienta", loQueFalta(undefined, [], []), []);

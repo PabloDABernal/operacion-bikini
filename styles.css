@@ -2179,6 +2179,43 @@ button:disabled {
   min-width: 0;
 }
 
+/* El editor de varias recetas/ingredientes por comida (spec 088): mismo
+   patrón que el editor de ingredientes de receta (082, `.receta-linea-editor`),
+   con un selector de tipo (receta o ingrediente de la despensa) en vez de
+   solo el nombre. */
+.celda-lineas {
+  flex: 1 1 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--e2);
+}
+
+.celda-linea-editor {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e2);
+  align-items: center;
+  padding: var(--e2);
+  width: 100%;
+  border: 1px solid var(--borde);
+  border-radius: var(--radio-s);
+}
+
+/* La lista de nombres cuando una comida tiene varias recetas/ingredientes
+   enlazados (spec 088): marca cuál se está viendo, igual que un botón de
+   pestaña. */
+.enlaces-dieta-lista {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e1);
+  margin-bottom: var(--e2);
+}
+
+.enlaces-dieta-lista .enlace-activo {
+  border-color: var(--acento);
+  color: var(--acento);
+}
+
 /* Los minutos son dos dígitos: darles el mismo ancho que al título dejaba la
    fila desequilibrada. */
 .comida-dieta.fila-edicion .edicion-minutos {

@@ -49,8 +49,32 @@ function errorConCodigo(codigo, mensaje) {
 export function semanaEnBlanco() {
   return DIAS.map((dia) => ({
     dia,
-    comidas: MOMENTOS_DIETA.map((momento) => ({ momento, texto: "", recetaId: "" }))
+    comidas: MOMENTOS_DIETA.map((momento) => ({ momento, texto: "", enlaces: [] }))
   }));
+}
+
+// Una comida enlazaba como mucho una receta, en `recetaId` (spec 060). Desde
+// la 088 enlaza varias recetas y/o ingredientes sueltos, en `enlaces`. Una
+// dieta guardada antes de la 088 solo trae `recetaId`: se convierte al leer,
+// sin tocar Firestore — es un solo documento por usuario, así que no hace
+// falta script de migración. Queda en el formato nuevo la próxima vez que se
+// guarde esa dieta (al editar una celda, o al regenerarla entera).
+function normalizarComida(comida) {
+  if (comida.enlaces) return comida;
+  return {
+    ...comida,
+    enlaces: comida.recetaId ? [{ tipo: "receta", id: comida.recetaId }] : []
+  };
+}
+
+function normalizarDieta(dieta) {
+  return {
+    ...dieta,
+    dias: dieta.dias.map((dia) => ({
+      ...dia,
+      comidas: dia.comidas.map(normalizarComida)
+    }))
+  };
 }
 
 // De todas las dietas guardadas, la que está en uso. Solo hay una.
@@ -61,7 +85,8 @@ export async function leerDietaActiva(uid) {
     ...documento.data()
   }));
 
-  return dietas.find((dieta) => dieta.activa) || null;
+  const activa = dietas.find((dieta) => dieta.activa) || null;
+  return activa ? normalizarDieta(activa) : null;
 }
 
 export function guardarDieta(uid, dias, instrucciones) {
@@ -139,7 +164,8 @@ export function semanaDesdeLaIa(dias, porNombre) {
     dia: dia.dia,
     comidas: MOMENTOS_DIETA.map((momento) => {
       const texto = String(dia[momento] || "").trim();
-      return { momento, texto, recetaId: porNombre.get(clave(texto)) || "" };
+      const recetaId = porNombre.get(clave(texto)) || "";
+      return { momento, texto, enlaces: recetaId ? [{ tipo: "receta", id: recetaId }] : [] };
     })
   }));
 }
@@ -177,7 +203,11 @@ export function semanaDesdeMenu(dias, recetas) {
       const encontrada = texto
         ? porLongitud.find((receta) => clave(texto).includes(receta.clave))
         : null;
-      return { momento, texto, recetaId: encontrada ? encontrada.id : "" };
+      return {
+        momento,
+        texto,
+        enlaces: encontrada ? [{ tipo: "receta", id: encontrada.id }] : []
+      };
     })
   }));
 }

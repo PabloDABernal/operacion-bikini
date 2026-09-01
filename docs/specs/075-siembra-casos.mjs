@@ -175,17 +175,20 @@ comprobar(
   true
 );
 
+// Desde la spec 088 el enlace vive en `enlaces` (una lista), no en
+// `recetaId`: como mucho una receta por plato al sembrar, así que "sin
+// enlazar" es una lista vacía y "enlazado" es una lista de un elemento.
 comprobar(
   "el domingo sigue vacío y sin receta",
   semanas.every((s) => {
     const domingo = s.find((d) => d.dia === "domingo");
-    return domingo.comidas.every((c) => c.texto === "" && c.recetaId === "");
+    return domingo.comidas.every((c) => c.texto === "" && c.enlaces.length === 0);
   }),
   true
 );
 
 const enlazados = semanas.flatMap((s) =>
-  s.flatMap((d) => d.comidas.filter((c) => c.recetaId))
+  s.flatMap((d) => d.comidas.filter((c) => c.enlaces.length))
 ).length;
 
 // Emparejando por nombre exacto salían 4 de 96, que hacía inútil poder abrir
@@ -196,7 +199,7 @@ comprobar("enlaza bastantes platos con su receta", enlazados >= 40, true);
 comprobar(
   "sin recetas no revienta, sólo no enlaza",
   dietas.semanaDesdeMenu(datos.MENUS[0].dias, []).every((d) =>
-    d.comidas.every((c) => c.recetaId === "")
+    d.comidas.every((c) => c.enlaces.length === 0)
   ),
   true
 );
@@ -204,7 +207,7 @@ comprobar(
 comprobar(
   "un plato que no es receta se queda como texto",
   semanas.some((s) =>
-    s.some((d) => d.comidas.some((c) => c.texto && !c.recetaId))
+    s.some((d) => d.comidas.some((c) => c.texto && !c.enlaces.length))
   ),
   true
 );

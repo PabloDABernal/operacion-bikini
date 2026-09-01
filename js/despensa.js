@@ -429,11 +429,29 @@ export function partesDeLinea(linea) {
 // Devuelve, por cada uno, el nombre que se enseña y el ingrediente de tu
 // despensa al que corresponde, si es que está apuntado: quien lo marque como
 // comprado necesita saber a cuál marcar.
-export function loQueFalta(recetas, despensa) {
+//
+// `ingredientesSueltos` (spec 088) son los ids de ingredientes enlazados
+// directamente a una celda de Mi dieta, sin pasar por ninguna receta —
+// mismo criterio que una línea de receta estructurada: si no está marcado,
+// falta.
+export function loQueFalta(recetas, ingredientesSueltos, despensa) {
   const faltan = [];
 
   const yaEsta = (nombre) =>
     faltan.some((falta) => mismoIngrediente(falta.nombre, nombre));
+
+  (ingredientesSueltos || []).forEach(({ id, nombre: nombreGuardado }) => {
+    const enDespensa = despensa.find((ingrediente) => ingrediente.id === id);
+
+    // Si el ingrediente se borró de la despensa, no hay nada que resolver:
+    // el nombre guardado junto al enlace es lo único que queda de él, igual
+    // que en una línea de receta (líneas 459-461 arriba).
+    const nombre = (enDespensa ? enDespensa.nombre : nombreGuardado || "").slice(0, MAX_NOMBRE);
+    if (!nombre || yaEsta(nombre)) return;
+    if (enDespensa && enDespensa.tengo) return;
+
+    faltan.push({ nombre, ingredienteId: enDespensa ? enDespensa.id : null });
+  });
 
   (recetas || []).forEach((receta) => {
     (receta.ingredientes || []).forEach((linea) => {

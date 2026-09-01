@@ -175,8 +175,12 @@ enlace de cada comida:
 - Antes: `{ momento: string, texto: string, recetaId: string }` (vacío si
   no hay receta enlazada).
 - Ahora: `{ momento: string, texto: string, enlaces: { tipo: "receta" |
-  "ingrediente", id: string }[] }` — lista, puede estar vacía, puede
-  mezclar tipos, sin límite.
+  "ingrediente", id: string, nombre?: string }[] }` — lista, puede estar
+  vacía, puede mezclar tipos, sin límite. `nombre` solo se guarda en los
+  enlaces de tipo `"ingrediente"`: es el respaldo para la lista de la
+  compra si ese ingrediente se borra de la despensa después (ver sección
+  6) — una receta no lo necesita, porque sin ella la comida simplemente
+  deja de contar como "con receta".
 
 `leerDietaActiva()` normaliza al vuelo: si una comida trae `recetaId` (y no
 `enlaces`), la convierte a `enlaces` antes de devolverla. El resto del
