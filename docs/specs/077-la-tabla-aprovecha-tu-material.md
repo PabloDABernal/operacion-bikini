@@ -1,6 +1,6 @@
 # 077 — La tabla aprovecha tu material
 
-- **Estado:** borrador
+- **Estado:** revisada — `revisor-specs` sin bloqueantes tras dos rondas
 - **Fecha:** 2026-09-01
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (v13: el material, decidida el 30 de agosto de 2026)", segundo punto ("La tabla lo aprovecha") y el punto "El material del ejercicio pasa a ser una lista".
 - **Depende de:** la spec 074 (el armario), ya implementada — sin ella no hay nada que cruzar.
@@ -151,6 +151,11 @@ por todos los usuarios) — mismo criterio que la 059.
   - `js/app.js` (~línea 4238), la precarga de `catalogo-material` al
     editar: `id("catalogo-material").value = ejercicio.material || ""`
     tiene el mismo problema. Pasa a `ejercicio.material.join(", ")`.
+  **`materialLegible()` da por hecho que `ejercicio.material` ya es un
+  array** (normalizado al leer, ver "Un ejercicio guardado antes de esta
+  spec" más arriba): no vuelve a comprobar si es string. Quien la llame
+  tiene que hacerlo sobre un ejercicio ya pasado por esa normalización de
+  lectura, nunca sobre el dato crudo de Firestore.
   Ambos sitios estaban fuera de la primera versión de esta spec; quedan
   añadidos aquí y en la sección 7.
 
