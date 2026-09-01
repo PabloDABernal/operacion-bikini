@@ -1,6 +1,6 @@
 # 087 — Cuánto llevas andado (estadísticas de distancia)
 
-- **Estado:** borrador
+- **Estado:** revisada — `revisor-specs` sin bloqueantes
 - **Fecha:** 2026-09-01
 - **Referencia en PRODUCTO.md:** no estaba desarrollada, solo el título en la
   tabla de specs de `docs/ESTADO.md` ("087 | Cuánto llevas andado
@@ -78,19 +78,27 @@ Dentro de **Ejercicio**, en la sub-pestaña donde ya se apunta y se lista el
 diario de ejercicios (Apuntar), cerca de la lista — mismo criterio de
 "vive donde ya se mira" que las estadísticas de peso (spec 015) en su
 propia pestaña, adaptado a que Ejercicio no tiene una pestaña dedicada
-entera a esto.
+entera a esto. En la vista de escritorio en varias columnas (spec 036),
+el bloque se coloca junto al resto de bloques de esa sub-pestaña, sin
+tratamiento especial — la rejilla de esa columna ya reparte lo que
+contiene.
 
 ### El cálculo
 
 - **"Este mes"**: filtra los ejercicios cargados por fecha dentro del mes
   en curso (año y mes iguales a hoy), suma `distanciaKm` de los que lo
-  tengan.
+  tengan (solo valores `> 0`: `distanciaKm` no debería llegar nunca a 0 o
+  negativo porque la 086 ya lo valida al guardar, pero el filtro es barato
+  y evita que un dato inesperado rompa el total).
 - **"Desde que empezaste"**: suma `distanciaKm` de todos los ejercicios
-  cargados, sin filtrar por fecha.
+  cargados, sin filtrar por fecha, mismo filtro `> 0`.
 - Los dos se calculan sobre la misma lista que ya usa el diario de
   Ejercicio (`listarEjercicios`), sin una consulta nueva a Firestore.
 - El total se muestra con **un decimal** (mismo criterio que guarda la
-  086: "32,4 km"), sumando los valores tal cual están guardados.
+  086: "32,4 km"). **La suma se redondea al final, no solo cada valor
+  individual**: `Math.round(suma * 10) / 10` antes de formatear, para
+  que una suma de varios decimales (`5,2 + 3,1 + ...`) no arrastre
+  artefactos de coma flotante (`8,299999...`) al mostrarse.
 
 ### Estado sin datos
 
