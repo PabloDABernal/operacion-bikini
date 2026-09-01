@@ -1,6 +1,6 @@
 # 088 — Varias recetas o ingredientes por comida
 
-- **Estado:** borrador (v2, corregida tras la primera revisión de `revisor-specs`)
+- **Estado:** borrador (v3, corregida tras la segunda revisión de `revisor-specs`)
 - **Fecha:** 2026-09-01
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (evolutivos de la fase productiva, desde el 31 de agosto de 2026)", entrada "Una comida puede tener varias recetas o ingredientes sueltos"
 
@@ -39,7 +39,8 @@ aparte, tomada por el usuario al escribir esta spec.
    la despensa (p. ej. "Yogur natural", esté marcado o no): el desplegable
    de "añadir otra" deja elegir entre receta o ingrediente, el texto suma
    también su nombre, y el desplegable de "ver" lo lista junto a las
-   recetas — tocarlo abre la ficha del ingrediente en la despensa.
+   recetas — tocarlo enseña una ficha mínima con su nombre y si lo tienes
+   marcado en la despensa ahora mismo o no (ficha nueva, ver sección 4).
 6. Marcas "me lo he comido" en una celda con dos recetas: se apunta en el
    diario un solo registro con el texto sumado, igual que hoy con una
    receta (el registro del diario NO lleva el enlace; ver sección 3).
@@ -50,6 +51,9 @@ aparte, tomada por el usuario al escribir esta spec.
 8. En Comidas → Despensa → lista de la compra, un ingrediente suelto
    enlazado a una celda de Mi dieta y que NO tienes marcado sale en la
    lista de lo que falta, igual que un ingrediente de una receta.
+9. Una celda enlazada SOLO a un ingrediente suelto (sin ninguna receta) NO
+   aparece en el aviso "estas comidas no tienen receta, no se sabe qué
+   llevan": ya se sabe qué es, es justo el ingrediente enlazado.
 
 ## 3. Alcance
 
@@ -82,7 +86,12 @@ aparte, tomada por el usuario al escribir esta spec.
   a leer `comida.enlaces` en vez de `comida.recetaId`, y a incluir también
   los ingredientes sueltos enlazados directamente (no vía receta) en el
   cálculo de lo que falta — un ingrediente enlazado y no marcado (`tengo:
-  false`) entra en la lista igual que uno que falte de una receta.
+  false`) entra en la lista igual que uno que falte de una receta. Nueva
+  función `ingredientesSueltosDeLaDieta()`, ver sección 4.
+  `comidasSinReceta()` cambia de criterio: hoy enseña una comida si NO
+  tiene receta enlazada; pasa a enseñarla si NO tiene NINGÚN enlace (ni
+  receta ni ingrediente) — una celda enlazada solo a un ingrediente ya no
+  cuenta como "no sé qué lleva" (criterio de aceptación, punto 9).
 - **Migración por lectura, sin script aparte**: `leerDietaActiva()`
   (`js/dietas.js`) normaliza cada comida al leerla — si trae `recetaId`
   (formato antiguo) lo convierte a `enlaces: [{tipo: "receta", id:
@@ -129,10 +138,30 @@ aparte, tomada por el usuario al escribir esta spec.
   icono abre/cierra un desplegable con un nombre por línea (receta o
   ingrediente), y tocar un nombre abre su ficha debajo, igual que hoy con
   una sola.
-- **Fichas de receta e ingrediente enlazado**: sin cambios respecto a como
-  se abren hoy (spec 060 para receta, la ficha de la despensa para un
-  ingrediente) — esta spec solo cambia cómo se llega a ellas cuando hay más
+- **Ficha de receta enlazada**: sin cambios respecto a como se abre hoy
+  (spec 060) — esta spec solo cambia cómo se llega a ella cuando hay más
   de una.
+- **Ficha de ingrediente enlazado (nueva)**: no existe hoy ninguna pantalla
+  así, porque hasta esta spec una celda de la dieta nunca enlazaba
+  directamente a un ingrediente. Es mínima, a propósito: el nombre del
+  ingrediente y una línea con su estado actual en la despensa ("Lo
+  tienes" / "Te falta", según `tengo` en `usuarios/{uid}/despensa` en
+  este momento, no como estaba cuando se enlazó — mismo criterio "en
+  vivo" que ya usa la ficha de receta desde la spec 058). Sin botón para
+  marcarlo desde aquí: para eso está la Despensa.
+- **`loQueFalta()` (`js/despensa.js`), firma nueva**: pasa de
+  `loQueFalta(recetas, despensa)` a `loQueFalta(recetas, ingredientesSueltos,
+  despensa)`, donde `ingredientesSueltos` es la lista plana de ids de
+  ingrediente enlazados directamente (tipo `"ingrediente"`) en cualquier
+  celda de la dieta activa, sin repetir — construida por una función nueva
+  `ingredientesSueltosDeLaDieta()` en `js/app.js`, hermana de
+  `recetasDeLaDieta()`. Dentro de `loQueFalta()`, cada id de
+  `ingredientesSueltos` se resuelve contra `despensa` igual que ya hace con
+  el `ingredienteId` de una línea de receta estructurada (líneas 442-457):
+  si está marcado (`tengo: true`), no falta; si no, entra en el resultado.
+  Los dos llamadores (`pintarBotonDeCompra()` y `pintarCompra()` en
+  `js/app.js`) pasan `ingredientesSueltosDeLaDieta()` como nuevo segundo
+  argumento.
 
 ## 5. Modelo de datos
 
@@ -170,6 +199,10 @@ nada vuelve a leer `recetaId` salvo esa normalización de entrada.
   en la lista de la compra como "te falta". Si además esa despensa no
   existe (se borró el ingrediente), se trata como en el caso de receta: se
   cuenta igual como que falta.
+- Una celda con una receta Y un ingrediente enlazados a la vez: no aparece
+  en "comidas sin receta" (ya tiene receta) y su ingrediente sí entra en
+  el cálculo de la compra — las dos cosas conviven sin conflicto porque
+  son listas independientes, no un único campo excluyente.
 
 ## 7. Archivos afectados
 
@@ -180,14 +213,24 @@ nada vuelve a leer `recetaId` salvo esa normalización de entrada.
   líneas); `recetaDeLaComida()` y el pintado del icono/desplegable de la
   fila (`col-receta`, alrededor de la línea 3538); `recetasDeLaDieta()` y
   `comidasSinReceta()` (lista de la compra, leen `comida.enlaces`).
-- `js/despensa.js`: `loQueFalta()`, para sumar también los ingredientes
-  sueltos enlazados directamente desde la dieta (no solo vía receta).
+- `js/despensa.js`: `loQueFalta()`, firma nueva con `ingredientesSueltos`
+  (ver sección 4).
 - `index.html`: si hace falta algún contenedor nuevo para las líneas
   repetibles del editor de celda.
-- `styles.css`: estilos de las líneas repetibles del editor y del
-  desplegable de varias recetas/ingredientes bajo el icono — reutilizar
-  patrones existentes (spec 082, líneas de ingrediente de receta) en la
-  medida de lo posible.
+- `styles.css`: estilos de las líneas repetibles del editor, del
+  desplegable de varias recetas/ingredientes bajo el icono, y de la ficha
+  mínima de ingrediente — reutilizar patrones existentes (spec 082, líneas
+  de ingrediente de receta) en la medida de lo posible.
+
+**Aviso de tamaño (regla 4 de `CLAUDE.md`):** el alcance real —editor
+multilínea con selector de tipo, desplegable de varias fichas, cuatro
+funciones de `js/dietas.js`, cambio de firma de `loQueFalta()` con función
+auxiliar nueva, `comidasSinReceta()` con criterio nuevo, ficha de
+ingrediente nueva y CSS— puede rondar o superar las ~300 líneas. Decisión
+del usuario, 2026-09-01: se implementa como una sola spec: si al escribir
+el código se ve que se dispara claramente por encima de ese margen, se para
+ahí mismo y se propone partir en dos antes de seguir, en vez de decidirlo
+ahora sobre una estimación.
 
 ## 8. Decisiones tomadas
 
@@ -215,6 +258,15 @@ nada vuelve a leer `recetaId` salvo esa normalización de entrada.
 - **La migración de ingredientes DENTRO de una receta (formato de la spec
   082) queda fuera de esta spec** y anotada en `docs/BACKLOG.md`. Decisión
   del usuario, 2026-09-01.
+- **La ficha de un ingrediente enlazado es mínima**: nombre y si lo tienes
+  ahora mismo o no, sin más. Decisión del usuario, 2026-09-01.
+- **Una celda enlazada solo a un ingrediente ya no cuenta como "sin
+  receta"** en el aviso de la lista de la compra. Decisión del usuario,
+  2026-09-01 (corrige una contradicción que encontró `revisor-specs`).
+- **Se implementa como una sola spec, con aviso de tamaño en vez de partir
+  de antemano**: si al codificar se dispara claramente por encima de las
+  ~300 líneas, se para y se propone partir en ese momento. Decisión del
+  usuario, 2026-09-01.
 
 ## 9. Fuera de spec: ideas apuntadas
 
