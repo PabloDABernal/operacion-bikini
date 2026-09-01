@@ -679,6 +679,20 @@ Ya no salen de una lista planificada: salen de usar la app cada día.
 | 086 | La distancia, al apuntar |
 | 087 | Cuánto llevas andado (estadísticas; sin escribir) |
 
+- **Una comida puede tener varias recetas o ingredientes sueltos**, no solo
+  uno. Salió de usarla: hay comidas con dos platos (una crema y una
+  hamburguesa) y hoy el modelo solo enlaza una receta o un ingrediente por
+  comida, así que la segunda queda como texto suelto, sin abrir su receta.
+  Al editar una comida se podrán añadir varias recetas y/o ingredientes
+  sueltos de la despensa (sin límite de uno). El texto que se guarda como
+  registro pasa a ser la suma de los nombres, unidos con ". ". Marcar "me lo
+  he comido" apunta una ración de cada receta/ingrediente de la comida a la
+  vez, no por separado.
+
+| Spec | Qué |
+|---|---|
+| 088 | Varias recetas o ingredientes por comida |
+
 ## Ideas para más adelante (27 de agosto de 2026)
 
 El 27 de agosto se vació `docs/BACKLOG.md`: la app está terminada y en uso

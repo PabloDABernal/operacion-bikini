@@ -40,6 +40,15 @@ apunten al mismo sitio, eso será la próxima versión.
 
 ## En el buzón
 
+- **Migrar los ingredientes de las recetas viejas al formato estructurado**
+  (spec 082). La 082 dejó convivir el formato antiguo (una línea de texto
+  suelto, tipo "un puñado de repollo" o "12 g de X") con el nuevo
+  (`{ingredienteId, cantidad, preparacion}`) sin forzar la migración de lo
+  ya guardado — así se crearon en su día las 73 recetas de la spec 075.
+  El usuario, el 1 de septiembre, pidió migrarlas de verdad a como se
+  crean ahora, empezando por su propio usuario (pablodabernal) y dejando
+  el otro para después. Salió al escribir la spec 088 (varias recetas por
+  comida) y es un asunto distinto: se anota aquí en vez de metérselo dentro.
 - **La distancia, también en el resumen de Hoy y en el contexto de la IA**
   (spec 086). Hoy solo se ve en la fila del diario de Ejercicio. Se dejó fuera
   a propósito: la spec guarda el dato, y dónde más enseñarlo se decide cuando
