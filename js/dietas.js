@@ -61,9 +61,14 @@ export function semanaEnBlanco() {
 // guarde esa dieta (al editar una celda, o al regenerarla entera).
 function normalizarComida(comida) {
   if (comida.enlaces) return comida;
+  // `recetaId` se descarta explícitamente, no solo se ignora: si se dejara
+  // colgando en el objeto, la próxima vez que se guardara esta celda (spread
+  // de `{...comida, ...}` en guardarCelda()) volvería a escribirse en
+  // Firestore junto al `enlaces` ya correcto, como un campo fantasma.
+  const { recetaId, ...resto } = comida;
   return {
-    ...comida,
-    enlaces: comida.recetaId ? [{ tipo: "receta", id: comida.recetaId }] : []
+    ...resto,
+    enlaces: recetaId ? [{ tipo: "receta", id: recetaId }] : []
   };
 }
 

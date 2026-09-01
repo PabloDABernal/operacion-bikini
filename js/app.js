@@ -3883,13 +3883,21 @@ function filaDeEnlaceCelda(linea, indice, repintarLineas, alCambiar) {
     alCambiar();
   });
 
-  const quitar = botonDeIcono("papelera", "Quitar esta línea", () => {
-    lineasCeldaEnEdicion.splice(indice, 1);
-    repintarLineas();
-    alCambiar();
-  });
+  fila.append(tipo, elegido);
 
-  fila.append(tipo, elegido, quitar);
+  // La única línea, vacía, no lleva botón de quitar: no hay nada útil que
+  // hacer con una celda de edición dejada sin ninguna línea.
+  const esUnicaYVacia = lineasCeldaEnEdicion.length === 1 && !linea.id;
+  if (!esUnicaYVacia) {
+    fila.appendChild(
+      botonDeIcono("papelera", "Quitar esta línea", () => {
+        lineasCeldaEnEdicion.splice(indice, 1);
+        repintarLineas();
+        alCambiar();
+      })
+    );
+  }
+
   return fila;
 }
 
