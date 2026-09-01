@@ -48,6 +48,17 @@ tres que quedaban declaradas en `PRODUCTO.md` y sin escribir (077, 078 y 087).
 Con eso **no queda ninguna spec declarada sin escribir**, ni ninguna escrita sin
 implementar. A partir de aquí, todo lo que entre sale de este archivo.
 
+## Anotado el 1 de septiembre de 2026
+
+- **Una comida con dos platos solo enlaza una receta.** Saltó usando la app: la
+  cena "Ensalada de repollo y manzana. Tortilla de 2 huevos" enseña solo la
+  ensalada. El modelo guarda UN `recetaId` por comida desde la spec 028, y
+  `semanaDesdeMenu()` (076) enlaza la receta más larga que quepa en el texto y
+  para. **El punto ciego, peor que lo que se ve**: la tortilla tampoco cuenta
+  para la lista de la compra, y `comidasSinReceta()` NO avisa, porque esa comida
+  sí tiene receta. Cambiarlo es pasar `recetaId` a lista y tocar el pintado del
+  día, la 083 y la compra: es una spec.
+
 ## En el buzón
 
 - **La distancia, también en el resumen de Hoy y en el contexto de la IA**
