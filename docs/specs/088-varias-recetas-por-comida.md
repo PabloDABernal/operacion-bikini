@@ -1,142 +1,230 @@
 # 088 — Varias recetas o ingredientes por comida
 
-- **Estado:** borrador
+- **Estado:** borrador (v2, corregida tras la primera revisión de `revisor-specs`)
 - **Fecha:** 2026-09-01
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (evolutivos de la fase productiva, desde el 31 de agosto de 2026)", entrada "Una comida puede tener varias recetas o ingredientes sueltos"
 
 ## 1. Objetivo
 
-Al editar una comida (apuntada o en la casilla de un día de Mi dieta), poder
-enlazarla a varias recetas y/o varios ingredientes sueltos de la despensa, no
-solo a uno. El texto que se guarda es la suma de sus nombres, y desde el día
-se puede abrir cada una de sus recetas/ingredientes, no solo el primero.
+En **Mi dieta** (la semana de menús, `usuarios/{uid}/dietas/{dietaId}`), una
+celda de un día/momento puede enlazar a **varias** recetas y/o varios
+ingredientes sueltos de la despensa, no solo a una receta como hoy. El texto
+del plato pasa a ser la suma de sus nombres, y desde el día se puede abrir
+cada receta/ingrediente enlazado, no solo el primero.
+
+**Esta spec NO toca el diario de comidas ya apuntadas** (spec 084, con su
+propio `ingredienteId`): eso sigue exactamente igual, sin editor de enlace
+tras apuntar. Es un modelo de datos distinto y una decisión de alcance
+aparte, tomada por el usuario al escribir esta spec.
 
 ## 2. Criterio de "esto funciona"
 
-1. Abres una comida ya guardada que tiene dos platos en el texto pero solo
-   uno enlazado a receta (el caso real: "Crema de zanahoria. 1 hamburguesa de
-   ternera", con la hamburguesa enlazada y la crema sin enlazar). La editas,
-   añades también la receta de la crema, guardas.
-2. El texto de la comida pasa a ser la suma de los nombres de ambas recetas
-   ("Crema de zanahoria. Hamburguesa de ternera"), sustituyendo lo que hubiera
-   escrito antes (puedes reescribirlo a mano si quieres otra cosa).
-3. En Mi dieta (o en el diario), la comida muestra un solo icono de "ver
-   receta". Al tocarlo, ves un desplegable con las dos recetas listadas por su
-   nombre; tocando cada una se abre su detalle igual que hoy.
-4. Repites el mismo caso pero añadiendo, en vez de una segunda receta, un
-   ingrediente suelto de la despensa (p. ej. "un yogur"): el texto suma
-   también su nombre, y el desplegable lo lista junto a las recetas.
-5. Marcas "me lo he comido" en una comida con dos recetas: se apunta una
-   ración de cada una a la vez (no hay botón independiente por receta).
-6. Abres una comida antigua (antes de esta spec) que solo tenía una receta
-   enlazada con el campo antiguo: se ve y se edita igual que las nuevas, sin
-   ningún error ni aviso raro.
+1. En Mi dieta, abres el lápiz de edición de una celda que hoy solo tiene una
+   receta enlazada y texto con dos platos (el caso real: "Crema de
+   zanahoria. 1 hamburguesa de ternera", con la hamburguesa enlazada y la
+   crema sin enlazar). El editor de la celda muestra una línea con la receta
+   ya enlazada y un botón "Añadir otra".
+2. Pulsas "Añadir otra", eliges la receta de la crema en el desplegable
+   nuevo, y guardas.
+3. El texto de la celda pasa a ser la suma de los nombres de ambas recetas,
+   unidos con ". " ("Crema de zanahoria. Hamburguesa de ternera"),
+   sustituyendo lo que hubiera escrito antes de guardar — pero el campo de
+   texto sigue siendo editable a mano por encima de esa propuesta, igual que
+   hoy rellena el nombre de una sola receta.
+4. En la fila de Mi dieta, la celda muestra un solo icono de "ver receta".
+   Al tocarlo, en vez de abrir directamente la ficha de una receta (como
+   hoy con una sola), se despliega una lista con los nombres de las dos
+   recetas; tocando cada una abre su ficha, igual que hoy.
+5. Repites añadiendo, en vez de una segunda receta, un ingrediente suelto de
+   la despensa (p. ej. "Yogur natural", esté marcado o no): el desplegable
+   de "añadir otra" deja elegir entre receta o ingrediente, el texto suma
+   también su nombre, y el desplegable de "ver" lo lista junto a las
+   recetas — tocarlo abre la ficha del ingrediente en la despensa.
+6. Marcas "me lo he comido" en una celda con dos recetas: se apunta en el
+   diario un solo registro con el texto sumado, igual que hoy con una
+   receta (el registro del diario NO lleva el enlace; ver sección 3).
+7. Abres una celda que no ha sido tocada desde antes de esta spec (formato
+   antiguo, `recetaId` en vez de `enlaces`): se ve y se edita exactamente
+   igual que las nuevas, sin ningún error ni aviso. Al guardarla, queda ya
+   en el formato nuevo.
+8. En Comidas → Despensa → lista de la compra, un ingrediente suelto
+   enlazado a una celda de Mi dieta y que NO tienes marcado sale en la
+   lista de lo que falta, igual que un ingrediente de una receta.
 
 ## 3. Alcance
 
 ### Entra
-- El formulario de editar una comida (desde el diario de Comidas y desde
-  "ver receta → Editar" en Mi dieta) pasa a permitir añadir/quitar varias
-  líneas, cada una una receta del Recetario o un ingrediente suelto de la
-  despensa (mismo selector que ya existe hoy para elegir una, repetido con
-  un botón "Añadir otra").
-- El texto de la comida se recalcula como la suma de los nombres elegidos,
-  unidos con ". ", cada vez que cambia la lista de recetas/ingredientes
-  seleccionados — pero sigue siendo un campo de texto editable a mano por
-  encima de esa propuesta (igual que hoy: la suma rellena el campo, no lo
-  bloquea).
-- En Mi dieta / Mi tabla y en el diario de Comidas, la comida con una o más
-  recetas/ingredientes enlazados enseña un solo icono de "ver receta"; si
-  hay más de una, tocarlo abre un desplegable con la lista de nombres, cada
-  uno llevando a su detalle (receta o ingrediente) como ya funciona hoy para
-  una sola.
-- "Me lo he comido" (o el equivalente al marcar la casilla del día) apunta
-  una ración de cada receta enlazada a la vez.
-- Migración: un script que reescribe, para un usuario dado, los documentos
-  de `comidas` que tengan el campo antiguo `recetaId` o `ingredienteSueltoId`
-  (string) a la lista nueva. Se ejecuta primero contra la cuenta de
-  pablodabernal; la del otro usuario se hace más adelante, a la orden.
+- El editor de una celda de Mi dieta (`filaEnEdicion()` en `js/app.js`, el
+  que se abre con el lápiz): pasa de un único `<select>` de receta a una
+  lista de líneas, cada una una receta del Recetario **o** un ingrediente
+  de la despensa (selector con las dos opciones), con un botón "Añadir
+  otra" y una forma de quitar una línea. Sin límite de líneas.
+- El desplegable de ingredientes muestra **todos** los de la despensa, estén
+  marcados o no (a diferencia de la spec 084, que solo mostraba los
+  marcados): aquí no se está afirmando "lo tengo ahora", solo qué plato es.
+- El texto de la celda se recalcula como la suma de los nombres elegidos,
+  unidos con ". ", cada vez que cambia la lista de líneas — sigue siendo un
+  campo de texto editable a mano por encima de esa propuesta.
+- El icono de "ver receta" de la fila (spec 060/072): si la celda tiene una
+  sola receta/ingrediente enlazado, se comporta como hoy (abre directo). Si
+  tiene más de una, el icono abre un desplegable con los nombres, cada uno
+  llevando a su ficha.
+- "Me lo he comido" (`apuntarDeLaDieta()`) sigue apuntando en el diario un
+  registro con el texto de la celda tal cual, sin cambios: no propaga la
+  lista de enlaces al diario (decisión de alcance, ver sección 8).
+- La generación de la semana (`semanaDesdeLaIa()`, `semanaDesdeMenu()` en
+  `js/dietas.js`) pasa a escribir `enlaces` con como mucho un elemento tipo
+  `"receta"`, en vez de `recetaId`. El algoritmo de emparejado (por nombre
+  exacto o por búsqueda dentro del texto) no cambia: solo cambia la forma
+  del campo que se guarda.
+- La lista de la compra (`recetasDeLaDieta()`, `comidasSinReceta()` en
+  `js/app.js`, y `loQueFalta()` en `js/despensa.js`, spec 073): se adaptan
+  a leer `comida.enlaces` en vez de `comida.recetaId`, y a incluir también
+  los ingredientes sueltos enlazados directamente (no vía receta) en el
+  cálculo de lo que falta — un ingrediente enlazado y no marcado (`tengo:
+  false`) entra en la lista igual que uno que falte de una receta.
+- **Migración por lectura, sin script aparte**: `leerDietaActiva()`
+  (`js/dietas.js`) normaliza cada comida al leerla — si trae `recetaId`
+  (formato antiguo) lo convierte a `enlaces: [{tipo: "receta", id:
+  recetaId}]` (o `[]` si estaba vacío) antes de que el resto de la app la
+  toque. `recetaId` deja de escribirse desde esta spec; una celda queda en
+  el formato nuevo la próxima vez que se guarde (al editarla, o al
+  regenerar la semana entera). No hace falta tocar Firestore a mano ni
+  ejecutar nada fuera de la app: es una sola colección con un documento
+  activo por usuario, y la lectura ya la entiende.
 
 ### NO entra (explícitamente fuera)
+- El diario de comidas ya apuntadas (`usuarios/{uid}/comidas`, spec 084):
+  su `ingredienteId` y su editor de texto libre siguen exactamente igual.
+  Decisión del usuario: son datos y pantallas distintos, y tocar los dos a
+  la vez no cabe en esta spec.
 - Migrar el formato de ingredientes DENTRO de una receta (spec 082, el
-  "puñado de repollo" sin estructurar): es un asunto distinto, anotado en
+  "puñado de repollo" sin estructurar): asunto distinto, anotado en
   `docs/BACKLOG.md`.
-- Marcado independiente por receta dentro de una misma comida ("me comí la
-  crema pero no la hamburguesa"): se marcan todas juntas.
-- Límite al número de recetas/ingredientes por comida: no lo hay.
-- Cambiar cómo se genera el texto cuando la IA propone una dieta o un menú
-  (076): esta spec toca el formulario de edición manual, no la generación
-  automática.
+- Marcado independiente por receta/ingrediente dentro de una misma celda
+  ("me comí la crema pero no la hamburguesa"): se marcan todas juntas, un
+  solo registro en el diario.
+- Que el registro del diario, al marcar "me lo he comido", lleve también
+  los enlaces de la celda (para poder abrir la receta desde el diario más
+  tarde): queda fuera. Decisión del usuario.
+- Límite al número de recetas/ingredientes por celda: no lo hay.
+- Cambiar el algoritmo de emparejado de la IA/menú (076): sigue enlazando
+  como mucho una receta por plato; esta spec no le enseña a proponer varias.
 
 ## 4. Comportamiento detallado
 
-*(a rellenar en la sesión de implementación, con el detalle de pantallas y
-mensajes — la spec ya fija el comportamiento observable en las secciones 2 y
-3, que es lo que ata las decisiones de producto)*
+- **Editor de la celda** (`filaEnEdicion()`): hoy es un `<select>` con
+  "Sin receta" + una opción por receta, cuyo valor es `comida.recetaId`.
+  Pasa a ser una lista de líneas repetible: cada línea tiene un selector de
+  tipo (Receta / Ingrediente de la despensa) y, según el tipo, un
+  `<select>` con las recetas o con todos los ingredientes de la despensa.
+  Un botón "Añadir otra línea" añade una vacía; cada línea (salvo si es la
+  única y está vacía) lleva un botón para quitarla. Al cambiar cualquier
+  línea, el campo de texto de la celda se rellena con la suma de los
+  nombres separados por ". " — mismo patrón que hoy tiene una sola receta,
+  extendido a varias.
+- **Icono de "ver receta" de la fila**: si `comida.enlaces.length === 1`,
+  comportamiento idéntico a hoy (abre la ficha correspondiente — de
+  receta, spec 060, o de ingrediente en despensa). Si `length > 1`, el
+  icono abre/cierra un desplegable con un nombre por línea (receta o
+  ingrediente), y tocar un nombre abre su ficha debajo, igual que hoy con
+  una sola.
+- **Fichas de receta e ingrediente enlazado**: sin cambios respecto a como
+  se abren hoy (spec 060 para receta, la ficha de la despensa para un
+  ingrediente) — esta spec solo cambia cómo se llega a ellas cuando hay más
+  de una.
 
 ## 5. Modelo de datos
 
-`comidas/{id}` — cambia el campo de enlace:
+`usuarios/{uid}/dietas/{dietaId}.dias[].comidas[]` — cambia el campo de
+enlace de cada comida:
 
-- Antes: `recetaId: string` (o vacío) **o** `ingredienteSueltoId: string` (o
-  vacío) — como mucho uno de los dos con valor.
-- Ahora: `enlaces: { tipo: "receta" | "ingrediente", id: string }[]` —
-  lista, puede estar vacía, puede mezclar recetas e ingredientes.
+- Antes: `{ momento: string, texto: string, recetaId: string }` (vacío si
+  no hay receta enlazada).
+- Ahora: `{ momento: string, texto: string, enlaces: { tipo: "receta" |
+  "ingrediente", id: string }[] }` — lista, puede estar vacía, puede
+  mezclar tipos, sin límite.
 
-Tras la migración, `recetaId` e `ingredienteSueltoId` dejan de escribirse;
-todo el código que los lee pasa a leer `enlaces`. La migración por usuario
-reescribe los documentos existentes; no queda código que siga los dos
-formatos a la vez salvo mientras el otro usuario no se haya migrado (ver
-sección 6).
+`leerDietaActiva()` normaliza al vuelo: si una comida trae `recetaId` (y no
+`enlaces`), la convierte a `enlaces` antes de devolverla. El resto del
+código (`js/app.js`, `js/dietas.js`) solo conoce `enlaces` desde esta spec;
+nada vuelve a leer `recetaId` salvo esa normalización de entrada.
 
 ## 6. Casos límite
 
-- Una comida sin ninguna receta ni ingrediente enlazado (texto suelto,
-  como la mayoría de la dieta): sigue sin icono de "ver receta", igual que
-  hoy.
-- El usuario del segundo email, mientras no se ejecute su migración, sigue
-  teniendo comidas con el campo antiguo: el código de lectura debe seguir
-  entendiendo el formato antiguo hasta que se confirme que los dos usuarios
-  están migrados (después, se puede quitar esa compatibilidad en una
-  limpieza aparte).
-- Añadir la misma receta dos veces a una comida: se permite (igual que un
-  ingrediente puede repetirse en una receta, spec 082) — no se deduplica.
-- Quitar todas las recetas/ingredientes de una comida que los tenía: el
-  texto deja de sumarse automáticamente, pero lo que hubiera escrito queda
-  tal cual (no se borra el texto al vaciar los enlaces).
-- Una receta o ingrediente enlazado que se borró después de enlazarlo: igual
-  que hoy con una sola, esa línea del desplegable no debe romper la lista
-  (se salta o se enseña como no disponible).
+- Una celda sin ningún enlace (texto suelto, la mayoría de los platos de un
+  menú de la nutricionista): sigue sin icono de "ver receta", igual que hoy.
+- Una receta o ingrediente enlazado que se borró después: igual que hoy con
+  un solo enlace (spec 072/060), esa línea del desplegable no debe romper
+  la lista — se salta o se enseña como no disponible, sin tocar las demás.
+- Añadir la misma receta o el mismo ingrediente dos veces en la misma
+  celda: se permite, no se deduplica (igual que un ingrediente puede
+  repetirse dentro de una receta, spec 082).
+- Vaciar todas las líneas de una celda que tenía enlaces: el texto deja de
+  sumarse automáticamente, pero lo que hubiera escrito queda tal cual (no
+  se borra el texto al quitar el último enlace).
+- Una celda en formato antiguo (`recetaId`) que nunca se llega a editar:
+  sigue funcionando para siempre vía la normalización de lectura: no hay
+  fecha límite ni obligación de tocarla.
+- Un ingrediente enlazado sin marcar (`tengo: false`) en una celda: entra
+  en la lista de la compra como "te falta". Si además esa despensa no
+  existe (se borró el ingrediente), se trata como en el caso de receta: se
+  cuenta igual como que falta.
 
 ## 7. Archivos afectados
 
-*(a estimar en la sesión de implementación tras localizar todos los
-lectores/escritores de `recetaId`/`ingredienteSueltoId` — al menos
-`js/app.js`, `js/recetas.js`, `js/despensa.js`, `js/dietas.js` según lo visto
-al escribir esta spec, y un script nuevo de migración)*
+- `js/dietas.js`: `semanaEnBlanco()`, `semanaDesdeLaIa()`,
+  `semanaDesdeMenu()` (escriben `enlaces` en vez de `recetaId`);
+  `leerDietaActiva()` (normaliza el formato antiguo al leer).
+- `js/app.js`: `filaEnEdicion()` y `guardarCelda()` (editor de varias
+  líneas); `recetaDeLaComida()` y el pintado del icono/desplegable de la
+  fila (`col-receta`, alrededor de la línea 3538); `recetasDeLaDieta()` y
+  `comidasSinReceta()` (lista de la compra, leen `comida.enlaces`).
+- `js/despensa.js`: `loQueFalta()`, para sumar también los ingredientes
+  sueltos enlazados directamente desde la dieta (no solo vía receta).
+- `index.html`: si hace falta algún contenedor nuevo para las líneas
+  repetibles del editor de celda.
+- `styles.css`: estilos de las líneas repetibles del editor y del
+  desplegable de varias recetas/ingredientes bajo el icono — reutilizar
+  patrones existentes (spec 082, líneas de ingrediente de receta) en la
+  medida de lo posible.
 
 ## 8. Decisiones tomadas
 
+- **Solo Mi dieta, no el diario de comidas apuntadas** (spec 084 queda
+  intacta). Decisión del usuario, 2026-09-01, tras la primera revisión de
+  `revisor-specs`.
 - **Texto final = suma de nombres unidos con ". "**, editable a mano por
   encima. Decisión del usuario, 2026-09-01.
-- **"Me lo he comido" marca todas las recetas/ingredientes de la comida a la
-  vez**, no una por una. Decisión del usuario, 2026-09-01.
-- **Sin límite de recetas/ingredientes por comida.** Decisión del usuario,
+- **"Me lo he comido" marca todas las recetas/ingredientes de la celda a la
+  vez**, un solo registro en el diario, sin llevar los enlaces consigo.
+  Decisión del usuario, 2026-09-01.
+- **Sin límite de recetas/ingredientes por celda.** Decisión del usuario,
   2026-09-01.
-- **Un solo icono de "ver receta" por comida, con desplegable si hay
+- **Un solo icono de "ver receta" por celda, con desplegable si hay
   varias.** Decisión del usuario, 2026-09-01.
-- **Se migran los documentos existentes** (no se deja convivir el formato
-  antiguo sin más), ejecutado primero contra pablodabernal y luego, a la
-  orden, contra el otro usuario. Decisión del usuario, 2026-09-01.
+- **Sin script de migración**: se normaliza al leer y se reescribe sola al
+  guardar, porque es un solo documento por usuario. Decisión del usuario,
+  2026-09-01, tras conocer que el modelo de datos real es mucho más simple
+  de lo que se pensó al escribir la primera versión de esta spec.
+- **El desplegable de ingredientes sueltos para la celda muestra TODOS los
+  de la despensa**, no solo los marcados (a diferencia de la spec 084).
+  Decisión del usuario, 2026-09-01: aquí no se afirma "lo tengo ahora".
+- **Un ingrediente suelto enlazado a Mi dieta SÍ entra en el cálculo de la
+  lista de la compra** si no está marcado. Decisión del usuario, 2026-09-01.
 - **La migración de ingredientes DENTRO de una receta (formato de la spec
   082) queda fuera de esta spec** y anotada en `docs/BACKLOG.md`. Decisión
-  del usuario, 2026-09-01: son dos asuntos distintos aunque salieran en la
-  misma conversación.
+  del usuario, 2026-09-01.
 
 ## 9. Fuera de spec: ideas apuntadas
 
 - Migrar el formato de ingredientes de las recetas antiguas al estructurado
   de la spec 082 → `docs/BACKLOG.md`.
+- Que el diario de comidas apuntadas también permita enlazar varias
+  recetas/ingredientes, o editar el enlace tras apuntar (reabriría la
+  exclusión de la spec 084) → no anotado como idea firme, el usuario lo
+  descartó explícitamente para esta spec; si se quiere en el futuro, es una
+  spec propia.
 
 ## ✅ Para probar a mano
 
