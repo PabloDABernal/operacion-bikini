@@ -190,7 +190,63 @@ avisar.
 
 ## ✅ Para probar a mano
 
-*(lo rellena/afina el agente `qa-manual` antes de la prueba, siguiendo el
-criterio de la sección 2 — caso concreto acordado: un ejercicio de tu
-tabla pide material que no tienes, sale en la lista de lo que falta,
-marcarlo lo mete ya marcado en tu armario)*
+**Paso 0, antes de nada**: ejecuta en tu equipo (donde ya hiciste `firebase
+login`):
+
+```
+npx --yes firebase-tools deploy --only firestore:rules
+```
+
+Sin esto, `materialCompra` no tiene reglas publicadas y todo falla con
+errores de permisos que parecen bugs.
+
+Prepárate una tabla activa con algún ejercicio que pida material que NO
+tienes marcado en tu armario.
+
+**Camino feliz**
+
+1. Ejercicio → Material: encima de "Mi material" debe verse un bloque
+   nuevo "Material que te falta".
+2. Debe listar las piezas que pide tu tabla y no tienes — y si dos
+   ejercicios piden la misma pieza, debe salir una sola vez.
+3. Apunta algo a mano (p. ej. "comprar un banco nuevo"): debe aparecer en
+   la lista.
+4. Marca como conseguida una pieza que SÍ tenías en el armario (desmarcada):
+   desaparece de la lista y pasa a verse marcada en tu armario y en el
+   ejercicio del Catálogo que la pedía.
+5. Marca como conseguido el apunte a mano del paso 3: debe borrarse, sin
+   crear nada en tu armario (a diferencia del paso 4).
+6. Marca como conseguida una pieza que NO tenías en tu armario en absoluto:
+   desaparece de la lista y aparece en tu armario ya marcada de un tirón
+   (sin paso intermedio).
+7. Sin tabla activa (o con una vacía), la lista solo debe tener tus
+   apuntes a mano, y decirlo si no hay ninguno.
+8. Con todo conseguido, debe decirlo en vez de enseñar la lista vacía sin
+   más.
+
+**Casos límite**
+
+9. Apunta a mano algo que coincide en texto con una pieza que ya sale como
+   falta (p. ej. tu tabla pide "mancuernas" y apuntas "mancuernas" a mano):
+   es el caso que señaló `revisor-codigo` — puede que salga duplicado en
+   vez de fundido en una línea. Compruébalo y dime qué ves: si sale
+   duplicado, es una limitación heredada tal cual de la lista de la compra
+   (073), no algo nuevo de esta spec.
+10. Un día de descanso de tu tabla (sin sesión) no debe generar ninguna
+    entrada ni aviso.
+11. Un ejercicio de peso corporal sin material (o uno de la sesión sin
+    enlazar al catálogo) no debe generar ningún aviso — a diferencia de
+    la lista de la compra, que sí avisa de "comidas sin receta": aquí es
+    a propósito que no lo haga.
+12. Borra del Catálogo un ejercicio que estuviera enlazado en tu tabla: su
+    material debe dejar de salir en la lista de lo que falta.
+
+**Regresión**
+
+13. Comidas → Despensa/Compra debe seguir funcionando exactamente igual
+    que antes (marcar un ingrediente, apuntar y marcar algo a mano): esta
+    spec reutiliza el mismo patrón de código, así que es la comprobación
+    de que no se ha roto nada por el camino.
+
+Si todo sale como se describe, la spec queda lista para marcarse como
+completada (cambiar el Estado a "✅ completada").
