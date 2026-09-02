@@ -2139,6 +2139,30 @@ button:disabled {
   border-top: 1px solid var(--borde);
 }
 
+/* Los paneles del interruptor de "Nueva comida" (specs 084 y 093).
+   
+   Son DIV, no el form, así que sus campos dejan de estirarse y se quedan con su
+   ancho por defecto. En un <select> ese ancho es el de su opción más larga, y
+   con recetas como "Boquerones con ajo y perejil y rodajas de tomate al horno"
+   el desplegable se salía de la columna y se montaba encima de Mi dieta.
+   
+   Es el MISMO fallo que la spec 086 con el campo de distancia, y se arregla
+   igual: el panel es flex-column, y el campo se acota a su ancho. */
+#panel-comida-receta,
+#panel-comida-despensa {
+  display: flex;
+  flex-direction: column;
+}
+
+#panel-comida-receta select,
+#panel-comida-despensa select,
+#panel-comida-despensa input {
+  width: 100%;
+  min-width: 0;
+  /* Un <select> ignora width si su contenido es más ancho: esto lo obliga. */
+  max-width: 100%;
+}
+
 /* El aviso de que una receta enlazada no se nombra en el texto (spec 091). En
    su propia línea, debajo de los chips, y sin bloquear nada. */
 .aviso-receta {

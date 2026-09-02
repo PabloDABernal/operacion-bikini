@@ -736,6 +736,15 @@ Ya no salen de una lista planificada: salen de usar la app cada día.
 | 094 | "Me lo he comido": del plan al diario |
 | 095 | Estadísticas de lo que comes |
 
+- **"Ya lo he comprado todo".** La lista de la compra se marca cosa a cosa, y al
+  volver del súper con veinte cosas eso son veinte toques. Un botón marca de una
+  vez todo lo que hay en la lista, que es lo que pasa de verdad cuando vuelves de
+  comprar.
+
+| Spec | Qué |
+|---|---|
+| 096 | Comprado todo: marcar la lista entera de una vez |
+
 - **Las recetas que trae la app, normalizadas.** Las 73 recetas sembradas
   llegaron con los ingredientes escritos como una línea de texto —"1 lata
   redonda pequeña de atún, enlatado al natural, escurrido (50 g)"— porque son
