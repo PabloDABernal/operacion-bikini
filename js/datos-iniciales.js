@@ -27,6 +27,23 @@ export const RECETAS = [
       "En un cuenco batimos el huevo y añadimos el atún junto con las especias que más nos gusten.",
       "Cocinamos la mezcla en una sartén caliente dándole la forma típica de la tortilla."
     ],
+    "ingredientesEnPiezas": [
+      {
+        "ingrediente": "Atún",
+        "cantidad": "1 lata redonda pequeña",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Huevos",
+        "cantidad": "2 unidades",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Aceite de oliva virgen extra",
+        "cantidad": "1/2 cucharada de café",
+        "preparacion": ""
+      }
+    ],
     "alias": [
       "Tortilla de 2 huevos con 1 lata de atún al natural",
       "Tortilla de 2 huevos y una lata de atún al natural"
@@ -40,6 +57,13 @@ export const RECETAS = [
     ],
     "preparacion": [
       "Echar un agua de aceite y retirar el exceso con una servilleta. Cuando el aceite en la sartén se encuentre caliente añadimos el huevo, bajamos el fuego y tapamos la sartén hasta obtener la cocción deseada."
+    ],
+    "ingredientesEnPiezas": [
+      {
+        "ingrediente": "Huevos",
+        "cantidad": "1-2",
+        "preparacion": ""
+      }
     ],
     "alias": []
   },
@@ -60,6 +84,28 @@ export const RECETAS = [
       "Puedes ir poniéndolas sobre un papel absorbente para retirar el exceso de grasa.",
       "Sirve tal cual con la otra mitad del plátano troceado y, si quieres, 1 onza de chocolate 75-85% derretida por encima.",
       "Puedes agregar un poco de levadura química a la masa si quieres que te queden más esponjosas."
+    ],
+    "ingredientesEnPiezas": [
+      {
+        "ingrediente": "Plátano",
+        "cantidad": "1",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Avena molida",
+        "cantidad": "30gr",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Huevos",
+        "cantidad": "1",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Canela",
+        "cantidad": "",
+        "preparacion": ""
+      }
     ],
     "alias": [
       "Tortitas de 30gr de avena y plátano",
@@ -83,6 +129,33 @@ export const RECETAS = [
       "Mete la bandeja con los boquerones dentro del horno.",
       "Estarán listos entre los 6 y 8 minutos."
     ],
+    "ingredientesEnPiezas": [
+      {
+        "ingrediente": "Boquerones",
+        "cantidad": "120 gramos",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Aceite de oliva virgen extra",
+        "cantidad": "1 cucharada de postre",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Sal",
+        "cantidad": "1 cucharada de postre",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Ajo",
+        "cantidad": "2 dientes",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Perejil",
+        "cantidad": "1 cucharada sopera",
+        "preparacion": ""
+      }
+    ],
     "alias": []
   },
   {
@@ -105,6 +178,48 @@ export const RECETAS = [
       "Cuando veamos que la carne ya está suelta y ha cambiado de color casi en su totalidad debido a la cocción, incorporaremos el tomate frito. Cubriremos todo bien con el tomate y añadiremos un poco de pimienta y orégano. Dejamos que se cocine durante unos 10 min aproximadamente.",
       "Ponemos una olla con agua y una pizca de sal a hervir, añadimos la pasta y esperamos 12 minutos para que se cueza.",
       "Finalmente mezclamos nuestra salsa boloñesa con la pasta."
+    ],
+    "ingredientesEnPiezas": [
+      {
+        "ingrediente": "Pasta",
+        "cantidad": "60gr",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Carne picada de cerdo",
+        "cantidad": "100 gramos",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Cebolla",
+        "cantidad": "25 gramos",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Tomate frito",
+        "cantidad": "2 cucharadas",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Aceite de oliva virgen extra",
+        "cantidad": "1 cucharada de postre",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Zanahoria",
+        "cantidad": "Media",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Puerro",
+        "cantidad": "Medio",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Calabacín",
+        "cantidad": "Medio",
+        "preparacion": ""
+      }
     ],
     "alias": [
       "50gr de pasta integral / de lentejas (en seco) a la boloñesa (110gr de carne picada)",
@@ -131,6 +246,38 @@ export const RECETAS = [
       "Añadir la tarrina de queso de burgos y dejar reposar unos minutos.",
       "Pasar la turmix y listo para servir."
     ],
+    "ingredientesEnPiezas": [
+      {
+        "ingrediente": "Calabacín",
+        "cantidad": "1/2 unidad mediana",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Puerro",
+        "cantidad": "1 unidad mediana",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Aceite de oliva virgen extra",
+        "cantidad": "1 cucharada de café",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Agua",
+        "cantidad": "500 gramos",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Queso de burgos",
+        "cantidad": "1 ración individual",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Cebolla",
+        "cantidad": "1/2 unidad pequeña",
+        "preparacion": ""
+      }
+    ],
     "alias": []
   },
   {
@@ -147,6 +294,33 @@ export const RECETAS = [
       "Dejar en remojo la chía con la leche (o el agua o la bebida vegetal) y la canela durante al menos 15 minutos o varias horas. De forma preferente dejarlas durante toda la noche.",
       "Una vez se hayan “hinchado”, mezclar la chía con el yogur o el kéfir.",
       "Puedes poner alguna fruta como topping."
+    ],
+    "ingredientesEnPiezas": [
+      {
+        "ingrediente": "Semillas de chía",
+        "cantidad": "1 cucharada sopera",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Edulcorante",
+        "cantidad": "",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Queso batido",
+        "cantidad": "125 gramos",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Leche",
+        "cantidad": "50 gramos",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Canela",
+        "cantidad": "",
+        "preparacion": ""
+      }
     ],
     "alias": []
   },
@@ -166,6 +340,38 @@ export const RECETAS = [
       "Cubrir la lubina con la mezcla reservada. Poner en una bandeja de horno junto con el tomate cortado a mitades, y las puntas de los espárragos.",
       "Introducir la bandeja en el horno y dejar que se cocine a 200 ºC durante unos 8-14 minutos (comprobar que está cocinado, ya que esto va a depender de la pieza y del horno). Sacar del horno y servir."
     ],
+    "ingredientesEnPiezas": [
+      {
+        "ingrediente": "Espárragos verdes",
+        "cantidad": "100gr",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Tomate",
+        "cantidad": "1",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Ajo",
+        "cantidad": "1 diente",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Perejil",
+        "cantidad": "",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Pan rallado",
+        "cantidad": "50 gramos",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Lubina",
+        "cantidad": "1 porción individual",
+        "preparacion": ""
+      }
+    ],
     "alias": []
   },
   {
@@ -181,6 +387,28 @@ export const RECETAS = [
       "Mezcla la leche y la chía en un recipiente pequeño y revuelve muy bien para evitar que las semillas de chía queden pegadas.",
       "Lleva tu mezcla al refrigerador y deja reposar de 30 minutos a 6-8 horas.",
       "Una vez transcurrido el tiempo, retira del refrigerador y decora con mermelada sin azúcar añadida y algunos berries. Y listo, mezcla bien y disfruta."
+    ],
+    "ingredientesEnPiezas": [
+      {
+        "ingrediente": "Semillas de chía",
+        "cantidad": "1 cucharada",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Leche",
+        "cantidad": "50 gramos",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Queso batido",
+        "cantidad": "125 gramos",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Mermelada sin azúcar",
+        "cantidad": "1 cucharadita",
+        "preparacion": ""
+      }
     ],
     "alias": []
   },
@@ -200,6 +428,38 @@ export const RECETAS = [
       "Cerrar el papel de aluminio para que no se salga el jugo.",
       "Cocinar en el horno durante 15 minutos."
     ],
+    "ingredientesEnPiezas": [
+      {
+        "ingrediente": "Bacalao",
+        "cantidad": "1 porción individual",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Aceite de oliva virgen extra",
+        "cantidad": "1 cucharada de postre",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Pimiento verde",
+        "cantidad": "1/4 unidad pequeña",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Cebolla",
+        "cantidad": "1/4 unidad pequeña",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Calabaza",
+        "cantidad": "100 gramos",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Calabacín",
+        "cantidad": "100 gramos",
+        "preparacion": ""
+      }
+    ],
     "alias": []
   },
   {
@@ -214,6 +474,33 @@ export const RECETAS = [
     ],
     "preparacion": [
       "Corta tus champiñones en cuatro. Pela y pica tu ajo. En una sartén caliente con aceite echa el ajo y saltea un minuto, seguidamente añade los champiñones y deja cocer hasta que cambien de color. Añade ahora el agua y la salsa de soja y deja que el líquido se espese y reduzca a la mitad."
+    ],
+    "ingredientesEnPiezas": [
+      {
+        "ingrediente": "Champiñones portobello",
+        "cantidad": "120gr",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Ajo",
+        "cantidad": "1 diente",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Aceite de oliva virgen extra",
+        "cantidad": "1 cucharada de café",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Salsa de soja",
+        "cantidad": "1 cucharada sopera",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Agua",
+        "cantidad": "2 cucharadas soperas",
+        "preparacion": ""
+      }
     ],
     "alias": []
   },
@@ -236,6 +523,43 @@ export const RECETAS = [
       "Dejar unos minutos antes de poner el arroz. Cocer hasta que esté tierno.",
       "Dejar reposar antes de servir."
     ],
+    "ingredientesEnPiezas": [
+      {
+        "ingrediente": "Pimentón",
+        "cantidad": "1 cucharada de café",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Vino blanco",
+        "cantidad": "20 gramos",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Menestra",
+        "cantidad": "1 guarnición",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Cebolla",
+        "cantidad": "20 gramos",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Pimiento verde",
+        "cantidad": "20 gramos",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Pimiento rojo",
+        "cantidad": "20 gramos",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Arroz blanco",
+        "cantidad": "60 gramos",
+        "preparacion": ""
+      }
+    ],
     "alias": [
       "125gr de arroz (hervido) con verduras"
     ]
@@ -251,6 +575,28 @@ export const RECETAS = [
     ],
     "preparacion": [
       "Pon en tu bol el yogur de proteínas, queso batido o yogur griego. Puedes añadir edulcorante a tu gusto si lo deseas. Coloca los cereales a un lado y las frutas al otro o a tu gusto."
+    ],
+    "ingredientesEnPiezas": [
+      {
+        "ingrediente": "Yogur de proteínas",
+        "cantidad": "125 gramos",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Cereales sin azúcar",
+        "cantidad": "30 gramos",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Fruta",
+        "cantidad": "",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Edulcorante",
+        "cantidad": "",
+        "preparacion": ""
+      }
     ],
     "alias": [
       "125gr de yogur con fruta y 30gr de cereal",
@@ -278,6 +624,43 @@ export const RECETAS = [
       "Agregar una cucharada sopera de queso untable 0% grasa opcionalmente.",
       "Rellenar las cáscaras con la mezcla obtenida y llevar al micro durante 3 minutos aprox."
     ],
+    "ingredientesEnPiezas": [
+      {
+        "ingrediente": "Berenjena",
+        "cantidad": "1 unidad mediana",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Atún",
+        "cantidad": "1 lata redonda pequeña",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Cebolla",
+        "cantidad": "1/2",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Pimiento rojo",
+        "cantidad": "1/4 unidad pequeña",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Pimiento verde",
+        "cantidad": "1/4 unidad pequeña",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Ajo",
+        "cantidad": "1 diente",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Aceite de oliva virgen extra",
+        "cantidad": "1 cucharada de café",
+        "preparacion": ""
+      }
+    ],
     "alias": []
   },
   {
@@ -291,6 +674,28 @@ export const RECETAS = [
     ],
     "preparacion": [
       "Haz las brochetas con los alimentos en dados y cocina a la vez."
+    ],
+    "ingredientesEnPiezas": [
+      {
+        "ingrediente": "Pechuga de pavo",
+        "cantidad": "120 gramos",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Calabacín",
+        "cantidad": "1 unidad mediana",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Tomate",
+        "cantidad": "",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Aceite de oliva virgen extra",
+        "cantidad": "1 cucharada de postre",
+        "preparacion": ""
+      }
     ],
     "alias": []
   },
@@ -312,6 +717,43 @@ export const RECETAS = [
       "En una fuente para horno ponemos el pollo y lo regamos con el vino blanco (opcional).",
       "Precalienta el horno a 200º, una vez que tenga la temperatura adecuada, introduce la bandeja en el horno y mantén una temperatura de 180º C. Pasados unos 15 minutos dar la vuelta y dejarlo 15 minutos más o hasta cuando esté hecho."
     ],
+    "ingredientesEnPiezas": [
+      {
+        "ingrediente": "Agua",
+        "cantidad": "100 gramos",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Aceite de oliva virgen extra",
+        "cantidad": "1 cucharada de café",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Muslo de pollo",
+        "cantidad": "1",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Ajo",
+        "cantidad": "1 diente",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Perejil",
+        "cantidad": "1 cucharada sopera",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Sal",
+        "cantidad": "1 cucharada de postre",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Sal",
+        "cantidad": "1 gramo",
+        "preparacion": ""
+      }
+    ],
     "alias": []
   },
   {
@@ -327,6 +769,38 @@ export const RECETAS = [
     ],
     "preparacion": [
       "Mezcla todos los ingredientes menos la fruta y deja reposar en la nevera mínimo 30 minutos (ideal toda la noche). Incorpora la fruta y disfruta."
+    ],
+    "ingredientesEnPiezas": [
+      {
+        "ingrediente": "Avena en copos",
+        "cantidad": "30 gramos",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Yogur natural",
+        "cantidad": "125gr",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Leche",
+        "cantidad": "100 gramos",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Edulcorante",
+        "cantidad": "1 cucharadita",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Semillas de chía",
+        "cantidad": "1 cucharada",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Fruta",
+        "cantidad": "",
+        "preparacion": ""
+      }
     ],
     "alias": [
       "Pudding de chía, 30gr de avena y fruta"
@@ -347,6 +821,43 @@ export const RECETAS = [
     "preparacion": [
       "Cogemos una bolsa de espinacas y lo echamos en un bol. A continuación, cortamos a cuadraditos el aguacate y el tomate. Lo añadimos en el bol. Agregamos las latas de atún al natural escurrido. Aliñamos con aceite de oliva, vinagre y sal. Por último, lo removemos todo y ya tendremos nuestra receta cocina de ensalada de espinacas fácil y rápida."
     ],
+    "ingredientesEnPiezas": [
+      {
+        "ingrediente": "Tomate",
+        "cantidad": "1/2 unidad grande",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Aguacate",
+        "cantidad": "1/4 unidad mediana",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Vinagre de Módena",
+        "cantidad": "1 cucharadita",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Sal",
+        "cantidad": "1 pizca",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Espinacas",
+        "cantidad": "1 guarnición",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Atún",
+        "cantidad": "1 lata redonda pequeña",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Pepino",
+        "cantidad": "1/4 unidad",
+        "preparacion": ""
+      }
+    ],
     "alias": []
   },
   {
@@ -358,6 +869,18 @@ export const RECETAS = [
     ],
     "preparacion": [
       "Mezclar."
+    ],
+    "ingredientesEnPiezas": [
+      {
+        "ingrediente": "Café",
+        "cantidad": "1 taza",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Bebida de avena",
+        "cantidad": "180 gramos",
+        "preparacion": ""
+      }
     ],
     "alias": []
   },
@@ -372,6 +895,28 @@ export const RECETAS = [
     ],
     "preparacion": [
       "Sofríe la cebolla y el ajo, añade los guisantes y deja tres minutos más."
+    ],
+    "ingredientesEnPiezas": [
+      {
+        "ingrediente": "Guisantes",
+        "cantidad": "150-200 gramos",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Ajo",
+        "cantidad": "1 diente",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Cebolla",
+        "cantidad": "1/2 unidad pequeña",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Aceite de oliva virgen extra",
+        "cantidad": "1 cucharada de café",
+        "preparacion": ""
+      }
     ],
     "alias": []
   },
@@ -390,6 +935,28 @@ export const RECETAS = [
       "Cuando estén doradas servir en un plato con mostaza de dijón, una cucharadita de acompañamiento.",
       "Se puede utilizar alcachofas en conserva."
     ],
+    "ingredientesEnPiezas": [
+      {
+        "ingrediente": "Aceite de oliva virgen extra",
+        "cantidad": "1 cucharada de postre",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Pimienta negra",
+        "cantidad": "1 gramo",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Alcachofas",
+        "cantidad": "",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Mostaza dijón",
+        "cantidad": "1 cucharadita",
+        "preparacion": ""
+      }
+    ],
     "alias": []
   },
   {
@@ -406,6 +973,43 @@ export const RECETAS = [
     ],
     "preparacion": [
       "Corta tus verduras en pedacitos pequeños y saltea en una sartén con un chorrito de aceite hasta que quede bien pochado. Bate tus huevos hasta espumar junto con las claras. Añade a tus huevos, las verduras junto al jamón serrano cortado a pedazos. Mezclar bien hasta impregnar bien todos los ingredientes. Añade sal y pimienta si lo deseas y lleva de nuevo a la sartén. Deja que cueza un lado y dale la vuelta, deja cocer al gusto y listo."
+    ],
+    "ingredientesEnPiezas": [
+      {
+        "ingrediente": "Huevos",
+        "cantidad": "2",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Huevos",
+        "cantidad": "2 unidades",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Pimiento rojo",
+        "cantidad": "Medio",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Jamón serrano",
+        "cantidad": "1 loncha",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Berenjena",
+        "cantidad": "2 rodajas",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Aceite de oliva virgen extra",
+        "cantidad": "1 cucharadita",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Sal",
+        "cantidad": "",
+        "preparacion": ""
+      }
     ],
     "alias": [
       "Tortilla de 2 huevos con pimiento rojo, berenjena y jamón serrano"
@@ -429,6 +1033,33 @@ export const RECETAS = [
       "Corta la pechuga de pollo en tiras o dados y, en otra sartén con un poco de aceite y una pizca de sal, cocínalo hasta que esté dorado.",
       "Añade el pollo a la sartén que contiene las verduras. Añade la salsa de soja y sube el fuego. Saltea 2-3 minutos más, apaga el fuego y sirve el contenido de la sartén en tu plato."
     ],
+    "ingredientesEnPiezas": [
+      {
+        "ingrediente": "Champiñones",
+        "cantidad": "100 gramos",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Pechuga de pavo",
+        "cantidad": "120 gramos",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Brócoli",
+        "cantidad": "100 gramos",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Cebolla",
+        "cantidad": "1/4 unidad pequeña",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Salsa de soja",
+        "cantidad": "1 cucharada sopera",
+        "preparacion": ""
+      }
+    ],
     "alias": []
   },
   {
@@ -442,6 +1073,23 @@ export const RECETAS = [
     "preparacion": [
       "Lava y corta tu berenjena a rodajas y saltea en una sartén caliente con AOVE hasta cocer. Salpimentar al gusto y servir."
     ],
+    "ingredientesEnPiezas": [
+      {
+        "ingrediente": "Berenjena",
+        "cantidad": "1 guarnición",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Aceite de oliva virgen extra",
+        "cantidad": "1 cucharada de café",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Pimienta negra",
+        "cantidad": "1 gramo",
+        "preparacion": ""
+      }
+    ],
     "alias": []
   },
   {
@@ -452,6 +1100,13 @@ export const RECETAS = [
     ],
     "preparacion": [
       "Hamburguesa a la plancha."
+    ],
+    "ingredientesEnPiezas": [
+      {
+        "ingrediente": "Ternera",
+        "cantidad": "120gr",
+        "preparacion": ""
+      }
     ],
     "alias": []
   },
@@ -472,6 +1127,33 @@ export const RECETAS = [
       "Dejar que cueza todo junto hasta que las verduras estén blanditas.",
       "Triturar en la batidora hasta que quede una crema fina y servir."
     ],
+    "ingredientesEnPiezas": [
+      {
+        "ingrediente": "Aceite de oliva virgen extra",
+        "cantidad": "1 cucharada de postre",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Caldo vegetal",
+        "cantidad": "80 gramos",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Apio",
+        "cantidad": "30 gramos",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Cebolla",
+        "cantidad": "40 gramos",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Zanahoria",
+        "cantidad": "150 gramos",
+        "preparacion": ""
+      }
+    ],
     "alias": []
   },
   {
@@ -482,6 +1164,13 @@ export const RECETAS = [
     ],
     "preparacion": [
       "Cocinar la lubina con poco AOVE o sin él en una sartén antiadherente. Primero por la parte de la piel durante unos 5 minutos aprox, darle la vuelta y dejarlo 3 minutos más o al gusto."
+    ],
+    "ingredientesEnPiezas": [
+      {
+        "ingrediente": "Lubina",
+        "cantidad": "1 porción individual",
+        "preparacion": ""
+      }
     ],
     "alias": []
   },
@@ -502,6 +1191,38 @@ export const RECETAS = [
       "Corta las manzanas en tiritas, estilo julienne.",
       "Mezcla las manzanas en tiritas con el resto de los ingredientes y sirve para acompañar."
     ],
+    "ingredientesEnPiezas": [
+      {
+        "ingrediente": "Mostaza",
+        "cantidad": "Media cucharada",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Pimienta negra",
+        "cantidad": "",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Repollo morado",
+        "cantidad": "Un puñado",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Col repollo",
+        "cantidad": "Un puñado",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Manzana",
+        "cantidad": "1/2",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Queso batido",
+        "cantidad": "1 cucharada sopera",
+        "preparacion": ""
+      }
+    ],
     "alias": []
   },
   {
@@ -513,6 +1234,13 @@ export const RECETAS = [
     "preparacion": [
       "Cortar el boniato por la mitad y coloca boca abajo en el horno sobre papel de horno.",
       "Cocinar en el horno a 180º durante 20 minutos, según horno."
+    ],
+    "ingredientesEnPiezas": [
+      {
+        "ingrediente": "Boniato",
+        "cantidad": "1 unidad pequeña",
+        "preparacion": ""
+      }
     ],
     "alias": [
       "Boniato pequeño asado"
@@ -526,6 +1254,18 @@ export const RECETAS = [
       "1 filete de salmón fresco"
     ],
     "preparacion": [],
+    "ingredientesEnPiezas": [
+      {
+        "ingrediente": "Judías verdes",
+        "cantidad": "200 gramos",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Salmón",
+        "cantidad": "1 filete",
+        "preparacion": ""
+      }
+    ],
     "alias": []
   },
   {
@@ -549,6 +1289,63 @@ export const RECETAS = [
       "En un bol añadir todos los ingredientes troceados y el atún desmigado.",
       "Aliñar y servir."
     ],
+    "ingredientesEnPiezas": [
+      {
+        "ingrediente": "Vinagre",
+        "cantidad": "1 cucharada de postre",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Espárragos blancos",
+        "cantidad": "1 unidad",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Cebolla",
+        "cantidad": "1 unidad pequeña",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Zanahoria",
+        "cantidad": "1 unidad mediana",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Tomate",
+        "cantidad": "",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Lechuga",
+        "cantidad": "1 ración individual",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Pepino",
+        "cantidad": "20 gramos",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Aceite de oliva virgen extra",
+        "cantidad": "1 cucharada de café",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Atún",
+        "cantidad": "1 lata redonda pequeña",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Queso fresco",
+        "cantidad": "1 ración individual",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Huevos",
+        "cantidad": "1 unidad pequeña",
+        "preparacion": ""
+      }
+    ],
     "alias": []
   },
   {
@@ -565,6 +1362,33 @@ export const RECETAS = [
       "Colocar los lomos de merluza sobre una cama de verduras listas para cocer al vapor.",
       "Una vez cocinado aliñar con sal y aceite."
     ],
+    "ingredientesEnPiezas": [
+      {
+        "ingrediente": "Merluza",
+        "cantidad": "1 porción individual",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Zanahoria",
+        "cantidad": "1 unidad pequeña",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Judías verdes",
+        "cantidad": "100 gramos",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Guisantes",
+        "cantidad": "100 gramos",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Aceite de oliva virgen extra",
+        "cantidad": "1 cucharada de postre",
+        "preparacion": ""
+      }
+    ],
     "alias": []
   },
   {
@@ -578,6 +1402,23 @@ export const RECETAS = [
     "preparacion": [
       "Hervir la calabaza o hacerla al horno.",
       "Cortarla en cuadraditos y añadir el requesón desmenuzado por encima. Aliñar con aceite y albahaca."
+    ],
+    "ingredientesEnPiezas": [
+      {
+        "ingrediente": "Calabaza",
+        "cantidad": "180 gramos",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Mozzarella",
+        "cantidad": "",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Aceite de oliva virgen extra",
+        "cantidad": "1 cucharada de café",
+        "preparacion": ""
+      }
     ],
     "alias": [
       "Calabaza con requesón / burrata / mozzarella"
@@ -600,6 +1441,53 @@ export const RECETAS = [
     "preparacion": [
       "Pela y corta tu ajo a láminas y picado, a tu gusto. Lava y corta tus champiñones a láminas o en cuatro partes. En una sartén caliente añade el AOVE, incorpora el ajo y cuando esté dorado añade los champiñones. Salpimienta, añade el orégano y mezcla. Saltea hasta que esté blandito y añade el jamón serrano. Mezcla hasta que cambie de color. Ahora baja el fuego al mínimo, haz un huequito en el centro de tu sartén y añade tu huevo. Pon la tapa a la sartén y déjalo hasta que tenga la cocción que tí más te guste. A más tiempo tapada tu sartén más cocida estará la yema de tu huevo. Para servir añade un poquito de orégano por encima."
     ],
+    "ingredientesEnPiezas": [
+      {
+        "ingrediente": "Huevos",
+        "cantidad": "1",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Champiñones",
+        "cantidad": "150 gramos",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Jamón serrano",
+        "cantidad": "60 gramos",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Ajo",
+        "cantidad": "1 diente",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Aceite de oliva virgen extra",
+        "cantidad": "1 cucharada de café",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Orégano",
+        "cantidad": "",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Romero",
+        "cantidad": "",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Tomillo",
+        "cantidad": "",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Pimienta negra",
+        "cantidad": "",
+        "preparacion": ""
+      }
+    ],
     "alias": []
   },
   {
@@ -616,6 +1504,43 @@ export const RECETAS = [
     ],
     "preparacion": [
       "Abrimos un bote de alubias cocidas. Lavamos y reservamos. Escurrimos una lata de atún en conserva. Partimos las verduras en trozos pequeños. Mezclamos las verduras con el atún con las alubias y aliñamos con sal y aceite de oliva virgen."
+    ],
+    "ingredientesEnPiezas": [
+      {
+        "ingrediente": "Alubias",
+        "cantidad": "180 gramos",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Atún",
+        "cantidad": "1 lata redonda pequeña",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Cebolla",
+        "cantidad": "70 gramos",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Aceite de oliva virgen extra",
+        "cantidad": "1 cucharada sopera",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Tomate",
+        "cantidad": "",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Pepino",
+        "cantidad": "1/4 unidad mediana",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Aceitunas",
+        "cantidad": "4 unidades",
+        "preparacion": ""
+      }
     ],
     "alias": [
       "ensalada de 120-150gr de alubias (en conserva) con atún"
@@ -637,6 +1562,43 @@ export const RECETAS = [
       "Cocer la pasta.",
       "Picar el resto de ingredientes y mezclar."
     ],
+    "ingredientesEnPiezas": [
+      {
+        "ingrediente": "Tomate",
+        "cantidad": "1/2 unidad mediana",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Lechuga",
+        "cantidad": "1 guarnición",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Cebolla morada",
+        "cantidad": "1/2",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Queso de cabra",
+        "cantidad": "30 gramos",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Pasta de lentejas",
+        "cantidad": "60 gramos",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Pimiento rojo",
+        "cantidad": "1/4 unidad pequeña",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Aceite de oliva virgen extra",
+        "cantidad": "1 cucharada de postre",
+        "preparacion": ""
+      }
+    ],
     "alias": [
       "Ensalada de 50-60gr pasta de lentejas (seco) y queso de cabra + lata de atún"
     ]
@@ -652,6 +1614,28 @@ export const RECETAS = [
     ],
     "preparacion": [
       "Pica la cebolla y saltea en una sartén con aceite hasta pochar. Ahora saltea las espinacas hasta reducir su tamaño. Añadir el pimentón y remover para que no se queme. Salpimentar al gusto, mezclar y servir."
+    ],
+    "ingredientesEnPiezas": [
+      {
+        "ingrediente": "Espinacas",
+        "cantidad": "1 ración individual",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Cebolla",
+        "cantidad": "1/4 unidad pequeña",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Pimentón",
+        "cantidad": "1/2 cucharada de café",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Aceite de oliva virgen extra",
+        "cantidad": "1 cucharada de café",
+        "preparacion": ""
+      }
     ],
     "alias": []
   },
@@ -669,6 +1653,28 @@ export const RECETAS = [
       "Con un poco de agua y sal, calienta el brócoli (al vapor o en el microondas) por 3 minutos.",
       "Mezcla el brócoli con la “salsa” de ajo, paprika y aceite de oliva.",
       "Buen provecho."
+    ],
+    "ingredientesEnPiezas": [
+      {
+        "ingrediente": "Aceite de oliva virgen extra",
+        "cantidad": "1 cucharada de café",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Paprika",
+        "cantidad": "1/2 cucharadita",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Ajo",
+        "cantidad": "1 diente",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Brócoli",
+        "cantidad": "1 taza",
+        "preparacion": ""
+      }
     ],
     "alias": []
   },
@@ -689,6 +1695,43 @@ export const RECETAS = [
       "Pelar y picar la cebolla y el ajo y cortar el tomate. Sofreír la cebolla y cuando poche, añadir la sepia. Añadir el resto de verduras y hacer a fuego lento. Si vemos que se nos puede quemar, podemos añadir algo de agua.",
       "Espolvorear perejil y salpimentar al gusto."
     ],
+    "ingredientesEnPiezas": [
+      {
+        "ingrediente": "Perejil",
+        "cantidad": "",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Ajo",
+        "cantidad": "1 diente",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Pimiento verde",
+        "cantidad": "1/2 unidad grande",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Pimiento rojo",
+        "cantidad": "1/2 unidad pequeña",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Cebolla",
+        "cantidad": "1/2 unidad pequeña",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Sepia",
+        "cantidad": "1 porción individual",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Berenjena",
+        "cantidad": "1 guarnición",
+        "preparacion": ""
+      }
+    ],
     "alias": []
   },
   {
@@ -702,6 +1745,18 @@ export const RECETAS = [
       "Cocinar los vegetales (que quieras) hasta formar un caldo, colar si es necesario o dejar los vegetales.",
       "Trocear o procesar el pollo y cocinarlo en el caldo de vegetales.",
       "Servir con queso rallado o levadura nutricional en copos."
+    ],
+    "ingredientesEnPiezas": [
+      {
+        "ingrediente": "Caldo vegetal",
+        "cantidad": "200 gramos",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Pechuga de pollo",
+        "cantidad": "60 gramos",
+        "preparacion": ""
+      }
     ],
     "alias": []
   },
@@ -725,6 +1780,38 @@ export const RECETAS = [
       "Pasados los 25 min., saca la fuente del horno y coloca la dorada por encima de la base de patatas y cebolla. Vuélvela a meter al horno durante 25 minutos más.",
       "Retirar y servir."
     ],
+    "ingredientesEnPiezas": [
+      {
+        "ingrediente": "Dorada",
+        "cantidad": "1",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Cebolla",
+        "cantidad": "1/2 unidad mediana",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Ajo",
+        "cantidad": "1 diente",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Limón",
+        "cantidad": "1/4 unidad mediana",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Vino blanco",
+        "cantidad": "1/2 vaso",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Perejil",
+        "cantidad": "",
+        "preparacion": ""
+      }
+    ],
     "alias": []
   },
   {
@@ -740,6 +1827,33 @@ export const RECETAS = [
     "preparacion": [
       "Lava y corta las verduras a rodajas. Saltea en una sartén caliente con AOVE hasta hacer, añade orégano y pimienta. Reserva. En la misma sartén pon la pechuga de pollo y hazla a la plancha. Si tu arroz está ya hervido o es de vasito, calienta en microondas 1 minuto y sirve junto con la verdura y el pollo. Como último paso puedes añadir el arroz a la sartén junto con la verdura y el pollo y mezclarlo todo."
     ],
+    "ingredientesEnPiezas": [
+      {
+        "ingrediente": "Arroz blanco",
+        "cantidad": "150 gramos",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Pechuga de pollo",
+        "cantidad": "100 gramos",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Champiñones",
+        "cantidad": "120 gramos",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Zanahoria",
+        "cantidad": "1 unidad mediana",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Aceite de oliva virgen extra",
+        "cantidad": "1 cucharada de café",
+        "preparacion": ""
+      }
+    ],
     "alias": []
   },
   {
@@ -752,6 +1866,23 @@ export const RECETAS = [
     ],
     "preparacion": [
       "Lava y corta tu berenjena por la mitad a lo largo. Echa un chorrito de aceite y salpimenta al gusto. Mete al horno previamente calentado a 180ºC durante 20-30 minutos aprox o hasta que pinches y esté blandita."
+    ],
+    "ingredientesEnPiezas": [
+      {
+        "ingrediente": "Berenjena",
+        "cantidad": "300 gramos",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Aceite de oliva virgen extra",
+        "cantidad": "1 cucharada de café",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Pimienta negra",
+        "cantidad": "1 gramo",
+        "preparacion": ""
+      }
     ],
     "alias": []
   },
@@ -771,6 +1902,38 @@ export const RECETAS = [
       "Una vez cocidas partir en trozos medianos y mezclar con el resto de ingredientes cortados al gusto.",
       "Aliñar con aceite de oliva y servir."
     ],
+    "ingredientesEnPiezas": [
+      {
+        "ingrediente": "Aceite de oliva virgen extra",
+        "cantidad": "1 cucharada de café",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Atún",
+        "cantidad": "1 lata",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Patata",
+        "cantidad": "200-300gr",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Aceitunas",
+        "cantidad": "4",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Tomate",
+        "cantidad": "1",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Huevos",
+        "cantidad": "1-2",
+        "preparacion": ""
+      }
+    ],
     "alias": []
   },
   {
@@ -784,6 +1947,28 @@ export const RECETAS = [
     ],
     "preparacion": [
       "En una sartén echamos una cucharada de AOVE. Cuando esté caliente ponemos las espinacas, vamos rehogando hasta que reduzca su tamaño. Añadimos el jamón serrano sin dejar de remover, cuando veamos que el jamón ha cambiado de color incorporamos el huevo batido. Removemos todo hasta cuajar a nuestro gusto."
+    ],
+    "ingredientesEnPiezas": [
+      {
+        "ingrediente": "Espinacas",
+        "cantidad": "60gr",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Huevos",
+        "cantidad": "2",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Jamón serrano",
+        "cantidad": "Un puñado",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Aceite de oliva virgen extra",
+        "cantidad": "1 cucharadita",
+        "preparacion": ""
+      }
     ],
     "alias": []
   },
@@ -800,6 +1985,33 @@ export const RECETAS = [
     "preparacion": [
       "Limpia y corta los espárragos. En una sartén caliente echa el aceite y saltea los espárragos hasta que estén hechos. Por otro lado, bate bien los huevos hasta espumar y añade la lata de atún escurrida y la pimienta. Mezcla bien y vuelca en la sartén de los espárragos. Mezcla bien mientras se va cuajando el huevo mezclando todos los ingredientes hasta que tenga la cocción deseada."
     ],
+    "ingredientesEnPiezas": [
+      {
+        "ingrediente": "Huevos",
+        "cantidad": "2",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Atún",
+        "cantidad": "1 lata redonda grande",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Espárragos verdes",
+        "cantidad": "5-6 unidades",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Aceite de oliva virgen extra",
+        "cantidad": "1 cucharada de postre",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Pimienta negra",
+        "cantidad": "",
+        "preparacion": ""
+      }
+    ],
     "alias": []
   },
   {
@@ -814,6 +2026,23 @@ export const RECETAS = [
       "Cuece los huevos en 1/2 litro de agua durante 10 minutos a partir de que el agua comience a hervir. Saca, refresca con agua fría y pela.",
       "Córtalos a la mitad a lo largo y saca la yema. Mezcla la yema con el atún escurrido y el tomate frito. Rellena los huevos con esta mezcla y sirve.",
       "Consejo: servir sobre una base de ensalada de lechuga, tomate... para hacer un plato completo."
+    ],
+    "ingredientesEnPiezas": [
+      {
+        "ingrediente": "Huevos",
+        "cantidad": "2 unidades",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Atún",
+        "cantidad": "1 lata redonda",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Tomate frito",
+        "cantidad": "2 cucharadas",
+        "preparacion": ""
+      }
     ],
     "alias": []
   },
@@ -834,6 +2063,48 @@ export const RECETAS = [
       "Lavar la base verde, luego cortar al gusto tomate, pepino y pelar la remolacha (si es cruda). Opcional: cortar la remolacha en láminas y saltearlas en poco aceite de oliva entre 2-4 minutos o si prefiere rallarla. Hacer el arroz/quinoa como dice el fabricante. Corta al gusto los frutos secos.",
       "Poner todos los ingredientes en un plato hondo o bol grande, dejar el queso para poner al final. Poner en un mortero aceite de oliva virgen + 1/4 diente ajo + hojas de perejil / albahaca fresca y chorrito de vinagre balsámico. Aderezar con esta mezcla si se desea o sólo con aceite de oliva."
     ],
+    "ingredientesEnPiezas": [
+      {
+        "ingrediente": "Lechuga",
+        "cantidad": "1 ración individual",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Queso de cabra",
+        "cantidad": "20 gramos",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Remolacha",
+        "cantidad": "1",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Pepino",
+        "cantidad": "1/2 unidad mediana",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Tomate",
+        "cantidad": "",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Arroz integral",
+        "cantidad": "1 cucharada sopera",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Aceite de oliva virgen extra",
+        "cantidad": "1 cucharada de café",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Almendras",
+        "cantidad": "4-5",
+        "preparacion": ""
+      }
+    ],
     "alias": []
   },
   {
@@ -852,6 +2123,43 @@ export const RECETAS = [
       "Solo tienes que pesar y añadir todos los ingredientes al vaso de la batidora. Batir hasta que quede lo más homogéneo posible.",
       "Prepara las tortitas en una sartén previamente untada con un poco aceite o mantequilla. Cada vez que hagas una tortita vuelve a untarla.",
       "Una vez has realizado todas las tortitas solo queda comerlas. Puedes acompañarlas con el topping que quieras: fruta, yogur, frutos secos, chocolate fundido, crema de cacahuete, etc."
+    ],
+    "ingredientesEnPiezas": [
+      {
+        "ingrediente": "Plátano",
+        "cantidad": "2 unidades",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Huevos",
+        "cantidad": "1 unidad grande",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Canela",
+        "cantidad": "1 cucharada de postre",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Sal",
+        "cantidad": "1 gramo",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Levadura en polvo",
+        "cantidad": "2 cucharadas de postre",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Leche",
+        "cantidad": "50 gramos",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Harina de avena",
+        "cantidad": "100 gramos",
+        "preparacion": ""
+      }
     ],
     "alias": []
   },
@@ -876,6 +2184,48 @@ export const RECETAS = [
       "Coloca el pisto en un recipiente apto para el horno. Sobre el pisto coloca las rodajas de merluza previamente salpimentadas por ambos lados y cocina en el horno a 200 °C durante 5-7 minutos. Saca el recipiente del horno, coloca la comida sobre tu plato y acompáñalo con un poco de cuscús.",
       "Si prefieres no emplear horno, puedes cocinar la merluza en la propia sartén que contiene el pisto. Entonces coloca la merluza en la sartén que contiene el pisto y cocinar a fuego suave unos 10-12 minutos. A mitad de cocción dales las vuelta para que se cocinen por ambos lados. Luego, sirve en los platos la merluza con el pisto y acompáñalos de varias cucharadas de cuscús."
     ],
+    "ingredientesEnPiezas": [
+      {
+        "ingrediente": "Ajo",
+        "cantidad": "1 diente",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Pimiento rojo",
+        "cantidad": "1/4 unidad grande",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Merluza",
+        "cantidad": "1 porción individual",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Pimiento verde",
+        "cantidad": "1/2 unidad grande",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Tomate",
+        "cantidad": "",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Cebolla",
+        "cantidad": "1/2 unidad mediana",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Cous-cous",
+        "cantidad": "",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Aceite de oliva virgen extra",
+        "cantidad": "1 cucharada de postre",
+        "preparacion": ""
+      }
+    ],
     "alias": []
   },
   {
@@ -898,6 +2248,58 @@ export const RECETAS = [
       "Hacer la vinagreta. En un bol, mezcla el zumo del limón junto la miel, el comino, el aceite y una cucharada de mostaza.",
       "Enjuaga las lentejas cocidas y escúrrelas.",
       "Montar la ensalada y añade el pollo en tiras o las dos latas de atún. Riega con la vinagreta de miel y limón."
+    ],
+    "ingredientesEnPiezas": [
+      {
+        "ingrediente": "Lentejas",
+        "cantidad": "150-200 gramos",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Canónigos",
+        "cantidad": "Un",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Zanahoria",
+        "cantidad": "1 unidad pequeña",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Cebolla",
+        "cantidad": "1/2 unidad pequeña",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Tomate",
+        "cantidad": "1 unidad mediana",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Limón",
+        "cantidad": "",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Aceite de oliva virgen extra",
+        "cantidad": "1 cucharada de postre",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Miel",
+        "cantidad": "1 cucharada de postre",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Atún",
+        "cantidad": "1 lata redonda pequeña",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Mostaza",
+        "cantidad": "1 cucharadita",
+        "preparacion": ""
+      }
     ],
     "alias": [
       "Ensalada de 150gr de lentejas y mostaza"
@@ -922,6 +2324,48 @@ export const RECETAS = [
       "Si vemos que falta aceite, añadimos un poco de agua o vino blanco para cocinar, esperando a que se evapore el alcohol.",
       "Finalmente, añadimos los garbanzos de bote (escurridos y lavados previamente), bajamos el fuego. Dejamos que se mezcle todo los sabores bien... ¡Y a comer!"
     ],
+    "ingredientesEnPiezas": [
+      {
+        "ingrediente": "Judías verdes",
+        "cantidad": "1 guarnición",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Tomate",
+        "cantidad": "",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Ajo",
+        "cantidad": "1 diente",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Zanahoria",
+        "cantidad": "1 unidad pequeña",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Pimiento rojo",
+        "cantidad": "1/4 unidad pequeña",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Pimiento verde",
+        "cantidad": "1/4 unidad pequeña",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Muslo de pollo",
+        "cantidad": "1",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Garbanzos",
+        "cantidad": "100-150 gramos",
+        "preparacion": ""
+      }
+    ],
     "alias": [
       "130gr de garbanzos (en conserva) con judías verdes"
     ]
@@ -940,6 +2384,33 @@ export const RECETAS = [
       "Pelamos, limpiamos y cortamos la cebolla, los tomates, el pimiento y el pepino.",
       "Trituramos la verdura junto con un chorro de aceite de oliva.",
       "Enfriamos en la nevera y consumimos una vez que esté frío."
+    ],
+    "ingredientesEnPiezas": [
+      {
+        "ingrediente": "Tomate",
+        "cantidad": "2 unidades",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Aceite de oliva virgen extra",
+        "cantidad": "1 cucharada de postre",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Cebolla",
+        "cantidad": "1/2",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Pepino",
+        "cantidad": "1 unidad mediana",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Pimiento verde",
+        "cantidad": "1 unidad mediana",
+        "preparacion": ""
+      }
     ],
     "alias": []
   },
@@ -963,6 +2434,48 @@ export const RECETAS = [
       "Cocinar la carne picada e introducir las verduras.",
       "Poner los espirales de calabacín junto a los demás ingredientes y seguir cocinando en una sartén."
     ],
+    "ingredientesEnPiezas": [
+      {
+        "ingrediente": "Calabacín",
+        "cantidad": "80 gramos",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Carne picada de vacuno",
+        "cantidad": "120 gramos",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Berenjena",
+        "cantidad": "80 gramos",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Champiñones",
+        "cantidad": "50 gramos",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Aceite de oliva virgen extra",
+        "cantidad": "1 cucharada sopera",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Ajo",
+        "cantidad": "1 diente",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Sal",
+        "cantidad": "1 sobre",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Cebolla",
+        "cantidad": "30 gramos",
+        "preparacion": ""
+      }
+    ],
     "alias": []
   },
   {
@@ -975,6 +2488,23 @@ export const RECETAS = [
     ],
     "preparacion": [
       "Cuando el aceite se encuentre caliente, añadimos la sepia. Salpimentamos."
+    ],
+    "ingredientesEnPiezas": [
+      {
+        "ingrediente": "Ajo",
+        "cantidad": "1 diente",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Perejil",
+        "cantidad": "1 cucharada sopera",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Sepia",
+        "cantidad": "1 porción individual",
+        "preparacion": ""
+      }
     ],
     "alias": []
   },
@@ -989,6 +2519,28 @@ export const RECETAS = [
     ],
     "preparacion": [
       "Saltea el ajo en un cazo con un poco de aceite hasta dorar. Añade el arroz y mezcla con el ajo y aceite hasta impregnar. Añade el agua, mezcla y deja cocer a fuego medio hasta absorber todo el agua. Aprox 15 minutos. Tapa y deja reposar a fuego muy bajo 10 minutos más."
+    ],
+    "ingredientesEnPiezas": [
+      {
+        "ingrediente": "Arroz blanco",
+        "cantidad": "50 gramos",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Agua",
+        "cantidad": "Doble",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Ajo",
+        "cantidad": "1 diente",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Aceite de oliva virgen extra",
+        "cantidad": "1 cucharada de postre",
+        "preparacion": ""
+      }
     ],
     "alias": []
   },
@@ -1005,6 +2557,23 @@ export const RECETAS = [
       "Colocar los trozos de calabaza y cebolla a hervir en 500ml de agua con un puñado de sal gruesa. Mantener la cacerola tapada para evitar desperdicio de líquido por ebullición.",
       "Una vez cocida la calabaza, minipimear finamente y servir en consomeras.",
       "Puede agregarse queso rallado en hebras o croutones de pan (siempre y cuando la persona pueda consumir sodio o no sufra de hipertensión)."
+    ],
+    "ingredientesEnPiezas": [
+      {
+        "ingrediente": "Agua",
+        "cantidad": "",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Cebolla",
+        "cantidad": "1/2 unidad pequeña",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Calabaza",
+        "cantidad": "200 gramos",
+        "preparacion": ""
+      }
     ],
     "alias": []
   },
@@ -1023,6 +2592,33 @@ export const RECETAS = [
       "Añadir sal y orégano, pinchar en la brocheta y hacer a la plancha.",
       "Condimentar y servir."
     ],
+    "ingredientesEnPiezas": [
+      {
+        "ingrediente": "Ajo",
+        "cantidad": "1 diente",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Agua",
+        "cantidad": "200 gramos",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Salsa de soja",
+        "cantidad": "3 cucharadas soperas",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Vinagre",
+        "cantidad": "3 cucharadas soperas",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Pechuga de pollo",
+        "cantidad": "1 filete",
+        "preparacion": ""
+      }
+    ],
     "alias": [
       "1-2 brochetas de pavo / pollo"
     ]
@@ -1040,6 +2636,33 @@ export const RECETAS = [
     "preparacion": [
       "Pon en un recipiente la avena y cubre de agua totalmente. Mete a tu microondas a máxima potencia dos minutos aproximadamente o hasta que veas que la avena sube. Añade la fruta cortada y las semillas de chía. Se puede tomar caliente o frío."
     ],
+    "ingredientesEnPiezas": [
+      {
+        "ingrediente": "Avena en copos",
+        "cantidad": "30-40 gramos",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Fruta",
+        "cantidad": "",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Canela",
+        "cantidad": "",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Semillas de chía",
+        "cantidad": "1 cucharada",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Leche",
+        "cantidad": "1 vaso",
+        "preparacion": ""
+      }
+    ],
     "alias": [
       "Gachas de 30-40gr de avena al microondas con fruta"
     ]
@@ -1052,6 +2675,13 @@ export const RECETAS = [
     ],
     "preparacion": [
       "Calienta una sartén a fuego alto y cuando esté caliente añade los ñoquis removiendo de vez en cuando para hacerse por ambos lados por igual. Cuando esté a tu gusto (pasados unos minutos) retira y sirve."
+    ],
+    "ingredientesEnPiezas": [
+      {
+        "ingrediente": "Ñoquis",
+        "cantidad": "100-120 gramos",
+        "preparacion": ""
+      }
     ],
     "alias": []
   },
@@ -1074,6 +2704,43 @@ export const RECETAS = [
       "Salpimentar y escurrir el aceite y cualquier líquido que haya en la sartén.",
       "Cuajar la tortilla hasta que esté dorada por ambas caras y servir."
     ],
+    "ingredientesEnPiezas": [
+      {
+        "ingrediente": "Aceite de oliva virgen extra",
+        "cantidad": "1 cucharada de café",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Huevos",
+        "cantidad": "2 unidades grandes",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Brócoli",
+        "cantidad": "70 gramos",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Cebolla",
+        "cantidad": "1/4",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Ajetes tiernos",
+        "cantidad": "",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Pimiento rojo",
+        "cantidad": "1/4 unidad pequeña",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Calabacín",
+        "cantidad": "1/4 unidad mediana",
+        "preparacion": ""
+      }
+    ],
     "alias": [
       "Tortilla de 2 huevos con verduras"
     ]
@@ -1095,6 +2762,38 @@ export const RECETAS = [
       "Agregar la canela y la vainilla.",
       "Una vez que tenga la consistencia deseada (¡la papilla gruesa queda muy bien!), verter la papilla en un tazón. Cubrir con unos arándanos extras, rodajas de banana y una llovizna de miel o jarabe de arce."
     ],
+    "ingredientesEnPiezas": [
+      {
+        "ingrediente": "Avena en copos",
+        "cantidad": "40 gramos",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Arándanos",
+        "cantidad": "15 unidades",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Canela",
+        "cantidad": "1 pizca",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Esencia de vainilla",
+        "cantidad": "1 cucharadita",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Edulcorante",
+        "cantidad": "",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Bebida de almendra",
+        "cantidad": "1 vaso",
+        "preparacion": ""
+      }
+    ],
     "alias": [
       "Gachas de 30-40gr de avena y arándanos"
     ]
@@ -1114,6 +2813,33 @@ export const RECETAS = [
       "Colocar los boquerones limpios encima de la base de tomate. Espolvorear con el ajo y el perejil bien picados.",
       "Hornear unos 20 minutos a 200ºC."
     ],
+    "ingredientesEnPiezas": [
+      {
+        "ingrediente": "Boquerones",
+        "cantidad": "120 gramos",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Tomate",
+        "cantidad": "1",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Ajo",
+        "cantidad": "1",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Perejil",
+        "cantidad": "1 cucharada sopera",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Aceite de oliva virgen extra",
+        "cantidad": "1 cucharada de postre",
+        "preparacion": ""
+      }
+    ],
     "alias": []
   },
   {
@@ -1131,6 +2857,33 @@ export const RECETAS = [
       "Rallar o cortar en tiras el repollo y las zanahorias, lo que sea más rápido o cómodo para ti.",
       "Preparar el aderezo con el limón, la mayonesa, pimienta y sal al gusto. Mezclar bien y agregar el aderezo a la ensalada. Mezclar muy bien todos los ingredientes."
     ],
+    "ingredientesEnPiezas": [
+      {
+        "ingrediente": "Zanahoria",
+        "cantidad": "1 unidad pequeña",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Limón",
+        "cantidad": "1/2",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Mayonesa",
+        "cantidad": "Una cucharada",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Pimienta negra",
+        "cantidad": "",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Col repollo",
+        "cantidad": "1 guarnición",
+        "preparacion": ""
+      }
+    ],
     "alias": []
   },
   {
@@ -1147,6 +2900,38 @@ export const RECETAS = [
     "preparacion": [
       "Limpia los champiñones y córtalos en cuatro piezas. Limpia el brócoli y corta los ramilletes. Pica la cebolla lo más pequeño posible. En una sartén echa un chorrito de aceite y cuando esté caliente añade la cebolla, saltea hasta que esté pochada y cambie de color. Añade el brócoli y saltea para mezclar, tapa la sartén y deja a fuego medio un par de minutos, moviendo de vez en cuando. Cuando veas que el brócoli está a medio hacer añade los champiñones y saltea todo. Déjalo cocer un par de minutos más con la tapa puesta. Añade el jengibre rallado y mezcla. Finalmente añade la salsa de soja, mezcla bien y deja que evapore. Sirve con unas semillas de sésamo para decorar."
     ],
+    "ingredientesEnPiezas": [
+      {
+        "ingrediente": "Brócoli",
+        "cantidad": "200 gramos",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Champiñones",
+        "cantidad": "150 gramos",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Cebolla",
+        "cantidad": "1/2 unidad pequeña",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Salsa de soja",
+        "cantidad": "2 cucharadas soperas",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Jengibre",
+        "cantidad": "",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Aceite de oliva virgen extra",
+        "cantidad": "1 cucharada de postre",
+        "preparacion": ""
+      }
+    ],
     "alias": []
   },
   {
@@ -1161,6 +2946,33 @@ export const RECETAS = [
     ],
     "preparacion": [
       "Corta los puerros por la mitad y las mitades a lo largo. Coloca con el centro hacia arriba en un recipiente apto para horno o airfryer. En un bol pon una o dos cucharadas de AOVE (depende de la cantidad de puerros), añade una pizca de sal y media cucharadita de especias. Mezcla bien y con una brochita baña tus puerros. Ahora pica los ajos y añádelos por encima. Colocamos en nuestra airfryer precalentada previamente a 180ºC durante 15-20'. Si usas horno unos 25' a 180ºC."
+    ],
+    "ingredientesEnPiezas": [
+      {
+        "ingrediente": "Puerro",
+        "cantidad": "2 unidades",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Aceite de oliva virgen extra",
+        "cantidad": "1 cucharada de postre",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Hierbas provenzales",
+        "cantidad": "",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Sal",
+        "cantidad": "1 sobre",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Ajo",
+        "cantidad": "2 dientes",
+        "preparacion": ""
+      }
     ],
     "alias": []
   },
@@ -1181,6 +2993,33 @@ export const RECETAS = [
       "Esperar a que se pongan tibias y pelar.",
       "Rociar con un poco de AOVE."
     ],
+    "ingredientesEnPiezas": [
+      {
+        "ingrediente": "Pimientos asados",
+        "cantidad": "1 porción",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Berenjena",
+        "cantidad": "300 gramos",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Aceite de oliva virgen extra",
+        "cantidad": "1 gramo",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Cebolla",
+        "cantidad": "200 gramos",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Ajo",
+        "cantidad": "2 dientes",
+        "preparacion": ""
+      }
+    ],
     "alias": []
   },
   {
@@ -1195,6 +3034,33 @@ export const RECETAS = [
     ],
     "preparacion": [
       "Lavar y escurrir los garbanzos. Saltear las espinacas en sartén con aceite hasta reducir su tamaño. Añadir el pimentón y remover para que no se queme. Añadir los garbanzos y mezclar. Salpimentar al gusto, mezclar y servir."
+    ],
+    "ingredientesEnPiezas": [
+      {
+        "ingrediente": "Espinacas",
+        "cantidad": "1 ración individual",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Aceite de oliva virgen extra",
+        "cantidad": "1 cucharada de café",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Ajo",
+        "cantidad": "1 diente",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Garbanzos",
+        "cantidad": "100 gramos",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Pimentón",
+        "cantidad": "1/2 cucharada de café",
+        "preparacion": ""
+      }
     ],
     "alias": [
       "Espinacas con 150gr de garbanzos (en conserva)"
@@ -1219,6 +3085,53 @@ export const RECETAS = [
       "Ponga la lechuga, tomates, cebolla y aguacate en una fuente para ensaladas.",
       "Añada el aderezo a las verduras y mezcle bien."
     ],
+    "ingredientesEnPiezas": [
+      {
+        "ingrediente": "Limón",
+        "cantidad": "",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Aceite de oliva virgen extra",
+        "cantidad": "1 cucharadita",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Lechuga",
+        "cantidad": "1 guarnición",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Tomate",
+        "cantidad": "Medio",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Cebolla morada",
+        "cantidad": "1/4 taza",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Sal",
+        "cantidad": "1 pizca",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Pimienta negra",
+        "cantidad": "",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Zanahoria",
+        "cantidad": "1/2 unidad pequeña",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Pepino",
+        "cantidad": "1/2 unidad mediana",
+        "preparacion": ""
+      }
+    ],
     "alias": []
   },
   {
@@ -1230,6 +3143,13 @@ export const RECETAS = [
     "preparacion": [
       "Cocinar los vegetales (que quieras) hasta formar un caldo, colar si es necesario o dejar los vegetales.",
       "Puedes comprar el caldo ya hecho y solamente calentar."
+    ],
+    "ingredientesEnPiezas": [
+      {
+        "ingrediente": "Caldo vegetal",
+        "cantidad": "200 gramos",
+        "preparacion": ""
+      }
     ],
     "alias": []
   },
@@ -1249,6 +3169,43 @@ export const RECETAS = [
       "Pelamos la cebolleta y la picamos, hacemos lo mismo con el resto de verduras, todo picadito finamente. Lo salteamos a fuego fuerte en una sartén con un chorrito de aceite de oliva virgen extra y un poco de sal. No hay que cocinarlo en exceso ya que luego se terminan en el horno.",
       "En un trozo de papel aluminio ponemos una cama con estas verduras, encima colocamos el trozo de merluza, añadimos un chorrito de aceite de oliva virgen extra y formamos un paquete con el papel bien cerrado. Metemos estos paquetes en el horno, precalentado, a 180ºC unos 8 o 10 minutos. Servimos los paquetes en el plato, cuando los abramos desprenderán todo el aroma."
     ],
+    "ingredientesEnPiezas": [
+      {
+        "ingrediente": "Merluza",
+        "cantidad": "1 porción individual",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Zanahoria",
+        "cantidad": "1/2 unidad pequeña",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Pimiento verde",
+        "cantidad": "1/2 unidad pequeña",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Calabacín",
+        "cantidad": "1/4 unidad mediana",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Cebolla",
+        "cantidad": "1/4 unidad mediana",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Puerro",
+        "cantidad": "1/2 unidad mediana",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Aceite de oliva virgen extra",
+        "cantidad": "1 cucharada de postre",
+        "preparacion": ""
+      }
+    ],
     "alias": []
   },
   {
@@ -1262,6 +3219,28 @@ export const RECETAS = [
     ],
     "preparacion": [
       "Bate huevos y claras hasta espumar. Incorpora el jamón de york cortado en porciones pequeñas y mezcla. En una sartén caliente echa un poco de aceite y echa los huevos. Cocina hasta tener el cuajado deseado y sirve."
+    ],
+    "ingredientesEnPiezas": [
+      {
+        "ingrediente": "Huevos",
+        "cantidad": "2",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Jamón cocido",
+        "cantidad": "2 lonchas",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Aceite de oliva virgen extra",
+        "cantidad": "1 cucharada de postre",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Huevos",
+        "cantidad": "2",
+        "preparacion": ""
+      }
     ],
     "alias": [
       "Tortilla a la francesa de 2 huevos con jamón de york"
@@ -1283,6 +3262,38 @@ export const RECETAS = [
       "Calentar a fuego medio una sartén para asar. Engrasar con un poco de aceite de oliva. Salpimentar las pechugas y colocarlas en la sartén, volteando de lado hasta que estén cocidas.",
       "Colocar sobre las pechugas la salsa de hierbas y revolver hasta que estén bien integrados los ingredientes."
     ],
+    "ingredientesEnPiezas": [
+      {
+        "ingrediente": "Limón",
+        "cantidad": "1/4 vaso",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Aceite de oliva virgen extra",
+        "cantidad": "1 cucharada de postre",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Ajo",
+        "cantidad": "1 diente",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Finas hierbas",
+        "cantidad": "",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Pechuga de pollo",
+        "cantidad": "130gr",
+        "preparacion": ""
+      },
+      {
+        "ingrediente": "Sal",
+        "cantidad": "",
+        "preparacion": ""
+      }
+    ],
     "alias": []
   }
 ];
@@ -1290,139 +3301,144 @@ export const RECETAS = [
 // El nombre pelado, sin cantidades ni formatos: en la despensa marcas
 // "lentejas", y la receta ya dice "150 gramos de lenteja, en conserva".
 export const INGREDIENTES = [
-  "aceite de oliva virgen extra",
-  "aceitunas",
-  "aguacate",
-  "ajetes tiernos",
-  "ajo",
-  "albahaca",
-  "alcachofas",
-  "almendras",
-  "alubias",
-  "apio",
-  "arroz blanco",
-  "arroz integral",
-  "arándanos",
-  "atún",
-  "avena en copos",
-  "avena molida",
-  "bacalao",
-  "bebida de almendra",
-  "bebida de avena",
-  "berenjena",
-  "boniato",
-  "boquerones",
-  "brócoli",
-  "burrata",
-  "cacao desgrasado",
-  "calabacín",
-  "calabaza",
-  "caldo vegetal",
-  "canela",
-  "canónigos",
-  "carne picada de cerdo",
-  "carne picada de vacuno",
-  "cebolla",
-  "cebolla morada",
-  "cereales sin azúcar",
-  "champiñones",
-  "champiñones portobello",
-  "chocolate negro",
-  "clementina",
-  "col repollo",
-  "cous-cous",
-  "cúrcuma",
-  "dorada",
-  "edulcorante",
-  "endibia",
-  "esencia de vainilla",
-  "espinacas",
-  "espárragos blancos",
-  "espárragos verdes",
-  "fresa",
-  "garbanzos",
-  "guisantes",
-  "harina de avena",
-  "hierbas provenzales",
-  "huevos",
-  "jamón cocido",
-  "jamón serrano",
-  "jengibre",
-  "judías verdes",
-  "kiwi",
-  "kéfir",
-  "laurel",
-  "leche",
-  "lechuga",
-  "lentejas",
-  "levadura en polvo",
-  "limón",
-  "lubina",
-  "manzana",
-  "mayonesa",
-  "melocotón",
-  "melón",
-  "menestra",
-  "merluza",
-  "mermelada sin azúcar",
-  "miel",
-  "mostaza",
-  "mostaza dijón",
-  "mozzarella",
-  "muslo de pollo",
-  "naranja",
-  "nueces",
-  "nuez moscada",
-  "orégano",
-  "pan de espelta",
-  "pan rallado",
-  "papaya",
-  "paprika",
-  "pasta",
-  "pasta de lentejas",
-  "patata",
-  "pechuga de pavo",
-  "pechuga de pollo",
-  "pepino",
-  "pera",
-  "perejil",
-  "pimentón",
-  "pimienta negra",
-  "pimiento rojo",
-  "pimiento verde",
-  "pimientos asados",
-  "piña",
-  "plátano",
-  "puerro",
-  "queso batido",
-  "queso de burgos",
-  "queso de cabra",
-  "quinoa",
-  "remolacha",
-  "repollo morado",
-  "requesón",
-  "romero",
-  "rúcula",
-  "sal",
-  "salmón",
-  "salmón ahumado",
-  "salsa de soja",
-  "semillas de chía",
-  "semillas de sésamo",
-  "sepia",
-  "ternera",
-  "tomate",
-  "tomate frito",
-  "tomillo",
-  "uvas",
-  "vinagre",
-  "vinagre de Módena",
-  "vino blanco",
-  "yogur de proteínas",
-  "yogur natural",
-  "yogur vegetal",
-  "zanahoria",
-  "ñoquis"
+  "Aceite de oliva virgen extra",
+  "Aceitunas",
+  "Aguacate",
+  "Ajetes tiernos",
+  "Ajo",
+  "Albahaca",
+  "Alcachofas",
+  "Almendras",
+  "Alubias",
+  "Apio",
+  "Arroz blanco",
+  "Arroz integral",
+  "Arándanos",
+  "Atún",
+  "Avena en copos",
+  "Avena molida",
+  "Bacalao",
+  "Bebida de almendra",
+  "Bebida de avena",
+  "Berenjena",
+  "Boniato",
+  "Boquerones",
+  "Brócoli",
+  "Burrata",
+  "Cacao desgrasado",
+  "Calabacín",
+  "Calabaza",
+  "Caldo vegetal",
+  "Canela",
+  "Canónigos",
+  "Carne picada de cerdo",
+  "Carne picada de vacuno",
+  "Cebolla",
+  "Cebolla morada",
+  "Cereales sin azúcar",
+  "Champiñones",
+  "Champiñones portobello",
+  "Chocolate negro",
+  "Clementina",
+  "Col repollo",
+  "Cous-cous",
+  "Cúrcuma",
+  "Dorada",
+  "Edulcorante",
+  "Endibia",
+  "Esencia de vainilla",
+  "Espinacas",
+  "Espárragos blancos",
+  "Espárragos verdes",
+  "Fresa",
+  "Garbanzos",
+  "Guisantes",
+  "Harina de avena",
+  "Hierbas provenzales",
+  "Huevos",
+  "Jamón cocido",
+  "Jamón serrano",
+  "Jengibre",
+  "Judías verdes",
+  "Kiwi",
+  "Kéfir",
+  "Laurel",
+  "Leche",
+  "Lechuga",
+  "Lentejas",
+  "Levadura en polvo",
+  "Limón",
+  "Lubina",
+  "Manzana",
+  "Mayonesa",
+  "Melocotón",
+  "Melón",
+  "Menestra",
+  "Merluza",
+  "Mermelada sin azúcar",
+  "Miel",
+  "Mostaza",
+  "Mostaza dijón",
+  "Mozzarella",
+  "Muslo de pollo",
+  "Naranja",
+  "Nueces",
+  "Nuez moscada",
+  "Orégano",
+  "Pan de espelta",
+  "Pan rallado",
+  "Papaya",
+  "Paprika",
+  "Pasta",
+  "Pasta de lentejas",
+  "Patata",
+  "Pechuga de pavo",
+  "Pechuga de pollo",
+  "Pepino",
+  "Pera",
+  "Perejil",
+  "Pimentón",
+  "Pimienta negra",
+  "Pimiento rojo",
+  "Pimiento verde",
+  "Pimientos asados",
+  "Piña",
+  "Plátano",
+  "Puerro",
+  "Queso batido",
+  "Queso de burgos",
+  "Queso de cabra",
+  "Quinoa",
+  "Remolacha",
+  "Repollo morado",
+  "Requesón",
+  "Romero",
+  "Rúcula",
+  "Sal",
+  "Salmón",
+  "Salmón ahumado",
+  "Salsa de soja",
+  "Semillas de chía",
+  "Semillas de sésamo",
+  "Sepia",
+  "Ternera",
+  "Tomate",
+  "Tomate frito",
+  "Tomillo",
+  "Uvas",
+  "Vinagre",
+  "Vinagre de Módena",
+  "Vino blanco",
+  "Yogur de proteínas",
+  "Yogur natural",
+  "Yogur vegetal",
+  "Zanahoria",
+  "Ñoquis",
+  "Agua",
+  "Fruta",
+  "Café",
+  "Queso fresco",
+  "Finas hierbas"
 ];
 
 // Del recorte de una linea de receta al nombre bueno de la despensa (spec 090).
@@ -1439,7 +3455,12 @@ export const SINONIMOS = new Map(Object.entries({
   "pollo": "pechuga de pollo",
   "pavo": "pechuga de pavo",
   "agua que de arroz": "agua",
-  "fruta a tu eleccion": "fruta"
+  "fruta a tu eleccion": "fruta",
+  "pieza de fruta": "fruta",
+  "pimienta molida": "pimienta negra",
+  "repollo a tiras": "col repollo",
+  "cafe": "café",
+  "esparragos": "espárragos verdes"
 }));
 
 // Ya con los siete días montados. Ver el comentario del generador sobre de

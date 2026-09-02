@@ -60,6 +60,28 @@ export function ingredientesQueFaltan(despensaDelUsuario) {
   return faltan;
 }
 
+// Las líneas de una receta, en la forma estructurada de la spec 082 y enlazadas
+// a la despensa del usuario (spec 092).
+//
+// El nombre que se guarda es el de SU despensa, no el de los datos iniciales: si
+// él tiene "Tomates" y la receta dice "Tomate", manda el suyo. Mismo criterio
+// que loQueFalta() de la spec 073.
+//
+// Si no se encuentra —no debería pasar, porque la lista maestra se construye de
+// las propias recetas— la línea se guarda SIN enlazar. Una línea coja se lee y
+// se arregla; un enlace a un documento que no existe es un fallo silencioso.
+function lineasEnlazadas(receta, buscar) {
+  return (receta.ingredientesEnPiezas || []).map((pieza) => {
+    const enDespensa = buscar(pieza.ingrediente);
+    return {
+      ingredienteId: enDespensa ? enDespensa.id : "",
+      ingredienteNombre: enDespensa ? enDespensa.nombre : pieza.ingrediente,
+      cantidad: pieza.cantidad || "",
+      preparacion: pieza.preparacion || ""
+    };
+  });
+}
+
 // Escribe en tandas. Cada `operacion` recibe el lote y añade lo suyo.
 async function porLotes(cosas, operacion) {
   for (let desde = 0; desde < cosas.length; desde += POR_LOTE) {
@@ -94,25 +116,51 @@ export async function sembrar(uid, recetasDelUsuario, despensaDelUsuario) {
   const recetas = recetasQueFaltan(recetasDelUsuario);
   const ingredientes = ingredientesQueFaltan(despensaDelUsuario);
 
+  // PRIMERO la despensa, y con el id generado POR ADELANTADO (spec 092): las
+  // líneas de las recetas necesitan ese id para enlazar, y lo necesitan antes
+  // de que el lote se escriba. Mismo truco que nuevoIdDeIngrediente() en la 090.
+  const nuevos = ingredientes.map((nombre) => ({
+    id: doc(collection(db, "usuarios", uid, "despensa")).id,
+    nombre
+  }));
+
+  // Todo lo que habrá en la despensa: lo que el usuario ya tenía y lo que se
+  // acaba de decidir crear.
+  const enLaDespensa = [
+    ...(despensaDelUsuario || []).map((i) => ({ id: i.id, nombre: i.nombre })),
+    ...nuevos
+  ];
+
+  // Con mismoIngrediente() y NO por igualdad de texto: así los "tomates" del
+  // usuario absorben el "tomate" de la receta, que es la regla de la spec 072.
+  // Un mapa por clave literal crearía duplicados.
+  const buscar = (nombre) =>
+    enLaDespensa.find((ingrediente) => mismoIngrediente(ingrediente.nombre, nombre));
+
+  // SIN marcar, como decidió la spec 068: que el ingrediente esté apuntado no
+  // significa que lo tengas en casa. Meterlos marcados haría que la app
+  // afirmase tener 138 cosas que nadie ha comprado.
+  await porLotes(nuevos, (lote, ingrediente) => {
+    lote.set(doc(db, "usuarios", uid, "despensa", ingrediente.id), {
+      nombre: ingrediente.nombre,
+      tengo: false,
+      creadoEn: serverTimestamp(),
+      actualizadoEn: serverTimestamp()
+    });
+  });
+
+  // DESPUÉS las recetas, ya enlazadas.
   await porLotes(recetas, (lote, receta) => {
     lote.set(doc(collection(db, "usuarios", uid, "recetas")), {
       nombre: receta.nombre,
       raciones: receta.raciones,
-      ingredientes: receta.ingredientes,
+      ingredientes: lineasEnlazadas(receta, buscar),
       preparacion: receta.preparacion,
+      // Los otros nombres por los que se reconoce la receta (spec 089). Antes se
+      // quedaban aquí por el camino, así que los platos de los menús no
+      // encontraban su receta en una cuenta recién sembrada.
+      alias: receta.alias || [],
       creadoEn: serverTimestamp()
-    });
-  });
-
-  // SIN marcar, como decidió la spec 068: que el ingrediente esté apuntado no
-  // significa que lo tengas en casa. Meterlos marcados haría que la app
-  // afirmase tener 133 cosas que nadie ha comprado.
-  await porLotes(ingredientes, (lote, nombre) => {
-    lote.set(doc(collection(db, "usuarios", uid, "despensa")), {
-      nombre,
-      tengo: false,
-      creadoEn: serverTimestamp(),
-      actualizadoEn: serverTimestamp()
     });
   });
 

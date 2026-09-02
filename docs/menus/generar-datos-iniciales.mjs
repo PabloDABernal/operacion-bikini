@@ -8,6 +8,35 @@
 // resultado y NO se edita a mano.
 import fs from "node:fs";
 
+// La extraccion de la spec 090, la de verdad: se carga js/normalizacion.js
+// recortandole los imports que necesitan red. Con una copia aqui, el generador
+// y la app harian cosas distintas sin que nadie se enterara.
+const sinImports = (ruta) =>
+  fs
+    .readFileSync(ruta, "utf8")
+    .replace(/^import[\s\S]*?from\s+"https:[^"]+";\s*$/gm, "")
+    .replace(/^import[\s\S]*?from\s+"\.\/[^"]+";\s*$/gm, "");
+
+const fuenteDespensa = sinImports("js/despensa.js");
+const trozoDe = (nombre) =>
+  fuenteDespensa.match(new RegExp(`export function ${nombre}[\\s\\S]*?\\n}`, "m"))[0];
+
+const extraccion = await import(
+  "data:text/javascript;base64," +
+    Buffer.from(
+      [
+        fuenteDespensa.match(/const UNIDADES = [\s\S]*?\n\];/m)[0],
+        fuenteDespensa.match(/const COLETILLAS = .*$/m)[0],
+        trozoDe("normalizar"),
+        trozoDe("mismoIngrediente"),
+        trozoDe("ingredienteDeLinea"),
+        trozoDe("esLineaEstructurada"),
+        sinImports("js/normalizacion.js")
+      ].join("\n"),
+      "utf8"
+    ).toString("base64")
+);
+
 const datos = JSON.parse(
   fs.readFileSync("docs/menus/recetas-transcritas.json", "utf8")
 );
@@ -25,6 +54,73 @@ const SINONIMOS = JSON.parse(
   fs.readFileSync("docs/menus/sinonimos-ingredientes.json", "utf8")
 ).sinonimos;
 
+// Mayuscula inicial, respetando el resto: "aceite de oliva virgen extra" pasa a
+// "Aceite de oliva virgen extra", no a "Aceite De Oliva Virgen Extra".
+const conMayuscula = (texto) =>
+  texto ? texto[0].toUpperCase() + texto.slice(1) : texto;
+
+const clave = (texto) =>
+  String(texto || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+// Singular y plural son el mismo ingrediente (spec 072).
+const mismo = (uno, otro) => {
+  const a = clave(uno);
+  const b = clave(otro);
+  return a === b || a === `${b}s` || b === `${a}s` || a === `${b}es` || b === `${a}es`;
+};
+
+// --- La lista maestra de ingredientes (spec 092) -------------------------
+//
+// Los 133 del PDF, mas lo que salga de las lineas de las recetas, sin duplicar
+// y todos con mayuscula inicial. Antes de esto, la siembra escribia las lineas
+// como texto y cada cuenta acababa adivinando el ingrediente por su cuenta.
+const maestro = [];
+const meterEnMaestro = (nombre) => {
+  const ya = maestro.find((otro) => mismo(otro, nombre));
+  if (ya) return ya;
+  const puesto = conMayuscula(nombre);
+  maestro.push(puesto);
+  return puesto;
+};
+
+datos.ingredientes.forEach(meterEnMaestro);
+
+// El catalogo contra el que busca la extraccion: los 133 de partida.
+const catalogoDePartida = datos.ingredientes.map((nombre, i) => ({ id: "i" + i, nombre }));
+
+const SINONIMOS_MAPA = new Map(Object.entries(SINONIMOS));
+
+// De una linea de texto a { ingrediente, cantidad, preparacion }, con el
+// ingrediente ya metido en la lista maestra.
+// Quita tildes CONSERVANDO LA LONGITUD: cada caracter sigue ocupando uno, para
+// poder buscar en el texto plegado y cortar en el original.
+//
+// Hace falta porque el recorte viene sin tildes ("atun") y la linea si las lleva
+// ("...de atún, enlatado..."): sin esto, indexOf no encuentra nada y la cantidad
+// se queda vacia en todas las lineas cuyo ingrediente lleve tilde.
+const plegado = (texto) =>
+  [...String(texto || "")]
+    .map((c) => c.normalize("NFD")[0].toLowerCase())
+    .join("");
+
+function cantidadDe(linea, recorte) {
+  const texto = String(linea).replace(/\([^)]*\)/g, " ").split(",")[0].trim();
+  const donde = plegado(texto).indexOf(plegado(recorte));
+  if (donde <= 0) return "";
+  return texto.slice(0, donde).trim().replace(/\s+de$/i, "").trim();
+}
+
+function enPiezas(linea) {
+  const hallado = extraccion.ingredienteDeReceta(linea, catalogoDePartida, SINONIMOS_MAPA);
+  return {
+    ingrediente: meterEnMaestro(hallado.nombre),
+    cantidad: cantidadDe(linea, hallado.recorte),
+    // Vacia, por lo mismo que decidio la 089: adivinar que coma separa la
+    // preparacion del nombre ensucia el nombre del ingrediente.
+    preparacion: ""
+  };
+}
+
 // --- Recetas: una por nombre --------------------------------------------
 //
 // Diez recetas salen en varios menús (las tortitas, en los cuatro). Se queda la
@@ -40,6 +136,10 @@ for (const receta of datos.recetas) {
     raciones: receta.raciones,
     ingredientes: receta.ingredientes,
     preparacion: receta.preparacion,
+    // Los ingredientes ya en piezas (spec 092). Campo NUEVO, al lado del de
+    // texto: `ingredientes` se queda como esta porque es la unica copia del
+    // texto original que queda, y de ahi lo lee la reparacion de la spec 090.
+    ingredientesEnPiezas: (receta.ingredientes || []).map(enPiezas),
     // Otros nombres por los que se la reconoce dentro del texto de un plato.
     // Lista vacía si no tiene: así todas las recetas tienen la misma forma y
     // nadie que la lea tiene que comprobar si el campo existe.
@@ -119,7 +219,7 @@ export const RECETAS = ${JSON.stringify(recetas, null, 2)};
 
 // El nombre pelado, sin cantidades ni formatos: en la despensa marcas
 // "lentejas", y la receta ya dice "150 gramos de lenteja, en conserva".
-export const INGREDIENTES = ${JSON.stringify(datos.ingredientes, null, 2)};
+export const INGREDIENTES = ${JSON.stringify(maestro, null, 2)};
 
 // Del recorte de una linea de receta al nombre bueno de la despensa (spec 090).
 // Sale de docs/menus/sinonimos-ingredientes.json, revisado a mano.

@@ -699,6 +699,27 @@ Ya no salen de una lista planificada: salen de usar la app cada día.
 |---|---|
 | 088 | Una comida, varias recetas |
 
+- **El editor de la comida avisa cuando el texto y las recetas no cuadran.** El
+  texto de una comida y sus recetas enlazadas son dos cosas separadas, y pueden
+  acabar diciendo cosas distintas: el día enseña una tarjeta de una receta que el
+  título no nombra. Nadie reescribe el texto —es del usuario—, pero al editar la
+  comida se avisa de qué receta está enlazada sin aparecer, para que decida si la
+  nombra o la suelta.
+
+| Spec | Qué |
+|---|---|
+| 091 | El editor avisa si una receta no aparece en el texto |
+
+- **Las recetas y los ingredientes que trae la app nacen ya enlazados.** Hasta
+  ahora se sembraban con los ingredientes como una línea de texto, así que una
+  cuenta nueva —o una que borrase su despensa para empezar de cero— nacía sin
+  enlazar y había que arreglarla después. Pasan a nacer ya en piezas, enlazadas
+  con la despensa, sin duplicados y con mayúscula inicial.
+
+| Spec | Qué |
+|---|---|
+| 092 | La siembra nace enlazada y limpia |
+
 - **Las recetas que trae la app, normalizadas.** Las 73 recetas sembradas
   llegaron con los ingredientes escritos como una línea de texto —"1 lata
   redonda pequeña de atún, enlatado al natural, escurrido (50 g)"— porque son

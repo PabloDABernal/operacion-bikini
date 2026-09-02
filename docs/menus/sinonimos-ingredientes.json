@@ -12,7 +12,12 @@
     "pollo": "pechuga de pollo",
     "pavo": "pechuga de pavo",
     "agua que de arroz": "agua",
-    "fruta a tu eleccion": "fruta"
+    "fruta a tu eleccion": "fruta",
+    "pieza de fruta": "fruta",
+    "pimienta molida": "pimienta negra",
+    "repollo a tiras": "col repollo",
+    "cafe": "café",
+    "esparragos": "espárragos verdes"
   },
   "_sin_equivalente": {
     "_nota": "Estos NO tienen equivalente en los 133 y se crean tal cual, que es lo correcto: son ingredientes de verdad que faltaban en la lista original. Se apunta aqui para no volver a buscarles sitio cada vez.",

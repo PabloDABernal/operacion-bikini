@@ -1,6 +1,6 @@
 # 090 — Reparar la normalización
 
-- **Estado:** 🚧 implementada y desplegada el 2 de septiembre de 2026, revisada por `revisor-specs` (tres bloqueantes cerrados) y `revisor-codigo` (CUMPLE con observaciones, la observación arreglada). **Pendiente de que el usuario la pruebe.**
+- **Estado:** ✅ completada, dada por buena por el usuario el 2 de septiembre de 2026.
 - **Fecha:** 2026-09-02
 - **Referencia en PRODUCTO.md:** arregla la spec 089, declarada en "Qué hará (evolutivos de la fase productiva, desde el 31 de agosto de 2026)".
 

@@ -1,6 +1,6 @@
 # 078 — El material que te falta
 
-- **Estado:** 🚧 implementada y desplegada el 1 de septiembre de 2026, revisada por `revisor-specs` (dos bloqueantes técnicos cerrados) y `revisor-codigo` (CUMPLE, sin hallazgos). **Pendiente de que el usuario la pruebe.**
+- **Estado:** ✅ completada, dada por buena por el usuario el 2 de septiembre de 2026.
 - **Fecha:** 2026-09-01
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (v13: el material, decidida el 30 de agosto de 2026)", tercer punto.
 

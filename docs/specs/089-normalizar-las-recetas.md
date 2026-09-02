@@ -1,6 +1,6 @@
 # 089 — Normalizar las recetas: ingredientes y alias
 
-- **Estado:** 🚧 implementada y desplegada el 2 de septiembre de 2026, revisada por `revisor-specs` (tres bloqueantes cerrados) y `revisor-codigo` (CUMPLE). Alias repasados por el usuario. **Pendiente de que el usuario la pruebe.**
+- **Estado:** ✅ completada, dada por buena por el usuario el 2 de septiembre de 2026.
 - **Fecha:** 2026-09-02
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (evolutivos de la fase productiva, desde el 31 de agosto de 2026)", el evolutivo de las recetas normalizadas.
 

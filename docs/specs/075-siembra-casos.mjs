@@ -66,7 +66,25 @@ const comprobar = (nombre, real, esperado) => {
 // --- Los datos generados -------------------------------------------------
 
 comprobar("73 recetas", datos.RECETAS.length, 73);
-comprobar("133 ingredientes", datos.INGREDIENTES.length, 133);
+// 138 desde la spec 092: los 133 del PDF mas Agua, Fruta, Cafe, Queso fresco y
+// Finas hierbas, que salian de las recetas y faltaban en la lista.
+comprobar("138 ingredientes", datos.INGREDIENTES.length, 138);
+
+// Todos con mayuscula inicial, y ninguno repetido (spec 092).
+comprobar(
+  "todos empiezan por mayuscula",
+  datos.INGREDIENTES.filter((n) => n[0] !== n[0].toUpperCase()),
+  []
+);
+
+const clavesDeIngrediente = datos.INGREDIENTES.map((n) =>
+  n.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "")
+);
+comprobar(
+  "y no hay ninguno repetido",
+  clavesDeIngrediente.length - new Set(clavesDeIngrediente).size,
+  0
+);
 comprobar("4 menús", datos.MENUS.length, 4);
 
 comprobar(
@@ -252,7 +270,7 @@ comprobar(
 
 // --- Qué ingredientes faltan --------------------------------------------
 
-comprobar("despensa vacía: faltan los 133", ingredientesQueFaltan([]).length, 133);
+comprobar("despensa vacía: faltan los 138", ingredientesQueFaltan([]).length, 138);
 
 comprobar(
   "lo que ya tienes no entra",
@@ -262,20 +280,24 @@ comprobar(
 
 comprobar(
   "el plural cuenta como el mismo (spec 072)",
-  ingredientesQueFaltan([{ nombre: "tomates" }]).includes("tomate"),
+  ingredientesQueFaltan([{ nombre: "tomates" }]).some(
+    (n) => n.toLowerCase() === "tomate"
+  ),
   false
 );
 
 comprobar(
   "pero no se lleva por delante lo que sólo se parece",
-  ingredientesQueFaltan([{ nombre: "sal" }]).includes("salmón"),
+  ingredientesQueFaltan([{ nombre: "sal" }]).some(
+    (n) => n.toLowerCase() === "salmón"
+  ),
   true
 );
 
 comprobar(
   "lo tuyo no cuenta si no está en la lista",
   ingredientesQueFaltan([{ nombre: "azafrán" }]).length,
-  133
+  138
 );
 
 console.log(mal === 0 ? "\nTodos los casos de siembra pasan." : `\n${mal} fallos.`);
