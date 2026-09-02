@@ -1,6 +1,6 @@
 # 095 — Estadísticas de lo que comes
 
-- **Estado:** 📝 escrita el 2 de septiembre de 2026. Pendiente de `revisor-specs`.
+- **Estado:** 📝 escrita el 2 de septiembre de 2026, revisada por `revisor-specs` (sin bloqueantes). **Pendiente de implementar.**
 - **Fecha:** 2026-09-02
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (evolutivos de la fase productiva…)", el evolutivo de saber lo que comes, tercer punto.
 
@@ -147,6 +147,16 @@ despensa.
 - **Un ingrediente borrado** de la despensa: igual.
 - **Empate en el quinto puesto**: se corta por orden alfabético, para que la
   lista no baile entre repintados.
+- **Una receta con los ingredientes en el formato viejo** (lista de textos, sin
+  `ingredienteId`): no aporta ingredientes. Pasa con las recetas que propone la
+  IA al pedir dieta, que se guardan tal cual, y **no es un caso raro**. Se cuenta
+  igual como comida enlazada —porque lo está—, pero sus ingredientes no se saben.
+  Lo avisó `revisor-specs`.
+- **Comidas enlazadas, pero todas de hace más de 30 días**: el bloque de arriba
+  enseña sus números y las dos listas salen **vacías**. En ese caso no se pintan
+  las listas ni sus títulos, y se dice en una línea: *"No has apuntado nada
+  enlazado en los últimos 30 días."* Enseñar dos títulos con nada debajo parece
+  un fallo.
 - **Una comida con dos recetas iguales**: no puede pasar (spec 088).
 - **Una comida con receta e ingrediente suelto**: no puede pasar, el interruptor
   es de uno en uno (spec 093).

@@ -1,24 +1,36 @@
 # 094 — "Me lo he comido": del plan al diario
 
-- **Estado:** 📝 escrita el 2 de septiembre de 2026. Pendiente de `revisor-specs`.
+- **Estado:** 📝 escrita el 2 de septiembre de 2026, revisada por `revisor-specs` (tres bloqueantes cerrados: la feature YA EXISTE y tiene un fallo en producción). **Pendiente de implementar.**
 - **Fecha:** 2026-09-02
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (evolutivos de la fase productiva…)", el evolutivo de saber lo que comes, segundo punto.
 
 ## 1. Objetivo
 
-Que lo que pone el plan para hoy se pueda **apuntar en el diario de un toque**,
-con sus recetas ya enlazadas.
+Que lo que pone el plan para hoy se apunte en el diario **bien**: solo desde el
+día de hoy, y con sus recetas enlazadas.
 
 ## 2. Por qué existe
 
-Con la spec 093 ya se puede apuntar una comida eligiendo receta, pero **a mano**:
-buscar el plato en el desplegable, elegirlo, poner el momento y guardar. Cuatro
-gestos, cuatro veces al día, para copiar algo que **la app ya tiene escrito** en
-Mi dieta.
+> ### ⚠️ Esto YA EXISTE. Esta spec lo arregla, no lo construye.
+>
+> `revisor-specs` lo destapó: el botón "Me lo he comido" está en producción desde
+> antes de la spec 065, en `filaDeComida()`, y `apuntarDeLaDieta()` ya guarda la
+> comida en el diario de hoy. La primera versión de esta spec lo daba por
+> construir, y quien la implementara habría escrito por segunda vez algo que ya
+> estaba.
+>
+> **Y tiene un fallo en producción**, que es lo que de verdad hay que arreglar.
 
-Si copiar el plan cuesta más que escribir "lentejas" a mano, nadie lo va a hacer,
-y sin datos enlazados la spec 095 no tiene qué contar. **Esto es lo que hace que
-el diario se llene.**
+**El fallo.** El icono se pinta en **las siete filas** de la semana, no solo en la
+de hoy. Y `apuntarDeLaDieta()` guarda siempre con `hoyISO()`. Así que si el jueves
+tocas el botón de la comida del martes, **se apunta como comida de hoy**, en
+silencio y sin que nada lo diga.
+
+**Y lo que falta.** Con la spec 093 una comida puede llevar `recetaIds`, pero
+`apuntarDeLaDieta()` no los pasa: lo apuntado desde el plan **llega al diario sin
+enlazar**, que es justo lo que hace falta para que la spec 095 tenga qué contar.
+
+Es el gesto que hace que el diario se llene, así que tiene que llenarlo **bien**.
 
 ## 3. Criterio de "esto funciona"
 
@@ -42,9 +54,11 @@ el diario se llene.**
 
 ### Entra
 
-- El botón "Me lo he comido" en cada comida del día en Mi dieta.
-- Apuntar la comida con su texto, su momento, la fecha de hoy y sus `recetaIds`.
-- El aviso de que ya estaba apuntado.
+- **Arreglar** que el botón salga solo en el día de hoy.
+- **Pasar los `recetaIds`** al apuntar, para que llegue enlazado.
+- **Quitar la hora**, que hoy se pone sola.
+- El aviso de que ya estaba apuntado, y desactivar el botón mientras guarda.
+- La etiqueta accesible, con el nombre del plato.
 - Suite de casos de la decisión de "ya está apuntado".
 
 ### NO entra (explícitamente fuera)
@@ -63,22 +77,23 @@ el diario se llene.**
 
 ## 5. Comportamiento detallado
 
-### Dónde va el botón
+### El botón, que ya está
 
-En la fila de cada comida del día, junto a los iconos que ya hay (ver la receta,
-editar). Es un **icono más** en esa columna, con el mismo patrón de la spec 065,
-para no meter un botón de texto en una fila que ya va apretada.
+Está en `filaDeComida()`, es un icono (spec 065) y llama a `apuntarDeLaDieta()`.
+Se queda donde está. Lo que cambia:
 
-Su etiqueta accesible es **"Me lo he comido: {texto del plato}"**.
+- **Su condición**: hoy es `if (comida.texto)`. Pasa a ser `if (comida.texto && esHoy)`.
+- **Su etiqueta accesible**: de `"Me lo he comido"` a
+  **`"Me lo he comido: {texto del plato}"`**. Con siete filas iguales, la etiqueta
+  fija no dice cuál es cuál.
 
-### Solo hoy
+### Solo hoy: el arreglo
 
-En la vista de la semana entera hay siete días delante, y seis de ellos no son
-hoy. El botón **solo se pinta en el día de hoy**, se esté viendo el día suelto o
-la semana.
+En la vista de la semana hay siete días delante y seis no son hoy. El botón
+**solo se pinta en el día de hoy**, se vea el día suelto o la semana entera.
 
-Es la misma idea que ya tiene la app con "Hoy": lo que se apunta, se apunta
-cuando pasa.
+`pintarDieta()` ya sabe qué día es hoy: usa `diaDeLaSemana(hoyISO())` para
+colocarse. Se compara con eso, sin inventar nada.
 
 ### Qué se apunta
 
@@ -90,8 +105,14 @@ cuando pasa.
 | `recetaIds` | Las de la comida del plan (spec 088) |
 | `hora` | **No se pone.** Es opcional (spec 014) |
 
-Se guarda con `guardarComida()`, la misma de siempre — con el `recetaIds` que
-estrena la spec 093. **No hay un camino de guardado nuevo.**
+> **Ojo: hoy SÍ se pone la hora.** `apuntarDeLaDieta()` llama a `guardarComida()`
+> con `horaActual()`. Hay que **quitarlo**: el plan no tiene hora, y ponerle la de
+> cuando pulsas el botón es inventarse a qué hora comiste. Lo avisó
+> `revisor-specs`, y no se habría visto leyendo solo el estado final.
+
+Se guarda con `guardarComida()`, la misma de siempre — ampliando la llamada con
+el `recetaIds` que estrena la spec 093, que va **al final de la firma**. Los
+demás llamadores no se enteran. **No hay un camino de guardado nuevo.**
 
 ### Si ya estaba apuntado
 
@@ -125,7 +146,8 @@ estrena la spec 093.
 ## 7. Casos límite
 
 - **Pulsar dos veces seguidas**: la segunda encuentra la de la primera y
-  pregunta. El botón además se desactiva mientras guarda.
+  pregunta. El botón además **pasa a desactivarse** mientras guarda, cosa que hoy
+  no hace.
 - **Comida del plan sin recetas**: se apunta solo con su texto. Es válido.
 - **Comida del plan sin texto**: no hay botón.
 - **Una receta del plan borrada del recetario**: se apunta igual, con el id que
@@ -155,11 +177,12 @@ estrena la spec 093.
 | Archivo | Qué |
 |---|---|
 | `js/comidas.js` | `yaApuntada(comidas, fecha, momento, texto)`: cálculo puro. |
-| `js/app.js` | El icono en la fila de Mi dieta, solo en hoy, y el guardado. |
+| `js/app.js` | `filaDeComida()`: la condición del icono y su etiqueta. `apuntarDeLaDieta()`: los `recetaIds`, fuera la hora, el aviso de repetido y desactivar el botón. |
 | `docs/specs/094-me-lo-he-comido-casos.mjs` | **Nuevo.** Casos de "ya está apuntado". |
 
-Estimación: **entre 120 y 160 líneas**. Depende de la spec **093**, que estrena
-`recetaIds` en la comida.
+Estimación: **entre 70 y 100 líneas**. Mucho menos que las 120-160 de la primera
+cuenta, porque el grueso ya estaba escrito: esto es un arreglo, no una feature.
+Depende de la spec **093**, que estrena `recetaIds`.
 
 ## 10. Fuera de spec: ideas apuntadas
 

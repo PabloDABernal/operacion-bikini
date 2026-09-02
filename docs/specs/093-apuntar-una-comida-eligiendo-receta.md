@@ -1,6 +1,6 @@
 # 093 — Apuntar una comida eligiendo una receta
 
-- **Estado:** 📝 escrita el 2 de septiembre de 2026. Pendiente de `revisor-specs`.
+- **Estado:** 📝 escrita el 2 de septiembre de 2026, revisada por `revisor-specs` (tres bloqueantes, cerrados recortando el alcance). **Pendiente de implementar.**
 - **Fecha:** 2026-09-02
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (evolutivos de la fase productiva…)", el evolutivo de saber lo que comes, primer punto.
 
@@ -28,10 +28,11 @@ Sin esto, las estadísticas de la spec 095 no tienen de dónde salir.
 2. En "Una receta mía" hay un desplegable con **todas tus recetas**.
 3. Eliges una y guardas: la comida se apunta **con el nombre de la receta como
    texto**, y **enlazada** a ella.
-4. La fila del diario dice que lleva receta, y **se puede abrir para verla**.
+4. La fila del diario **nombra las recetas** en su línea de detalle.
 5. Puedes apuntar **varias recetas en la misma comida** (primer plato y segundo),
    igual que en Mi dieta desde la spec 088.
-6. Al **editar** una comida ya apuntada se pueden cambiar sus recetas.
+6. Al **editar** una comida, sus recetas **se conservan** aunque el editor no las
+   enseñe.
 7. Una comida **escrita a mano** se guarda exactamente como antes, sin campos de
    más.
 8. Una comida **con ingrediente suelto** (spec 084) sigue funcionando igual.
@@ -45,8 +46,7 @@ Sin esto, las estadísticas de la spec 095 no tienen de dónde salir.
 
 - La tercera opción del interruptor, con su desplegable y sus chips.
 - El campo `recetaIds` en la comida apuntada.
-- Ver la receta desde la fila del diario.
-- Cambiar las recetas al editar una comida.
+- Los nombres de las recetas en la línea de detalle de la fila del diario.
 - Suite de casos.
 
 ### NO entra (explícitamente fuera)
@@ -58,6 +58,18 @@ Sin esto, las estadísticas de la spec 095 no tienen de dónde salir.
   la mantienes tú (spec 058).
 - **Que la IA vea las recetas enlazadas** al analizar el día (spec 030). El
   análisis sigue leyendo el texto. Cambiarlo es una decisión aparte.
+- **Abrir la receta desde el diario.** `revisor-specs` avisó de que el diario no
+  se pinta como Mi dieta: lo hace `crearLista()`, la fábrica que comparten Peso,
+  Comidas, Bebidas y Ejercicio, con filas planas sin columna de iconos ni fila
+  desplegable. Meter ahí un icono que abre la receta obliga a generalizar código
+  de **cuatro listas**, y eso no es esta spec. La fila **nombra** las recetas; la
+  receta se ve en el Recetario.
+- **Cambiar las recetas al editar una comida.** Por lo mismo, y porque abre un
+  caso que hoy no existe: una comida hecha con "Elegir de mi despensa" tiene
+  `ingredienteId`, y dejar añadirle recetas al editar la dejaría con las dos
+  cosas a la vez, que es justo lo que la 084 evitó. Al editar, `recetaIds` **se
+  conserva** y no se toca. Si te equivocaste de receta, se borra la comida y se
+  apunta otra vez.
 - **Pasar el plan al diario.** Eso es la spec 094.
 - **Estadísticas.** Eso es la 095.
 - **Tocar Mi dieta.** Esto es el diario.
@@ -100,16 +112,27 @@ como antes**.
 
 ### En el diario
 
-La fila de una comida enlazada enseña el **icono de receta**, el mismo que usa Mi
-dieta desde la spec 072, y al tocarlo se abre la receta debajo — reutilizando
-`recetaDesplegada()`, que desde la 088 ya sabe pintar varias.
+La fila de una comida enlazada **nombra sus recetas** en la línea de detalle que
+ya existe, junto al momento y la hora:
 
-Una receta borrada se salta, como allí.
+```
+Tortilla de atún
+Cena · 21:30 · Tortilla de atún
+```
+
+Sin icono y sin abrir nada: el diario lo pinta `crearLista()`, que hace filas
+planas para cuatro pantallas, y la fila solo sabe de `{ que, detalles }`. Se usa
+lo que hay.
+
+Una receta borrada del recetario **no se nombra**, como en todas partes.
 
 ### Al editar
 
-La fila en edición del diario gana el mismo desplegable con chips. Las recetas
-enlazadas se cargan de la comida y se guardan al aceptar.
+**Las recetas no se tocan.** El editor del diario sigue exactamente como está, y
+`actualizarComida()` no escribe `recetaIds`, así que lo que hubiera se queda.
+
+Es a propósito: dejar añadir recetas ahí abriría el caso de una comida con
+`ingredienteId` **y** `recetaIds` a la vez, que la 084 evitó por diseño.
 
 ## 6. Modelo de datos
 
@@ -135,8 +158,11 @@ con las comidas.
 - **Soltar todas las recetas**: la comida se queda como texto suelto.
 - **Receta borrada del recetario**: la fila no enseña icono si no queda ninguna
   viva; si queda alguna, enseña las que haya.
-- **Ingrediente suelto y receta a la vez**: no puede pasar, el interruptor es de
-  uno en uno. Lo que se guarda es lo del panel activo.
+- **Ingrediente suelto y receta a la vez**: no puede pasar. Al apuntar, el
+  interruptor es de uno en uno y solo se guarda lo del panel activo; y al editar
+  no se tocan ni uno ni otro.
+- **Editar una comida con recetas**: se le puede cambiar el texto, el momento, la
+  fecha, la hora y los acompañamientos. Sus recetas siguen enlazadas.
 - **"Lo de siempre"** (spec 013): rellena el texto como hasta ahora y **no**
   enlaza recetas. Los chips salen de lo que repites, y repetir un texto no dice
   qué receta era.
@@ -158,16 +184,23 @@ con las comidas.
 
 | Archivo | Qué |
 |---|---|
-| `js/comidas.js` | `validarComida()` y `guardarComida()` con `recetaIds`. |
+| `js/comidas.js` | `validarComida()` y `guardarComida()` con `recetaIds`, **al final de la firma y con valor por defecto**, para que los llamadores de siempre no se enteren. `actualizarComida()` **no se toca**. |
 | `index.html` | El tercer botón del interruptor y su panel. |
-| `js/app.js` | El panel, el desplegable con chips, guardar, la fila del diario con su icono y la fila en edición. |
+| `js/app.js` | El panel, el desplegable con chips, el guardado y los nombres en la línea de detalle del diario. |
 | `styles.css` | Solo si el interruptor de tres necesita algo. |
 | `docs/specs/093-comida-receta-casos.mjs` | **Nuevo.** Casos de la validación y el guardado. |
 
-Estimación: **entre 200 y 260 líneas**.
+Estimación: **entre 130 y 170 líneas**. La primera cuenta decía 200-260 e incluía
+abrir la receta desde el diario y editarla, que `revisor-specs` destapó como
+mucho más caras de lo que parecían —obligan a generalizar `crearLista()`— y que
+han salido del alcance.
 
 ## 10. Fuera de spec: ideas apuntadas
 
+- **Abrir la receta desde el diario**, generalizando `crearLista()` para que sus
+  cuatro listas admitan una fila desplegable. Es lo que se ha sacado de aquí.
+- **Cambiar las recetas al editar una comida**, decidiendo antes qué pasa con el
+  ingrediente suelto.
 - Que el análisis de la IA (spec 030) use las recetas enlazadas en vez del texto.
 - Raciones, y con ellas las calorías de verdad.
 - Que "lo de siempre" recuerde también la receta.
