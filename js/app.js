@@ -126,7 +126,9 @@ import {
   validarApunte,
   guardarApunte,
   borrarApunte,
-  listarCompra
+  listarCompra,
+  repartoDeLaCompra,
+  comprarTodo
 } from "./compra.js";
 
 import {
@@ -2604,6 +2606,9 @@ function pintarBotonDeCompra() {
     : "Ver lista de la compra";
 }
 
+// Lo que hay ahora mismo en la lista de la compra (spec 096).
+let compraPintada = [];
+
 function pintarCompra() {
   // El botón vive en la despensa pero cuenta lo mismo que esta lista, así que se
   // repinta con ella y nunca se quedan diciendo cosas distintas.
@@ -2630,6 +2635,11 @@ function pintarCompra() {
     : dietaActiva
       ? "No te falta nada de tu dieta. Puedes apuntar aquí lo que necesites."
       : "Aún no tienes dieta, así que aquí solo saldrá lo que apuntes a mano.";
+
+  // Se guarda lo que se acaba de pintar: es exactamente lo que marcaria el
+  // boton de "comprado todo" (spec 096), asi que no puede salir de otro sitio.
+  compraPintada = todo;
+  id("btn-comprado-todo").classList.toggle("oculta", todo.length === 0);
 
   todo.forEach((cosa) => contenedor.appendChild(filaDeCompra(cosa)));
 
@@ -2699,6 +2709,43 @@ async function marcarComprado(cosa) {
       "No se ha podido guardar. Comprueba tu conexión.";
   }
 }
+
+// Comprado todo (spec 096): marca la lista entera de una vez, que es lo que pasa
+// de verdad al volver del super.
+id("btn-comprado-todo").addEventListener("click", async () => {
+  const boton = id("btn-comprado-todo");
+  const error = id("error-compra");
+  const aviso = id("guardado-compra-todo");
+  error.textContent = "";
+  aviso.textContent = "";
+
+  const reparto = repartoDeLaCompra(compraPintada, despensaCargada);
+  if (reparto.cuantas === 0 && reparto.borrarApuntes.length === 0) return;
+
+  // Se pregunta porque no se deshace y porque toca muchas cosas de una vez.
+  const cuantas = compraPintada.length;
+  if (!confirm(`¿Marcar las ${cuantas} cosas de la lista como compradas?`)) return;
+
+  boton.disabled = true;
+  try {
+    await comprarTodo(uidActual, reparto);
+    await refrescarCompra();
+    await refrescarDespensa();
+
+    aviso.textContent =
+      `Marcadas ${reparto.cuantas} cosas.` +
+      (reparto.crear.length
+        ? ` ${reparto.crear.length} eran nuevas y han entrado en tu despensa.`
+        : "");
+  } catch {
+    // Lo escrito se queda: volver a pulsarlo termina lo que faltara.
+    error.textContent =
+      "No se ha podido terminar. Comprueba tu conexión y vuelve a pulsarlo: " +
+      "lo que ya se marcó no se repite.";
+  } finally {
+    boton.disabled = false;
+  }
+});
 
 async function quitarApunte(cosa) {
   id("error-compra").textContent = "";

@@ -442,12 +442,12 @@ El 20 de agosto arrancó la **v4**, que sale de una auditoría de usabilidad hec
 | 093 | Apuntar una comida eligiendo una receta | 🚧 desplegada, **sin probar** |
 | 094 | "Me lo he comido": del plan al diario | 🚧 desplegada, **sin probar** |
 | 095 | Estadísticas de lo que comes | 🚧 desplegada, **sin probar** |
+| 096 | Comprado todo: marcar la lista entera de una vez | 🚧 desplegada, **sin probar** |
 
 ## Qué toca ahora
 
-**Una pasada de pruebas de las cinco que quedan desplegadas sin probar**: la
-**091**, la **092**, la **093**, la **094** y la **095**. El guion conjunto está
-al final de este apartado.
+**Una pasada de pruebas de las seis que quedan desplegadas sin probar**: la
+**091**, la **092**, la **093**, la **094**, la **095** y la **096**.
 
 Al 2 de septiembre de 2026 las specs **001 a 095 están escritas e
 implementadas**. No queda nada declarado y sin hacer. El trabajo entra por lo que
