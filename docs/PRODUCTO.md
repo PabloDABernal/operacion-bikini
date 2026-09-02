@@ -720,6 +720,22 @@ Ya no salen de una lista planificada: salen de usar la app cada día.
 |---|---|
 | 092 | La siembra nace enlazada y limpia |
 
+- **Saber lo que comes.** Hasta ahora el diario —lo que de verdad te comes— es
+  texto libre, y como mucho un ingrediente suelto de la despensa. El plan (Mi
+  dieta) sí está enlazado con las recetas, pero lo apuntado no, así que la app no
+  puede decir qué comes de verdad. Esto lo cierra:
+  - **Apuntar una comida eligiendo una receta tuya**, no solo escribiéndola.
+  - **"Me lo he comido"**: pasar lo que pone el plan de un día al diario de un
+    toque, con sus recetas ya enlazadas.
+  - **Estadísticas de lo que comes**: cuántas comidas apuntas, cuántas van
+    enlazadas, y qué recetas e ingredientes repites más.
+
+| Spec | Qué |
+|---|---|
+| 093 | Apuntar una comida eligiendo una receta |
+| 094 | "Me lo he comido": del plan al diario |
+| 095 | Estadísticas de lo que comes |
+
 - **Las recetas que trae la app, normalizadas.** Las 73 recetas sembradas
   llegaron con los ingredientes escritos como una línea de texto —"1 lata
   redonda pequeña de atún, enlatado al natural, escurrido (50 g)"— porque son

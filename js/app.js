@@ -53,6 +53,7 @@ import {
   semanaDesdeLaIa,
   semanaDesdeMenu,
   idsDeRecetaDe,
+  recetasQueNoAparecen,
   pedirDietaALaIa
 } from "./dietas.js";
 
@@ -3852,6 +3853,10 @@ function filaEnEdicion(indiceDia, indiceComida, comida) {
   const chips = document.createElement("div");
   chips.className = "chips-receta";
 
+  // El aviso de que una receta enlazada no se nombra en el texto (spec 091).
+  const aviso = document.createElement("p");
+  aviso.className = "advertencia aviso-receta";
+
   // El desplegable SUMA, no sustituye (spec 088): elegir una receta engancha su
   // nombre al final del texto y la añade a la lista. Antes reemplazaba el texto
   // entero, y por eso una comida solo podía llevar una.
@@ -3872,6 +3877,32 @@ function filaEnEdicion(indiceDia, indiceComida, comida) {
       recetas.appendChild(elemento);
     });
     recetas.value = "";
+  }
+
+  // Se recalcula en los tres sitios donde puede cambiar algo: al escribir, al
+  // elegir una receta y al soltar un chip. Y al abrir, para que un desajuste que
+  // ya venía de antes se vea enseguida — que es el caso que motivó la spec.
+  function pintarAviso() {
+    const puestas = enlazadas
+      .map((id) => recetasCargadas.find((receta) => receta.id === id))
+      // Una receta borrada del recetario no cuenta: su chip ya dice
+      // "(receta borrada)", y dos avisos del mismo problema es ruido.
+      .filter(Boolean);
+
+    const faltan = recetasQueNoAparecen(texto.value, puestas);
+
+    if (faltan.length === 0) {
+      aviso.textContent = "";
+      aviso.classList.add("oculta");
+      return;
+    }
+
+    const nombres = faltan.map((receta) => `"${receta.nombre}"`).join(", ");
+    aviso.textContent =
+      faltan.length === 1
+        ? `Ojo: ${nombres} está enlazada pero no aparece en el texto.`
+        : `Ojo: ${nombres} están enlazadas pero no aparecen en el texto.`;
+    aviso.classList.remove("oculta");
   }
 
   function pintarChips() {
@@ -3896,6 +3927,7 @@ function filaEnEdicion(indiceDia, indiceComida, comida) {
         enlazadas = enlazadas.filter((otro) => otro !== id);
         pintarChips();
         pintarOpciones();
+        pintarAviso();
       });
       chip.appendChild(quitar);
       chips.appendChild(chip);
@@ -3915,10 +3947,15 @@ function filaEnEdicion(indiceDia, indiceComida, comida) {
 
     pintarChips();
     pintarOpciones();
+    pintarAviso();
   });
+
+  // Al escribir: el aviso se va o aparece según escribes, sin guardar.
+  texto.addEventListener("input", pintarAviso);
 
   pintarOpciones();
   pintarChips();
+  pintarAviso();
 
   fila.append(
     celda(etiquetaDeMomento(comida.momento), "resumen-etiqueta"),
@@ -3931,7 +3968,8 @@ function filaEnEdicion(indiceDia, indiceComida, comida) {
       celdaEditando = null;
       pintarDieta();
     }),
-    chips
+    chips,
+    aviso
   );
 
   return fila;

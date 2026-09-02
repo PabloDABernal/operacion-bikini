@@ -1,6 +1,6 @@
 # 091 — El editor avisa si una receta no aparece en el texto
 
-- **Estado:** 📝 escrita el 2 de septiembre de 2026, revisada por `revisor-specs` (un bloqueante, que cierra la spec 092). **Pendiente de implementar, después de la 092.**
+- **Estado:** 🚧 implementada y desplegada el 2 de septiembre de 2026, revisada por `revisor-specs` (un bloqueante, cerrado por la spec 092). **Pendiente de que el usuario la pruebe.**
 - **Fecha:** 2026-09-02
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (evolutivos de la fase productiva, desde el 31 de agosto de 2026)", el evolutivo del editor que avisa.
 

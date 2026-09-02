@@ -248,6 +248,31 @@ function candidatosDeReceta(receta) {
     .filter((candidato) => candidato.clave.length >= MINIMO_PARA_ENLAZAR);
 }
 
+// Las recetas enlazadas a una comida cuyo nombre NO aparece en su texto
+// (spec 091).
+//
+// El texto de una comida y sus recetas son dos cosas separadas —el texto es del
+// usuario y nadie se lo reescribe—, así que pueden acabar diciendo cosas
+// distintas: el día enseña una tarjeta que el título no nombra. Esto es lo que
+// deja avisarlo al editar.
+//
+// SE MIRAN LOS ALIAS, y no es un adorno: casi todos los platos de los menús se
+// enlazan por alias (spec 089). "Tortilla de 2 huevos con 1 lata de atún al
+// natural" tiene enlazada "Tortilla de atún", cuyo nombre no está en el texto
+// pero su alias sí. Sin esto el aviso saltaría en falso en 24 platos, y un aviso
+// que se equivoca deja de leerse (la lección de la 076).
+//
+// Se busca sin exigir palabra entera, al revés que el enlazado: aquí callarse de
+// más es mejor que saltar en falso.
+export function recetasQueNoAparecen(texto, recetas) {
+  const donde = clave(texto);
+
+  return (recetas || []).filter((receta) => {
+    const nombres = [receta.nombre, ...(receta.alias || [])];
+    return !nombres.some((nombre) => nombre && donde.includes(clave(nombre)));
+  });
+}
+
 export function semanaDesdeMenu(dias, recetas) {
   const porLongitud = (recetas || [])
     .flatMap(candidatosDeReceta)

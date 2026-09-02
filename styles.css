@@ -2139,6 +2139,14 @@ button:disabled {
   border-top: 1px solid var(--borde);
 }
 
+/* El aviso de que una receta enlazada no se nombra en el texto (spec 091). En
+   su propia línea, debajo de los chips, y sin bloquear nada. */
+.aviso-receta {
+  flex: 1 0 100%;
+  margin: var(--e2) 0 0;
+  font-size: 0.8rem;
+}
+
 /* Los chips de receta enlazada, en el editor de la celda (spec 088). Van en su
    propia línea porque la fila de edición ya va apretada en móvil. */
 .chips-receta {
