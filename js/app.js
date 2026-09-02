@@ -142,13 +142,14 @@ import { hayQueSembrar, sembrar, olvidarLaSiembra } from "./siembra.js";
 import {
   VERSION as VERSION_DATOS_INICIALES,
   MENUS,
-  RECETAS as RECETAS_INICIALES
+  RECETAS as RECETAS_INICIALES,
+  INGREDIENTES as INGREDIENTES_INICIALES,
+  SINONIMOS
 } from "./datos-iniciales.js";
 import {
-  planDeNormalizacion,
-  aliasDeLosDatos,
+  planDeReparacion,
   nuevoIdDeIngrediente,
-  escribirNormalizacion
+  escribirReparacion
 } from "./normalizacion.js";
 
 // Ingredientes de una receta recién creada que se parecen a algo que ya tenías
@@ -7219,11 +7220,12 @@ observarSesion(
   }
 );
 
-// --- Normalizar las recetas (spec 089) -----------------------------------
+// --- Reparar las recetas (specs 089 y 090) -------------------------------
 //
-// Pasa los ingredientes de las recetas sembradas de texto a piezas enlazadas
-// con la despensa, y les pone sus alias. Las 73 recetas llegaron en el formato
-// viejo porque son anteriores a la spec 082.
+// La 089 dejó la despensa con 114 entradas ilegibles ("redonda pequeña de atún,
+// enlatado al natural, escurrido"), porque partía la línea con una heurística
+// pensada para otra cosa. La 090 vuelve a enlazar contra los nombres buenos y
+// se lleva la basura.
 //
 // Se pinta SOLO para una cuenta: se prueba ahí y, si va bien, se abre a las
 // demás quitando esta constante. No es una medida de seguridad —las reglas de
@@ -7238,11 +7240,10 @@ function pintarZonaDeNormalizar() {
   );
 }
 
-// La misma confirmación por escrito que el reinicio: no borra, pero escribe en
-// las 73 recetas de una vez y no se deshace.
+// La misma confirmación por escrito que el reinicio, y aquí con más motivo:
+// esto sí borra documentos de la despensa.
 id("palabra-normalizar").addEventListener("input", (evento) => {
-  id("btn-normalizar").disabled =
-    evento.target.value.trim().toUpperCase() !== "NORMALIZAR";
+  id("btn-normalizar").disabled = evento.target.value.trim().toUpperCase() !== "REPARAR";
 });
 
 id("btn-normalizar").addEventListener("click", async () => {
@@ -7250,35 +7251,44 @@ id("btn-normalizar").addEventListener("click", async () => {
   const error = id("error-normalizar");
 
   error.textContent = "";
-  estado.textContent = "Normalizando…";
+  estado.textContent = "Reparando…";
   id("btn-normalizar").disabled = true;
 
   try {
-    const plan = planDeNormalizacion(
+    const plan = planDeReparacion(
       recetasCargadas,
       despensaCargada,
-      aliasDeLosDatos(RECETAS_INICIALES),
+      RECETAS_INICIALES,
+      INGREDIENTES_INICIALES,
+      SINONIMOS,
       () => nuevoIdDeIngrediente(uidActual)
     );
 
-    if (plan.recetas.length === 0 && plan.ingredientesNuevos.length === 0) {
+    if (
+      plan.recetas.length === 0 &&
+      plan.ingredientesNuevos.length === 0 &&
+      plan.aBorrar.length === 0
+    ) {
       // Con otras palabras y no el mismo texto lleno de ceros: así se ve que no
       // ha hecho nada en vez de parecer que ha fallado.
-      estado.textContent = "Ya estaba todo normalizado: no ha hecho falta cambiar nada.";
+      estado.textContent = "Ya estaba todo bien: no ha hecho falta cambiar nada.";
       id("palabra-normalizar").value = "";
       return;
     }
 
-    await escribirNormalizacion(uidActual, plan);
+    await escribirReparacion(uidActual, plan);
     await refrescarRecetas();
     await refrescarDespensa();
 
-    const { revisadas, normalizadas, lineasEnlazadas, ingredientesCreados } =
-      plan.resumen;
+    const { reconstruidas, reenlazadas, ambiguas, ingredientesBorrados } = plan.resumen;
     estado.textContent =
-      `Listo: ${revisadas} recetas revisadas, ${normalizadas} normalizadas, ` +
-      `${lineasEnlazadas} líneas enlazadas y ${ingredientesCreados} ` +
-      `ingredientes nuevos en tu despensa.`;
+      `Listo: ${reconstruidas} recetas reconstruidas, ${reenlazadas} reenlazadas ` +
+      `y ${ingredientesBorrados} ingredientes ilegibles fuera de tu despensa.` +
+      // Solo si ha pasado: con el nombre repetido no se toca ninguna, y eso hay
+      // que decirlo o parece que se han quedado sin reparar por las buenas.
+      (ambiguas
+        ? ` ${ambiguas} no se han tocado porque tienes otra receta con el mismo nombre.`
+        : "");
     id("palabra-normalizar").value = "";
   } catch {
     // Lo escrito hasta aquí se queda hecho, y no pasa nada: volver a pulsarlo

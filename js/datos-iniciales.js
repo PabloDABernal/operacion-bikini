@@ -1425,6 +1425,23 @@ export const INGREDIENTES = [
   "ñoquis"
 ];
 
+// Del recorte de una linea de receta al nombre bueno de la despensa (spec 090).
+// Sale de docs/menus/sinonimos-ingredientes.json, revisado a mano.
+export const SINONIMOS = new Map(Object.entries({
+  "aceite de oliva": "aceite de oliva virgen extra",
+  "aove": "aceite de oliva virgen extra",
+  "pimienta": "pimienta negra",
+  "chia": "semillas de chía",
+  "esparrago": "espárragos verdes",
+  "muslito de pollo": "muslo de pollo",
+  "carne molida cerdo": "carne picada de cerdo",
+  "avena": "avena en copos",
+  "pollo": "pechuga de pollo",
+  "pavo": "pechuga de pavo",
+  "agua que de arroz": "agua",
+  "fruta a tu eleccion": "fruta"
+}));
+
 // Ya con los siete días montados. Ver el comentario del generador sobre de
 // dónde sale cada uno.
 export const MENUS = [

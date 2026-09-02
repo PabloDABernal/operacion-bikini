@@ -1,6 +1,6 @@
 # 090 — Reparar la normalización
 
-- **Estado:** 📝 escrita el 2 de septiembre de 2026, revisada por `revisor-specs` (tres bloqueantes cerrados). **Pendiente de implementar.**
+- **Estado:** 🚧 implementada y desplegada el 2 de septiembre de 2026, revisada por `revisor-specs` (tres bloqueantes cerrados) y `revisor-codigo` (CUMPLE con observaciones, la observación arreglada). **Pendiente de que el usuario la pruebe.**
 - **Fecha:** 2026-09-02
 - **Referencia en PRODUCTO.md:** arregla la spec 089, declarada en "Qué hará (evolutivos de la fase productiva, desde el 31 de agosto de 2026)".
 
@@ -52,9 +52,13 @@ Medido sobre las 373 líneas reales, con el recorte y la búsqueda de esta spec:
 
 | | La 089 | Esta spec |
 |---|---|---|
-| Líneas enlazadas a los 133 limpios | — | **306 (82%)** |
-| Ingredientes nuevos creados | **181** | **22** |
-| De ellos, ilegibles (4+ palabras) | **114** | **9** |
+| Líneas enlazadas a los 133 limpios | — | **357 (96%)** |
+| Ingredientes nuevos creados | **181** | **8** |
+| De ellos, ilegibles (4+ palabras) | **114** | **0** |
+
+> Las cifras finales, mejores que las de la primera estimación (306/22/9): la
+> tabla de sinónimos y el arreglo del corte por la coma se llevaron el resto.
+> **La suite las comprueba y falla si empeoran.**
 
 Y de esos 22, la mayoría tienen equivalente en la despensa escrito de otra
 forma, que resuelve una tabla de sinónimos revisada a mano.

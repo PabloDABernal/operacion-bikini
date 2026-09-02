@@ -19,6 +19,12 @@ const ALIAS = JSON.parse(
   fs.readFileSync("docs/menus/alias-recetas.json", "utf8")
 ).alias;
 
+// Los sinonimos de ingredientes, revisados a mano (spec 090). Del recorte de
+// una linea de receta al nombre bueno de la despensa.
+const SINONIMOS = JSON.parse(
+  fs.readFileSync("docs/menus/sinonimos-ingredientes.json", "utf8")
+).sinonimos;
+
 // --- Recetas: una por nombre --------------------------------------------
 //
 // Diez recetas salen en varios menús (las tortitas, en los cuatro). Se queda la
@@ -114,6 +120,10 @@ export const RECETAS = ${JSON.stringify(recetas, null, 2)};
 // El nombre pelado, sin cantidades ni formatos: en la despensa marcas
 // "lentejas", y la receta ya dice "150 gramos de lenteja, en conserva".
 export const INGREDIENTES = ${JSON.stringify(datos.ingredientes, null, 2)};
+
+// Del recorte de una linea de receta al nombre bueno de la despensa (spec 090).
+// Sale de docs/menus/sinonimos-ingredientes.json, revisado a mano.
+export const SINONIMOS = new Map(Object.entries(${JSON.stringify(SINONIMOS, null, 2)}));
 
 // Ya con los siete días montados. Ver el comentario del generador sobre de
 // dónde sale cada uno.

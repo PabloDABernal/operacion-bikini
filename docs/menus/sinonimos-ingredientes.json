@@ -1,0 +1,21 @@
+{
+  "_nota": "Sinonimos de ingredientes (spec 090). Del recorte de una linea de receta al nombre bueno de la despensa. REVISADO A MANO: aqui es donde una equivocacion mete un ingrediente donde no toca, igual que con los alias de la spec 089. Para ver que queda sin sitio: node docs/menus/proponer-sinonimos.mjs. Las claves son el RECORTE tal y como sale de recortarLinea(): sin tildes, en minusculas, y despues del corte por la coma. Al cambiar esto hay que regenerar js/datos-iniciales.js.",
+  "sinonimos": {
+    "aceite de oliva": "aceite de oliva virgen extra",
+    "aove": "aceite de oliva virgen extra",
+    "pimienta": "pimienta negra",
+    "chia": "semillas de chía",
+    "esparrago": "espárragos verdes",
+    "muslito de pollo": "muslo de pollo",
+    "carne molida cerdo": "carne picada de cerdo",
+    "avena": "avena en copos",
+    "pollo": "pechuga de pollo",
+    "pavo": "pechuga de pavo",
+    "agua que de arroz": "agua",
+    "fruta a tu eleccion": "fruta"
+  },
+  "_sin_equivalente": {
+    "_nota": "Estos NO tienen equivalente en los 133 y se crean tal cual, que es lo correcto: son ingredientes de verdad que faltaban en la lista original. Se apunta aqui para no volver a buscarles sitio cada vez.",
+    "lista": ["agua", "fruta", "cafe", "finas hierbas", "queso fresco"]
+  }
+}
