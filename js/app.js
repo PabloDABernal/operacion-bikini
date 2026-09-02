@@ -22,7 +22,11 @@ import {
 
 import { pesosPorDia, mediaMovil, calendarioDeConstancia } from "./grafica.js";
 
-import { estadisticasDePeso, estadisticasDeDistancia } from "./estadisticas.js";
+import {
+  estadisticasDePeso,
+  estadisticasDeDistancia,
+  estadisticasDeComidas
+} from "./estadisticas.js";
 
 import { dibujarGrafica, dibujarCalendario } from "./grafica-svg.js";
 
@@ -184,6 +188,7 @@ import {
   etiquetaDeMomento,
   validarComida,
   guardarComida,
+  yaApuntada,
   actualizarComida,
   listarComidas,
   borrarComida
@@ -1690,6 +1695,90 @@ function refrescarPantallas() {
   refrescarGrafica();
   refrescarHoy();
   pintarDistanciaRecorrida();
+  pintarQueComes();
+}
+
+// Qué comes (spec 095): cuántas comidas apuntas, cuántas van enlazadas de
+// verdad, y qué recetas e ingredientes repites más.
+//
+// Cálculo puro sobre lo que ya está en memoria: ni una lectura nueva.
+function pintarQueComes() {
+  const lista = id("comidas-estadisticas");
+  const vacio = id("comidas-vacio");
+  const listas = id("comidas-listas");
+
+  lista.innerHTML = "";
+  listas.innerHTML = "";
+
+  const comidas = listaComidas.obtenerRegistros();
+  const datos = estadisticasDeComidas(
+    comidas,
+    hoyISO(),
+    (recetaId) => recetasCargadas.find((receta) => receta.id === recetaId),
+    (ingredienteId) =>
+      despensaCargada.find((ingrediente) => ingrediente.id === ingredienteId)?.nombre || ""
+  );
+
+  if (datos.total.comidas === 0) {
+    vacio.textContent = "Cuando apuntes comidas, aquí verás qué comes.";
+    return;
+  }
+
+  // Decirle "0%" a quien lleva meses escribiendo a mano no le dice QUÉ HACER.
+  if (datos.total.enlazadas === 0) {
+    vacio.textContent =
+      `Tienes ${datos.total.comidas} comidas apuntadas, pero ninguna enlazada a ` +
+      "una receta o a un ingrediente. Elige la receta al apuntar, o usa " +
+      "\"Me lo he comido\" desde tu dieta.";
+    return;
+  }
+  vacio.textContent = "";
+
+  const linea = (etiqueta, ventana) => {
+    const porcentaje = ventana.comidas
+      ? ` (${Math.round((ventana.enlazadas / ventana.comidas) * 100)}%)`
+      : "";
+    return lineaDeEstadistica(
+      etiqueta,
+      `${ventana.comidas} ${ventana.comidas === 1 ? "comida" : "comidas"}`,
+      ventana.comidas ? `${ventana.enlazadas} enlazadas${porcentaje}` : ""
+    );
+  };
+
+  lista.append(
+    linea("De hoy", datos.hoy),
+    linea("Últimos 7 días", datos.siete),
+    linea("Últimos 30 días", datos.treinta),
+    linea("Desde que empezaste", datos.total)
+  );
+
+  // Las listas salen de los últimos 30 días. Si ahí no hay nada enlazado, se
+  // dice: dos títulos con nada debajo parecen un fallo.
+  if (datos.recetas.length === 0 && datos.ingredientes.length === 0) {
+    listas.appendChild(
+      celda("No has apuntado nada enlazado en los últimos 30 días.", "explicacion")
+    );
+    return;
+  }
+
+  const masRepetido = (titulo, cosas) => {
+    if (cosas.length === 0) return;
+    const cabecera = document.createElement("h3");
+    cabecera.textContent = titulo;
+    listas.appendChild(cabecera);
+
+    const ul = document.createElement("ul");
+    ul.className = "resumen";
+    cosas.forEach((cosa) =>
+      ul.appendChild(
+        lineaDeEstadistica(cosa.nombre, `${cosa.veces} ${cosa.veces === 1 ? "vez" : "veces"}`)
+      )
+    );
+    listas.appendChild(ul);
+  };
+
+  masRepetido("Lo que más repites", datos.recetas);
+  masRepetido("Lo que más comes", datos.ingredientes);
 }
 
 // Cuánto llevas andado (spec 087).
@@ -2287,6 +2376,10 @@ async function refrescarRecetas() {
   if (dietaActiva) pintarDieta();
   // Y la lista de la compra, que sale de los ingredientes de esas recetas.
   pintarCompra();
+  // El modo "Una receta mia" del alta de comidas depende de que haya recetas
+  // (spec 093): sin esto, el boton se quedaria deshabilitado tras crear la
+  // primera, o habilitado tras borrar la ultima.
+  actualizarModoComida();
 }
 
 id("btn-nueva-receta").addEventListener("click", () => abrirFormularioDeReceta(null));
@@ -3726,12 +3819,21 @@ function filaDeComida(indiceDia, indiceComida, comida) {
     fila.appendChild(verReceta);
   }
 
-  if (comida.texto) {
+  // SOLO en el día de hoy (spec 094). Antes salía en las siete filas de la
+  // semana, y apuntarDeLaDieta() guarda siempre con la fecha de hoy: tocar el
+  // botón de la comida del martes un jueves la apuntaba como comida de hoy, en
+  // silencio. Era un fallo en producción, no una decisión.
+  const esHoy = indiceDia === diaDeLaSemana(hoyISO());
+
+  if (comida.texto && esHoy) {
     // Iconos y no texto (spec 065): los botones de texto tenían ancho variable
     // -"Me lo he comido" solo sale con texto, y el otro dice "Editar" o "+"-,
     // así que la columna del plato acababa en un sitio distinto en cada fila.
     // Con iconos todos miden lo mismo y las filas se alinean solas.
-    const apuntar = botonDeIcono("comido", "Me lo he comido", () =>
+    //
+    // La etiqueta dice QUÉ se apunta: con siete filas iguales, un "Me lo he
+    // comido" a secas no distingue una de otra.
+    const apuntar = botonDeIcono("comido", `Me lo he comido: ${comida.texto}`, () =>
       apuntarDeLaDieta(comida, apuntar)
     );
     apuntar.classList.add("boton-comido", "col-comido");
@@ -4007,14 +4109,48 @@ async function apuntarDeLaDieta(comida, boton) {
   const error = id("error-semana");
   error.textContent = "";
 
+  // Si ya lo tienes apuntado hoy, se pregunta y NO se impide: repetir plato
+  // puede ser verdad. Lo que no vale es duplicarlo sin enterarte por pulsar dos
+  // veces el mismo botón (spec 094).
+  const repetida = yaApuntada(
+    listaComidas.obtenerRegistros(),
+    hoyISO(),
+    comida.momento,
+    comida.texto
+  );
+  if (repetida) {
+    const seguir = confirm(
+      `Ya tienes apuntado "${comida.texto}" en ${etiquetaDeMomento(comida.momento).toLowerCase()} de hoy. ¿Lo apunto otra vez?`
+    );
+    if (!seguir) return;
+  }
+
+  boton.disabled = true;
+
   try {
-    await guardarComida(uidActual, comida.texto, comida.momento, hoyISO(), horaActual());
+    await guardarComida(
+      uidActual,
+      comida.texto,
+      comida.momento,
+      hoyISO(),
+      // SIN hora (spec 094): el plan no la tiene, y ponerle la de cuando pulsas
+      // el botón es inventarse a qué hora comiste. La hora es opcional desde la
+      // spec 014. Antes se guardaba horaActual().
+      "",
+      [],
+      "",
+      // Con sus recetas, que es lo que hace que el diario se llene ENLAZADO y
+      // las estadísticas de la spec 095 tengan qué contar.
+      idsDeRecetaDe(comida)
+    );
     avisarGuardado("guardado-dieta");
     responderEnBoton(boton, true);
     await listaComidas.refrescar();
   } catch {
     error.textContent = "No se ha podido apuntar. Comprueba tu conexión.";
     responderEnBoton(boton, false);
+  } finally {
+    boton.disabled = false;
   }
 }
 
@@ -5008,7 +5144,12 @@ const listaComidas = crearLista({
       detalles: [
         formatearFechaConHora(comida.fecha, comida.hora),
         etiquetaDeMomento(comida.momento),
-        conQue.length ? `+ ${conQue.join(", ")}` : ""
+        conQue.length ? `+ ${conQue.join(", ")}` : "",
+        // Las recetas de la comida, por su nombre (spec 093). Solo se nombran:
+        // el diario lo pinta crearLista(), que hace filas planas para cuatro
+        // pantallas y no sabe de filas desplegables. La receta se ve en el
+        // Recetario. Una receta borrada no se nombra.
+        nombresDeLasRecetas(comida)
       ]
     };
   },
@@ -5076,9 +5217,86 @@ function ingredientesMarcados() {
 // de modo, y cada vez que la despensa se refresca (un ingrediente puede
 // dejar de estar marcado, o dejar de haber ninguno, sin recargar la
 // página).
+// Las recetas elegidas al apuntar una comida (spec 093). Viven aquí y no en el
+// formulario porque hay que poder soltarlas de una en una.
+let recetasElegidas = [];
+
+// Pinta el panel de "Una receta mía": el desplegable con lo que queda por
+// elegir, los chips de lo elegido y el texto que se va a guardar.
+function pintarPanelDeReceta() {
+  const select = id("comida-receta");
+  const chips = id("chips-comida-receta");
+
+  // Las ya elegidas no se ofrecen: elegir dos veces la misma no dice nada.
+  select.innerHTML = "";
+  [
+    { valor: "", etiqueta: "añadir una receta…" },
+    ...recetasCargadas
+      .filter((receta) => !recetasElegidas.includes(receta.id))
+      .map((receta) => ({ valor: receta.id, etiqueta: receta.nombre }))
+  ].forEach((opcion) => {
+    const elemento = document.createElement("option");
+    elemento.value = opcion.valor;
+    elemento.textContent = opcion.etiqueta;
+    select.appendChild(elemento);
+  });
+  select.value = "";
+
+  chips.innerHTML = "";
+  recetasElegidas.forEach((recetaId) => {
+    const receta = recetasCargadas.find((otra) => otra.id === recetaId);
+    const chip = document.createElement("span");
+    chip.className = "chip-receta";
+    chip.append(celda(receta ? receta.nombre : "(receta borrada)", "chip-nombre"));
+
+    const quitar = document.createElement("button");
+    quitar.type = "button";
+    quitar.className = "chip-quitar";
+    quitar.setAttribute("aria-label", `Quitar ${receta ? receta.nombre : "esta receta"}`);
+    quitar.textContent = "×";
+    quitar.addEventListener("click", () => {
+      recetasElegidas = recetasElegidas.filter((otro) => otro !== recetaId);
+      pintarPanelDeReceta();
+    });
+    chip.appendChild(quitar);
+    chips.appendChild(chip);
+  });
+
+  id("texto-comida-receta").textContent = recetasElegidas.length
+    ? `Se apuntará como: ${textoDeLasRecetas()}`
+    : "";
+}
+
+// El texto que se guarda: los nombres de las recetas elegidas, unidos con ". "
+// como los platos de la nutricionista.
+function textoDeLasRecetas() {
+  return recetasElegidas
+    .map((recetaId) => recetasCargadas.find((otra) => otra.id === recetaId))
+    .filter(Boolean)
+    .map((receta) => receta.nombre)
+    .join(". ");
+}
+
+// Los nombres de las recetas enlazadas a una comida apuntada (spec 093), para
+// la linea de detalle del diario. Vacio si no lleva ninguna.
+function nombresDeLasRecetas(comida) {
+  return idsDeRecetaDe(comida)
+    .map((recetaId) => recetasCargadas.find((receta) => receta.id === recetaId))
+    .filter(Boolean)
+    .map((receta) => receta.nombre)
+    .join(", ");
+}
+
 function actualizarModoComida() {
   const marcados = ingredientesMarcados();
   const botonDespensa = id("btn-modo-comida-despensa");
+  const botonReceta = id("btn-modo-comida-receta");
+
+  // Sin recetas en el recetario no hay nada que elegir, igual que la despensa
+  // sin nada marcado (spec 084).
+  botonReceta.disabled = recetasCargadas.length === 0;
+  botonReceta.title = recetasCargadas.length ? "" : "Aún no tienes recetas.";
+  if (recetasCargadas.length === 0 && modoComida === "receta") modoComida = "escribir";
 
   // Sin ningún ingrediente marcado, el modo se deshabilita y se fuerza
   // "Escribir": nunca hay un modo activo en el que no se pueda guardar.
@@ -5099,7 +5317,10 @@ function actualizarModoComida() {
   });
 
   id("panel-comida-escribir").classList.toggle("oculta", modoComida !== "escribir");
+  id("panel-comida-receta").classList.toggle("oculta", modoComida !== "receta");
   id("panel-comida-despensa").classList.toggle("oculta", modoComida !== "despensa");
+
+  if (modoComida === "receta") pintarPanelDeReceta();
 
   if (modoComida === "despensa") {
     const select = id("comida-ingrediente");
@@ -5121,6 +5342,15 @@ document.querySelectorAll("[data-modo-comida]").forEach((boton) => {
   });
 });
 
+// El desplegable SUMA, como el de Mi dieta (spec 088): elegir una receta la
+// añade a la lista en vez de sustituir la anterior.
+id("comida-receta").addEventListener("change", (evento) => {
+  const receta = recetasCargadas.find((otra) => otra.id === evento.target.value);
+  if (!receta) return;
+  recetasElegidas = [...recetasElegidas, receta.id];
+  pintarPanelDeReceta();
+});
+
 // Estado inicial: despensaCargada aún puede estar vacía (nadie ha entrado
 // todavía), así que esto se repite al refrescar la despensa. Sin esta
 // llamada, el botón se vería habilitado un instante antes de la primera
@@ -5138,6 +5368,13 @@ id("form-comida").addEventListener("submit", async (evento) => {
   // exactamente lo de siempre.
   let textoBruto = id("comida-texto").value;
   let ingredienteId = "";
+  // En modo "Una receta mia" el texto son los nombres de las recetas elegidas
+  // (spec 093), y ademas se manda la lista de ids para que la comida quede
+  // enlazada de verdad.
+  const recetaIds = modoComida === "receta" ? recetasElegidas : [];
+  if (modoComida === "receta") {
+    textoBruto = textoDeLasRecetas();
+  }
   if (modoComida === "despensa") {
     const select = id("comida-ingrediente");
     const nombre = select.options[select.selectedIndex]?.textContent || "";
@@ -5152,7 +5389,8 @@ id("form-comida").addEventListener("submit", async (evento) => {
     id("comida-fecha").value,
     id("comida-hora").value,
     acompanamientosNuevos,
-    ingredienteId
+    ingredienteId,
+    recetaIds
   );
   if (resultado.error) {
     error.textContent = resultado.error;
@@ -5169,11 +5407,14 @@ id("form-comida").addEventListener("submit", async (evento) => {
       resultado.fecha,
       resultado.hora,
       resultado.acompanamientos,
-      resultado.ingredienteId
+      resultado.ingredienteId,
+      resultado.recetaIds
     );
     avisarGuardado("guardado-comida");
     id("comida-texto").value = "";
     id("comida-cantidad").value = "";
+    // Las recetas elegidas son de esa comida, no de la siguiente.
+    recetasElegidas = [];
     // Vuelve a "Escribir" tras guardar: elegir un ingrediente es la
     // excepción, no lo que se espera la próxima vez que se abre el
     // formulario (spec 084).

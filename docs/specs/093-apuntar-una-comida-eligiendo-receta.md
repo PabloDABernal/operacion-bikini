@@ -1,6 +1,6 @@
 # 093 — Apuntar una comida eligiendo una receta
 
-- **Estado:** 📝 escrita el 2 de septiembre de 2026, revisada por `revisor-specs` (tres bloqueantes, cerrados recortando el alcance). **Pendiente de implementar.**
+- **Estado:** 🚧 implementada y desplegada el 2 de septiembre de 2026, revisada por `revisor-specs` y `revisor-codigo` (CUMPLE). **Pendiente de que el usuario la pruebe.**
 - **Fecha:** 2026-09-02
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (evolutivos de la fase productiva…)", el evolutivo de saber lo que comes, primer punto.
 

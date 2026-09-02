@@ -102,6 +102,86 @@ export function estadisticasDeDistancia(ejercicios, hoy) {
   };
 }
 
+// --- Qué comes (spec 095) ------------------------------------------------
+//
+// El objetivo del usuario: "que todo se enlace, así puedo saber lo que como".
+// Las specs 093 y 094 llenan el diario de comidas enlazadas; esto lo devuelve
+// en forma de respuesta.
+//
+// Una comida está ENLAZADA si lleva al menos una receta (093) o un ingrediente
+// suelto (084): las dos formas dicen qué comiste de verdad.
+
+function enlazada(comida) {
+  return Boolean(
+    (Array.isArray(comida.recetaIds) && comida.recetaIds.length) || comida.ingredienteId
+  );
+}
+
+function ventanaDeComidas(comidas, hoy, dias) {
+  const desde = sumarDias(hoy, -(dias - 1));
+  const dentro = comidas.filter((c) => c.fecha >= desde && c.fecha <= hoy);
+  return {
+    comidas: dentro.length,
+    enlazadas: dentro.filter(enlazada).length
+  };
+}
+
+// Los cinco más repetidos, con el empate roto por orden alfabético para que la
+// lista no baile entre repintados.
+function masRepetidos(cuenta) {
+  return [...cuenta.entries()]
+    .sort((uno, otro) => otro[1] - uno[1] || uno[0].localeCompare(otro[0], "es"))
+    .slice(0, 5)
+    .map(([nombre, veces]) => ({ nombre, veces }));
+}
+
+// `recetaPorId` y `ingredientePorNombre` los pasa quien llama: aquí no se toca
+// ni el DOM ni la red.
+export function estadisticasDeComidas(comidas, hoy, recetaPorId, ingredientePorId) {
+  const todas = comidas || [];
+
+  // Las listas se calculan sobre los últimos 30 días: interesa qué comes AHORA,
+  // no qué comías hace tres meses.
+  const desde = sumarDias(hoy, -29);
+  const recientes = todas.filter((c) => c.fecha >= desde && c.fecha <= hoy);
+
+  const recetas = new Map();
+  const ingredientes = new Map();
+  const sumar = (mapa, nombre) => {
+    if (!nombre) return;
+    mapa.set(nombre, (mapa.get(nombre) || 0) + 1);
+  };
+
+  recientes.forEach((comida) => {
+    // El ingrediente suelto de la spec 084 cuenta una vez.
+    if (comida.ingredienteId) sumar(ingredientes, ingredientePorId(comida.ingredienteId));
+
+    (Array.isArray(comida.recetaIds) ? comida.recetaIds : []).forEach((recetaId) => {
+      const receta = recetaPorId(recetaId);
+      // Una receta borrada del recetario no se cuenta: no se sabe qué era.
+      if (!receta) return;
+      sumar(recetas, receta.nombre);
+
+      (receta.ingredientes || []).forEach((linea) => {
+        // Solo las líneas ENLAZADAS. Una línea de texto —las recetas que propone
+        // la IA se guardan así— no dice qué ingrediente es, y contarla sería
+        // inventarse el dato.
+        if (!linea || typeof linea !== "object" || !linea.ingredienteId) return;
+        sumar(ingredientes, ingredientePorId(linea.ingredienteId));
+      });
+    });
+  });
+
+  return {
+    hoy: ventanaDeComidas(todas, hoy, 1),
+    siete: ventanaDeComidas(todas, hoy, 7),
+    treinta: ventanaDeComidas(todas, hoy, 30),
+    total: { comidas: todas.length, enlazadas: todas.filter(enlazada).length },
+    recetas: masRepetidos(recetas),
+    ingredientes: masRepetidos(ingredientes)
+  };
+}
+
 export function estadisticasDePeso(diarios, hoy, pesoObjetivo) {
   return {
     semana: variacion(diarios, hoy, 7),

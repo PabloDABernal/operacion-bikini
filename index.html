@@ -218,11 +218,22 @@
              sin inventar un estilo nuevo. -->
         <div class="subpestanas-internas" aria-labelledby="etiqueta-comida-texto">
           <button type="button" class="panel-recetario-boton activa" data-modo-comida="escribir" aria-current="true">Escribir</button>
+          <button type="button" class="panel-recetario-boton" id="btn-modo-comida-receta" data-modo-comida="receta">Una receta mía</button>
           <button type="button" class="panel-recetario-boton" id="btn-modo-comida-despensa" data-modo-comida="despensa">Elegir de mi despensa</button>
         </div>
 
         <div id="panel-comida-escribir">
         <textarea id="comida-texto" rows="2" placeholder="lentejas y una manzana"></textarea>
+        </div>
+
+        <!-- Apuntar eligiendo una receta (spec 093). Mismo gesto que el editor
+             de Mi dieta desde la 088 —desplegable que SUMA y chips con x— para
+             no tener dos formas de hacer lo mismo. -->
+        <div id="panel-comida-receta" class="oculta">
+        <label for="comida-receta">Receta</label>
+        <select id="comida-receta"></select>
+        <div id="chips-comida-receta" class="chips-receta"></div>
+        <p id="texto-comida-receta" class="registro-detalle"></p>
         </div>
 
         <div id="panel-comida-despensa" class="oculta">
@@ -322,6 +333,13 @@
       <button type="button" id="btn-reintentar-comidas" class="oculta">Reintentar</button>
       <ul id="lista-comidas"></ul>
       <button type="button" id="btn-desplegar-comidas" class="desplegar oculta"></button>
+
+      <!-- Qué comes (spec 095). Lo que se cuenta vive donde se apunta, igual
+           que los kilómetros en Ejercicio desde la 087. -->
+      <h2>Qué comes</h2>
+      <p id="comidas-vacio" class="explicacion"></p>
+      <ul id="comidas-estadisticas" class="resumen"></ul>
+      <div id="comidas-listas"></div>
 
       <h2>Lo que llevo bebido</h2>
       <div class="filtro-dia">

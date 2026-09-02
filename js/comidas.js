@@ -99,7 +99,18 @@ function coleccionDe(uid) {
 // despensa"), y vacío cuando se escribió a mano. Es un id de Firestore que
 // ya viene validado por quien construye el desplegable: no hace falta
 // comprobar su forma aquí.
-export function validarComida(textoBruto, momento, fecha, hora, acompanamientos = [], ingredienteId = "") {
+// `recetaIds` va AL FINAL y con valor por defecto (spec 093): los llamadores de
+// siempre —"lo de siempre" (013), el alta a mano, apuntar de la dieta— siguen
+// llamando con los argumentos que ya pasaban y no se enteran de nada.
+export function validarComida(
+  textoBruto,
+  momento,
+  fecha,
+  hora,
+  acompanamientos = [],
+  ingredienteId = "",
+  recetaIds = []
+) {
   const texto = String(textoBruto ?? "").trim();
 
   if (texto === "") {
@@ -124,11 +135,41 @@ export function validarComida(textoBruto, momento, fecha, hora, acompanamientos 
     fecha,
     hora: hora || "",
     acompanamientos: acompanamientosDe({ acompanamientos }),
-    ingredienteId: String(ingredienteId ?? "").trim()
+    ingredienteId: String(ingredienteId ?? "").trim(),
+    // Se llama igual que en la dieta (spec 088) a proposito: es lo mismo, y asi
+    // idsDeRecetaDe() sirve para las dos sin tocarla.
+    recetaIds: (Array.isArray(recetaIds) ? recetaIds : []).filter(Boolean)
   };
 }
 
-export function guardarComida(uid, texto, momento, fecha, hora, acompanamientos = [], ingredienteId = "") {
+// ¿Ya está apuntada esta comida hoy? (spec 094)
+//
+// Mismo día, mismo momento y mismo texto. Se compara normalizado, sin tildes ni
+// mayúsculas, porque el plan y lo apuntado pueden venir escritos distinto.
+//
+// Sirve para PREGUNTAR, no para impedir: repetir plato puede ser verdad.
+export function yaApuntada(comidas, fecha, momento, texto) {
+  const clave = (t) =>
+    String(t || "").trim().toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+
+  return (comidas || []).some(
+    (comida) =>
+      comida.fecha === fecha &&
+      comida.momento === momento &&
+      clave(comida.texto) === clave(texto)
+  );
+}
+
+export function guardarComida(
+  uid,
+  texto,
+  momento,
+  fecha,
+  hora,
+  acompanamientos = [],
+  ingredienteId = "",
+  recetaIds = []
+) {
   const comida = { texto, momento, fecha, creadoEn: serverTimestamp() };
   if (hora) comida.hora = hora;
   // Solo si hay algo: una comida sin acompañamientos se guarda exactamente como
@@ -138,6 +179,10 @@ export function guardarComida(uid, texto, momento, fecha, hora, acompanamientos 
   // Igual con el enlace (spec 084): una comida escrita a mano se guarda
   // exactamente como antes, sin el campo.
   if (ingredienteId) comida.ingredienteId = ingredienteId;
+  // Y lo mismo con las recetas (spec 093): una comida escrita a mano se guarda
+  // byte a byte como antes, sin un array vacio de relleno.
+  const recetas = (Array.isArray(recetaIds) ? recetaIds : []).filter(Boolean);
+  if (recetas.length) comida.recetaIds = recetas;
   return addDoc(coleccionDe(uid), comida);
 }
 

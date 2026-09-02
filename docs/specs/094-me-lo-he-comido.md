@@ -1,6 +1,6 @@
 # 094 — "Me lo he comido": del plan al diario
 
-- **Estado:** 📝 escrita el 2 de septiembre de 2026, revisada por `revisor-specs` (tres bloqueantes cerrados: la feature YA EXISTE y tiene un fallo en producción). **Pendiente de implementar.**
+- **Estado:** 🚧 implementada y desplegada el 2 de septiembre de 2026, revisada por `revisor-specs` y `revisor-codigo` (CUMPLE). **Pendiente de que el usuario la pruebe.**
 - **Fecha:** 2026-09-02
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (evolutivos de la fase productiva…)", el evolutivo de saber lo que comes, segundo punto.
 

@@ -1,6 +1,6 @@
 # 095 — Estadísticas de lo que comes
 
-- **Estado:** 📝 escrita el 2 de septiembre de 2026, revisada por `revisor-specs` (sin bloqueantes). **Pendiente de implementar.**
+- **Estado:** 🚧 implementada y desplegada el 2 de septiembre de 2026, revisada por `revisor-specs` y `revisor-codigo` (CUMPLE). **Pendiente de que el usuario la pruebe.**
 - **Fecha:** 2026-09-02
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (evolutivos de la fase productiva…)", el evolutivo de saber lo que comes, tercer punto.
 
