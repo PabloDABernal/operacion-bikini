@@ -1,0 +1,67 @@
+{
+  "_nota": "Alias de las recetas (spec 089). Otros nombres por los que se reconoce una receta dentro del texto de un plato del menú. PROPUESTO por docs/menus/proponer-alias.mjs y REVISADO A MANO: lo que vale es la revisión. Un alias equivocado es una mentira en pantalla (spec 076). Al cambiarlo hay que regenerar js/datos-iniciales.js.",
+  "alias": {
+    "Brochetas de pollo": [
+      "1-2 brochetas de pavo / pollo"
+    ],
+    "Arroz con verduras": [
+      "125gr de arroz (hervido) con verduras"
+    ],
+    "Yogur con fruta y cereal": [
+      "125gr de yogur con fruta y 30gr de cereal",
+      "125gr de yogur natural con pieza de fruta y 30gr de cereal sin azúcar",
+      "125gr de yogur vegetal con fruta y 30gr de cereal sin azúcar (arroz, quinoa, maíz, sin gluten...)"
+    ],
+    "Garbanzos con judías verdes": [
+      "130gr de garbanzos (en conserva) con judías verdes"
+    ],
+    "Pasta a la boloñesa": [
+      "50gr de pasta integral / de lentejas (en seco) a la boloñesa (110gr de carne picada)",
+      "60-70gr de pasta (en seco) a la boloñesa"
+    ],
+    "Boniato asado": [
+      "Boniato pequeño asado"
+    ],
+    "Calabaza con requesón, burrata o mozzarella": [
+      "Calabaza con requesón / burrata / mozzarella"
+    ],
+    "Ensalada de lentejas y mostaza": [
+      "Ensalada de 150gr de lentejas y mostaza"
+    ],
+    "Ensalada de pasta de lentejas y queso de cabra": [
+      "Ensalada de 50-60gr pasta de lentejas (seco) y queso de cabra + lata de atún"
+    ],
+    "Espinacas con garbanzos": [
+      "Espinacas con 150gr de garbanzos (en conserva)"
+    ],
+    "Gachas de avena al microondas con fruta": [
+      "Gachas de 30-40gr de avena al microondas con fruta"
+    ],
+    "Gachas de avena y arándanos": [
+      "Gachas de 30-40gr de avena y arándanos"
+    ],
+    "Pudding de chía, avena y fruta": [
+      "Pudding de chía, 30gr de avena y fruta"
+    ],
+    "Tortilla a la francesa con jamón de york": [
+      "Tortilla a la francesa de 2 huevos con jamón de york"
+    ],
+    "Tortilla de atún": [
+      "Tortilla de 2 huevos con 1 lata de atún al natural",
+      "Tortilla de 2 huevos y una lata de atún al natural"
+    ],
+    "Tortilla de pimiento rojo, berenjena y jamón serrano": [
+      "Tortilla de 2 huevos con pimiento rojo, berenjena y jamón serrano"
+    ],
+    "Tortilla de verduras": [
+      "Tortilla de 2 huevos con verduras"
+    ],
+    "Tortitas de avena y plátano": [
+      "Tortitas de 30gr de avena y plátano",
+      "Tortitas de 40gr de avena y plátano"
+    ],
+    "Ensalada de alubias con atún": [
+      "ensalada de 120-150gr de alubias (en conserva) con atún"
+    ]
+  }
+}

@@ -12,6 +12,13 @@ const datos = JSON.parse(
   fs.readFileSync("docs/menus/recetas-transcritas.json", "utf8")
 );
 
+// Los alias, revisados a mano (spec 089). Los propone
+// docs/menus/proponer-alias.mjs, pero lo que vale es la revisión: un alias
+// equivocado es una mentira en pantalla (spec 076).
+const ALIAS = JSON.parse(
+  fs.readFileSync("docs/menus/alias-recetas.json", "utf8")
+).alias;
+
 // --- Recetas: una por nombre --------------------------------------------
 //
 // Diez recetas salen en varios menús (las tortitas, en los cuatro). Se queda la
@@ -26,7 +33,11 @@ for (const receta of datos.recetas) {
     nombre: receta.nombre,
     raciones: receta.raciones,
     ingredientes: receta.ingredientes,
-    preparacion: receta.preparacion
+    preparacion: receta.preparacion,
+    // Otros nombres por los que se la reconoce dentro del texto de un plato.
+    // Lista vacía si no tiene: así todas las recetas tienen la misma forma y
+    // nadie que la lea tiene que comprobar si el campo existe.
+    alias: ALIAS[receta.nombre] || []
   });
 }
 

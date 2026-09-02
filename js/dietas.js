@@ -201,20 +201,26 @@ function recetasEnElTexto(texto, porLongitud) {
   const pisa = (inicio, fin) =>
     ocupados.some((tramo) => inicio < tramo.fin && fin > tramo.inicio);
 
-  porLongitud.forEach((receta) => {
+  porLongitud.forEach((candidato) => {
+    // Una receta entra COMO MUCHO UNA VEZ (spec 089). Desde los alias, la misma
+    // receta tiene varios candidatos —su nombre y cada alias— y dos podrían
+    // encajar en tramos distintos de la misma frase: la comida acabaría con la
+    // receta repetida y el día pintaría dos tarjetas iguales.
+    if (ids.includes(candidato.id)) return;
+
     // TODAS las apariciones, no solo la primera: si la primera está pisada por
     // una receta más larga, más adelante puede haber un hueco libre. Con solo
     // indexOf(), "Ensalada de repollo y manzana. Ensalada de repollo" enlazaba
     // una sola. Lo cazó la suite de casos, no la lectura de la spec.
     let desde = 0;
     for (;;) {
-      const inicio = donde.indexOf(receta.clave, desde);
+      const inicio = donde.indexOf(candidato.clave, desde);
       if (inicio === -1) return;
 
-      const fin = inicio + receta.clave.length;
+      const fin = inicio + candidato.clave.length;
       if (!pisa(inicio, fin)) {
         ocupados.push({ inicio, fin });
-        ids.push(receta.id);
+        ids.push(candidato.id);
         return;
       }
       // Pisada: se sigue buscando desde el siguiente carácter.
@@ -225,10 +231,26 @@ function recetasEnElTexto(texto, porLongitud) {
   return ids;
 }
 
+// Cada nombre por el que se puede reconocer una receta dentro del texto de un
+// plato: el suyo, y sus alias (spec 089).
+//
+// Los alias existen porque una receta se llama "Tortilla de atún" y el plato
+// del menú dice "Tortilla de 2 huevos con 1 lata de atún al natural". Salen de
+// docs/menus/alias-recetas.json, revisado a mano, y llegan aquí en la propia
+// receta del usuario.
+//
+// Son candidatos independientes con su propia longitud, así que un alias —que
+// es más largo que el nombre— se prueba antes. Es lo que se quiere: el alias
+// casa con el texto del menú y el nombre corto es lo genérico.
+function candidatosDeReceta(receta) {
+  return [receta.nombre, ...(receta.alias || [])]
+    .map((nombre) => ({ id: receta.id, clave: clave(nombre) }))
+    .filter((candidato) => candidato.clave.length >= MINIMO_PARA_ENLAZAR);
+}
+
 export function semanaDesdeMenu(dias, recetas) {
   const porLongitud = (recetas || [])
-    .map((receta) => ({ id: receta.id, clave: clave(receta.nombre) }))
-    .filter((receta) => receta.clave.length >= MINIMO_PARA_ENLAZAR)
+    .flatMap(candidatosDeReceta)
     .sort((uno, otro) => otro.clave.length - uno.clave.length);
 
   return dias.map((dia) => ({

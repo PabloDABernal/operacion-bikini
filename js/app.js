@@ -139,7 +139,17 @@ import {
 } from "./material.js";
 
 import { hayQueSembrar, sembrar, olvidarLaSiembra } from "./siembra.js";
-import { VERSION as VERSION_DATOS_INICIALES, MENUS } from "./datos-iniciales.js";
+import {
+  VERSION as VERSION_DATOS_INICIALES,
+  MENUS,
+  RECETAS as RECETAS_INICIALES
+} from "./datos-iniciales.js";
+import {
+  planDeNormalizacion,
+  aliasDeLosDatos,
+  nuevoIdDeIngrediente,
+  escribirNormalizacion
+} from "./normalizacion.js";
 
 // Ingredientes de una receta recién creada que se parecen a algo que ya tenías
 // (spec 072). Se preguntan al terminar la dieta; hasta que se contesten, no se
@@ -7185,6 +7195,9 @@ observarSesion(
     mostrar("principal");
 
     id("email-ajustes").textContent = usuario.email;
+    // El bloque de normalizar solo se pinta para una cuenta (spec 089), y el
+    // email no se sabe hasta aqui.
+    pintarZonaDeNormalizar();
     // Con await: refrescarTodo() pinta la pestaña Consulta, que necesita saber
     // si hay operación activa. Sin esperar aquí, se pintaba con el valor de
     // antes de leerlo.
@@ -7205,3 +7218,77 @@ observarSesion(
     errorLogin.textContent = mensajeDeError(ERROR_NO_AUTORIZADO);
   }
 );
+
+// --- Normalizar las recetas (spec 089) -----------------------------------
+//
+// Pasa los ingredientes de las recetas sembradas de texto a piezas enlazadas
+// con la despensa, y les pone sus alias. Las 73 recetas llegaron en el formato
+// viejo porque son anteriores a la spec 082.
+//
+// Se pinta SOLO para una cuenta: se prueba ahí y, si va bien, se abre a las
+// demás quitando esta constante. No es una medida de seguridad —las reglas de
+// Firestore ya impiden escribir en los datos de otro—: es para no tocar las
+// recetas de los demás sin haberlo probado antes.
+const CUENTA_QUE_NORMALIZA = "pantonbernal@gmail.com";
+
+function pintarZonaDeNormalizar() {
+  id("zona-normalizar").classList.toggle(
+    "oculta",
+    String(emailActual || "").toLowerCase() !== CUENTA_QUE_NORMALIZA
+  );
+}
+
+// La misma confirmación por escrito que el reinicio: no borra, pero escribe en
+// las 73 recetas de una vez y no se deshace.
+id("palabra-normalizar").addEventListener("input", (evento) => {
+  id("btn-normalizar").disabled =
+    evento.target.value.trim().toUpperCase() !== "NORMALIZAR";
+});
+
+id("btn-normalizar").addEventListener("click", async () => {
+  const estado = id("estado-normalizar");
+  const error = id("error-normalizar");
+
+  error.textContent = "";
+  estado.textContent = "Normalizando…";
+  id("btn-normalizar").disabled = true;
+
+  try {
+    const plan = planDeNormalizacion(
+      recetasCargadas,
+      despensaCargada,
+      aliasDeLosDatos(RECETAS_INICIALES),
+      () => nuevoIdDeIngrediente(uidActual)
+    );
+
+    if (plan.recetas.length === 0 && plan.ingredientesNuevos.length === 0) {
+      // Con otras palabras y no el mismo texto lleno de ceros: así se ve que no
+      // ha hecho nada en vez de parecer que ha fallado.
+      estado.textContent = "Ya estaba todo normalizado: no ha hecho falta cambiar nada.";
+      id("palabra-normalizar").value = "";
+      return;
+    }
+
+    await escribirNormalizacion(uidActual, plan);
+    await refrescarRecetas();
+    await refrescarDespensa();
+
+    const { revisadas, normalizadas, lineasEnlazadas, ingredientesCreados } =
+      plan.resumen;
+    estado.textContent =
+      `Listo: ${revisadas} recetas revisadas, ${normalizadas} normalizadas, ` +
+      `${lineasEnlazadas} líneas enlazadas y ${ingredientesCreados} ` +
+      `ingredientes nuevos en tu despensa.`;
+    id("palabra-normalizar").value = "";
+  } catch {
+    // Lo escrito hasta aquí se queda hecho, y no pasa nada: volver a pulsarlo
+    // se salta lo que ya está y termina lo que falte.
+    estado.textContent = "";
+    error.textContent =
+      "No se ha podido terminar. Comprueba tu conexión y vuelve a pulsarlo: " +
+      "lo que ya se hizo no se repite.";
+  } finally {
+    // Vuelve a pedir la palabra: cada pasada se confirma entera.
+    id("btn-normalizar").disabled = true;
+  }
+});

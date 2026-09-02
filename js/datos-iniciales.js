@@ -26,6 +26,10 @@ export const RECETAS = [
     "preparacion": [
       "En un cuenco batimos el huevo y añadimos el atún junto con las especias que más nos gusten.",
       "Cocinamos la mezcla en una sartén caliente dándole la forma típica de la tortilla."
+    ],
+    "alias": [
+      "Tortilla de 2 huevos con 1 lata de atún al natural",
+      "Tortilla de 2 huevos y una lata de atún al natural"
     ]
   },
   {
@@ -36,7 +40,8 @@ export const RECETAS = [
     ],
     "preparacion": [
       "Echar un agua de aceite y retirar el exceso con una servilleta. Cuando el aceite en la sartén se encuentre caliente añadimos el huevo, bajamos el fuego y tapamos la sartén hasta obtener la cocción deseada."
-    ]
+    ],
+    "alias": []
   },
   {
     "nombre": "Tortitas de avena y plátano",
@@ -55,6 +60,10 @@ export const RECETAS = [
       "Puedes ir poniéndolas sobre un papel absorbente para retirar el exceso de grasa.",
       "Sirve tal cual con la otra mitad del plátano troceado y, si quieres, 1 onza de chocolate 75-85% derretida por encima.",
       "Puedes agregar un poco de levadura química a la masa si quieres que te queden más esponjosas."
+    ],
+    "alias": [
+      "Tortitas de 30gr de avena y plátano",
+      "Tortitas de 40gr de avena y plátano"
     ]
   },
   {
@@ -73,7 +82,8 @@ export const RECETAS = [
       "Pica el ajo y el perejil y añádelo a un mortero junto con el AOVE (aceite de oliva virgen extra) y cubre los boquerones con este majado.",
       "Mete la bandeja con los boquerones dentro del horno.",
       "Estarán listos entre los 6 y 8 minutos."
-    ]
+    ],
+    "alias": []
   },
   {
     "nombre": "Pasta a la boloñesa",
@@ -95,6 +105,10 @@ export const RECETAS = [
       "Cuando veamos que la carne ya está suelta y ha cambiado de color casi en su totalidad debido a la cocción, incorporaremos el tomate frito. Cubriremos todo bien con el tomate y añadiremos un poco de pimienta y orégano. Dejamos que se cocine durante unos 10 min aproximadamente.",
       "Ponemos una olla con agua y una pizca de sal a hervir, añadimos la pasta y esperamos 12 minutos para que se cueza.",
       "Finalmente mezclamos nuestra salsa boloñesa con la pasta."
+    ],
+    "alias": [
+      "50gr de pasta integral / de lentejas (en seco) a la boloñesa (110gr de carne picada)",
+      "60-70gr de pasta (en seco) a la boloñesa"
     ]
   },
   {
@@ -116,7 +130,8 @@ export const RECETAS = [
       "Añadir sal, tomillo y nuez moscada.",
       "Añadir la tarrina de queso de burgos y dejar reposar unos minutos.",
       "Pasar la turmix y listo para servir."
-    ]
+    ],
+    "alias": []
   },
   {
     "nombre": "Pudding de chía y canela",
@@ -132,7 +147,8 @@ export const RECETAS = [
       "Dejar en remojo la chía con la leche (o el agua o la bebida vegetal) y la canela durante al menos 15 minutos o varias horas. De forma preferente dejarlas durante toda la noche.",
       "Una vez se hayan “hinchado”, mezclar la chía con el yogur o el kéfir.",
       "Puedes poner alguna fruta como topping."
-    ]
+    ],
+    "alias": []
   },
   {
     "nombre": "Lubina al horno con tomates y trigueros",
@@ -149,7 +165,8 @@ export const RECETAS = [
       "Poner el pan rallado, la albahaca, los piñones y aceite de oliva en un recipiente. Triturar todo y reservar.",
       "Cubrir la lubina con la mezcla reservada. Poner en una bandeja de horno junto con el tomate cortado a mitades, y las puntas de los espárragos.",
       "Introducir la bandeja en el horno y dejar que se cocine a 200 ºC durante unos 8-14 minutos (comprobar que está cocinado, ya que esto va a depender de la pieza y del horno). Sacar del horno y servir."
-    ]
+    ],
+    "alias": []
   },
   {
     "nombre": "Pudding de chía y mermelada",
@@ -164,7 +181,8 @@ export const RECETAS = [
       "Mezcla la leche y la chía en un recipiente pequeño y revuelve muy bien para evitar que las semillas de chía queden pegadas.",
       "Lleva tu mezcla al refrigerador y deja reposar de 30 minutos a 6-8 horas.",
       "Una vez transcurrido el tiempo, retira del refrigerador y decora con mermelada sin azúcar añadida y algunos berries. Y listo, mezcla bien y disfruta."
-    ]
+    ],
+    "alias": []
   },
   {
     "nombre": "Bacalao al papillote con verduras",
@@ -181,7 +199,8 @@ export const RECETAS = [
       "Hacer una cama con las verduras en un trozo de papel de aluminio (mejor si antes las hemos salteado ligeramente) y poner el bacalao encima con una pizca de aceite de oliva.",
       "Cerrar el papel de aluminio para que no se salga el jugo.",
       "Cocinar en el horno durante 15 minutos."
-    ]
+    ],
+    "alias": []
   },
   {
     "nombre": "Champiñones portobello en salsa de soja",
@@ -195,7 +214,8 @@ export const RECETAS = [
     ],
     "preparacion": [
       "Corta tus champiñones en cuatro. Pela y pica tu ajo. En una sartén caliente con aceite echa el ajo y saltea un minuto, seguidamente añade los champiñones y deja cocer hasta que cambien de color. Añade ahora el agua y la salsa de soja y deja que el líquido se espese y reduzca a la mitad."
-    ]
+    ],
+    "alias": []
   },
   {
     "nombre": "Arroz con verduras",
@@ -215,6 +235,9 @@ export const RECETAS = [
       "Cuando se evapore el alcohol, poner un poco de agua para guisar la verdura.",
       "Dejar unos minutos antes de poner el arroz. Cocer hasta que esté tierno.",
       "Dejar reposar antes de servir."
+    ],
+    "alias": [
+      "125gr de arroz (hervido) con verduras"
     ]
   },
   {
@@ -228,6 +251,11 @@ export const RECETAS = [
     ],
     "preparacion": [
       "Pon en tu bol el yogur de proteínas, queso batido o yogur griego. Puedes añadir edulcorante a tu gusto si lo deseas. Coloca los cereales a un lado y las frutas al otro o a tu gusto."
+    ],
+    "alias": [
+      "125gr de yogur con fruta y 30gr de cereal",
+      "125gr de yogur natural con pieza de fruta y 30gr de cereal sin azúcar",
+      "125gr de yogur vegetal con fruta y 30gr de cereal sin azúcar (arroz, quinoa, maíz, sin gluten...)"
     ]
   },
   {
@@ -249,7 +277,8 @@ export const RECETAS = [
       "Agregar el atún escurrido, la pulpa de berenjena y condimentar a gusto (sal, pimienta, perejil y endulzante si les gusta agridulce).",
       "Agregar una cucharada sopera de queso untable 0% grasa opcionalmente.",
       "Rellenar las cáscaras con la mezcla obtenida y llevar al micro durante 3 minutos aprox."
-    ]
+    ],
+    "alias": []
   },
   {
     "nombre": "Brochetas de pavo y calabacín",
@@ -262,7 +291,8 @@ export const RECETAS = [
     ],
     "preparacion": [
       "Haz las brochetas con los alimentos en dados y cocina a la vez."
-    ]
+    ],
+    "alias": []
   },
   {
     "nombre": "Muslo de pollo asado",
@@ -281,7 +311,8 @@ export const RECETAS = [
       "En un mortero ponemos el aceite, el ajo y el perejil y lo majamos todo muy bien. Lo extendemos por todo el pollo.",
       "En una fuente para horno ponemos el pollo y lo regamos con el vino blanco (opcional).",
       "Precalienta el horno a 200º, una vez que tenga la temperatura adecuada, introduce la bandeja en el horno y mantén una temperatura de 180º C. Pasados unos 15 minutos dar la vuelta y dejarlo 15 minutos más o hasta cuando esté hecho."
-    ]
+    ],
+    "alias": []
   },
   {
     "nombre": "Pudding de chía, avena y fruta",
@@ -296,6 +327,9 @@ export const RECETAS = [
     ],
     "preparacion": [
       "Mezcla todos los ingredientes menos la fruta y deja reposar en la nevera mínimo 30 minutos (ideal toda la noche). Incorpora la fruta y disfruta."
+    ],
+    "alias": [
+      "Pudding de chía, 30gr de avena y fruta"
     ]
   },
   {
@@ -312,7 +346,8 @@ export const RECETAS = [
     ],
     "preparacion": [
       "Cogemos una bolsa de espinacas y lo echamos en un bol. A continuación, cortamos a cuadraditos el aguacate y el tomate. Lo añadimos en el bol. Agregamos las latas de atún al natural escurrido. Aliñamos con aceite de oliva, vinagre y sal. Por último, lo removemos todo y ya tendremos nuestra receta cocina de ensalada de espinacas fácil y rápida."
-    ]
+    ],
+    "alias": []
   },
   {
     "nombre": "Café con bebida de avena",
@@ -323,7 +358,8 @@ export const RECETAS = [
     ],
     "preparacion": [
       "Mezclar."
-    ]
+    ],
+    "alias": []
   },
   {
     "nombre": "Guisantes con ajo y cebolla",
@@ -336,7 +372,8 @@ export const RECETAS = [
     ],
     "preparacion": [
       "Sofríe la cebolla y el ajo, añade los guisantes y deja tres minutos más."
-    ]
+    ],
+    "alias": []
   },
   {
     "nombre": "Alcachofas a la plancha con mostaza",
@@ -352,7 +389,8 @@ export const RECETAS = [
       "Ponerlas en la plancha caliente con un hilo de aceite y dorar, con pimienta y sal.",
       "Cuando estén doradas servir en un plato con mostaza de dijón, una cucharadita de acompañamiento.",
       "Se puede utilizar alcachofas en conserva."
-    ]
+    ],
+    "alias": []
   },
   {
     "nombre": "Tortilla de pimiento rojo, berenjena y jamón serrano",
@@ -368,6 +406,9 @@ export const RECETAS = [
     ],
     "preparacion": [
       "Corta tus verduras en pedacitos pequeños y saltea en una sartén con un chorrito de aceite hasta que quede bien pochado. Bate tus huevos hasta espumar junto con las claras. Añade a tus huevos, las verduras junto al jamón serrano cortado a pedazos. Mezclar bien hasta impregnar bien todos los ingredientes. Añade sal y pimienta si lo deseas y lleva de nuevo a la sartén. Deja que cueza un lado y dale la vuelta, deja cocer al gusto y listo."
+    ],
+    "alias": [
+      "Tortilla de 2 huevos con pimiento rojo, berenjena y jamón serrano"
     ]
   },
   {
@@ -387,7 +428,8 @@ export const RECETAS = [
       "En una sartén, con un poco de aceite, saltea a fuego medio todas las verduras: la cebolla, los champiñones y los ramilletes de brócoli, durante 7-8 minutos. Comprueba que las verduras están crujientes pero no crudas.",
       "Corta la pechuga de pollo en tiras o dados y, en otra sartén con un poco de aceite y una pizca de sal, cocínalo hasta que esté dorado.",
       "Añade el pollo a la sartén que contiene las verduras. Añade la salsa de soja y sube el fuego. Saltea 2-3 minutos más, apaga el fuego y sirve el contenido de la sartén en tu plato."
-    ]
+    ],
+    "alias": []
   },
   {
     "nombre": "Berenjena a la plancha",
@@ -399,7 +441,8 @@ export const RECETAS = [
     ],
     "preparacion": [
       "Lava y corta tu berenjena a rodajas y saltea en una sartén caliente con AOVE hasta cocer. Salpimentar al gusto y servir."
-    ]
+    ],
+    "alias": []
   },
   {
     "nombre": "Hamburguesa de ternera",
@@ -409,7 +452,8 @@ export const RECETAS = [
     ],
     "preparacion": [
       "Hamburguesa a la plancha."
-    ]
+    ],
+    "alias": []
   },
   {
     "nombre": "Crema de zanahoria",
@@ -427,7 +471,8 @@ export const RECETAS = [
       "Salpimentar y añadir un poco de agua.",
       "Dejar que cueza todo junto hasta que las verduras estén blanditas.",
       "Triturar en la batidora hasta que quede una crema fina y servir."
-    ]
+    ],
+    "alias": []
   },
   {
     "nombre": "Lubina a la plancha",
@@ -437,7 +482,8 @@ export const RECETAS = [
     ],
     "preparacion": [
       "Cocinar la lubina con poco AOVE o sin él en una sartén antiadherente. Primero por la parte de la piel durante unos 5 minutos aprox, darle la vuelta y dejarlo 3 minutos más o al gusto."
-    ]
+    ],
+    "alias": []
   },
   {
     "nombre": "Ensalada de repollo y manzana",
@@ -455,7 +501,8 @@ export const RECETAS = [
       "En un envase grande y cómodo, mezcla los repollos y la zanahoria. Luego aderézalos, añadiendo la mezcla del paso anterior.",
       "Corta las manzanas en tiritas, estilo julienne.",
       "Mezcla las manzanas en tiritas con el resto de los ingredientes y sirve para acompañar."
-    ]
+    ],
+    "alias": []
   },
   {
     "nombre": "Boniato asado",
@@ -466,6 +513,9 @@ export const RECETAS = [
     "preparacion": [
       "Cortar el boniato por la mitad y coloca boca abajo en el horno sobre papel de horno.",
       "Cocinar en el horno a 180º durante 20 minutos, según horno."
+    ],
+    "alias": [
+      "Boniato pequeño asado"
     ]
   },
   {
@@ -475,7 +525,8 @@ export const RECETAS = [
       "200 gramos de judías verdes guisadas",
       "1 filete de salmón fresco"
     ],
-    "preparacion": []
+    "preparacion": [],
+    "alias": []
   },
   {
     "nombre": "Ensalada mixta completa",
@@ -497,7 +548,8 @@ export const RECETAS = [
       "Cocer el huevo y reservar.",
       "En un bol añadir todos los ingredientes troceados y el atún desmigado.",
       "Aliñar y servir."
-    ]
+    ],
+    "alias": []
   },
   {
     "nombre": "Merluza con menestra",
@@ -512,7 +564,8 @@ export const RECETAS = [
     "preparacion": [
       "Colocar los lomos de merluza sobre una cama de verduras listas para cocer al vapor.",
       "Una vez cocinado aliñar con sal y aceite."
-    ]
+    ],
+    "alias": []
   },
   {
     "nombre": "Calabaza con requesón, burrata o mozzarella",
@@ -525,6 +578,9 @@ export const RECETAS = [
     "preparacion": [
       "Hervir la calabaza o hacerla al horno.",
       "Cortarla en cuadraditos y añadir el requesón desmenuzado por encima. Aliñar con aceite y albahaca."
+    ],
+    "alias": [
+      "Calabaza con requesón / burrata / mozzarella"
     ]
   },
   {
@@ -543,7 +599,8 @@ export const RECETAS = [
     ],
     "preparacion": [
       "Pela y corta tu ajo a láminas y picado, a tu gusto. Lava y corta tus champiñones a láminas o en cuatro partes. En una sartén caliente añade el AOVE, incorpora el ajo y cuando esté dorado añade los champiñones. Salpimienta, añade el orégano y mezcla. Saltea hasta que esté blandito y añade el jamón serrano. Mezcla hasta que cambie de color. Ahora baja el fuego al mínimo, haz un huequito en el centro de tu sartén y añade tu huevo. Pon la tapa a la sartén y déjalo hasta que tenga la cocción que tí más te guste. A más tiempo tapada tu sartén más cocida estará la yema de tu huevo. Para servir añade un poquito de orégano por encima."
-    ]
+    ],
+    "alias": []
   },
   {
     "nombre": "Ensalada de alubias con atún",
@@ -559,6 +616,9 @@ export const RECETAS = [
     ],
     "preparacion": [
       "Abrimos un bote de alubias cocidas. Lavamos y reservamos. Escurrimos una lata de atún en conserva. Partimos las verduras en trozos pequeños. Mezclamos las verduras con el atún con las alubias y aliñamos con sal y aceite de oliva virgen."
+    ],
+    "alias": [
+      "ensalada de 120-150gr de alubias (en conserva) con atún"
     ]
   },
   {
@@ -576,6 +636,9 @@ export const RECETAS = [
     "preparacion": [
       "Cocer la pasta.",
       "Picar el resto de ingredientes y mezclar."
+    ],
+    "alias": [
+      "Ensalada de 50-60gr pasta de lentejas (seco) y queso de cabra + lata de atún"
     ]
   },
   {
@@ -589,7 +652,8 @@ export const RECETAS = [
     ],
     "preparacion": [
       "Pica la cebolla y saltea en una sartén con aceite hasta pochar. Ahora saltea las espinacas hasta reducir su tamaño. Añadir el pimentón y remover para que no se queme. Salpimentar al gusto, mezclar y servir."
-    ]
+    ],
+    "alias": []
   },
   {
     "nombre": "Brócoli al ajillo",
@@ -605,7 +669,8 @@ export const RECETAS = [
       "Con un poco de agua y sal, calienta el brócoli (al vapor o en el microondas) por 3 minutos.",
       "Mezcla el brócoli con la “salsa” de ajo, paprika y aceite de oliva.",
       "Buen provecho."
-    ]
+    ],
+    "alias": []
   },
   {
     "nombre": "Sepia a la plancha con verduras",
@@ -623,7 +688,8 @@ export const RECETAS = [
       "Escurrir y limpiar la sepia y cortar en trozos pequeños. Marcar la sepia en la sartén a fuego fuerte con un poco de aceite de oliva hasta que veamos que cambia de color.",
       "Pelar y picar la cebolla y el ajo y cortar el tomate. Sofreír la cebolla y cuando poche, añadir la sepia. Añadir el resto de verduras y hacer a fuego lento. Si vemos que se nos puede quemar, podemos añadir algo de agua.",
       "Espolvorear perejil y salpimentar al gusto."
-    ]
+    ],
+    "alias": []
   },
   {
     "nombre": "Sopa de pollo",
@@ -636,7 +702,8 @@ export const RECETAS = [
       "Cocinar los vegetales (que quieras) hasta formar un caldo, colar si es necesario o dejar los vegetales.",
       "Trocear o procesar el pollo y cocinarlo en el caldo de vegetales.",
       "Servir con queso rallado o levadura nutricional en copos."
-    ]
+    ],
+    "alias": []
   },
   {
     "nombre": "Dorada asada",
@@ -657,7 +724,8 @@ export const RECETAS = [
       "Corta en medias rodajas varios trozos de limón. Realiza varios cortes sobre la piel de la dorada e introduce en ellos las rodajas de limón.",
       "Pasados los 25 min., saca la fuente del horno y coloca la dorada por encima de la base de patatas y cebolla. Vuélvela a meter al horno durante 25 minutos más.",
       "Retirar y servir."
-    ]
+    ],
+    "alias": []
   },
   {
     "nombre": "Pollo con champiñones, zanahoria y arroz",
@@ -671,7 +739,8 @@ export const RECETAS = [
     ],
     "preparacion": [
       "Lava y corta las verduras a rodajas. Saltea en una sartén caliente con AOVE hasta hacer, añade orégano y pimienta. Reserva. En la misma sartén pon la pechuga de pollo y hazla a la plancha. Si tu arroz está ya hervido o es de vasito, calienta en microondas 1 minuto y sirve junto con la verdura y el pollo. Como último paso puedes añadir el arroz a la sartén junto con la verdura y el pollo y mezclarlo todo."
-    ]
+    ],
+    "alias": []
   },
   {
     "nombre": "Berenjena asada",
@@ -683,7 +752,8 @@ export const RECETAS = [
     ],
     "preparacion": [
       "Lava y corta tu berenjena por la mitad a lo largo. Echa un chorrito de aceite y salpimenta al gusto. Mete al horno previamente calentado a 180ºC durante 20-30 minutos aprox o hasta que pinches y esté blandita."
-    ]
+    ],
+    "alias": []
   },
   {
     "nombre": "Ensalada campera",
@@ -700,7 +770,8 @@ export const RECETAS = [
       "En primer lugar cocer las patatas en abundante agua con sal. Cocer también las judías verdes si son frescas o congeladas; si usas de las que vienen ya cocidas en bote, escurrir.",
       "Una vez cocidas partir en trozos medianos y mezclar con el resto de ingredientes cortados al gusto.",
       "Aliñar con aceite de oliva y servir."
-    ]
+    ],
+    "alias": []
   },
   {
     "nombre": "Revuelto de espinacas y jamón serrano",
@@ -713,7 +784,8 @@ export const RECETAS = [
     ],
     "preparacion": [
       "En una sartén echamos una cucharada de AOVE. Cuando esté caliente ponemos las espinacas, vamos rehogando hasta que reduzca su tamaño. Añadimos el jamón serrano sin dejar de remover, cuando veamos que el jamón ha cambiado de color incorporamos el huevo batido. Removemos todo hasta cuajar a nuestro gusto."
-    ]
+    ],
+    "alias": []
   },
   {
     "nombre": "Revuelto de trigueros y atún",
@@ -727,7 +799,8 @@ export const RECETAS = [
     ],
     "preparacion": [
       "Limpia y corta los espárragos. En una sartén caliente echa el aceite y saltea los espárragos hasta que estén hechos. Por otro lado, bate bien los huevos hasta espumar y añade la lata de atún escurrida y la pimienta. Mezcla bien y vuelca en la sartén de los espárragos. Mezcla bien mientras se va cuajando el huevo mezclando todos los ingredientes hasta que tenga la cocción deseada."
-    ]
+    ],
+    "alias": []
   },
   {
     "nombre": "Huevos rellenos de tomate y atún",
@@ -741,7 +814,8 @@ export const RECETAS = [
       "Cuece los huevos en 1/2 litro de agua durante 10 minutos a partir de que el agua comience a hervir. Saca, refresca con agua fría y pela.",
       "Córtalos a la mitad a lo largo y saca la yema. Mezcla la yema con el atún escurrido y el tomate frito. Rellena los huevos con esta mezcla y sirve.",
       "Consejo: servir sobre una base de ensalada de lechuga, tomate... para hacer un plato completo."
-    ]
+    ],
+    "alias": []
   },
   {
     "nombre": "Ensalada de remolacha y queso de cabra",
@@ -759,7 +833,8 @@ export const RECETAS = [
     "preparacion": [
       "Lavar la base verde, luego cortar al gusto tomate, pepino y pelar la remolacha (si es cruda). Opcional: cortar la remolacha en láminas y saltearlas en poco aceite de oliva entre 2-4 minutos o si prefiere rallarla. Hacer el arroz/quinoa como dice el fabricante. Corta al gusto los frutos secos.",
       "Poner todos los ingredientes en un plato hondo o bol grande, dejar el queso para poner al final. Poner en un mortero aceite de oliva virgen + 1/4 diente ajo + hojas de perejil / albahaca fresca y chorrito de vinagre balsámico. Aderezar con esta mezcla si se desea o sólo con aceite de oliva."
-    ]
+    ],
+    "alias": []
   },
   {
     "nombre": "Tortitas de avena y plátano (4 raciones, con harina de avena)",
@@ -777,7 +852,8 @@ export const RECETAS = [
       "Solo tienes que pesar y añadir todos los ingredientes al vaso de la batidora. Batir hasta que quede lo más homogéneo posible.",
       "Prepara las tortitas en una sartén previamente untada con un poco aceite o mantequilla. Cada vez que hagas una tortita vuelve a untarla.",
       "Una vez has realizado todas las tortitas solo queda comerlas. Puedes acompañarlas con el topping que quieras: fruta, yogur, frutos secos, chocolate fundido, crema de cacahuete, etc."
-    ]
+    ],
+    "alias": []
   },
   {
     "nombre": "Merluza con pisto y cous-cous",
@@ -799,7 +875,8 @@ export const RECETAS = [
       "Añade a la sartén el tomate natural cortado en dados y un poco de sal. Remueve para que se integre con el resto de ingredientes. Verás que poco a poco el agua de los tomates se irá absorbiendo. Pon el fuego suave y deja que se cocinen las verduras hasta que estén tiernas.",
       "Coloca el pisto en un recipiente apto para el horno. Sobre el pisto coloca las rodajas de merluza previamente salpimentadas por ambos lados y cocina en el horno a 200 °C durante 5-7 minutos. Saca el recipiente del horno, coloca la comida sobre tu plato y acompáñalo con un poco de cuscús.",
       "Si prefieres no emplear horno, puedes cocinar la merluza en la propia sartén que contiene el pisto. Entonces coloca la merluza en la sartén que contiene el pisto y cocinar a fuego suave unos 10-12 minutos. A mitad de cocción dales las vuelta para que se cocinen por ambos lados. Luego, sirve en los platos la merluza con el pisto y acompáñalos de varias cucharadas de cuscús."
-    ]
+    ],
+    "alias": []
   },
   {
     "nombre": "Ensalada de lentejas y mostaza",
@@ -821,6 +898,9 @@ export const RECETAS = [
       "Hacer la vinagreta. En un bol, mezcla el zumo del limón junto la miel, el comino, el aceite y una cucharada de mostaza.",
       "Enjuaga las lentejas cocidas y escúrrelas.",
       "Montar la ensalada y añade el pollo en tiras o las dos latas de atún. Riega con la vinagreta de miel y limón."
+    ],
+    "alias": [
+      "Ensalada de 150gr de lentejas y mostaza"
     ]
   },
   {
@@ -841,6 +921,9 @@ export const RECETAS = [
       "Cuando se encuentre hecho el sofrito, añadimos las judías verdes (puedes utilizar de bote, ya vienen cocidas) y el muslo de pollo. Salpimentamos.",
       "Si vemos que falta aceite, añadimos un poco de agua o vino blanco para cocinar, esperando a que se evapore el alcohol.",
       "Finalmente, añadimos los garbanzos de bote (escurridos y lavados previamente), bajamos el fuego. Dejamos que se mezcle todo los sabores bien... ¡Y a comer!"
+    ],
+    "alias": [
+      "130gr de garbanzos (en conserva) con judías verdes"
     ]
   },
   {
@@ -857,7 +940,8 @@ export const RECETAS = [
       "Pelamos, limpiamos y cortamos la cebolla, los tomates, el pimiento y el pepino.",
       "Trituramos la verdura junto con un chorro de aceite de oliva.",
       "Enfriamos en la nevera y consumimos una vez que esté frío."
-    ]
+    ],
+    "alias": []
   },
   {
     "nombre": "Espagueti de calabacín con berenjena, champiñones y carne picada",
@@ -878,7 +962,8 @@ export const RECETAS = [
       "En una sartén aparte, cocinar la cebolla, el ajo, los champiñones y la berenjena previamente cortados en cuadraditos pequeños con el aceite de oliva.",
       "Cocinar la carne picada e introducir las verduras.",
       "Poner los espirales de calabacín junto a los demás ingredientes y seguir cocinando en una sartén."
-    ]
+    ],
+    "alias": []
   },
   {
     "nombre": "Sepia a la plancha",
@@ -890,7 +975,8 @@ export const RECETAS = [
     ],
     "preparacion": [
       "Cuando el aceite se encuentre caliente, añadimos la sepia. Salpimentamos."
-    ]
+    ],
+    "alias": []
   },
   {
     "nombre": "Arroz blanco cocido",
@@ -903,7 +989,8 @@ export const RECETAS = [
     ],
     "preparacion": [
       "Saltea el ajo en un cazo con un poco de aceite hasta dorar. Añade el arroz y mezcla con el ajo y aceite hasta impregnar. Añade el agua, mezcla y deja cocer a fuego medio hasta absorber todo el agua. Aprox 15 minutos. Tapa y deja reposar a fuego muy bajo 10 minutos más."
-    ]
+    ],
+    "alias": []
   },
   {
     "nombre": "Crema de calabaza",
@@ -918,7 +1005,8 @@ export const RECETAS = [
       "Colocar los trozos de calabaza y cebolla a hervir en 500ml de agua con un puñado de sal gruesa. Mantener la cacerola tapada para evitar desperdicio de líquido por ebullición.",
       "Una vez cocida la calabaza, minipimear finamente y servir en consomeras.",
       "Puede agregarse queso rallado en hebras o croutones de pan (siempre y cuando la persona pueda consumir sodio o no sufra de hipertensión)."
-    ]
+    ],
+    "alias": []
   },
   {
     "nombre": "Brochetas de pollo",
@@ -934,6 +1022,9 @@ export const RECETAS = [
       "Marinar el pollo con la mezcla de vinagre, soja, el ajo bien picado y agua.",
       "Añadir sal y orégano, pinchar en la brocheta y hacer a la plancha.",
       "Condimentar y servir."
+    ],
+    "alias": [
+      "1-2 brochetas de pavo / pollo"
     ]
   },
   {
@@ -948,6 +1039,9 @@ export const RECETAS = [
     ],
     "preparacion": [
       "Pon en un recipiente la avena y cubre de agua totalmente. Mete a tu microondas a máxima potencia dos minutos aproximadamente o hasta que veas que la avena sube. Añade la fruta cortada y las semillas de chía. Se puede tomar caliente o frío."
+    ],
+    "alias": [
+      "Gachas de 30-40gr de avena al microondas con fruta"
     ]
   },
   {
@@ -958,7 +1052,8 @@ export const RECETAS = [
     ],
     "preparacion": [
       "Calienta una sartén a fuego alto y cuando esté caliente añade los ñoquis removiendo de vez en cuando para hacerse por ambos lados por igual. Cuando esté a tu gusto (pasados unos minutos) retira y sirve."
-    ]
+    ],
+    "alias": []
   },
   {
     "nombre": "Tortilla de verduras",
@@ -978,6 +1073,9 @@ export const RECETAS = [
       "Batir los huevos.",
       "Salpimentar y escurrir el aceite y cualquier líquido que haya en la sartén.",
       "Cuajar la tortilla hasta que esté dorada por ambas caras y servir."
+    ],
+    "alias": [
+      "Tortilla de 2 huevos con verduras"
     ]
   },
   {
@@ -996,6 +1094,9 @@ export const RECETAS = [
       "Bajar el fuego, agregar los arándanos y cocinar a fuego medio, revolviendo ocasionalmente hasta que la papilla se espese y la avena esté cocida, aproximadamente de 4 a 5 minutos. ¡La papilla se volverá de un tono púrpura oscuro!",
       "Agregar la canela y la vainilla.",
       "Una vez que tenga la consistencia deseada (¡la papilla gruesa queda muy bien!), verter la papilla en un tazón. Cubrir con unos arándanos extras, rodajas de banana y una llovizna de miel o jarabe de arce."
+    ],
+    "alias": [
+      "Gachas de 30-40gr de avena y arándanos"
     ]
   },
   {
@@ -1012,7 +1113,8 @@ export const RECETAS = [
       "Precalentar el horno. Colocar una base de rodajas de tomate en la bandeja del horno.",
       "Colocar los boquerones limpios encima de la base de tomate. Espolvorear con el ajo y el perejil bien picados.",
       "Hornear unos 20 minutos a 200ºC."
-    ]
+    ],
+    "alias": []
   },
   {
     "nombre": "Ensalada de repollo y zanahoria",
@@ -1028,7 +1130,8 @@ export const RECETAS = [
       "Lavar y pelar las zanahorias.",
       "Rallar o cortar en tiras el repollo y las zanahorias, lo que sea más rápido o cómodo para ti.",
       "Preparar el aderezo con el limón, la mayonesa, pimienta y sal al gusto. Mezclar bien y agregar el aderezo a la ensalada. Mezclar muy bien todos los ingredientes."
-    ]
+    ],
+    "alias": []
   },
   {
     "nombre": "Brócoli y champiñón en salsa de soja",
@@ -1043,7 +1146,8 @@ export const RECETAS = [
     ],
     "preparacion": [
       "Limpia los champiñones y córtalos en cuatro piezas. Limpia el brócoli y corta los ramilletes. Pica la cebolla lo más pequeño posible. En una sartén echa un chorrito de aceite y cuando esté caliente añade la cebolla, saltea hasta que esté pochada y cambie de color. Añade el brócoli y saltea para mezclar, tapa la sartén y deja a fuego medio un par de minutos, moviendo de vez en cuando. Cuando veas que el brócoli está a medio hacer añade los champiñones y saltea todo. Déjalo cocer un par de minutos más con la tapa puesta. Añade el jengibre rallado y mezcla. Finalmente añade la salsa de soja, mezcla bien y deja que evapore. Sirve con unas semillas de sésamo para decorar."
-    ]
+    ],
+    "alias": []
   },
   {
     "nombre": "Puerros asados en airfryer u horno",
@@ -1057,7 +1161,8 @@ export const RECETAS = [
     ],
     "preparacion": [
       "Corta los puerros por la mitad y las mitades a lo largo. Coloca con el centro hacia arriba en un recipiente apto para horno o airfryer. En un bol pon una o dos cucharadas de AOVE (depende de la cantidad de puerros), añade una pizca de sal y media cucharadita de especias. Mezcla bien y con una brochita baña tus puerros. Ahora pica los ajos y añádelos por encima. Colocamos en nuestra airfryer precalentada previamente a 180ºC durante 15-20'. Si usas horno unos 25' a 180ºC."
-    ]
+    ],
+    "alias": []
   },
   {
     "nombre": "Escalivada de verduras",
@@ -1075,7 +1180,8 @@ export const RECETAS = [
       "Horno a 180º o 200º durante una hora aprox.",
       "Esperar a que se pongan tibias y pelar.",
       "Rociar con un poco de AOVE."
-    ]
+    ],
+    "alias": []
   },
   {
     "nombre": "Espinacas con garbanzos",
@@ -1089,6 +1195,9 @@ export const RECETAS = [
     ],
     "preparacion": [
       "Lavar y escurrir los garbanzos. Saltear las espinacas en sartén con aceite hasta reducir su tamaño. Añadir el pimentón y remover para que no se queme. Añadir los garbanzos y mezclar. Salpimentar al gusto, mezclar y servir."
+    ],
+    "alias": [
+      "Espinacas con 150gr de garbanzos (en conserva)"
     ]
   },
   {
@@ -1109,7 +1218,8 @@ export const RECETAS = [
       "Prepare el aderezo mezclando el cilantro picado, el jugo de limón, el aceite, la sal y pimienta.",
       "Ponga la lechuga, tomates, cebolla y aguacate en una fuente para ensaladas.",
       "Añada el aderezo a las verduras y mezcle bien."
-    ]
+    ],
+    "alias": []
   },
   {
     "nombre": "Sopa de pollo (consomé)",
@@ -1120,7 +1230,8 @@ export const RECETAS = [
     "preparacion": [
       "Cocinar los vegetales (que quieras) hasta formar un caldo, colar si es necesario o dejar los vegetales.",
       "Puedes comprar el caldo ya hecho y solamente calentar."
-    ]
+    ],
+    "alias": []
   },
   {
     "nombre": "Merluza al papillote con verduras",
@@ -1137,7 +1248,8 @@ export const RECETAS = [
     "preparacion": [
       "Pelamos la cebolleta y la picamos, hacemos lo mismo con el resto de verduras, todo picadito finamente. Lo salteamos a fuego fuerte en una sartén con un chorrito de aceite de oliva virgen extra y un poco de sal. No hay que cocinarlo en exceso ya que luego se terminan en el horno.",
       "En un trozo de papel aluminio ponemos una cama con estas verduras, encima colocamos el trozo de merluza, añadimos un chorrito de aceite de oliva virgen extra y formamos un paquete con el papel bien cerrado. Metemos estos paquetes en el horno, precalentado, a 180ºC unos 8 o 10 minutos. Servimos los paquetes en el plato, cuando los abramos desprenderán todo el aroma."
-    ]
+    ],
+    "alias": []
   },
   {
     "nombre": "Tortilla a la francesa con jamón de york",
@@ -1150,6 +1262,9 @@ export const RECETAS = [
     ],
     "preparacion": [
       "Bate huevos y claras hasta espumar. Incorpora el jamón de york cortado en porciones pequeñas y mezcla. En una sartén caliente echa un poco de aceite y echa los huevos. Cocina hasta tener el cuajado deseado y sirve."
+    ],
+    "alias": [
+      "Tortilla a la francesa de 2 huevos con jamón de york"
     ]
   },
   {
@@ -1167,7 +1282,8 @@ export const RECETAS = [
       "En una fuente donde se servirá el plato colocar ajo picado, jugo de limón y aceite de oliva. Añadir hierbas aromáticas frescas finamente picadas (perejil, cilantro, albahaca, eneldo).",
       "Calentar a fuego medio una sartén para asar. Engrasar con un poco de aceite de oliva. Salpimentar las pechugas y colocarlas en la sartén, volteando de lado hasta que estén cocidas.",
       "Colocar sobre las pechugas la salsa de hierbas y revolver hasta que estén bien integrados los ingredientes."
-    ]
+    ],
+    "alias": []
   }
 ];
 

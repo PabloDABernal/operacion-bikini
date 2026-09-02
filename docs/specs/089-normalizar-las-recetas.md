@@ -1,6 +1,6 @@
 # 089 — Normalizar las recetas: ingredientes y alias
 
-- **Estado:** 📝 escrita el 2 de septiembre de 2026, revisada por `revisor-specs` (tres bloqueantes cerrados). **Pendiente de implementar.**
+- **Estado:** 🚧 implementada y desplegada el 2 de septiembre de 2026, revisada por `revisor-specs` (tres bloqueantes cerrados) y `revisor-codigo` (CUMPLE). Alias repasados por el usuario. **Pendiente de que el usuario la pruebe.**
 - **Fecha:** 2026-09-02
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (evolutivos de la fase productiva, desde el 31 de agosto de 2026)", el evolutivo de las recetas normalizadas.
 
@@ -111,12 +111,24 @@ alias tiene que ser solo el suyo: si el alias fuera la frase entera, se comería
 también las palabras de la ensalada y la regla de no solapar de la 088 dejaría
 la ensalada fuera. Los trozos se separan por `". "`, como ya hace el enlazado.
 
+**Los trozos se separan por `". "`, por `" // "` y por `", o "`.** Los dos
+primeros separan platos de una misma comida. El tercero separa **alternativas**:
+*"...queso de cabra + lata de atún, **o** ensalada de alubias con atún"* son dos
+platos entre los que eliges, y **los dos tienen receta**. Cada uno necesita su
+propio trozo: con el texto entero como alias de los dos, el primero ocuparía el
+tramo y la regla de no solapar de la 088 dejaría al otro fuera. Un `" o "` suelto
+NO parte, que rompería "pollo o pavo" y "asado o a la plancha".
+
+> Decisión del usuario el 2 de septiembre, al repasar los alias: ese plato enlaza
+> **las dos recetas**, y al cocinar se elige. Efecto asumido: la lista de la
+> compra pedirá lo de las dos, porque no sabe cuál vas a hacer.
+
 **El script que los propone**: `docs/menus/proponer-alias.mjs`, que se ejecuta a
 mano y escribe el JSON con las propuestas y **una marca en las dudosas**. No se
 usa en la app y no se ejecuta solo. Propone comprobando que **todas** las
 palabras del nombre de la receta estén en el trozo, ignorando las vacías (`de`,
 `la`, `con`, `gramos`…) y los números. Sobre los datos de hoy: de los 22 trozos
-sin enlazar propone 11 y deja 11 sin propuesta.
+sin enlazar propone 24 y deja 34 sin propuesta, y **no queda ninguna ambigua**: al partir por `", o "` cada alternativa casa con una sola receta.
 
 **El fichero se revisa a mano y esa revisión es la que vale.** Un alias
 equivocado es una mentira en pantalla (076), y el script se equivoca: hay que
