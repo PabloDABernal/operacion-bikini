@@ -298,10 +298,21 @@ mutable de chips en memoria y el filtrado de las ya elegidas.
 
 ## ✅ Para probar a mano
 
-**El caso que motivó la spec, tal cual**: la cena **"Ensalada de repollo y
-manzana. Tortilla de 2 huevos"** tiene que enseñar **las dos** tarjetas, y los
-huevos de la tortilla tienen que aparecer en la lista de la compra si no los
-tienes marcados en la despensa.
+> **OJO: el caso que motivó la spec NO se arregla solo, y se comprobó al
+> probarla.** La cena entera es *"Ensalada de repollo y manzana. **Tortilla de 2
+> huevos con 1 lata de atún al natural**"*, y su receta se llama **"Tortilla de
+> atún"**. El enlazado busca el nombre de la receta **literalmente dentro** del
+> texto, y ahí las palabras están separadas. No enlazaba antes y no enlaza
+> ahora: esta spec arregla *"solo se coge la primera"*, no *"el nombre no
+> aparece igual"*. **Se arregla a mano**, enlazando la receta desde el editor,
+> que es justo lo que esta spec estrena.
+>
+> Medido sobre los 96 platos de los cuatro menús: **10 pasan a enlazar dos o
+> más recetas** (antes, ninguno podía), 40 enlazan una y 46 ninguna. Para verlo
+> funcionando solo: **Menú 2 · lunes · cena** (berenjena + lubina), **Menú 4 ·
+> martes · cena** (sepia + berenjena) o **Menú 3 · viernes · cena**, que enlaza
+> cuatro. Hay que **volver a elegir el menú**: una dieta ya guardada conserva
+> los enlaces con los que se creó.
 
 Guion completo: lo afina `qa-manual`. En corto, los once puntos del apartado 3,
 con especial atención al **2** (que los ingredientes de las dos lleguen a la

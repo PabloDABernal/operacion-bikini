@@ -59,6 +59,14 @@ implementar. A partir de aquí, todo lo que entre sale de este archivo.
   sí tiene receta. Cambiarlo es pasar `recetaId` a lista y tocar el pintado del
   día, la 083 y la compra: es una spec.
 
+- **El enlazado de platos con recetas falla cuando el nombre no aparece literal.**
+  Saltó al probar la 088: *"Tortilla de 2 huevos con 1 lata de atún al natural"*
+  no enlaza con la receta *"Tortilla de atún"*, porque se busca el nombre entero
+  como texto seguido. De 96 platos de los menús, **46 no enlazan con nada**.
+  Enlazar por palabras sueltas los cazaría, pero la 076 avisó de lo contrario:
+  "uno enlazado a la receta equivocada es una mentira en pantalla". Sería una
+  spec, y con cuidado.
+
 ## En el buzón
 
 - **La distancia, también en el resumen de Hoy y en el contexto de la IA**
