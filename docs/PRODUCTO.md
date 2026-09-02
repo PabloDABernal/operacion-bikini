@@ -699,6 +699,22 @@ Ya no salen de una lista planificada: salen de usar la app cada día.
 |---|---|
 | 088 | Una comida, varias recetas |
 
+- **Las recetas que trae la app, normalizadas.** Las 73 recetas sembradas
+  llegaron con los ingredientes escritos como una línea de texto —"1 lata
+  redonda pequeña de atún, enlatado al natural, escurrido (50 g)"— porque son
+  anteriores a que la app supiera guardarlos por piezas. Eso deja el cruce con
+  la despensa a merced de una heurística. Pasan a estar **estructuradas**, con
+  cada línea enlazada a su ingrediente de la despensa, creando el que falte.
+- **Y las recetas ganan alias.** El nombre de una receta es corto ("Tortilla de
+  atún") y el plato del menú es una frase larga ("Tortilla de 2 huevos con 1
+  lata de atún al natural"), así que muchos platos no encuentran su receta. Cada
+  receta puede tener **otros nombres por los que se la reconoce**, revisados a
+  mano, y el enlazado los mira además del nombre.
+
+| Spec | Qué |
+|---|---|
+| 089 | Normalizar las recetas: ingredientes y alias |
+
 ## Ideas para más adelante (27 de agosto de 2026)
 
 El 27 de agosto se vació `docs/BACKLOG.md`: la app está terminada y en uso
