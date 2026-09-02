@@ -685,7 +685,19 @@ Ya no salen de una lista planificada: salen de usar la app cada día.
 | Spec | Qué |
 |---|---|
 | 086 | La distancia, al apuntar |
-| 087 | Cuánto llevas andado (estadísticas; sin escribir) |
+| 087 | Cuánto llevas andado (estadísticas) |
+
+- **Una comida puede llevar varias recetas.** Hasta ahora cada comida del día
+  enlazaba UNA sola, así que una cena de dos platos —"Ensalada de repollo y
+  manzana. Tortilla de 2 huevos"— enseñaba solo la primera, y los ingredientes
+  de la segunda no contaban para la lista de la compra sin que nada lo avisara.
+  Pasa a llevar las que hagan falta: el día las enseña todas, y al escribir la
+  comida cada receta que eliges se **suma** al texto en vez de sustituirlo, de
+  forma que el texto de la comida sigue siendo una sola frase.
+
+| Spec | Qué |
+|---|---|
+| 088 | Una comida, varias recetas |
 
 ## Ideas para más adelante (27 de agosto de 2026)
 
