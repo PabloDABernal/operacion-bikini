@@ -2131,6 +2131,47 @@ button:disabled {
   font-size: 0.9rem;
 }
 
+/* Una comida puede llevar varias recetas (spec 088). Se separan con una línea
+   para que no parezca que la preparación de la primera sigue en la segunda. */
+.receta-en-dieta-plato + .receta-en-dieta-plato {
+  margin-top: var(--e3);
+  padding-top: var(--e3);
+  border-top: 1px solid var(--borde);
+}
+
+/* Los chips de receta enlazada, en el editor de la celda (spec 088). Van en su
+   propia línea porque la fila de edición ya va apretada en móvil. */
+.chips-receta {
+  flex: 1 0 100%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e2);
+  margin-top: var(--e2);
+}
+
+.chip-receta {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--e1);
+  padding: var(--e1) var(--e2);
+  border: 1px solid var(--acento);
+  border-radius: var(--radio-s);
+  background: var(--superficie-alta);
+  font-size: 0.8rem;
+}
+
+/* El aspa se hereda del botón de la fila, así que hay que devolverle el tamaño:
+   sin esto sale con el padding de un botón de acción. */
+.comida-dieta button.chip-quitar {
+  padding: 0 var(--e1);
+  border: 0;
+  background: none;
+  color: var(--acento);
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
 /* En móvil, 5.5rem de sangría dejan la receta en un pasillo. */
 @media (max-width: 30rem) {
   .receta-en-dieta {

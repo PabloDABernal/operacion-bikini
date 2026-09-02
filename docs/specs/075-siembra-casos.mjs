@@ -179,24 +179,28 @@ comprobar(
   "el domingo sigue vacío y sin receta",
   semanas.every((s) => {
     const domingo = s.find((d) => d.dia === "domingo");
-    return domingo.comidas.every((c) => c.texto === "" && c.recetaId === "");
+    // recetaIds desde la spec 088: una comida puede llevar varias recetas.
+    return domingo.comidas.every((c) => c.texto === "" && c.recetaIds.length === 0);
   }),
   true
 );
 
 const enlazados = semanas.flatMap((s) =>
-  s.flatMap((d) => d.comidas.filter((c) => c.recetaId))
+  s.flatMap((d) => d.comidas.filter((c) => c.recetaIds.length))
 ).length;
 
 // Emparejando por nombre exacto salían 4 de 96, que hacía inútil poder abrir
 // la receta desde la dieta. Por contención salen unos 50. El umbral está en 40
 // para que se note si alguien vuelve a la comparación estricta.
+//
+// Se mantiene en 40 tras la spec 088, que enlaza VARIAS recetas por plato: esto
+// cuenta platos con al menos una, así que el número solo puede subir.
 comprobar("enlaza bastantes platos con su receta", enlazados >= 40, true);
 
 comprobar(
   "sin recetas no revienta, sólo no enlaza",
   dietas.semanaDesdeMenu(datos.MENUS[0].dias, []).every((d) =>
-    d.comidas.every((c) => c.recetaId === "")
+    d.comidas.every((c) => c.recetaIds.length === 0)
   ),
   true
 );
@@ -204,7 +208,7 @@ comprobar(
 comprobar(
   "un plato que no es receta se queda como texto",
   semanas.some((s) =>
-    s.some((d) => d.comidas.some((c) => c.texto && !c.recetaId))
+    s.some((d) => d.comidas.some((c) => c.texto && !c.recetaIds.length))
   ),
   true
 );

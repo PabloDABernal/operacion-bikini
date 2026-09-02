@@ -49,8 +49,23 @@ function errorConCodigo(codigo, mensaje) {
 export function semanaEnBlanco() {
   return DIAS.map((dia) => ({
     dia,
-    comidas: MOMENTOS_DIETA.map((momento) => ({ momento, texto: "", recetaId: "" }))
+    comidas: MOMENTOS_DIETA.map((momento) => ({ momento, texto: "", recetaIds: [] }))
   }));
+}
+
+// Las recetas de una comida, venga guardada como venga (spec 088).
+//
+// Hasta la 088 una comida llevaba UN `recetaId`; desde ella lleva una lista,
+// `recetaIds`. NO se migra nada en Firestore: esta función lee las dos formas y
+// es el único sitio del proyecto que sabe que existen las dos. Una dieta vieja
+// se pasa sola a la nueva en cuanto se guarda cualquiera de sus celdas.
+//
+// Campo NUEVO y no `recetaId` convertido en lista, por lo mismo que se decidió
+// en la spec 077 con el material del ejercicio: un campo con dos tipos posibles
+// obliga a comprobar el tipo en todos los lectores, para siempre.
+export function idsDeRecetaDe(comida) {
+  if (Array.isArray(comida?.recetaIds)) return comida.recetaIds.filter(Boolean);
+  return comida?.recetaId ? [comida.recetaId] : [];
 }
 
 // De todas las dietas guardadas, la que está en uso. Solo hay una.
@@ -139,7 +154,11 @@ export function semanaDesdeLaIa(dias, porNombre) {
     dia: dia.dia,
     comidas: MOMENTOS_DIETA.map((momento) => {
       const texto = String(dia[momento] || "").trim();
-      return { momento, texto, recetaId: porNombre.get(clave(texto)) || "" };
+      // Por nombre EXACTO, como siempre: la IA devuelve el nombre tal cual lo
+      // acaba de inventar. De ahí que aquí salga una receta o ninguna, nunca
+      // varias; lo de enlazar varias es cosa de los menús del papel.
+      const id = porNombre.get(clave(texto)) || "";
+      return { momento, texto, recetaIds: id ? [id] : [] };
     })
   }));
 }
@@ -163,6 +182,49 @@ export function semanaDesdeLaIa(dias, porNombre) {
 // enlazado a la receta equivocada es una mentira en pantalla.
 const MINIMO_PARA_ENLAZAR = 8;
 
+// Todas las recetas que reconoce dentro del texto de un plato (spec 088).
+//
+// Antes se cogía la primera y se paraba, y por eso "Ensalada de repollo y
+// manzana. Tortilla de 2 huevos" solo enseñaba la ensalada —y los huevos no
+// llegaban a la lista de la compra sin que nada lo avisara.
+//
+// Se comparan POSICIONES REALES, no "un nombre dentro de otro": se lleva la
+// cuenta de qué tramos del texto se ha llevado ya cada receta, y una candidata
+// que se solape con un tramo ocupado se descarta. Así "Ensalada de repollo" no
+// entra si "Ensalada de repollo y manzana" ya se llevó esas palabras, y en
+// cambio dos recetas distintas que solo comparten una palabra sí entran las dos.
+function recetasEnElTexto(texto, porLongitud) {
+  const donde = clave(texto);
+  const ocupados = [];
+  const ids = [];
+
+  const pisa = (inicio, fin) =>
+    ocupados.some((tramo) => inicio < tramo.fin && fin > tramo.inicio);
+
+  porLongitud.forEach((receta) => {
+    // TODAS las apariciones, no solo la primera: si la primera está pisada por
+    // una receta más larga, más adelante puede haber un hueco libre. Con solo
+    // indexOf(), "Ensalada de repollo y manzana. Ensalada de repollo" enlazaba
+    // una sola. Lo cazó la suite de casos, no la lectura de la spec.
+    let desde = 0;
+    for (;;) {
+      const inicio = donde.indexOf(receta.clave, desde);
+      if (inicio === -1) return;
+
+      const fin = inicio + receta.clave.length;
+      if (!pisa(inicio, fin)) {
+        ocupados.push({ inicio, fin });
+        ids.push(receta.id);
+        return;
+      }
+      // Pisada: se sigue buscando desde el siguiente carácter.
+      desde = inicio + 1;
+    }
+  });
+
+  return ids;
+}
+
 export function semanaDesdeMenu(dias, recetas) {
   const porLongitud = (recetas || [])
     .map((receta) => ({ id: receta.id, clave: clave(receta.nombre) }))
@@ -174,10 +236,11 @@ export function semanaDesdeMenu(dias, recetas) {
     comidas: MOMENTOS_DIETA.map((momento) => {
       const comida = dia.comidas.find((c) => c.momento === momento);
       const texto = String(comida?.texto || "").trim();
-      const encontrada = texto
-        ? porLongitud.find((receta) => clave(texto).includes(receta.clave))
-        : null;
-      return { momento, texto, recetaId: encontrada ? encontrada.id : "" };
+      return {
+        momento,
+        texto,
+        recetaIds: texto ? recetasEnElTexto(texto, porLongitud) : []
+      };
     })
   }));
 }

@@ -1,6 +1,6 @@
 # 088 — Una comida, varias recetas
 
-- **Estado:** 📝 escrita el 1 de septiembre de 2026, revisada por `revisor-specs` (dos bloqueantes cerrados). **Pendiente de implementar.**
+- **Estado:** 🚧 implementada y desplegada el 2 de septiembre de 2026, revisada por `revisor-specs` (dos bloqueantes cerrados) y `revisor-codigo` (CUMPLE). **Pendiente de que el usuario la pruebe.**
 - **Fecha:** 2026-09-01
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (evolutivos de la fase productiva, desde el 31 de agosto de 2026)", el evolutivo de la comida con varias recetas.
 
@@ -149,14 +149,24 @@ Se trabaja sobre `clave(texto)`, el texto del plato ya normalizado. Se lleva una
 lista de **tramos ocupados** `[inicio, fin)`. Para cada receta candidata, de la
 más larga a la más corta:
 
-1. Se busca su clave con `indexOf` dentro de `clave(texto)`. Si no está, se
-   descarta.
-2. Si el tramo que ocuparía **se solapa** con alguno ya ocupado, se descarta.
-3. Si no, se enlaza y su tramo se apunta como ocupado.
+1. Se recorren **todas** sus apariciones dentro de `clave(texto)`, de izquierda
+   a derecha. Si no aparece, se descarta.
+2. La **primera aparición que no se solape** con un tramo ya ocupado gana: se
+   enlaza y su tramo se apunta como ocupado.
+3. Si todas sus apariciones están pisadas, se descarta.
 
 Es **posiciones reales, no "un nombre dentro de otro"**. Las dos lecturas dan lo
 mismo en el ejemplo de arriba, pero solo esta acierta cuando dos recetas de
 nombre distinto se pisan en el texto sin que una contenga a la otra.
+
+> **El "todas sus apariciones" del punto 1 se corrigió al implementarlo.** La
+> spec decía primero *"se busca con `indexOf`; si el tramo se solapa, se
+> descarta"*, mirando solo la **primera** aparición. La suite de casos lo cazó:
+> con "Ensalada de repollo y manzana. Ensalada de repollo" y las dos recetas
+> guardadas, la corta se descartaba por chocar con la larga al principio del
+> texto, aunque más adelante tenía su propio hueco libre. Un caso raro, pero el
+> arreglo son cinco líneas y la alternativa era dejar escrito algo que se sabe
+> que falla.
 
 ### La lista de la compra
 
@@ -230,6 +240,16 @@ tocarla; en cuanto se **guarda** una celda, esa dieta pasa a escribir
 - **Editar una celda y dejarla sin ninguna receta**: se guarda `recetaIds: []` y
   `recetaId: ""`. La comida vuelve a ser texto suelto, y vuelve al aviso de la
   compra.
+- **Un chip de una receta borrada del recetario**: dice **"(receta borrada)"** y
+  se puede soltar con su ×. Se añadió al implementar, avisado por
+  `revisor-codigo`: no estaba escrito, pero sin esto el editor lee `nombre` de
+  un `undefined` y revienta al abrir la celda. Es la hermana de la frase "Esta
+  receta ya no existe." que ya enseña la tarjeta del día.
+- **Un chip de una receta borrada del recetario**: dice **"(receta borrada)"** y
+  se puede soltar con su ×. Se añadió al implementar, avisado por
+  `revisor-codigo`: no estaba escrito, pero sin esto el editor lee `nombre` de
+  un `undefined` y revienta al abrir la celda. Es la hermana de la frase "Esta
+  receta ya no existe." que ya enseña la tarjeta del día.
 - **Una dieta guardada a medias** (unas comidas con `recetaId` y otras con
   `recetaIds`, por haber editado solo una celda): cada comida se lee por su
   cuenta. No hay estado inconsistente posible.

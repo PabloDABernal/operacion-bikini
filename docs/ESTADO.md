@@ -2,7 +2,44 @@
 
 Documento para retomar el trabajo en frío. Se actualiza al terminar cada spec.
 
-**Última actualización:** 1 de septiembre de 2026. **Specs 001 a 087 escritas y cerradas, sin ningún hueco.** Por la mañana se cerraron las cinco que arrastraban "desplegada sin probar" (074, 075, 076, 079 y 086), probadas por el usuario en producción. Por la tarde se escribieron, revisaron, implementaron y desplegaron las **tres últimas que quedaban declaradas y sin escribir**: **077** (la tabla aprovecha tu material), **078** (el material que te falta) y **087** (cuánto llevas andado). **Las tres están desplegadas y PENDIENTES de que el usuario las pruebe.**
+**Última actualización:** 2 de septiembre de 2026. **Specs 001 a 088 escritas y sin ningún hueco.** El 1 de septiembre se cerraron las cinco que arrastraban "desplegada sin probar" (074, 075, 076, 079 y 086) y se hicieron las tres que quedaban declaradas y sin escribir (**077**, **078** y **087**), con lo que se cierra la v13. Luego, del uso salió la **088** (una comida, varias recetas). **Las cuatro —077, 078, 087 y 088— están desplegadas y PENDIENTES de que el usuario las pruebe.**
+
+> **Del 1 al 2 de septiembre de 2026: la 088, que sí salió del uso.** El usuario
+> vio en su cena —"Ensalada de repollo y manzana. Tortilla de 2 huevos"— que
+> solo salía una receta, y preguntó si eso no se iba a cambiar. **No: nunca se
+> especificó.** Una comida guarda UN `recetaId` desde la spec 028, y la 076 vio
+> el caso —dejó escrito que los platos del papel son "una frase entera con
+> cantidades y a veces dos cosas"— y lo aceptó.
+>
+> **El punto ciego era peor que lo que se veía**: los huevos de la tortilla no
+> llegaban a la lista de la compra, y el aviso de "estas comidas no tienen
+> receta y no sé qué llevan" **se callaba**, porque esa comida sí tenía una.
+>
+> **`recetaId` pasa a `recetaIds`, y NO se migra nada.** `idsDeRecetaDe()` en
+> `js/dietas.js` es el único sitio del proyecto que sabe que existen las dos
+> formas; una dieta vieja se pasa sola a la nueva en cuanto se guarda cualquiera
+> de sus celdas. Campo nuevo y no el viejo convertido en lista, por lo mismo que
+> se decidió esa misma tarde en la 077: un campo con dos tipos posibles obliga a
+> comprobar el tipo en todos los lectores, para siempre.
+>
+> **Se avisó de que se pasaba de las 300 líneas y el usuario decidió hacerla
+> entera**, en vez de partirla en 088 (el modelo) + 089 (el editor con chips).
+> Salió en **251**, así que la estimación era pesimista. Queda anotado porque la
+> regla 4 de `CLAUDE.md` dice avisar y proponer partir, y se hizo.
+>
+> **Dos cosas que cazaron las herramientas y no la lectura:**
+>
+> 1. **`revisor-specs`**: la suite `075-siembra-casos.mjs` comprueba `recetaId`
+>    en cuatro aserciones y se habría roto entera y en silencio. Y
+>    `filaDeComida()` era un lector que la spec no cubría — el icono de "ver la
+>    receta" se habría pintado siempre, porque una lista vacía es *truthy*.
+> 2. **La suite nueva**: el algoritmo de no-solapamiento que la propia spec
+>    dejaba escrito estaba mal. Usaba `indexOf`, que mira solo la PRIMERA
+>    aparición, así que una receta cuya primera aparición estuviera pisada se
+>    descartaba aunque más adelante tuviera hueco libre. Corregido en el código
+>    y en la spec.
+>
+> **Nueve suites de pruebas**, todas en verde. Reglas de Firestore sin tocar.
 
 > **Sesión del 1 de septiembre de 2026, por la tarde: las tres últimas specs.**
 > El usuario pidió cerrar la deuda entera —"no quiero tener debes"— y se
@@ -325,11 +362,12 @@ El 20 de agosto arrancó la **v4**, que sale de una auditoría de usabilidad hec
 | 085 | Recetario: un solo apartado con recetas e ingredientes | ✅ completada |
 | 086 | La distancia, al apuntar | ✅ completada |
 | 087 | Cuánto llevas andado (estadísticas) | 🚧 implementada y desplegada, **sin probar** |
+| 088 | Una comida, varias recetas | 🚧 implementada y desplegada, **sin probar** |
 
 ## Qué toca ahora
 
-**Probar las tres de la tarde del 1 de septiembre**: la **077**, la **078** y la
-**087**. Es lo único abierto. Están desplegadas, revisadas y con sus suites en
+**Probar las cuatro que están desplegadas sin probar**: la **077**, la **078**,
+la **087** y la **088**. Es lo único abierto. Están desplegadas, revisadas y con sus suites en
 verde, pero **build verde no es probado**: sus guiones están al final de cada
 spec.
 
@@ -357,7 +395,8 @@ colección ni campo.
 
 ### Lo siguiente
 
-1. **Probar la 077, la 078 y la 087.** Lo único abierto.
+1. **Probar la 077, la 078, la 087 y la 088.** Lo único abierto. Se han
+   acumulado cuatro: si algo falla, hay más sitios donde mirar que de costumbre.
 2. Después, **usar la app**: es lo único que genera trabajo ahora. Lo que
    chirríe se anota en `docs/BACKLOG.md`, en una línea.
 3. Cuando se junten varias anotaciones que apunten al mismo sitio, **eso será la

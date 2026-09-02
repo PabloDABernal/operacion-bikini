@@ -52,6 +52,7 @@ import {
   guardarRecetasPropuestas,
   semanaDesdeLaIa,
   semanaDesdeMenu,
+  idsDeRecetaDe,
   pedirDietaALaIa
 } from "./dietas.js";
 
@@ -2454,7 +2455,9 @@ function recetasDeLaDieta() {
   const ids = new Set();
   dietaActiva.dias.forEach((dia) => {
     dia.comidas.forEach((comida) => {
-      if (comida.recetaId) ids.add(comida.recetaId);
+      // Todas las de la comida, no una (spec 088): si la cena lleva ensalada y
+      // tortilla, los ingredientes de las dos tienen que llegar a la compra.
+      idsDeRecetaDe(comida).forEach((id) => ids.add(id));
     });
   });
 
@@ -2473,7 +2476,9 @@ function comidasSinReceta() {
   dietaActiva.dias.forEach((dia) => {
     dia.comidas.forEach((comida) => {
       if (!comida.texto) return;
-      if (recetaDeLaComida(comida)) return;
+      // Con la lista vacía es cuando no hay nada que mirar. Una comida con una
+      // sola receta viva sigue callando, igual que antes de la spec 088.
+      if (recetasDeLaComida(comida).length) return;
       if (!nombres.includes(comida.texto)) nombres.push(comida.texto);
     });
   });
@@ -3687,9 +3692,9 @@ function filaDeComida(indiceDia, indiceComida, comida) {
   );
 
   // El icono de la receta, en su columna fija (spec 072). Solo si esa comida
-  // tiene una y sigue existiendo.
-  const receta = recetaDeLaComida(comida);
-  if (receta) {
+  // tiene alguna y sigue existiendo. UNO aunque haya varias (spec 088): abre la
+  // fila con todas las tarjetas dentro.
+  if (recetasDeLaComida(comida).length > 0) {
     const clave = `${indiceDia}-${indiceComida}`;
     const abierta = recetaDeDietaAbierta === clave;
 
@@ -3770,45 +3775,57 @@ function nombreDelPlato(comida, clave) {
   return celdaDesplegable(comida.texto, "plato-nombre", clave, platosDesplegados, pintarDieta);
 }
 
-// La receta enlazada a una comida de la semana, o null.
+// Las recetas enlazadas a una comida de la semana, las que sigan existiendo.
 //
-// Devuelve null también cuando el `recetaId` apunta a una receta que ya no
-// existe —se borró desde el recetario—: el enlace se guarda en la dieta y nadie
-// lo limpia al borrar. Sin esta comprobación, el nombre saldría tocable y al
-// tocarlo no se abriría nada.
-function recetaDeLaComida(comida) {
-  if (!comida.texto || !comida.recetaId) return null;
-  return recetasCargadas.find((receta) => receta.id === comida.recetaId) || null;
+// Devuelve una LISTA desde la spec 088: una comida puede llevar varias. Se
+// saltan los enlaces a recetas ya borradas desde el recetario —el enlace se
+// guarda en la dieta y nadie lo limpia al borrar—, porque si no el nombre
+// saldría tocable y al tocarlo no se abriría nada.
+function recetasDeLaComida(comida) {
+  if (!comida.texto) return [];
+  return idsDeRecetaDe(comida)
+    .map((id) => recetasCargadas.find((receta) => receta.id === id))
+    .filter(Boolean);
 }
 
-// La receta abierta bajo su fila. Solo se lee: para cambiarla está el recetario.
+// Las recetas abiertas bajo su fila, una tarjeta por receta (spec 088). Solo se
+// leen: para cambiarlas está el recetario, al que lleva cada botón Editar.
 function recetaDesplegada(comida) {
   const caja = document.createElement("div");
   caja.className = "receta-en-dieta";
 
-  const receta = recetaDeLaComida(comida);
+  const recetas = recetasDeLaComida(comida);
 
-  // No debería pasar —el nombre solo se vuelve tocable si la receta existe—,
-  // pero si se borra la receta con la dieta abierta en otra pestaña, mejor
-  // decirlo que enseñar un hueco.
-  if (!receta) {
+  // No debería pasar —el nombre solo se vuelve tocable si queda alguna viva—,
+  // pero si se borran con la dieta abierta en otra pestaña, mejor decirlo que
+  // enseñar un hueco. La frase sale solo cuando NO queda ninguna.
+  if (recetas.length === 0) {
     caja.appendChild(celda("Esta receta ya no existe.", "explicacion"));
     return caja;
   }
 
+  recetas.forEach((receta) => caja.appendChild(tarjetaDeRecetaEnDieta(receta)));
+
+  return caja;
+}
+
+function tarjetaDeRecetaEnDieta(receta) {
+  const tarjeta = document.createElement("div");
+  tarjeta.className = "receta-en-dieta-plato";
+
   const cabecera = document.createElement("p");
   cabecera.className = "receta-en-dieta-cabecera";
   cabecera.textContent = `${receta.nombre} · para ${receta.raciones}`;
-  caja.appendChild(cabecera);
+  tarjeta.appendChild(cabecera);
 
-  caja.appendChild(cuerpoDeReceta(receta));
+  tarjeta.appendChild(cuerpoDeReceta(receta));
 
   const acciones = document.createElement("div");
   acciones.className = "receta-acciones";
   acciones.appendChild(botonDeFila("Editar", () => editarRecetaDesdeElDia(receta)));
-  caja.appendChild(acciones);
+  tarjeta.appendChild(acciones);
 
-  return caja;
+  return tarjeta;
 }
 
 function filaEnEdicion(indiceDia, indiceComida, comida) {
@@ -3817,42 +3834,99 @@ function filaEnEdicion(indiceDia, indiceComida, comida) {
 
   const texto = campoTexto(comida.texto, "edicion-texto");
 
-  // El desplegable rellena el texto con el nombre de la receta y la deja
-  // enlazada: escribirlo a mano y que coincida letra por letra sería absurdo.
-  const recetas = campoDesplegable(
+  // Las recetas enlazadas mientras dura la edición. Viven aquí y no en la dieta
+  // hasta que se guarda, para que Cancelar deje las cosas como estaban.
+  let enlazadas = idsDeRecetaDe(comida);
+
+  const chips = document.createElement("div");
+  chips.className = "chips-receta";
+
+  // El desplegable SUMA, no sustituye (spec 088): elegir una receta engancha su
+  // nombre al final del texto y la añade a la lista. Antes reemplazaba el texto
+  // entero, y por eso una comida solo podía llevar una.
+  const recetas = campoDesplegable([], "", "edicion-momento");
+
+  function pintarOpciones() {
+    recetas.innerHTML = "";
+    // Las ya enlazadas no se ofrecen: enlazar dos veces la misma no dice nada.
     [
-      { valor: "", etiqueta: "o usa una receta tuya…" },
-      ...recetasCargadas.map((receta) => ({
-        valor: receta.id,
-        etiqueta: receta.nombre
-      }))
-    ],
-    comida.recetaId || "",
-    "edicion-momento"
-  );
+      { valor: "", etiqueta: "añadir una receta tuya…" },
+      ...recetasCargadas
+        .filter((receta) => !enlazadas.includes(receta.id))
+        .map((receta) => ({ valor: receta.id, etiqueta: receta.nombre }))
+    ].forEach((opcion) => {
+      const elemento = document.createElement("option");
+      elemento.value = opcion.valor;
+      elemento.textContent = opcion.etiqueta;
+      recetas.appendChild(elemento);
+    });
+    recetas.value = "";
+  }
+
+  function pintarChips() {
+    chips.innerHTML = "";
+    enlazadas.forEach((id) => {
+      const receta = recetasCargadas.find((otra) => otra.id === id);
+      const chip = document.createElement("span");
+      chip.className = "chip-receta";
+      // Una receta borrada del recetario sigue enlazada hasta que la sueltes:
+      // se dice, en vez de enseñar un chip en blanco.
+      chip.append(celda(receta ? receta.nombre : "(receta borrada)", "chip-nombre"));
+
+      const quitar = document.createElement("button");
+      quitar.type = "button";
+      quitar.className = "chip-quitar";
+      quitar.setAttribute("aria-label", `Soltar ${receta ? receta.nombre : "esta receta"}`);
+      quitar.textContent = "×";
+      quitar.addEventListener("click", () => {
+        // Se suelta el enlace y NO se toca el texto: lo escrito es del usuario,
+        // y borrarle media frase por soltar un enlace es peor que dejarle una
+        // línea de más que puede editar a mano.
+        enlazadas = enlazadas.filter((otro) => otro !== id);
+        pintarChips();
+        pintarOpciones();
+      });
+      chip.appendChild(quitar);
+      chips.appendChild(chip);
+    });
+  }
 
   recetas.addEventListener("change", () => {
     const receta = recetasCargadas.find((otra) => otra.id === recetas.value);
-    if (receta) texto.value = receta.nombre;
+    if (!receta) return;
+
+    enlazadas = [...enlazadas, receta.id];
+    // Los platos de la nutricionista vienen escritos así, con punto: "Ensalada
+    // de repollo y manzana. Tortilla de 2 huevos".
+    texto.value = texto.value.trim()
+      ? `${texto.value.trim()}. ${receta.nombre}`
+      : receta.nombre;
+
+    pintarChips();
+    pintarOpciones();
   });
+
+  pintarOpciones();
+  pintarChips();
 
   fila.append(
     celda(etiquetaDeMomento(comida.momento), "resumen-etiqueta"),
     texto,
     recetas,
     botonDeFila("Guardar", () =>
-      guardarCelda(indiceDia, indiceComida, texto.value, recetas.value)
+      guardarCelda(indiceDia, indiceComida, texto.value, enlazadas)
     ),
     botonDeFila("Cancelar", () => {
       celdaEditando = null;
       pintarDieta();
-    })
+    }),
+    chips
   );
 
   return fila;
 }
 
-async function guardarCelda(indiceDia, indiceComida, texto, recetaId) {
+async function guardarCelda(indiceDia, indiceComida, texto, recetaIds) {
   const error = id("error-semana");
   error.textContent = "";
 
@@ -3862,7 +3936,10 @@ async function guardarCelda(indiceDia, indiceComida, texto, recetaId) {
     ...dia,
     comidas: dia.comidas.map((comida, j) =>
       i === indiceDia && j === indiceComida
-        ? { ...comida, texto: texto.trim(), recetaId: recetaId || "" }
+        // `recetaId` se pone a "" a propósito: la comida pasa a la forma nueva
+        // (spec 088) y no se quedan dos verdades en el documento. Es la
+        // migración, y pasa sola al guardar cualquier celda.
+        ? { ...comida, texto: texto.trim(), recetaIds: recetaIds || [], recetaId: "" }
         : comida
     )
   }));
