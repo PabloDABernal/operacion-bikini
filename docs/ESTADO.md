@@ -2,7 +2,79 @@
 
 Documento para retomar el trabajo en frío. Se actualiza al terminar cada spec.
 
-**Última actualización:** 2 de septiembre de 2026. **Specs 001 a 088 escritas y sin ningún hueco.** El 1 de septiembre se cerraron las cinco que arrastraban "desplegada sin probar" (074, 075, 076, 079 y 086) y se hicieron las tres que quedaban declaradas y sin escribir (**077**, **078** y **087**), con lo que se cierra la v13. Luego, del uso salió la **088** (una comida, varias recetas). **Las cuatro —077, 078, 087 y 088— están desplegadas y PENDIENTES de que el usuario las pruebe.**
+**Última actualización:** 2 de septiembre de 2026. **Specs 001 a 095 escritas, y todas implementadas menos ninguna.** El 1 de septiembre se cerraron las cinco que arrastraban "sin probar" y se hicieron las tres que faltaban de la v13. El 2, del uso salieron **088** (una comida, varias recetas), **089** (normalizar las recetas), **090** (repararla, porque la 089 estropeó datos), **091** (el editor avisa), **092** (la siembra nace enlazada) y las tres del diario: **093**, **094** y **095**. **Las nueve desplegadas y pendientes de una pasada de pruebas conjunta.**
+
+> **2 de septiembre de 2026: el objetivo de verdad, y el día que rompí datos.**
+>
+> El usuario puso encima de la mesa lo que quiere: *"mi objetivo es que todo se
+> enlace, así puedo saber lo que como con estadísticas"*. Todo lo del día sale
+> de ahí.
+>
+> **LO QUE SALIÓ MAL, y la regla que deja.** La spec **089** normalizaba los
+> ingredientes de las 73 recetas sembradas. Se desplegó, el usuario la pulsó, y
+> le dejó la despensa con **181 ingredientes creados, 114 de ellos ilegibles**
+> ("redonda pequeña de atún, enlatado al natural, escurrido"). De 133 entradas
+> pasó a 314.
+>
+> La causa técnica: se usó `ingredienteDeLinea()` (spec 068), hecha para líneas
+> cortas tipo "200 g de lentejas", contra frases largas transcritas de un PDF.
+>
+> **La causa de fondo, que es la que importa: las 373 líneas reales llevaban en
+> el repositorio desde la spec 075 y NO se ejecutó la transformación contra
+> ellas antes de desplegarla.** La suite pasaba con líneas inventadas. Costaba
+> un comando.
+>
+> > **REGLA, para el resto del proyecto:** cuando una spec transforma datos que
+> > ya existen, **se ejecuta contra los datos de verdad y se mira el resultado
+> > ANTES de desplegar**. Una suite de casos inventados dice que el código hace
+> > lo que le pediste; no dice que le pidieras lo correcto.
+>
+> La **090** lo reparó: dejó de partir la frase y pasó a **buscar** cuál de los
+> nombres limpios de la despensa cabe dentro. Medido sobre las 373 líneas:
+> **357 enlazadas, 8 ingredientes nuevos, 0 ilegibles**. Y esa medida **vive
+> dentro de la suite**, con topes: si empeora, falla sola.
+>
+> **La 092 cerró el agujero en origen**: la siembra escribe ya los ingredientes
+> en piezas, enlazados, sin duplicados, con mayúscula inicial y con los alias.
+> El usuario borró Recetas y Despensa y volvieron limpias: **138 ingredientes,
+> 73 recetas, 373 piezas enlazadas**.
+>
+> **Lo demás del día**, todo salido de usar la app:
+>
+> | Spec | Qué |
+> |---|---|
+> | **088** | Una comida puede llevar varias recetas |
+> | **089** | Normalizar las recetas (la que rompió) |
+> | **090** | Repararla |
+> | **091** | El editor avisa si una receta enlazada no aparece en el texto |
+> | **092** | La siembra nace enlazada y limpia |
+> | **093** | Apuntar una comida eligiendo una receta |
+> | **094** | "Me lo he comido": arreglado, ver abajo |
+> | **095** | Estadísticas de lo que comes |
+>
+> **UN FALLO EN PRODUCCIÓN QUE NADIE HABÍA VISTO**, destapado por
+> `revisor-specs` al escribir la 094: el botón "Me lo he comido" se pintaba en
+> **las siete filas** de la semana, y `apuntarDeLaDieta()` guarda siempre con
+> `hoyISO()`. Tocar el botón de la comida del martes un jueves la apuntaba
+> **como comida de hoy, en silencio**. Estaba así desde antes de la spec 065.
+> Arreglado en la 094, que pasó de ser una feature a ser un arreglo.
+>
+> **Las herramientas encontraron lo que leer el código no encontraba.** Vale la
+> pena tenerlo presente:
+>
+> - El banco de pruebas de la 090 cazó que **el corte por la coma nunca había
+>   funcionado** —la normalización convierte la coma en espacio antes de llegar
+>   al corte—, y venía de la 089. No se veía porque la búsqueda rescataba el
+>   recorte malo.
+> - `revisor-specs` cazó que la 092 **rompía la 090** al convertir un campo que
+>   la reparación lee como texto. Se resolvió añadiendo al lado en vez de
+>   sustituir.
+> - `revisor-codigo` cazó que la 090 **reescribía 61 recetas idénticas** en cada
+>   pulsación, y que la suite lo tapaba por comparar el contenido en vez de
+>   comprobar que no escribía.
+>
+> **Dieciséis suites de pruebas**, todas en verde. Reglas de Firestore sin tocar
+> en todo el día.
 
 > **Del 1 al 2 de septiembre de 2026: la 088, que sí salió del uso.** El usuario
 > vio en su cena —"Ensalada de repollo y manzana. Tortilla de 2 huevos"— que
@@ -362,26 +434,28 @@ El 20 de agosto arrancó la **v4**, que sale de una auditoría de usabilidad hec
 | 085 | Recetario: un solo apartado con recetas e ingredientes | ✅ completada |
 | 086 | La distancia, al apuntar | ✅ completada |
 | 087 | Cuánto llevas andado (estadísticas) | 🚧 implementada y desplegada, **sin probar** |
-| 088 | Una comida, varias recetas | 🚧 implementada y desplegada, **sin probar** |
+| 088 | Una comida, varias recetas | ✅ completada |
+| 089 | Normalizar las recetas: ingredientes y alias | ✅ completada |
+| 090 | Reparar la normalización | ✅ completada |
+| 091 | El editor avisa si una receta no aparece en el texto | 🚧 desplegada, **sin probar** |
+| 092 | La siembra nace enlazada y limpia | 🚧 desplegada, **sin probar** |
+| 093 | Apuntar una comida eligiendo una receta | 🚧 desplegada, **sin probar** |
+| 094 | "Me lo he comido": del plan al diario | 🚧 desplegada, **sin probar** |
+| 095 | Estadísticas de lo que comes | 🚧 desplegada, **sin probar** |
 
 ## Qué toca ahora
 
-**Probar las cuatro que están desplegadas sin probar**: la **077**, la **078**,
-la **087** y la **088**. Es lo único abierto. Están desplegadas, revisadas y con sus suites en
-verde, pero **build verde no es probado**: sus guiones están al final de cada
-spec.
+**Una pasada de pruebas de las cinco que quedan desplegadas sin probar**: la
+**091**, la **092**, la **093**, la **094** y la **095**. El guion conjunto está
+al final de este apartado.
 
-Después, **usar la app**. Al 1 de septiembre las specs **001 a 087 están
-escritas**, sin ningún hueco, y con estas tres **se cierra la v13**, que llevaba
-a medias desde el 30 de agosto. **No queda nada declarado y sin escribir.** El
-trabajo entra por lo que el usuario se encuentre usándola, y cae primero en
-`docs/BACKLOG.md`.
+Al 2 de septiembre de 2026 las specs **001 a 095 están escritas e
+implementadas**. No queda nada declarado y sin hacer. El trabajo entra por lo que
+el usuario se encuentre usándola, y cae primero en `docs/BACKLOG.md`.
 
-**Las reglas de Firestore del bloque `usuarios/{uid}/material` SÍ están
-publicadas**, con la CLI y antes del commit `6c250b3`. Se anota porque no se ve
-en el repositorio y la duda cuesta una tarde de perseguir errores de permisos
-que parecen bugs. Las specs 077, 078 y 087 **no las tocan**: ninguna estrena
-colección ni campo.
+**Las reglas de Firestore no se han tocado en todo el día**: ninguna de las ocho
+specs del 2 de septiembre estrena colección, y los campos nuevos (`recetaIds`,
+`alias`, `ingredientesEnPiezas`) viven en colecciones ya permitidas.
 
 ### Lo que se cerró entre el 28 y el 30 de agosto
 
