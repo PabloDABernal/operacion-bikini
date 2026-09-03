@@ -209,6 +209,25 @@ export function actualizarComida(
   });
 }
 
+// El orden del diario: TODO hacia atrás, también dentro del día.
+//
+// Los días van de más nuevo a más viejo, y dentro de cada uno la cena va antes
+// que el desayuno. Antes el día se ordenaba al revés que la lista —desayuno
+// primero—, así que justo debajo de lo de hoy aparecía el desayuno de ayer y
+// parecía lo último que habías comido. Nunca hubo un motivo escrito para esa
+// mezcla: era una incoherencia.
+export function compararComidas(a, b) {
+  if (a.fecha !== b.fecha) return a.fecha < b.fecha ? 1 : -1;
+
+  // Al revés que el orden natural de los momentos: cena, merienda, comida,
+  // desayuno.
+  const orden = ordenDeMomento(b.momento) - ordenDeMomento(a.momento);
+  if (orden !== 0) return orden;
+
+  // Dos comidas del mismo momento: la más tarde, primero.
+  return compararPorFechaYCreacion(a, b);
+}
+
 // Firestore solo ordena por fecha (índice de un campo, sin índice compuesto);
 // el momento del día y el desempate se ordenan aquí.
 export async function listarComidas(uid) {
@@ -220,12 +239,7 @@ export async function listarComidas(uid) {
     ...documento.data()
   }));
 
-  comidas.sort((a, b) => {
-    if (a.fecha !== b.fecha) return a.fecha < b.fecha ? 1 : -1;
-    const orden = ordenDeMomento(a.momento) - ordenDeMomento(b.momento);
-    if (orden !== 0) return orden;
-    return compararPorFechaYCreacion(a, b);
-  });
+  comidas.sort(compararComidas);
 
   return comidas;
 }

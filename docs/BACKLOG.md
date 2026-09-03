@@ -48,6 +48,15 @@ tres que quedaban declaradas en `PRODUCTO.md` y sin escribir (077, 078 y 087).
 Con eso **no queda ninguna spec declarada sin escribir**, ni ninguna escrita sin
 implementar. A partir de aquí, todo lo que entre sale de este archivo.
 
+## Anotado el 3 de septiembre de 2026
+
+- **El diario de comidas ordenaba el día al revés que la lista.** Los días iban
+  de más nuevo a más viejo, pero dentro de cada día los momentos iban hacia
+  delante (desayuno primero). Debajo de lo de hoy salía el desayuno de ayer y
+  parecía la última comida del día anterior. **Arreglado el mismo día**, sin
+  spec: era una incoherencia sin motivo escrito, no una decisión. El comparador
+  se sacó a `compararComidas()` para poder probarlo.
+
 ## Anotado el 1 de septiembre de 2026
 
 - **Una comida con dos platos solo enlaza una receta.** Saltó usando la app: la
