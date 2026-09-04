@@ -761,6 +761,17 @@ Ya no salen de una lista planificada: salen de usar la app cada día.
 |---|---|
 | 089 | Normalizar las recetas: ingredientes y alias |
 
+- **"Me lo he comido" en cualquier día de la semana.** Hasta ahora solo el
+  día de hoy tenía el botón. Pasa a estar en los siete, y la hora que se
+  guarda deja de ser siempre "ahora": si el momento ya pasó (otro día, o
+  hoy tras su franja) se guarda con la hora fija de esa franja (desayuno
+  9:00, comida 14:00, merienda 18:00, cena 21:30); si aún no ha llegado, se
+  avisa y se guarda con la hora real de ahora.
+
+| Spec | Qué |
+|---|---|
+| 097 | "Me lo he comido" en cualquier día |
+
 ## Ideas para más adelante (27 de agosto de 2026)
 
 El 27 de agosto se vació `docs/BACKLOG.md`: la app está terminada y en uso

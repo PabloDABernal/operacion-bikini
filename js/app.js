@@ -191,6 +191,7 @@ import {
   validarComida,
   guardarComida,
   yaApuntada,
+  apunteDesdeDieta,
   actualizarComida,
   listarComidas,
   borrarComida
@@ -502,9 +503,9 @@ document.querySelectorAll(".subpestana").forEach((boton) => {
 
 // Confirmación breve al guardar: sin esto, guardar un pesaje no produce
 // ninguna señal visible más allá de que el campo se vacía.
-function avisarGuardado(elementoId) {
+function avisarGuardado(elementoId, texto = "Guardado") {
   const aviso = id(elementoId);
-  aviso.textContent = "Guardado";
+  aviso.textContent = texto;
   setTimeout(() => {
     aviso.textContent = "";
   }, 3000);
@@ -3866,13 +3867,11 @@ function filaDeComida(indiceDia, indiceComida, comida) {
     fila.appendChild(verReceta);
   }
 
-  // SOLO en el día de hoy (spec 094). Antes salía en las siete filas de la
-  // semana, y apuntarDeLaDieta() guarda siempre con la fecha de hoy: tocar el
-  // botón de la comida del martes un jueves la apuntaba como comida de hoy, en
-  // silencio. Era un fallo en producción, no una decisión.
-  const esHoy = indiceDia === diaDeLaSemana(hoyISO());
-
-  if (comida.texto && esHoy) {
+  // En los siete días, no solo hoy (spec 097). Antes solo salía en el día de
+  // hoy porque siempre se guardaba con la fecha de hoy: tocar el botón de la
+  // comida del martes un jueves la apuntaba como comida de hoy, en silencio.
+  // Ahora apuntarDeLaDieta() calcula la fecha real del día tocado.
+  if (comida.texto) {
     // Iconos y no texto (spec 065): los botones de texto tenían ancho variable
     // -"Me lo he comido" solo sale con texto, y el otro dice "Editar" o "+"-,
     // así que la columna del plato acababa en un sitio distinto en cada fila.
@@ -3881,7 +3880,7 @@ function filaDeComida(indiceDia, indiceComida, comida) {
     // La etiqueta dice QUÉ se apunta: con siete filas iguales, un "Me lo he
     // comido" a secas no distingue una de otra.
     const apuntar = botonDeIcono("comido", `Me lo he comido: ${comida.texto}`, () =>
-      apuntarDeLaDieta(comida, apuntar)
+      apuntarDeLaDieta(comida, apuntar, indiceDia)
     );
     apuntar.classList.add("boton-comido", "col-comido");
     fila.appendChild(apuntar);
@@ -4152,22 +4151,35 @@ async function guardarCelda(indiceDia, indiceComida, texto, recetaIds) {
   }
 }
 
-async function apuntarDeLaDieta(comida, boton) {
+async function apuntarDeLaDieta(comida, boton, indiceDia) {
   const error = id("error-semana");
   error.textContent = "";
 
-  // Si ya lo tienes apuntado hoy, se pregunta y NO se impide: repetir plato
-  // puede ser verdad. Lo que no vale es duplicarlo sin enterarte por pulsar dos
-  // veces el mismo botón (spec 094).
+  // Fecha y hora con las que se guarda (spec 097): franja fija del día si ya
+  // pasó, hora real de ahora si aún no ha llegado.
+  const { fecha, hora, esFuturo } = apunteDesdeDieta(
+    indiceDia,
+    comida.momento,
+    hoyISO(),
+    new Date()
+  );
+
+  // Si ya lo tienes apuntado, se pregunta y NO se impide: repetir plato puede
+  // ser verdad. Lo que no vale es duplicarlo sin enterarte por pulsar dos
+  // veces el mismo botón (spec 094). Se compara contra la fecha con la que se
+  // va a guardar de verdad (spec 097): si se comparase contra el día tocado,
+  // marcar dos veces una comida futura no se detectaría, porque las dos veces
+  // se guarda con la fecha de hoy, no la del día futuro.
   const repetida = yaApuntada(
     listaComidas.obtenerRegistros(),
-    hoyISO(),
+    fecha,
     comida.momento,
     comida.texto
   );
   if (repetida) {
+    const cuando = fecha === hoyISO() ? "hoy" : `el ${formatearFecha(fecha)}`;
     const seguir = confirm(
-      `Ya tienes apuntado "${comida.texto}" en ${etiquetaDeMomento(comida.momento).toLowerCase()} de hoy. ¿Lo apunto otra vez?`
+      `Ya tienes apuntado "${comida.texto}" en ${etiquetaDeMomento(comida.momento).toLowerCase()} ${cuando}. ¿Lo apunto otra vez?`
     );
     if (!seguir) return;
   }
@@ -4179,18 +4191,18 @@ async function apuntarDeLaDieta(comida, boton) {
       uidActual,
       comida.texto,
       comida.momento,
-      hoyISO(),
-      // SIN hora (spec 094): el plan no la tiene, y ponerle la de cuando pulsas
-      // el botón es inventarse a qué hora comiste. La hora es opcional desde la
-      // spec 014. Antes se guardaba horaActual().
-      "",
+      fecha,
+      hora,
       [],
       "",
       // Con sus recetas, que es lo que hace que el diario se llene ENLAZADO y
       // las estadísticas de la spec 095 tengan qué contar.
       idsDeRecetaDe(comida)
     );
-    avisarGuardado("guardado-dieta");
+    avisarGuardado(
+      "guardado-dieta",
+      esFuturo ? "Ese momento aún no ha llegado. Se apunta con la hora de ahora." : "Guardado"
+    );
     responderEnBoton(boton, true);
     await listaComidas.refrescar();
   } catch {

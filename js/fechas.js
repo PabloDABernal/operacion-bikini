@@ -17,11 +17,14 @@ export function formatearFecha(iso) {
 
 // La hora va como texto "HH:MM" en hora local, igual que las fechas: no se
 // convierte a ninguna zona horaria ni se guarda como instante.
-export function horaActual() {
-  const ahora = new Date();
-  const horas = String(ahora.getHours()).padStart(2, "0");
-  const minutos = String(ahora.getMinutes()).padStart(2, "0");
+export function horaDe(momento) {
+  const horas = String(momento.getHours()).padStart(2, "0");
+  const minutos = String(momento.getMinutes()).padStart(2, "0");
   return `${horas}:${minutos}`;
+}
+
+export function horaActual() {
+  return horaDe(new Date());
 }
 
 // Devuelve el mensaje de error, o null si la hora vale. Vacía es válida: la
@@ -47,6 +50,14 @@ export function errorDeFecha(fecha) {
   if (!fecha) return "Introduce una fecha.";
   if (fecha > hoyISO()) return "La fecha no puede ser futura.";
   return null;
+}
+
+// Fecha ISO + hora "HH:MM" como instante local, para comparar contra `new
+// Date()` (spec 097: saber si una franja fija ya pasó o está en el futuro).
+export function instanteDe(fecha, hora) {
+  const [anio, mes, dia] = fecha.split("-").map(Number);
+  const [horas, minutos] = hora.split(":").map(Number);
+  return new Date(anio, mes - 1, dia, horas, minutos);
 }
 
 // Suma (o resta, con días negativos) días naturales a una fecha ISO y devuelve

@@ -13,7 +13,15 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 import { db } from "./firebase-config.js";
-import { errorDeFecha, errorDeHora, compararPorFechaYCreacion } from "./fechas.js";
+import {
+  errorDeFecha,
+  errorDeHora,
+  compararPorFechaYCreacion,
+  diaDeLaSemana,
+  sumarDias,
+  instanteDe,
+  horaDe
+} from "./fechas.js";
 import { campoHora } from "./pesajes.js";
 
 const MAX_CARACTERES = 500;
@@ -77,6 +85,41 @@ export const MOMENTOS = [
 ];
 
 export const MOMENTO_POR_DEFECTO = "comida";
+
+// Franja fija de cada momento, para "me lo he comido" desde Mi dieta (spec
+// 097): un día pasado (o de hoy tras su franja) se apunta con esta hora, en
+// vez de con la hora real de la pulsación.
+export const FRANJAS_MOMENTO = {
+  desayuno: "09:00",
+  comida: "14:00",
+  merienda: "18:00",
+  cena: "21:30"
+};
+
+// Fecha y hora con las que se guarda "me lo he comido" desde Mi dieta (spec
+// 097). `indiceDia` es la posición del día tocado en la tira (0 = lunes); la
+// tira es un patrón semanal sin fechas propias, así que su fecha real se
+// calcula a partir de `hoy`.
+//
+// Pasado (la franja fija de ese día ya llegó, en el límite exacto incluido):
+// se guarda con la fecha del día y la hora de su franja. Futuro (todavía no
+// ha llegado): se guarda con la fecha y hora reales de `ahora`, y se marca
+// `esFuturo` para que quien llama pueda avisar.
+//
+// `hoy` y `ahora` se reciben en vez de calcularse aquí dentro para que la
+// función sea pura y se pueda probar sin esperar al reloj real.
+export function apunteDesdeDieta(indiceDia, momento, hoy, ahora) {
+  const diaHoy = diaDeLaSemana(hoy);
+  const fechaDelDia = sumarDias(hoy, indiceDia - diaHoy);
+  const franja = FRANJAS_MOMENTO[momento];
+  const esFuturo = !franja || instanteDe(fechaDelDia, franja) > ahora;
+
+  return {
+    fecha: esFuturo ? hoy : fechaDelDia,
+    hora: esFuturo ? horaDe(ahora) : franja,
+    esFuturo
+  };
+}
 
 export function etiquetaDeMomento(valor) {
   const momento = MOMENTOS.find((m) => m.valor === valor);
