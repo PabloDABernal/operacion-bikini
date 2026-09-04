@@ -2,7 +2,9 @@
 
 Documento para retomar el trabajo en frío. Se actualiza al terminar cada spec.
 
-**Última actualización:** 2 de septiembre de 2026. **Specs 001 a 095 escritas, y todas implementadas menos ninguna.** El 1 de septiembre se cerraron las cinco que arrastraban "sin probar" y se hicieron las tres que faltaban de la v13. El 2, del uso salieron **088** (una comida, varias recetas), **089** (normalizar las recetas), **090** (repararla, porque la 089 estropeó datos), **091** (el editor avisa), **092** (la siembra nace enlazada) y las tres del diario: **093**, **094** y **095**. **Las nueve desplegadas y pendientes de una pasada de pruebas conjunta.**
+**Última actualización:** 4 de septiembre de 2026. **Spec 097** ("me lo he comido" en cualquier día de la semana, con franja fija por tipo de comida) escrita, implementada, revisada (`revisor-specs` y `revisor-codigo`, sin bloqueantes) y **probada y confirmada por el usuario en producción**. Revoca dos decisiones de la 094 ("solo hoy" y "sin hora"), dejándolo dicho en la propia spec.
+
+Sigue pendiente lo de antes: **Specs 001 a 095 escritas, y todas implementadas menos ninguna.** El 1 de septiembre se cerraron las cinco que arrastraban "sin probar" y se hicieron las tres que faltaban de la v13. El 2, del uso salieron **088** (una comida, varias recetas), **089** (normalizar las recetas), **090** (repararla, porque la 089 estropeó datos), **091** (el editor avisa), **092** (la siembra nace enlazada) y las tres del diario: **093**, **094** y **095**. **Las nueve desplegadas y pendientes de una pasada de pruebas conjunta.**
 
 > **2 de septiembre de 2026: el objetivo de verdad, y el día que rompí datos.**
 >
@@ -443,6 +445,7 @@ El 20 de agosto arrancó la **v4**, que sale de una auditoría de usabilidad hec
 | 094 | "Me lo he comido": del plan al diario | 🚧 desplegada, **sin probar** |
 | 095 | Estadísticas de lo que comes | 🚧 desplegada, **sin probar** |
 | 096 | Comprado todo: marcar la lista entera de una vez | 🚧 desplegada, **sin probar** |
+| 097 | "Me lo he comido" en cualquier día de la semana, con franja fija | ✅ completada |
 
 ## Qué toca ahora
 

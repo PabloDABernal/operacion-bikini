@@ -1,6 +1,6 @@
 # 097 — Marcar "me lo he comido" en cualquier día de la semana
 
-- **Estado:** borrador
+- **Estado:** completada
 - **Fecha:** 2026-09-04
 - **Referencia en PRODUCTO.md:** sección "evolutivos de la fase productiva", entrada de la spec 097
 
