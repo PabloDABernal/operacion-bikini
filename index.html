@@ -591,6 +591,17 @@
 
       <!-- Sub-pestaña: Apuntar -->
       <div class="subseccion activa" data-subseccion="apuntar">
+
+      <!-- "Lo que toca hoy" (spec 101), espejo de "Lo que toca ahora" de
+           Comidas (spec 098): la sesión de hoy de Mi tabla, arriba del todo,
+           para apuntarla sin cambiar de sub-pestaña. -->
+      <section id="bloque-toca-hoy-ejercicio">
+      <h2>Lo que toca hoy</h2>
+      <div id="toca-hoy-ejercicio"></div>
+      <p id="error-toca-hoy-ejercicio" class="error" role="alert"></p>
+      <p id="guardado-toca-hoy-ejercicio" class="guardado" role="status"></p>
+      </section>
+
       <h2>Nuevo ejercicio</h2>
       <form id="form-ejercicio">
         <label for="ejercicio-texto">Qué has hecho</label>

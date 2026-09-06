@@ -122,6 +122,22 @@ export function validarEjercicio(
   };
 }
 
+// ¿Ya está apuntado este ejercicio ese día? (spec 101, espejo de
+// `yaApuntada()` en js/comidas.js para las comidas, spec 094).
+//
+// Mismo día y mismo texto, comparado normalizado, sin tildes ni mayúsculas:
+// la sesión de la tabla y lo apuntado pueden venir escritos distinto.
+//
+// Sirve para PREGUNTAR, no para impedir: repetir ejercicio puede ser verdad.
+export function yaApuntado(ejercicios, fecha, texto) {
+  const clave = (t) =>
+    String(t || "").trim().toLowerCase().normalize("NFD").replace(/\p{Mn}/gu, "");
+
+  return (ejercicios || []).some(
+    (ejercicio) => ejercicio.fecha === fecha && clave(ejercicio.texto) === clave(texto)
+  );
+}
+
 export function guardarEjercicio(
   uid,
   texto,

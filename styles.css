@@ -248,10 +248,13 @@ header {
   display: block;
 }
 
-/* "Lo que toca ahora" (spec 098). Una línea al pie para separarlo de "Nueva
-   comida". La fila de dentro (`.comida-dieta`) ya pierde su borde de arriba
-   sola, por `.comida-dieta:first-of-type` (spec 072): es la única fila aquí. */
-#bloque-toca-ahora {
+/* "Lo que toca ahora"/"Lo que toca hoy" (specs 098 y 101, Comidas y
+   Ejercicio). Una línea al pie para separarlas de "Nueva comida"/"Nuevo
+   ejercicio". La fila de dentro (`.comida-dieta`) ya pierde su borde de
+   arriba sola, por `.comida-dieta:first-of-type` (spec 072): es la única
+   fila aquí. */
+#bloque-toca-ahora,
+#bloque-toca-hoy-ejercicio {
   padding-bottom: var(--e4);
   margin-bottom: var(--e4);
   border-bottom: 1px solid var(--borde);

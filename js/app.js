@@ -206,6 +206,7 @@ import {
   etiquetaDeIntensidad,
   validarEjercicio,
   guardarEjercicio,
+  yaApuntado,
   actualizarEjercicio,
   listarEjercicios,
   borrarEjercicio
@@ -329,6 +330,8 @@ function abrirPestana(nombre, subseccion) {
   // enseñando el momento de antes hasta el próximo cambio en el diario o en
   // la dieta.
   if (nombre === "comidas") pintarLoQueTocaAhora();
+  // Mismo motivo, para "Lo que toca hoy" de Ejercicio (spec 101).
+  if (nombre === "ejercicio") pintarLoQueTocaHoyEjercicio();
 
   // Comidas y Ejercicio tienen sub-pestañas dentro (spec 035). Sin decir cuál,
   // se abre la primera: entrar en Comidas es entrar a apuntar, que es lo que se
@@ -1711,6 +1714,8 @@ function refrescarPantallas() {
   // El diario cambió: si la comida de "Lo que toca ahora" (spec 098) es la que
   // se acaba de apuntar, tiene que pasar a decir "ya lo tienes apuntado hoy".
   pintarLoQueTocaAhora();
+  // Mismo motivo para el ejercicio de hoy (spec 101).
+  pintarLoQueTocaHoyEjercicio();
 }
 
 // Qué comes (spec 095): cuántas comidas apuntas, cuántas van enlazadas de
@@ -4869,6 +4874,70 @@ function pintarTabla() {
   });
 }
 
+// --- "Lo que toca hoy" (spec 101) -----------------------------------------
+//
+// La sesión de hoy de Mi tabla, arriba del todo en Apuntar: la acción más
+// repetida no obliga a cambiar de sub-pestaña. Espejo de "Lo que toca ahora"
+// de Comidas (spec 098), pero sin franjas: una sesión es una al día, no
+// cuatro momentos con horario.
+function pintarLoQueTocaHoyEjercicio() {
+  const contenedor = id("toca-hoy-ejercicio");
+  if (!contenedor) return;
+
+  contenedor.innerHTML = "";
+  id("error-toca-hoy-ejercicio").textContent = "";
+
+  const indiceHoy = diaDeLaSemana(hoyISO());
+  const dia = tablaActiva ? tablaActiva.dias[indiceHoy] : null;
+  const sesion = dia ? dia.sesion : null;
+
+  if (!sesion || !sesion.titulo) {
+    contenedor.appendChild(bloqueTocaHoyEjercicioVacio());
+    return;
+  }
+
+  contenedor.appendChild(filaTocaHoyEjercicio(sesion, indiceHoy));
+
+  if (yaApuntado(listaEjercicios.obtenerRegistros(), hoyISO(), sesion.titulo)) {
+    contenedor.appendChild(celda("Ya la tienes apuntada hoy.", "registro-detalle"));
+  }
+}
+
+function bloqueTocaHoyEjercicioVacio() {
+  const bloque = document.createElement("div");
+
+  const texto = document.createElement("p");
+  texto.className = "explicacion";
+  texto.textContent = tablaActiva
+    ? "Hoy toca descanso."
+    : "Aún no tienes tabla de ejercicio.";
+  bloque.appendChild(texto);
+
+  const atajo = botonDeFila("Ir a Mi tabla", () => abrirSubpestana("ejercicio", "tabla"));
+  atajo.classList.add("enlace");
+  bloque.appendChild(atajo);
+
+  return bloque;
+}
+
+function filaTocaHoyEjercicio(sesion, indiceHoy) {
+  const fila = document.createElement("div");
+  fila.className = "comida-dieta";
+
+  fila.append(
+    celda(sesion.titulo, "registro-texto"),
+    celda(`${sesion.minutos} min · ${etiquetaDeIntensidad(sesion.intensidad)}`, "registro-detalle")
+  );
+
+  const hecho = botonDeIcono("comido", `Lo he hecho: ${sesion.titulo}`, () =>
+    apuntarDeLaTabla(sesion, hecho, indiceHoy, "error-toca-hoy-ejercicio", "guardado-toca-hoy-ejercicio")
+  );
+  hecho.classList.add("boton-comido");
+  fila.appendChild(hecho);
+
+  return fila;
+}
+
 function filaDeSesion(indiceDia, sesion) {
   const fila = document.createElement("div");
   fila.className = "comida-dieta";
@@ -4896,7 +4965,7 @@ function filaDeSesion(indiceDia, sesion) {
   );
 
   const hecho = botonDeIcono("comido", "Lo he hecho", () =>
-    apuntarDeLaTabla(sesion, hecho)
+    apuntarDeLaTabla(sesion, hecho, indiceDia)
   );
   hecho.classList.add("boton-comido");
   fila.appendChild(hecho);
@@ -5047,9 +5116,42 @@ function enlazarConElCatalogo(ejercicios) {
 //
 // Sin hora, igual que "me lo he comido": el botón se pulsa cuando uno se
 // acuerda, no cuando entrena.
-async function apuntarDeLaTabla(sesion, boton) {
-  const error = id("error-semana-tabla");
+// `idError`/`idGuardado`: dónde se escribe el error y el aviso de guardado.
+// Mi tabla usa los suyos por defecto; el bloque "Lo que toca hoy" de Apuntar
+// (spec 101) pasa los suyos, porque los de Mi tabla viven en una sub-pestaña
+// oculta desde Apuntar — sin esto, un fallo de guardado desde el bloque
+// sería invisible (mismo motivo que la spec 098 con `apuntarDeLaDieta()`).
+async function apuntarDeLaTabla(
+  sesion,
+  boton,
+  indiceDia,
+  idError = "error-semana-tabla",
+  idGuardado = "guardado-tabla"
+) {
+  const error = id(idError);
   error.textContent = "";
+
+  // Fecha del día tocado (spec 101, mismo cálculo que apuntarDeLaDieta en la
+  // spec 097): hoy es hoy, cualquier otro día se calcula a partir de él. Sin
+  // franjas horarias en el ejercicio (una sesión al día, no cuatro momentos),
+  // no hay ninguna hora que proponer para un día que no es hoy: se guarda sin
+  // hora, ni para el pasado ni para el futuro.
+  const hoy = diaDeLaSemana(hoyISO());
+  const esHoy = indiceDia === hoy;
+  const fecha = esHoy ? hoyISO() : sumarDias(hoyISO(), indiceDia - hoy);
+  const hora = esHoy ? horaActual() : "";
+
+  // Si ya está apuntada ese día, se pregunta y NO se impide: repetir
+  // ejercicio puede ser verdad (spec 101, mismo criterio que "me lo he
+  // comido", spec 094).
+  const repetido = yaApuntado(listaEjercicios.obtenerRegistros(), fecha, sesion.titulo);
+  if (repetido) {
+    const cuando = fecha === hoyISO() ? "hoy" : `el ${formatearFecha(fecha)}`;
+    const seguir = confirm(`Ya tienes apuntado "${sesion.titulo}" ${cuando}. ¿Lo apunto otra vez?`);
+    if (!seguir) return;
+  }
+
+  boton.disabled = true;
 
   try {
     await guardarEjercicio(
@@ -5057,15 +5159,17 @@ async function apuntarDeLaTabla(sesion, boton) {
       sesion.titulo,
       sesion.minutos,
       sesion.intensidad,
-      hoyISO(),
-      horaActual()
+      fecha,
+      hora
     );
-    avisarGuardado("guardado-tabla");
+    avisarGuardado(idGuardado);
     responderEnBoton(boton, true);
     await listaEjercicios.refrescar();
   } catch {
     error.textContent = "No se ha podido apuntar. Comprueba tu conexión.";
     responderEnBoton(boton, false);
+  } finally {
+    boton.disabled = false;
   }
 }
 
@@ -5157,6 +5261,8 @@ async function refrescarTabla() {
   // mirando ya es otra cosa.
   diaTablaAbierto = diaDeLaSemana(hoyISO());
   pintarTabla();
+  // Y la sesión en "Lo que toca hoy" (spec 101): depende de la misma tabla.
+  pintarLoQueTocaHoyEjercicio();
 }
 
 // --- Comidas -------------------------------------------------------------

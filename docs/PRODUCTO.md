@@ -821,6 +821,52 @@ Qué NO hace la v16:
 | 099 | Un solo campo con sugerencias de recetas e ingredientes |
 | 100 | El momento lo propone la hora |
 
+## Qué hará (v17: lo mismo, para Ejercicio, decidida el 6 de septiembre de 2026)
+
+Sale de aplicar a Ejercicio el mismo diagnóstico que la v16 aplicó a Comidas,
+al terminarla. Ejercicio tiene su Catálogo (029), su tabla semanal (029) y su
+armario de material (074/077/078), pero se quedó un peldaño por detrás en dos
+sitios muy concretos.
+
+**El primero es un fallo, no una mejora**: el botón "Lo he hecho" de Mi tabla
+sale ya en los siete días de la semana, pero **siempre apunta con la fecha y
+la hora de hoy**, toces el día que toques. Es el mismo fallo silencioso que
+tenía "Me lo he comido" antes de arreglarse en la spec 094: tocar el botón
+del martes un jueves apunta la sesión como si fuera de hoy, sin decir nada.
+
+- **"Lo que toca hoy" en Apuntar, con la fecha arreglada.** Un bloque arriba
+  de "Nuevo ejercicio" con la sesión de hoy y su botón, para no tener que ir
+  a Mi tabla a apuntarla. De paso, el botón "Lo he hecho" —el de Mi tabla y
+  el de este bloque nuevo— pasa a apuntar con la fecha del día que se toca,
+  no siempre con la de hoy.
+- **Un solo campo con sugerencias del catálogo**, en "Nuevo ejercicio":
+  escribes y sugiere tus ejercicios del catálogo; elegir uno enlaza el
+  registro del diario con él, igual que ahora se enlaza una comida con su
+  receta (spec 093). Hasta ahora el diario de ejercicio es texto libre sin
+  ningún enlace, aunque Mi tabla sí enlaza cada sesión a su ejercicio del
+  catálogo desde la spec 029 — es la misma asimetría que tenía Comidas antes
+  de la 093.
+- **Estadísticas de qué entrenas**: con el diario enlazado, cuántas sesiones
+  apuntas, cuántas van enlazadas a un ejercicio del catálogo, y qué
+  ejercicios repites más — el mismo tipo de resumen que la spec 095 hace
+  para las comidas.
+
+Qué NO hace la v17:
+
+- **No toca el momento del día ni ninguna franja horaria.** Una sesión de
+  ejercicio es una al día, no cuatro con horario fijo como las comidas: no
+  hay equivalente al "momento" de la v16 que proponer.
+- **No cambia el Catálogo ni el armario de material.** Siguen exactamente
+  como están.
+- **No marca en Mi tabla lo que has cumplido**, por el mismo motivo que Mi
+  dieta no lo hace: la semana enseña el plan, no lo hecho.
+
+| Spec | Qué |
+|---|---|
+| 101 | Lo que toca hoy en Apuntar, y la fecha arreglada en "Lo he hecho" |
+| 102 | Un solo campo con sugerencias del catálogo de ejercicio |
+| 103 | Estadísticas de qué entrenas |
+
 ## Ideas para más adelante (27 de agosto de 2026)
 
 El 27 de agosto se vació `docs/BACKLOG.md`: la app está terminada y en uso
