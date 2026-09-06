@@ -17,7 +17,8 @@ import {
   formatearHora,
   formatearFechaConHora,
   compararPorFechaYCreacion,
-  diaDeLaSemana
+  diaDeLaSemana,
+  instanteDe
 } from "./fechas.js";
 
 import { pesosPorDia, mediaMovil, calendarioDeConstancia } from "./grafica.js";
@@ -5401,6 +5402,32 @@ id("btn-fecha-hora-comida").addEventListener("click", () => {
   id("btn-fecha-hora-comida").classList.add("oculta");
 });
 
+// --- El momento lo propone la hora (spec 100) -----------------------------
+//
+// El desplegable "Momento" ya no sale siempre en "Comida": propone el que
+// toca según la hora del propio formulario, con el mismo criterio de franja
+// más cercana que "Lo que toca ahora" (spec 098).
+//
+// Se apaga en cuanto se toca el desplegable a mano, para no pisar una
+// elección ya hecha; se enciende de nuevo en cada formulario en blanco.
+let momentoTocadoAMano = false;
+
+// `momentoQueToca()` pide un Date; `comida-hora` es un string "HH:MM" (o
+// vacío). `instanteDe()` (spec 097) construye el instante a partir de una
+// fecha ISO cualquiera + esa hora — la fecha es indiferente aquí, porque
+// `momentoQueToca()` solo mira horas y minutos.
+function proponerMomentoComida() {
+  if (momentoTocadoAMano) return;
+  const hora = id("comida-hora").value;
+  const ahora = hora ? instanteDe(hoyISO(), hora) : new Date();
+  id("comida-momento").value = momentoQueToca(ahora);
+}
+
+id("comida-hora").addEventListener("input", proponerMomentoComida);
+id("comida-momento").addEventListener("change", () => {
+  momentoTocadoAMano = true;
+});
+
 // --- Un solo campo con sugerencias de recetas e ingredientes (spec 099) ---
 //
 // Sustituye el interruptor de tres modos (Escribir/Una receta mía/Elegir de
@@ -5637,11 +5664,15 @@ id("form-comida").addEventListener("submit", async (evento) => {
     acompanamientosNuevos = [];
     id("comida-acompanamiento").value = "";
     pintarAcompanamientosNuevos();
-    id("comida-momento").value = MOMENTO_POR_DEFECTO;
     id("comida-fecha").value = hoyISO();
     id("comida-hora").value = horaActual();
     id("campos-fecha-hora-comida").classList.add("oculta");
     id("btn-fecha-hora-comida").classList.remove("oculta");
+    // La hora se resetea ANTES de proponer el momento (spec 100): si no, se
+    // propondría con la hora de la comida que se acaba de guardar, no con la
+    // hora real de ahora.
+    momentoTocadoAMano = false;
+    proponerMomentoComida();
     await listaComidas.refrescar();
   } catch {
     error.textContent = "No se ha podido guardar. Comprueba tu conexión.";
@@ -7644,6 +7675,10 @@ function limpiarFormularios() {
     id(campo).value = horaActual();
   });
   rellenarDesplegable("comida-momento", MOMENTOS, MOMENTO_POR_DEFECTO);
+  // Se propone según la hora ya reseteada arriba (spec 100): sustituye el
+  // valor por defecto que acaba de poner rellenarDesplegable().
+  momentoTocadoAMano = false;
+  proponerMomentoComida();
   rellenarDesplegable("ejercicio-intensidad", INTENSIDADES, INTENSIDAD_POR_DEFECTO);
   [
     "error-pesaje",
