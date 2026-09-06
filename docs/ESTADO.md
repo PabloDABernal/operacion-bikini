@@ -2,7 +2,12 @@
 
 Documento para retomar el trabajo en frío. Se actualiza al terminar cada spec.
 
-**Última actualización:** 6 de septiembre de 2026. Arranca la **v16: registrar en un toque** (`docs/PRODUCTO.md`), pedida por el usuario para que Comidas sea más fácil de usar a diario. Repartida en tres specs: **098** (lo que toca ahora, en Apuntar), **099** (un solo campo con sugerencias) y **100** (el momento lo propone la hora). **La 098 está escrita, implementada, revisada dos veces por `revisor-specs` (cerró dos bloqueantes: el botón "Editar" de una receta desplegada volvía siempre a Mi dieta, y `apuntarDeLaDieta()` escribía sus errores en elementos ocultos desde Apuntar), pasó `revisor-codigo` con CUMPLE, y el usuario la probó y confirmó en producción el mismo día.** Se descartó de nuevo, a petición del usuario, marcar en Mi dieta lo cumplido: sigue igual que decidió `PRODUCTO.md`.
+**Última actualización:** 6 de septiembre de 2026. **La v16 "registrar en un toque" (`docs/PRODUCTO.md`) está cerrada del todo**: sus tres specs —**098** (lo que toca ahora, en Apuntar), **099** (un solo campo con sugerencias de recetas e ingredientes) y **100** (el momento lo propone la hora)— están escritas, implementadas, revisadas por `revisor-specs` y `revisor-codigo`, y **probadas y confirmadas por el usuario en producción**, las tres el mismo día. Salió de que el usuario pidió, en una frase, hacer Comidas "mucho más fácil de registrar, con las recetas y los ingredientes claros". Se descartó de nuevo, a petición del usuario, marcar en Mi dieta lo cumplido: sigue igual que decidió `PRODUCTO.md`.
+
+**Lo que deja la v16 para quien toque este código después:**
+- `ingredienteId` (comida, spec 084) pasó a `ingredienteIds` (lista, spec 099), mismo patrón que `recetaId`→`recetaIds` de la 088: sin migrar nada, con `idsDeIngredienteDe()` en `js/comidas.js` leyendo las dos formas. `js/estadisticas.js` tiene su PROPIA copia local de esa lógica (`idsDeIngredienteDeLaComida`) a propósito, para no importar `comidas.js` (que toca Firestore) en un archivo que se mantiene cálculo puro.
+- `apuntarDeLaDieta()`, `recetaDesplegada()` y `tarjetaDeRecetaEnDieta()` (Mi dieta, spec 083) ahora aceptan parámetros de destino/ids configurables, porque las mismas funciones las reutiliza el bloque nuevo "Lo que toca ahora". La variable `volverAMiDietaTrasEditar` (booleana) pasó a `destinoTrasEditarReceta` (`null | "dieta" | "apuntar"`).
+- El interruptor de tres modos de "Nueva comida" (Escribir/Una receta mía/Elegir de mi despensa) desapareció entero, sustituido por un campo único con sugerencias mezcladas y chips.
 
 **Trampa que deja la 098**: `volverAMiDietaTrasEditar` (booleano, spec 083) pasó a llamarse `destinoTrasEditarReceta` (`null | "dieta" | "apuntar"`), porque el botón "Editar" de una receta desplegada ahora puede abrirse desde dos sitios. Cualquier tercer sitio que despliegue una receta con su botón de editar tiene que pasar su propio destino, o heredará el de "dieta" por defecto.
 
@@ -452,6 +457,7 @@ El 20 de agosto arrancó la **v4**, que sale de una auditoría de usabilidad hec
 | 097 | "Me lo he comido" en cualquier día de la semana, con franja fija | ✅ completada |
 | 098 | Lo que toca ahora: el plan del momento, en Apuntar (v16) | ✅ completada |
 | 099 | Un solo campo con sugerencias de recetas e ingredientes (v16) | ✅ completada |
+| 100 | El momento lo propone la hora (v16) | ✅ completada |
 
 ## Qué toca ahora
 

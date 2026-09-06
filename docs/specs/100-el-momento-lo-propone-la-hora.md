@@ -1,6 +1,6 @@
 # 100 — El momento lo propone la hora
 
-- **Estado:** borrador
+- **Estado:** ✅ completada, probada por el usuario en producción el 6 de septiembre de 2026
 - **Fecha:** 2026-09-06
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (v16: registrar en un toque)", tercer punto
 
