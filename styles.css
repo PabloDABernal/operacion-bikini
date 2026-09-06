@@ -2201,6 +2201,62 @@ button:disabled {
   font-size: 0.8rem;
 }
 
+/* La cantidad de un chip de ingrediente (spec 099), pequeña y dentro del
+   propio chip: no es un campo del formulario, es un detalle de ESE chip. */
+.chip-cantidad {
+  width: 4.5rem;
+  border: none;
+  border-bottom: 1px solid var(--borde);
+  background: none;
+  color: inherit;
+  font-size: 0.8rem;
+  padding: 0 var(--e1);
+}
+
+/* El campo de "Qué has comido" y su lista de sugerencias (spec 099): la
+   lista flota justo debajo, sin empujar el resto del formulario. */
+.campo-con-sugerencias {
+  position: relative;
+}
+
+.sugerencias-comida {
+  position: absolute;
+  z-index: 1;
+  left: 0;
+  right: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  background: var(--superficie-alta);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio-s);
+  max-height: 12rem;
+  overflow-y: auto;
+}
+
+.sugerencia-comida {
+  display: flex;
+  align-items: center;
+  gap: var(--e2);
+  width: 100%;
+  padding: var(--e2);
+  border: none;
+  border-top: 1px solid var(--borde);
+  background: none;
+  color: inherit;
+  text-align: left;
+  font-size: 0.9rem;
+}
+
+.sugerencia-comida:first-child {
+  border-top: none;
+}
+
+.sugerencia-comida-nombre {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
 /* El aspa se hereda del botón de la fila, así que hay que devolverle el tamaño:
    sin esto sale con el padding de un botón de acción. */
 .comida-dieta button.chip-quitar {

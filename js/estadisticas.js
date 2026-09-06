@@ -109,11 +109,23 @@ export function estadisticasDeDistancia(ejercicios, hoy) {
 // en forma de respuesta.
 //
 // Una comida está ENLAZADA si lleva al menos una receta (093) o un ingrediente
-// suelto (084): las dos formas dicen qué comiste de verdad.
+// suelto (084, uno o varios desde la spec 099): las dos formas dicen qué
+// comiste de verdad.
+//
+// El ingrediente suelto se lee en las dos formas que puede traer una comida
+// —`ingredienteIds` (lista, spec 099) o `ingredienteId` (uno solo, spec 084)—
+// inline y no con `idsDeIngredienteDe()` de `js/comidas.js` a propósito: este
+// archivo es cálculo puro, sin importar nada que toque Firestore, igual que ya
+// hace con `recetaIds` en `estadisticasDeComidas()` más abajo.
+function idsDeIngredienteDeLaComida(comida) {
+  if (Array.isArray(comida.ingredienteIds)) return comida.ingredienteIds.filter(Boolean);
+  return comida.ingredienteId ? [comida.ingredienteId] : [];
+}
 
 function enlazada(comida) {
   return Boolean(
-    (Array.isArray(comida.recetaIds) && comida.recetaIds.length) || comida.ingredienteId
+    (Array.isArray(comida.recetaIds) && comida.recetaIds.length) ||
+      idsDeIngredienteDeLaComida(comida).length
   );
 }
 
@@ -153,8 +165,11 @@ export function estadisticasDeComidas(comidas, hoy, recetaPorId, ingredientePorI
   };
 
   recientes.forEach((comida) => {
-    // El ingrediente suelto de la spec 084 cuenta una vez.
-    if (comida.ingredienteId) sumar(ingredientes, ingredientePorId(comida.ingredienteId));
+    // Los ingredientes sueltos de las specs 084 y 099: uno o varios, cada uno
+    // cuenta una vez.
+    idsDeIngredienteDeLaComida(comida).forEach((ingredienteId) =>
+      sumar(ingredientes, ingredientePorId(ingredienteId))
+    );
 
     (Array.isArray(comida.recetaIds) ? comida.recetaIds : []).forEach((recetaId) => {
       const receta = recetaPorId(recetaId);

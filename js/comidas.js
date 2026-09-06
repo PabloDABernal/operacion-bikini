@@ -167,13 +167,13 @@ function coleccionDe(uid) {
   return collection(db, "usuarios", uid, "comidas");
 }
 
-// Devuelve { texto, momento, fecha, ingredienteId } o { error }.
+// Devuelve { texto, momento, fecha, ingredienteIds } o { error }.
 //
-// `ingredienteId` (spec 084) es opcional: viene puesto cuando la comida se
-// apuntó eligiendo un ingrediente de la despensa (modo "Elegir de mi
-// despensa"), y vacío cuando se escribió a mano. Es un id de Firestore que
-// ya viene validado por quien construye el desplegable: no hace falta
-// comprobar su forma aquí.
+// `ingredienteIds` (spec 084, lista desde la spec 099) es opcional: trae los
+// ingredientes sueltos de la despensa que se eligieron al apuntar la comida
+// desde el campo con sugerencias, y vacío cuando se escribió a mano. Son ids
+// de Firestore que ya vienen validados por quien construye la lista: no hace
+// falta comprobar su forma aquí.
 // `recetaIds` va AL FINAL y con valor por defecto (spec 093): los llamadores de
 // siempre —"lo de siempre" (013), el alta a mano, apuntar de la dieta— siguen
 // llamando con los argumentos que ya pasaban y no se enteran de nada.
@@ -183,7 +183,7 @@ export function validarComida(
   fecha,
   hora,
   acompanamientos = [],
-  ingredienteId = "",
+  ingredienteIds = [],
   recetaIds = []
 ) {
   const texto = String(textoBruto ?? "").trim();
@@ -210,11 +210,23 @@ export function validarComida(
     fecha,
     hora: hora || "",
     acompanamientos: acompanamientosDe({ acompanamientos }),
-    ingredienteId: String(ingredienteId ?? "").trim(),
-    // Se llama igual que en la dieta (spec 088) a proposito: es lo mismo, y asi
-    // idsDeRecetaDe() sirve para las dos sin tocarla.
+    // Se llama igual que recetaIds a propósito: mismo criterio de la spec
+    // 088, así que idsDeIngredienteDe() sirve para las comidas nuevas y las
+    // viejas (con el campo `ingredienteId` singular, spec 084) sin tocarla.
+    ingredienteIds: (Array.isArray(ingredienteIds) ? ingredienteIds : []).filter(Boolean),
     recetaIds: (Array.isArray(recetaIds) ? recetaIds : []).filter(Boolean)
   };
+}
+
+// Los ingredientes sueltos de una comida, venga guardada como venga (spec
+// 099). Hasta la 099 una comida llevaba UN `ingredienteId` (spec 084); desde
+// ella lleva una lista, `ingredienteIds`. NO se migra nada en Firestore: esta
+// función lee las dos formas y es el único sitio del proyecto que sabe que
+// existen las dos — mismo patrón que `idsDeRecetaDe()` en `js/dietas.js` para
+// `recetaId` → `recetaIds` (spec 088).
+export function idsDeIngredienteDe(comida) {
+  if (Array.isArray(comida?.ingredienteIds)) return comida.ingredienteIds.filter(Boolean);
+  return comida?.ingredienteId ? [comida.ingredienteId] : [];
 }
 
 // ¿Ya está apuntada esta comida hoy? (spec 094)
@@ -242,7 +254,7 @@ export function guardarComida(
   fecha,
   hora,
   acompanamientos = [],
-  ingredienteId = "",
+  ingredienteIds = [],
   recetaIds = []
 ) {
   const comida = { texto, momento, fecha, creadoEn: serverTimestamp() };
@@ -251,9 +263,10 @@ export function guardarComida(
   // se guardaba antes de la spec 063, sin un array vacío de relleno.
   const lista = acompanamientosDe({ acompanamientos });
   if (lista.length) comida.acompanamientos = lista;
-  // Igual con el enlace (spec 084): una comida escrita a mano se guarda
-  // exactamente como antes, sin el campo.
-  if (ingredienteId) comida.ingredienteId = ingredienteId;
+  // Igual con el enlace (spec 084, lista desde la 099): una comida escrita a
+  // mano se guarda exactamente como antes, sin el campo.
+  const ingredientes = (Array.isArray(ingredienteIds) ? ingredienteIds : []).filter(Boolean);
+  if (ingredientes.length) comida.ingredienteIds = ingredientes;
   // Y lo mismo con las recetas (spec 093): una comida escrita a mano se guarda
   // byte a byte como antes, sin un array vacio de relleno.
   const recetas = (Array.isArray(recetaIds) ? recetaIds : []).filter(Boolean);

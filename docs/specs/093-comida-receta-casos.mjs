@@ -85,12 +85,12 @@ comprobar(
 );
 
 comprobar(
-  "una comida con ingrediente suelto sigue igual (spec 084)",
+  "una comida con ingrediente suelto sigue igual (specs 084 y 099)",
   (() => {
-    const r = validarComida("Yogur (200 g)", "merienda", HOY, "", [], "i9");
-    return { ingredienteId: r.ingredienteId, recetaIds: r.recetaIds };
+    const r = validarComida("Yogur (200 g)", "merienda", HOY, "", [], ["i9"]);
+    return { ingredienteIds: r.ingredienteIds, recetaIds: r.recetaIds };
   })(),
-  { ingredienteId: "i9", recetaIds: [] }
+  { ingredienteIds: ["i9"], recetaIds: [] }
 );
 
 comprobar(

@@ -193,6 +193,7 @@ import {
   yaApuntada,
   apunteDesdeDieta,
   momentoQueToca,
+  idsDeIngredienteDe,
   actualizarComida,
   listarComidas,
   borrarComida
@@ -2396,10 +2397,11 @@ async function refrescarRecetas() {
   if (dietaActiva) pintarDieta();
   // Y la lista de la compra, que sale de los ingredientes de esas recetas.
   pintarCompra();
-  // El modo "Una receta mia" del alta de comidas depende de que haya recetas
-  // (spec 093): sin esto, el boton se quedaria deshabilitado tras crear la
-  // primera, o habilitado tras borrar la ultima.
-  actualizarModoComida();
+  // Las sugerencias y los chips del alta de comidas dependen de las recetas
+  // (spec 099): un chip de una receta borrada tiene que decirlo, y una
+  // recién creada tiene que poder sugerirse sin recargar la página.
+  pintarSugerenciasComida();
+  pintarChipsComida();
 }
 
 id("btn-nueva-receta").addEventListener("click", () => abrirFormularioDeReceta(null));
@@ -3195,9 +3197,10 @@ async function refrescarDespensa() {
   // Y las sugerencias del editor de receta (spec 082): un ingrediente nuevo
   // tiene que poder sugerirse sin recargar la página.
   actualizarSugerenciasDespensa();
-  // Y el modo "Elegir de mi despensa" al apuntar una comida (spec 084): la
-  // lista de marcados, y si hay alguno, pueden cambiar sin recargar.
-  actualizarModoComida();
+  // Y las sugerencias y los chips al apuntar una comida (specs 084 y 099):
+  // los ingredientes marcados pueden cambiar sin recargar la página.
+  pintarSugerenciasComida();
+  pintarChipsComida();
 }
 
 id("buscar-recetas").addEventListener("input", (evento) => {
@@ -4331,7 +4334,7 @@ async function apuntarDeLaDieta(
       fecha,
       hora,
       [],
-      "",
+      [],
       // Con sus recetas, que es lo que hace que el diario se llene ENLAZADO y
       // las estadísticas de la spec 095 tengan qué contar.
       idsDeRecetaDe(comida)
@@ -5398,82 +5401,180 @@ id("btn-fecha-hora-comida").addEventListener("click", () => {
   id("btn-fecha-hora-comida").classList.add("oculta");
 });
 
-// --- Apuntar con un ingrediente suelto de la despensa (spec 084) ---------
+// --- Un solo campo con sugerencias de recetas e ingredientes (spec 099) ---
 //
-// "Escribir" es el modo de siempre; "Elegir de mi despensa" enlaza la
-// comida a un ingrediente real, sin tener que montar una receta de uno
-// solo. No es una sub-pestaña ni un panel del Recetario: es un interruptor
-// propio de este formulario, con el mismo aspecto (reutiliza
-// `.panel-recetario-boton`, spec 085).
-let modoComida = "escribir";
+// Sustituye el interruptor de tres modos (Escribir/Una receta mía/Elegir de
+// mi despensa, specs 084 y 093). Mientras se escribe, se sugieren las
+// recetas y los ingredientes marcados de la despensa que coincidan; elegir
+// una los suma como chip. Sin elegir ninguno, la comida se guarda como texto
+// libre, exactamente igual que "Escribir" antes de esta spec.
+//
+// Cada chip es { tipo: "receta", id } o { tipo: "ingrediente", id, cantidad }.
+// Solo se guarda el id: el nombre se resuelve siempre al vuelo contra
+// recetasCargadas/despensaCargada, igual que ya hacía `textoDeLasRecetas()`,
+// para que una receta renombrada en otra pestaña se vea actualizada aquí.
+let chipsComida = [];
+
+const MAX_SUGERENCIAS_COMIDA = 8;
 
 function ingredientesMarcados() {
   return despensaCargada.filter((ingrediente) => ingrediente.tengo);
 }
 
-// Repinta el interruptor y el panel activo. Se llama al cargar, al cambiar
-// de modo, y cada vez que la despensa se refresca (un ingrediente puede
-// dejar de estar marcado, o dejar de haber ninguno, sin recargar la
-// página).
-// Las recetas elegidas al apuntar una comida (spec 093). Viven aquí y no en el
-// formulario porque hay que poder soltarlas de una en una.
-let recetasElegidas = [];
+// Recetas e ingredientes marcados cuyo nombre contiene `textoBuscado`, sin
+// los que ya estén elegidos (elegir dos veces lo mismo no dice nada). Mínimo
+// dos caracteres: con uno solo, el recetario y la despensa enteros saldrían
+// de golpe.
+function sugerenciasDeComida(textoBuscado) {
+  const buscado = normalizarIngrediente(textoBuscado);
+  if (buscado.length < 2) return [];
 
-// Pinta el panel de "Una receta mía": el desplegable con lo que queda por
-// elegir, los chips de lo elegido y el texto que se va a guardar.
-function pintarPanelDeReceta() {
-  const select = id("comida-receta");
-  const chips = id("chips-comida-receta");
+  const elegidos = new Set(chipsComida.map((chip) => `${chip.tipo}:${chip.id}`));
 
-  // Las ya elegidas no se ofrecen: elegir dos veces la misma no dice nada.
-  select.innerHTML = "";
-  [
-    { valor: "", etiqueta: "añadir una receta…" },
-    ...recetasCargadas
-      .filter((receta) => !recetasElegidas.includes(receta.id))
-      .map((receta) => ({ valor: receta.id, etiqueta: receta.nombre }))
-  ].forEach((opcion) => {
-    const elemento = document.createElement("option");
-    elemento.value = opcion.valor;
-    elemento.textContent = opcion.etiqueta;
-    select.appendChild(elemento);
+  const recetas = recetasCargadas
+    .filter((receta) => normalizarIngrediente(receta.nombre).includes(buscado))
+    .filter((receta) => !elegidos.has(`receta:${receta.id}`))
+    .map((receta) => ({ tipo: "receta", id: receta.id, nombre: receta.nombre }));
+
+  const ingredientes = ingredientesMarcados()
+    .filter((ingrediente) => normalizarIngrediente(ingrediente.nombre).includes(buscado))
+    .filter((ingrediente) => !elegidos.has(`ingrediente:${ingrediente.id}`))
+    .map((ingrediente) => ({ tipo: "ingrediente", id: ingrediente.id, nombre: ingrediente.nombre }));
+
+  return [...recetas, ...ingredientes].slice(0, MAX_SUGERENCIAS_COMIDA);
+}
+
+function nombreDeChipComida(chip) {
+  if (chip.tipo === "receta") {
+    return recetasCargadas.find((receta) => receta.id === chip.id)?.nombre || "(receta borrada)";
+  }
+  return despensaCargada.find((ingrediente) => ingrediente.id === chip.id)?.nombre ||
+    "(ingrediente borrado)";
+}
+
+// El texto que se guarda cuando hay chips: sus nombres unidos con ". ", en
+// el orden en que se eligieron — mismo criterio que ya usaba
+// `textoDeLasRecetas()` para las recetas solas.
+function textoDeChipsComida() {
+  return chipsComida
+    .map((chip) => {
+      const nombre = nombreDeChipComida(chip);
+      if (chip.tipo === "ingrediente" && chip.cantidad) return `${nombre} (${chip.cantidad})`;
+      return nombre;
+    })
+    .join(". ");
+}
+
+// Pinta la lista de sugerencias, según lo que haya en el campo AHORA MISMO.
+function pintarSugerenciasComida() {
+  const lista = id("sugerencias-comida");
+  const sugerencias = sugerenciasDeComida(id("comida-texto").value);
+
+  lista.innerHTML = "";
+  lista.classList.toggle("oculta", sugerencias.length === 0);
+
+  sugerencias.forEach((sugerencia) => {
+    const opcion = document.createElement("li");
+    const boton = document.createElement("button");
+    boton.type = "button";
+    boton.className = "sugerencia-comida";
+    // El icono dice si es receta o ingrediente (spec 099): mezcladas en una
+    // sola lista, sin agruparlas aparte. Es decorativo (aria-hidden en
+    // iconoDeAccion), así que el tipo se dice también en el aria-label, para
+    // que un lector de pantalla no pierda la distinción.
+    boton.appendChild(iconoDeAccion(sugerencia.tipo === "receta" ? "receta" : "despensa"));
+    boton.appendChild(celda(sugerencia.nombre, "sugerencia-comida-nombre"));
+    boton.setAttribute(
+      "aria-label",
+      `${sugerencia.nombre}, ${sugerencia.tipo === "receta" ? "receta" : "ingrediente de tu despensa"}`
+    );
+
+    boton.addEventListener("click", () => {
+      chipsComida = [
+        ...chipsComida,
+        sugerencia.tipo === "receta"
+          ? { tipo: "receta", id: sugerencia.id }
+          : { tipo: "ingrediente", id: sugerencia.id, cantidad: "" }
+      ];
+      // Se vacía y se repinta: listo para buscar y sumar otro (spec 099). El
+      // foco vuelve al campo —la lista que tenía el foco va a desaparecer del
+      // DOM— para que seguir escribiendo no obligue a tocar/tabular de nuevo.
+      const campo = id("comida-texto");
+      campo.value = "";
+      pintarChipsComida();
+      pintarSugerenciasComida();
+      campo.focus();
+    });
+
+    opcion.appendChild(boton);
+    lista.appendChild(opcion);
   });
-  select.value = "";
+}
 
-  chips.innerHTML = "";
-  recetasElegidas.forEach((recetaId) => {
-    const receta = recetasCargadas.find((otra) => otra.id === recetaId);
-    const chip = document.createElement("span");
-    chip.className = "chip-receta";
-    chip.append(celda(receta ? receta.nombre : "(receta borrada)", "chip-nombre"));
+// Pinta los chips elegidos y la previa de "se apuntará como". Cada chip de
+// ingrediente lleva su propio campo de cantidad, porque con varios sueltos a
+// la vez uno solo no bastaría (spec 099).
+function pintarChipsComida() {
+  const contenedor = id("chips-comida");
+  contenedor.innerHTML = "";
+
+  chipsComida.forEach((chip) => {
+    const nombre = nombreDeChipComida(chip);
+    const elemento = document.createElement("span");
+    elemento.className = "chip-receta";
+    elemento.append(celda(nombre, "chip-nombre"));
+
+    if (chip.tipo === "ingrediente") {
+      const cantidad = document.createElement("input");
+      cantidad.type = "text";
+      cantidad.className = "chip-cantidad";
+      cantidad.maxLength = 40;
+      cantidad.placeholder = "cantidad";
+      cantidad.setAttribute("aria-label", `Cantidad de ${nombre}`);
+      cantidad.value = chip.cantidad;
+      cantidad.addEventListener("input", () => {
+        chip.cantidad = cantidad.value;
+        id("texto-comida-chips").textContent = `Se apuntará como: ${textoDeChipsComida()}`;
+      });
+      elemento.appendChild(cantidad);
+    }
 
     const quitar = document.createElement("button");
     quitar.type = "button";
     quitar.className = "chip-quitar";
-    quitar.setAttribute("aria-label", `Quitar ${receta ? receta.nombre : "esta receta"}`);
+    quitar.setAttribute("aria-label", `Quitar ${nombre}`);
     quitar.textContent = "×";
     quitar.addEventListener("click", () => {
-      recetasElegidas = recetasElegidas.filter((otro) => otro !== recetaId);
-      pintarPanelDeReceta();
+      chipsComida = chipsComida.filter((otro) => otro !== chip);
+      pintarChipsComida();
+      pintarSugerenciasComida();
     });
-    chip.appendChild(quitar);
-    chips.appendChild(chip);
+    elemento.appendChild(quitar);
+
+    contenedor.appendChild(elemento);
   });
 
-  id("texto-comida-receta").textContent = recetasElegidas.length
-    ? `Se apuntará como: ${textoDeLasRecetas()}`
+  id("texto-comida-chips").textContent = chipsComida.length
+    ? `Se apuntará como: ${textoDeChipsComida()}`
     : "";
+
+  // Mientras haya chips, el campo solo sirve para buscar MÁS sugerencias: no
+  // se puede mezclar con texto libre en la misma comida (decisión del
+  // usuario, spec 099).
+  id("comida-texto").placeholder = chipsComida.length
+    ? "Busca otra receta o ingrediente para añadir…"
+    : "lentejas y una manzana";
 }
 
-// El texto que se guarda: los nombres de las recetas elegidas, unidos con ". "
-// como los platos de la nutricionista.
-function textoDeLasRecetas() {
-  return recetasElegidas
-    .map((recetaId) => recetasCargadas.find((otra) => otra.id === recetaId))
-    .filter(Boolean)
-    .map((receta) => receta.nombre)
-    .join(". ");
-}
+id("comida-texto").addEventListener("input", pintarSugerenciasComida);
+
+// Cerrar la lista al tocar fuera: sin esto, se queda abierta tapando el resto
+// del formulario hasta la próxima tecla.
+document.addEventListener("click", (evento) => {
+  const dentro =
+    evento.target.closest("#comida-texto") || evento.target.closest("#sugerencias-comida");
+  if (!dentro) id("sugerencias-comida").classList.add("oculta");
+});
 
 // Los nombres de las recetas enlazadas a una comida apuntada (spec 093), para
 // la linea de detalle del diario. Vacio si no lleva ninguna.
@@ -5485,101 +5586,18 @@ function nombresDeLasRecetas(comida) {
     .join(", ");
 }
 
-function actualizarModoComida() {
-  const marcados = ingredientesMarcados();
-  const botonDespensa = id("btn-modo-comida-despensa");
-  const botonReceta = id("btn-modo-comida-receta");
-
-  // Sin recetas en el recetario no hay nada que elegir, igual que la despensa
-  // sin nada marcado (spec 084).
-  botonReceta.disabled = recetasCargadas.length === 0;
-  botonReceta.title = recetasCargadas.length ? "" : "Aún no tienes recetas.";
-  if (recetasCargadas.length === 0 && modoComida === "receta") modoComida = "escribir";
-
-  // Sin ningún ingrediente marcado, el modo se deshabilita y se fuerza
-  // "Escribir": nunca hay un modo activo en el que no se pueda guardar.
-  botonDespensa.disabled = marcados.length === 0;
-  botonDespensa.title = marcados.length
-    ? ""
-    : "No tienes ningún ingrediente marcado en tu despensa.";
-  if (marcados.length === 0) modoComida = "escribir";
-
-  document.querySelectorAll("[data-modo-comida]").forEach((boton) => {
-    const puesta = boton.dataset.modoComida === modoComida;
-    boton.classList.toggle("activa", puesta);
-    if (puesta) {
-      boton.setAttribute("aria-current", "true");
-    } else {
-      boton.removeAttribute("aria-current");
-    }
-  });
-
-  id("panel-comida-escribir").classList.toggle("oculta", modoComida !== "escribir");
-  id("panel-comida-receta").classList.toggle("oculta", modoComida !== "receta");
-  id("panel-comida-despensa").classList.toggle("oculta", modoComida !== "despensa");
-
-  if (modoComida === "receta") pintarPanelDeReceta();
-
-  if (modoComida === "despensa") {
-    const select = id("comida-ingrediente");
-    select.innerHTML = "";
-    ordenarDespensa(marcados).forEach((ingrediente) => {
-      const opcion = document.createElement("option");
-      opcion.value = ingrediente.id;
-      opcion.textContent = ingrediente.nombre;
-      select.appendChild(opcion);
-    });
-  }
-}
-
-document.querySelectorAll("[data-modo-comida]").forEach((boton) => {
-  boton.addEventListener("click", () => {
-    if (boton.disabled) return;
-    modoComida = boton.dataset.modoComida;
-    actualizarModoComida();
-  });
-});
-
-// El desplegable SUMA, como el de Mi dieta (spec 088): elegir una receta la
-// añade a la lista en vez de sustituir la anterior.
-id("comida-receta").addEventListener("change", (evento) => {
-  const receta = recetasCargadas.find((otra) => otra.id === evento.target.value);
-  if (!receta) return;
-  recetasElegidas = [...recetasElegidas, receta.id];
-  pintarPanelDeReceta();
-});
-
-// Estado inicial: despensaCargada aún puede estar vacía (nadie ha entrado
-// todavía), así que esto se repite al refrescar la despensa. Sin esta
-// llamada, el botón se vería habilitado un instante antes de la primera
-// carga.
-actualizarModoComida();
-
 id("form-comida").addEventListener("submit", async (evento) => {
   evento.preventDefault();
   const error = id("error-comida");
   error.textContent = "";
 
-  // En modo "Elegir de mi despensa", el texto se construye aquí
-  // ("Ingrediente (cantidad)", o solo el nombre sin cantidad) y se manda
-  // además el id del ingrediente elegido (spec 084). En "Escribir" es
-  // exactamente lo de siempre.
-  let textoBruto = id("comida-texto").value;
-  let ingredienteId = "";
-  // En modo "Una receta mia" el texto son los nombres de las recetas elegidas
-  // (spec 093), y ademas se manda la lista de ids para que la comida quede
-  // enlazada de verdad.
-  const recetaIds = modoComida === "receta" ? recetasElegidas : [];
-  if (modoComida === "receta") {
-    textoBruto = textoDeLasRecetas();
-  }
-  if (modoComida === "despensa") {
-    const select = id("comida-ingrediente");
-    const nombre = select.options[select.selectedIndex]?.textContent || "";
-    const cantidad = id("comida-cantidad").value.trim();
-    textoBruto = cantidad ? `${nombre} (${cantidad})` : nombre;
-    ingredienteId = select.value;
-  }
+  // Con chips, el texto que se guarda son sus nombres unidos (spec 099); sin
+  // ninguno, es el texto libre de siempre.
+  const textoBruto = chipsComida.length ? textoDeChipsComida() : id("comida-texto").value;
+  const recetaIds = chipsComida.filter((chip) => chip.tipo === "receta").map((chip) => chip.id);
+  const ingredienteIds = chipsComida
+    .filter((chip) => chip.tipo === "ingrediente")
+    .map((chip) => chip.id);
 
   const resultado = validarComida(
     textoBruto,
@@ -5587,7 +5605,7 @@ id("form-comida").addEventListener("submit", async (evento) => {
     id("comida-fecha").value,
     id("comida-hora").value,
     acompanamientosNuevos,
-    ingredienteId,
+    ingredienteIds,
     recetaIds
   );
   if (resultado.error) {
@@ -5605,19 +5623,15 @@ id("form-comida").addEventListener("submit", async (evento) => {
       resultado.fecha,
       resultado.hora,
       resultado.acompanamientos,
-      resultado.ingredienteId,
+      resultado.ingredienteIds,
       resultado.recetaIds
     );
     avisarGuardado("guardado-comida");
     id("comida-texto").value = "";
-    id("comida-cantidad").value = "";
-    // Las recetas elegidas son de esa comida, no de la siguiente.
-    recetasElegidas = [];
-    // Vuelve a "Escribir" tras guardar: elegir un ingrediente es la
-    // excepción, no lo que se espera la próxima vez que se abre el
-    // formulario (spec 084).
-    modoComida = "escribir";
-    actualizarModoComida();
+    // Los chips son de esa comida, no de la siguiente.
+    chipsComida = [];
+    pintarChipsComida();
+    pintarSugerenciasComida();
     // El campo de acompañamiento se vacía con la comida: son de esa comida, no
     // de la siguiente.
     acompanamientosNuevos = [];
@@ -7609,12 +7623,12 @@ function rellenarDesplegable(elementoId, opciones, porDefecto) {
 function limpiarFormularios() {
   acompanamientosNuevos = [];
   pintarAcompanamientosNuevos();
-  modoComida = "escribir";
-  actualizarModoComida();
+  chipsComida = [];
+  pintarChipsComida();
+  pintarSugerenciasComida();
   [
     "peso",
     "comida-texto",
-    "comida-cantidad",
     "comida-acompanamiento",
     "ejercicio-texto",
     "ejercicio-minutos",
