@@ -2,7 +2,11 @@
 
 Documento para retomar el trabajo en frío. Se actualiza al terminar cada spec.
 
-**Última actualización:** 4 de septiembre de 2026. **Spec 097** ("me lo he comido" en cualquier día de la semana, con franja fija por tipo de comida) escrita, implementada, revisada (`revisor-specs` y `revisor-codigo`, sin bloqueantes) y **probada y confirmada por el usuario en producción**. Revoca dos decisiones de la 094 ("solo hoy" y "sin hora"), dejándolo dicho en la propia spec.
+**Última actualización:** 6 de septiembre de 2026. Arranca la **v16: registrar en un toque** (`docs/PRODUCTO.md`), pedida por el usuario para que Comidas sea más fácil de usar a diario. Repartida en tres specs: **098** (lo que toca ahora, en Apuntar), **099** (un solo campo con sugerencias) y **100** (el momento lo propone la hora). **La 098 está escrita, implementada, revisada dos veces por `revisor-specs` (cerró dos bloqueantes: el botón "Editar" de una receta desplegada volvía siempre a Mi dieta, y `apuntarDeLaDieta()` escribía sus errores en elementos ocultos desde Apuntar), pasó `revisor-codigo` con CUMPLE, y el usuario la probó y confirmó en producción el mismo día.** Se descartó de nuevo, a petición del usuario, marcar en Mi dieta lo cumplido: sigue igual que decidió `PRODUCTO.md`.
+
+**Trampa que deja la 098**: `volverAMiDietaTrasEditar` (booleano, spec 083) pasó a llamarse `destinoTrasEditarReceta` (`null | "dieta" | "apuntar"`), porque el botón "Editar" de una receta desplegada ahora puede abrirse desde dos sitios. Cualquier tercer sitio que despliegue una receta con su botón de editar tiene que pasar su propio destino, o heredará el de "dieta" por defecto.
+
+Antes de la v16: **Spec 097** ("me lo he comido" en cualquier día de la semana, con franja fija por tipo de comida) escrita, implementada, revisada (`revisor-specs` y `revisor-codigo`, sin bloqueantes) y **probada y confirmada por el usuario en producción**. Revoca dos decisiones de la 094 ("solo hoy" y "sin hora"), dejándolo dicho en la propia spec.
 
 Sigue pendiente lo de antes: **Specs 001 a 095 escritas, y todas implementadas menos ninguna.** El 1 de septiembre se cerraron las cinco que arrastraban "sin probar" y se hicieron las tres que faltaban de la v13. El 2, del uso salieron **088** (una comida, varias recetas), **089** (normalizar las recetas), **090** (repararla, porque la 089 estropeó datos), **091** (el editor avisa), **092** (la siembra nace enlazada) y las tres del diario: **093**, **094** y **095**. **Las nueve desplegadas y pendientes de una pasada de pruebas conjunta.**
 
@@ -446,6 +450,7 @@ El 20 de agosto arrancó la **v4**, que sale de una auditoría de usabilidad hec
 | 095 | Estadísticas de lo que comes | 🚧 desplegada, **sin probar** |
 | 096 | Comprado todo: marcar la lista entera de una vez | 🚧 desplegada, **sin probar** |
 | 097 | "Me lo he comido" en cualquier día de la semana, con franja fija | ✅ completada |
+| 098 | Lo que toca ahora: el plan del momento, en Apuntar (v16) | ✅ completada |
 
 ## Qué toca ahora
 
