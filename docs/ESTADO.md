@@ -451,6 +451,7 @@ El 20 de agosto arrancó la **v4**, que sale de una auditoría de usabilidad hec
 | 096 | Comprado todo: marcar la lista entera de una vez | 🚧 desplegada, **sin probar** |
 | 097 | "Me lo he comido" en cualquier día de la semana, con franja fija | ✅ completada |
 | 098 | Lo que toca ahora: el plan del momento, en Apuntar (v16) | ✅ completada |
+| 099 | Un solo campo con sugerencias de recetas e ingredientes (v16) | ✅ completada |
 
 ## Qué toca ahora
 
