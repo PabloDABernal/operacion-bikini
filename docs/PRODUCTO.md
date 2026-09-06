@@ -772,6 +772,55 @@ Ya no salen de una lista planificada: salen de usar la app cada día.
 |---|---|
 | 097 | "Me lo he comido" en cualquier día |
 
+## Qué hará (v16: registrar en un toque, decidida el 6 de septiembre de 2026)
+
+Sale de usar Comidas a diario con todo lo anterior encima. El usuario lo pidió
+así: *"que sea mucho más fácil registrarlas, se vean claras las recetas y los
+ingredientes"*. De la revisión de la pantalla salieron seis cosas; se hacen las
+tres que tocan el gesto de todos los días, y las de leer recetas se dejan para
+después.
+
+El diagnóstico, en tres frases: **apuntar lo que pone el plan está en la
+pestaña equivocada** (vive solo en Mi dieta, a dos navegaciones de donde se
+apunta); **hay que decidir cómo apuntar antes de apuntar** (tres modos —
+Escribir, Una receta mía, Elegir de mi despensa— con su selector y sus tres
+paneles); y **el momento siempre sale "Comida"**, aunque la app sabe la hora y
+desde la spec 097 tiene las franjas de cada momento.
+
+- **Lo que toca ahora, arriba de Apuntar.** Lo que tu dieta dice para el
+  momento en el que estás, con su botón de "me lo he comido". La acción más
+  repetida del día pasa a estar a cero navegaciones, con la misma lógica de
+  fecha y hora que la spec 097.
+- **Un solo campo, con sugerencias.** Los tres modos se funden: escribes, y
+  mientras escribes salen tus recetas y tus ingredientes; al elegir uno, la
+  comida queda **enlazada**. Si no eliges nada, se guarda como texto libre,
+  exactamente igual que hoy. El enlazado pasa a ser el camino natural en vez
+  de una decisión previa — que es justo lo que persigue el objetivo del 2 de
+  septiembre: *"que todo se enlace, así puedo saber lo que como"*.
+- **El momento lo propone la hora.** Desayuno hasta media mañana, comida al
+  mediodía, merienda por la tarde, cena por la noche, con las mismas franjas
+  de la spec 097. Y se elige tocando, no desplegando una lista.
+
+Qué NO hace la v16:
+
+- **No quita el texto libre.** Apuntar "lo que había en casa de mi madre" sin
+  receta ni ingrediente sigue siendo válido y sigue siendo un toque.
+- **No marca en Mi dieta lo que has cumplido.** Se volvió a plantear el 6 de
+  septiembre y el usuario lo descartó otra vez: la semana enseña el plan, no
+  lo hecho. Sigue en "Con una condición delante", más abajo.
+- **No toca la vista de receta ni el Recetario.** La receta que se lee mal
+  cocinando, las raciones escalables y los filtros del recetario ("puedo
+  hacerla ya", "las de mi dieta", "las que más repito") quedan anotados y sin
+  compromiso: se harán si al usar esto se echan de menos.
+- **No parte Apuntar en dos pestañas.** Dar de alta y consultar el diario
+  siguen compartiendo pantalla; es cosmético y no es lo que duele.
+
+| Spec | Qué |
+|---|---|
+| 098 | Lo que toca ahora: el plan del momento, en Apuntar |
+| 099 | Un solo campo con sugerencias de recetas e ingredientes |
+| 100 | El momento lo propone la hora |
+
 ## Ideas para más adelante (27 de agosto de 2026)
 
 El 27 de agosto se vació `docs/BACKLOG.md`: la app está terminada y en uso

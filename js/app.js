@@ -192,6 +192,7 @@ import {
   guardarComida,
   yaApuntada,
   apunteDesdeDieta,
+  momentoQueToca,
   actualizarComida,
   listarComidas,
   borrarComida
@@ -320,6 +321,12 @@ function abrirPestana(nombre, subseccion) {
   // desde la barra, y también desde otros sitios, así que vive aquí: se entre
   // por donde se entre, los recuentos se releen.
   if (nombre === "ajustes") refrescarRecuentos();
+
+  // "Lo que toca ahora" (spec 098) depende de la hora, no solo de los datos:
+  // sin esto, entrar en Comidas horas después de la última carga seguiría
+  // enseñando el momento de antes hasta el próximo cambio en el diario o en
+  // la dieta.
+  if (nombre === "comidas") pintarLoQueTocaAhora();
 
   // Comidas y Ejercicio tienen sub-pestañas dentro (spec 035). Sin decir cuál,
   // se abre la primera: entrar en Comidas es entrar a apuntar, que es lo que se
@@ -1699,6 +1706,9 @@ function refrescarPantallas() {
   refrescarHoy();
   pintarDistanciaRecorrida();
   pintarQueComes();
+  // El diario cambió: si la comida de "Lo que toca ahora" (spec 098) es la que
+  // se acaba de apuntar, tiene que pasar a decir "ya lo tienes apuntado hoy".
+  pintarLoQueTocaAhora();
 }
 
 // Qué comes (spec 095): cuántas comidas apuntas, cuántas van enlazadas de
@@ -2261,28 +2271,31 @@ id("btn-anadir-linea-receta").addEventListener("click", () => {
   pintarLineasReceta();
 });
 
-// Si el editor de receta se abrió desde el botón "Editar" de Mi dieta (spec
-// 083), guardar/cancelar tiene que volver ahí en vez de dejarte en Recetas.
+// Si el editor de receta se abrió desde el botón "Editar" de una receta
+// desplegada (spec 083), guardar/cancelar tiene que volver ahí en vez de
+// dejarte en Recetas. Esa receta desplegada puede vivir en Mi dieta o en el
+// bloque "Lo que toca ahora" de Apuntar (spec 098), así que esto guarda A
+// DÓNDE volver, no solo que hay que volver: `null` (no venimos de editar
+// desde ningún sitio), `"dieta"` o `"apuntar"`.
 //
-// Es un booleano, NO el día que se estaba viendo: `diaDietaAbierto` también
-// vale `null` en la vista de "semana entera", así que guardarlo ahí
-// confundiría los dos casos. No hace falta: nada cambia `diaDietaAbierto`
-// mientras el formulario sigue VISIBLE, así que `pintarDieta()` ya respeta
-// lo que hubiera al volver.
+// No es el día que se estaba viendo: `diaDietaAbierto` también vale `null` en
+// la vista de "semana entera", así que guardarlo ahí confundiría los dos
+// casos. No hace falta: nada cambia `diaDietaAbierto` mientras el formulario
+// sigue VISIBLE, así que `pintarDieta()` ya respeta lo que hubiera al volver.
 //
 // Se apaga en dos sitios, no solo al terminar la edición: al abrir CUALQUIER
 // formulario de receta (para que una edición abandonada no "contamine" una
 // posterior y distinta), y en refrescarTodo() (para que las acciones
 // disruptivas de Ajustes —que sí pueden cambiar `diaDietaAbierto` de fondo,
-// vía refrescarDieta()— no dejen el recordatorio apuntando a un día que ya
+// vía refrescarDieta()— no dejen el recordatorio apuntando a un sitio que ya
 // no es el que se miraba).
-let volverAMiDietaTrasEditar = false;
+let destinoTrasEditarReceta = null;
 
 function abrirFormularioDeReceta(receta) {
-  // Cualquier apertura del formulario —nueva, o editar desde el Recetario o
-  // desde Mi dieta— empieza "de cero": solo el botón nuevo de Mi dieta la
+  // Cualquier apertura del formulario —nueva, o editar desde el Recetario, Mi
+  // dieta o Apuntar— empieza "de cero": solo `editarRecetaDesdeElDia()` la
   // vuelve a encender, y lo hace DESPUÉS de esta llamada.
-  volverAMiDietaTrasEditar = false;
+  destinoTrasEditarReceta = null;
   recetaEditando = receta ? receta.id : null;
 
   id("receta-nombre").value = receta ? receta.nombre : "";
@@ -2323,10 +2336,14 @@ function cerrarFormularioDeReceta() {
   // El submit de form-receta llama a esta función al guardar con éxito, así
   // que cubre Guardar y Cancelar a la vez: no hace falta comprobarlo en el
   // submit por separado (spec 083).
-  if (volverAMiDietaTrasEditar) {
-    volverAMiDietaTrasEditar = false;
+  if (destinoTrasEditarReceta === "dieta") {
+    destinoTrasEditarReceta = null;
     abrirPestana("comidas", "dieta");
     pintarDieta();
+  } else if (destinoTrasEditarReceta === "apuntar") {
+    destinoTrasEditarReceta = null;
+    abrirPestana("comidas", "apuntar");
+    pintarLoQueTocaAhora();
   }
 }
 
@@ -2335,15 +2352,15 @@ function editarReceta(receta) {
   id("form-receta").scrollIntoView({ block: "center" });
 }
 
-// El botón "Editar" de la receta desplegada en Mi dieta (spec 083): abre el
-// mismo editor que el Recetario, cambiando de sub-pestaña, y deja dicho que
-// hay que volver aquí al terminar.
-function editarRecetaDesdeElDia(receta) {
+// El botón "Editar" de una receta desplegada, en Mi dieta o en "Lo que toca
+// ahora" de Apuntar (specs 083 y 098): abre el mismo editor que el Recetario,
+// cambiando de sub-pestaña, y deja dicho A DÓNDE volver al terminar.
+function editarRecetaDesdeElDia(receta, destino) {
   abrirPestana("comidas", "recetas");
   editarReceta(receta);
   // Después de editarReceta(): abrirFormularioDeReceta(), que llama por
   // dentro, apaga esta variable al principio. Ponerla antes se la comería.
-  volverAMiDietaTrasEditar = true;
+  destinoTrasEditarReceta = destino;
 }
 
 async function borrarLaReceta(receta) {
@@ -3825,6 +3842,109 @@ id("btn-ver-semana").addEventListener("click", () => {
   pintarDieta();
 });
 
+// --- "Lo que toca ahora" (spec 098) ---------------------------------------
+//
+// El plato que la dieta guardada dice para el momento más cercano a la hora
+// actual, arriba del todo en Apuntar: la acción más repetida del día no
+// obliga a cambiar de sub-pestaña.
+//
+// La dieta es el plan; esto es un atajo para apuntarlo, no una vista nueva
+// del plan. No marca nada en Mi dieta (ver la nota de más arriba, "La dieta
+// es el plan; las comidas apuntadas son el diario").
+
+// Variable PROPIA de "receta abierta", no la de Mi dieta (`recetaDeDietaAbierta`,
+// indexada por "indiceDia-indiceComida"): este bloque enseña una sola comida,
+// así que le basta un booleano, y mezclar las dos abriría la receta en un
+// sitio y la cerraría en el otro sin querer.
+let recetaTocaAhoraAbierta = false;
+
+function pintarLoQueTocaAhora() {
+  const contenedor = id("toca-ahora");
+  if (!contenedor) return;
+
+  contenedor.innerHTML = "";
+  id("error-toca-ahora").textContent = "";
+
+  const indiceDiaHoy = diaDeLaSemana(hoyISO());
+  const dia = dietaActiva ? dietaActiva.dias[indiceDiaHoy] : null;
+  const momento = momentoQueToca(new Date());
+  const comida = dia ? dia.comidas.find((c) => c.momento === momento) : null;
+
+  if (!comida || !comida.texto) {
+    contenedor.appendChild(bloqueTocaAhoraVacio());
+    return;
+  }
+
+  contenedor.appendChild(filaTocaAhora(comida, indiceDiaHoy));
+
+  // Fuera de la rejilla de la fila (spec 072: momento/plato/receta/comido/
+  // editar con columnas fijas), como párrafo hermano: metido dentro como un
+  // quinto hijo más, el auto-colocado de la rejilla lo empujaría a la columna
+  // que le tocara según cuántos iconos hubiera esa vez, en vez de quedarse
+  // siempre debajo.
+  if (yaApuntada(listaComidas.obtenerRegistros(), hoyISO(), comida.momento, comida.texto)) {
+    contenedor.appendChild(celda("Ya lo tienes apuntado hoy.", "registro-detalle"));
+  }
+
+  if (recetaTocaAhoraAbierta) {
+    contenedor.appendChild(recetaDesplegada(comida, "apuntar"));
+  }
+}
+
+function bloqueTocaAhoraVacio() {
+  const bloque = document.createElement("div");
+
+  const texto = document.createElement("p");
+  texto.className = "explicacion";
+  texto.textContent = "No tienes nada planeado para este momento.";
+  bloque.appendChild(texto);
+
+  const atajo = botonDeFila("Ir a Mi dieta", () => abrirSubpestana("comidas", "dieta"));
+  atajo.classList.add("enlace");
+  bloque.appendChild(atajo);
+
+  return bloque;
+}
+
+function filaTocaAhora(comida, indiceDiaHoy) {
+  const fila = document.createElement("div");
+  // Misma rejilla que las filas de Mi dieta (spec 072), para que se vea igual
+  // de ordenado: aquí no hay columna de editar (el plan no se toca desde
+  // aquí), pero dejar la quinta columna sin usar no descuadra nada — la
+  // rejilla ya está pensada para que una columna sin icono se quede vacía.
+  fila.className = "comida-dieta fila-plato";
+
+  fila.append(
+    celda(etiquetaDeMomento(comida.momento), "resumen-etiqueta"),
+    // La clave incluye el momento: si cruzas de franja con el texto
+    // desplegado, el plato nuevo no debe heredar el "desplegado" del anterior.
+    celdaDesplegable(comida.texto, "plato-nombre", `toca-ahora-${comida.momento}`, platosDesplegados, pintarLoQueTocaAhora)
+  );
+
+  if (recetasDeLaComida(comida).length > 0) {
+    const verReceta = botonDeIcono(
+      "receta",
+      recetaTocaAhoraAbierta ? "Cerrar la receta" : "Ver la receta",
+      () => {
+        recetaTocaAhoraAbierta = !recetaTocaAhoraAbierta;
+        pintarLoQueTocaAhora();
+      }
+    );
+    verReceta.classList.add("col-receta");
+    if (recetaTocaAhoraAbierta) verReceta.classList.add("receta-abierta");
+    verReceta.setAttribute("aria-expanded", String(recetaTocaAhoraAbierta));
+    fila.appendChild(verReceta);
+  }
+
+  const apuntar = botonDeIcono("comido", `Me lo he comido: ${comida.texto}`, () =>
+    apuntarDeLaDieta(comida, apuntar, indiceDiaHoy, "error-toca-ahora", "guardado-toca-ahora")
+  );
+  apuntar.classList.add("boton-comido", "col-comido");
+  fila.appendChild(apuntar);
+
+  return fila;
+}
+
 function filaDeComida(indiceDia, indiceComida, comida) {
   const fila = document.createElement("div");
   // `fila-plato` la convierte en una REJILLA de cuatro columnas fijas (etiqueta,
@@ -3950,7 +4070,9 @@ function recetasDeLaComida(comida) {
 
 // Las recetas abiertas bajo su fila, una tarjeta por receta (spec 088). Solo se
 // leen: para cambiarlas está el recetario, al que lleva cada botón Editar.
-function recetaDesplegada(comida) {
+// `destinoEditar` es a dónde debe volver el botón "Editar" de cada receta:
+// "dieta" (por defecto, Mi dieta) o "apuntar" (el bloque de la spec 098).
+function recetaDesplegada(comida, destinoEditar = "dieta") {
   const caja = document.createElement("div");
   caja.className = "receta-en-dieta";
 
@@ -3964,12 +4086,14 @@ function recetaDesplegada(comida) {
     return caja;
   }
 
-  recetas.forEach((receta) => caja.appendChild(tarjetaDeRecetaEnDieta(receta)));
+  recetas.forEach((receta) =>
+    caja.appendChild(tarjetaDeRecetaEnDieta(receta, destinoEditar))
+  );
 
   return caja;
 }
 
-function tarjetaDeRecetaEnDieta(receta) {
+function tarjetaDeRecetaEnDieta(receta, destinoEditar) {
   const tarjeta = document.createElement("div");
   tarjeta.className = "receta-en-dieta-plato";
 
@@ -3982,7 +4106,9 @@ function tarjetaDeRecetaEnDieta(receta) {
 
   const acciones = document.createElement("div");
   acciones.className = "receta-acciones";
-  acciones.appendChild(botonDeFila("Editar", () => editarRecetaDesdeElDia(receta)));
+  acciones.appendChild(
+    botonDeFila("Editar", () => editarRecetaDesdeElDia(receta, destinoEditar))
+  );
   tarjeta.appendChild(acciones);
 
   return tarjeta;
@@ -4151,8 +4277,19 @@ async function guardarCelda(indiceDia, indiceComida, texto, recetaIds) {
   }
 }
 
-async function apuntarDeLaDieta(comida, boton, indiceDia) {
-  const error = id("error-semana");
+// `idError`/`idGuardado`: dónde se escribe el error y el aviso de guardado.
+// Mi dieta usa los suyos por defecto; el bloque "Lo que toca ahora" de
+// Apuntar (spec 098) pasa los suyos, porque los de Mi dieta viven en una
+// sub-pestaña que está oculta mientras se está en Apuntar — sin esto, un
+// fallo de guardado desde el bloque sería invisible.
+async function apuntarDeLaDieta(
+  comida,
+  boton,
+  indiceDia,
+  idError = "error-semana",
+  idGuardado = "guardado-dieta"
+) {
+  const error = id(idError);
   error.textContent = "";
 
   // Fecha y hora con las que se guarda (spec 097): franja fija del día si ya
@@ -4200,7 +4337,7 @@ async function apuntarDeLaDieta(comida, boton, indiceDia) {
       idsDeRecetaDe(comida)
     );
     avisarGuardado(
-      "guardado-dieta",
+      idGuardado,
       esFuturo ? "Ese momento aún no ha llegado. Se apunta con la hora de ahora." : "Guardado"
     );
     responderEnBoton(boton, true);
@@ -4420,6 +4557,8 @@ async function refrescarDieta() {
   pintarDieta();
   // Otra dieta, otras recetas, otra lista de la compra.
   pintarCompra();
+  // Y otro plato en "Lo que toca ahora" (spec 098): depende de la misma dieta.
+  pintarLoQueTocaAhora();
 }
 
 // --- Catálogo de ejercicios (spec 029) -----------------------------------
@@ -6751,9 +6890,9 @@ id("archivo-foto").addEventListener("change", async (evento) => {
 function refrescarTodo() {
   // Solo la llaman tres acciones disruptivas de Ajustes/Consulta (finalizar
   // operación, reintentar archivado, borrar datos) y el login: las tres
-  // cambian de raíz lo que hay que ver en Mi dieta, así que un "volver a
-  // donde estabas editando" ya no tiene sentido (spec 083).
-  volverAMiDietaTrasEditar = false;
+  // cambian de raíz lo que hay que ver en Mi dieta y en Apuntar, así que un
+  // "volver a donde estabas editando" ya no tiene sentido (specs 083 y 098).
+  destinoTrasEditarReceta = null;
 
   return Promise.all([
     listaPeso.refrescar(),

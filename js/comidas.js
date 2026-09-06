@@ -121,6 +121,38 @@ export function apunteDesdeDieta(indiceDia, momento, hoy, ahora) {
   };
 }
 
+// El momento cuya franja fija está más cerca de `ahora`, para "Lo que toca
+// ahora" en Apuntar (spec 098). Da igual que la franja ya haya pasado o esté
+// por llegar: se mira la distancia en minutos, sin signo.
+//
+// En un empate exacto gana la franja que TODAVÍA NO ha llegado (convención
+// para que el resultado sea determinista, no una decisión de producto: ver
+// spec 098, sección 8).
+export function momentoQueToca(ahora) {
+  const minutosAhora = ahora.getHours() * 60 + ahora.getMinutes();
+
+  let elegido = null;
+  let distanciaElegida = Infinity;
+
+  for (const momento of Object.keys(FRANJAS_MOMENTO)) {
+    const [horas, minutos] = FRANJAS_MOMENTO[momento].split(":").map(Number);
+    const minutosFranja = horas * 60 + minutos;
+    const distancia = Math.abs(minutosFranja - minutosAhora);
+    const aunNoLlega = minutosFranja > minutosAhora;
+
+    const gana =
+      distancia < distanciaElegida ||
+      (distancia === distanciaElegida && aunNoLlega && !elegido.aunNoLlega);
+
+    if (gana) {
+      elegido = { momento, aunNoLlega };
+      distanciaElegida = distancia;
+    }
+  }
+
+  return elegido.momento;
+}
+
 export function etiquetaDeMomento(valor) {
   const momento = MOMENTOS.find((m) => m.valor === valor);
   return momento ? momento.etiqueta : valor;

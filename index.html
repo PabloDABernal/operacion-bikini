@@ -204,6 +204,19 @@
 
       <!-- Sub-pestaña: Apuntar -->
       <div class="subseccion activa" data-subseccion="apuntar">
+
+      <!-- "Lo que toca ahora" (spec 098): el plato del momento más cercano a
+           la hora actual, con su botón de apuntar. Va antes que las dos
+           columnas de abajo porque es la acción más repetida del día: en
+           escritorio "Apuntar" no tiene columnas propias (ver spec 098,
+           sección 4), así que va simplemente arriba del todo, a lo ancho. -->
+      <section id="bloque-toca-ahora">
+      <h2>Lo que toca ahora</h2>
+      <div id="toca-ahora"></div>
+      <p id="error-toca-ahora" class="error" role="alert"></p>
+      <p id="guardado-toca-ahora" class="guardado" role="status"></p>
+      </section>
+
       <!-- Dos columnas en escritorio (spec 079), con el mismo patrón que Hoy y
            Peso: a la izquierda lo que apuntas, a la derecha lo apuntado. En
            móvil no hacen nada y se sigue leyendo en una sola columna. -->

@@ -248,6 +248,15 @@ header {
   display: block;
 }
 
+/* "Lo que toca ahora" (spec 098). Una línea al pie para separarlo de "Nueva
+   comida". La fila de dentro (`.comida-dieta`) ya pierde su borde de arriba
+   sola, por `.comida-dieta:first-of-type` (spec 072): es la única fila aquí. */
+#bloque-toca-ahora {
+  padding-bottom: var(--e4);
+  margin-bottom: var(--e4);
+  border-bottom: 1px solid var(--borde);
+}
+
 /* Navegación inferior ----------------------------------------------------
 
    Fija abajo en todos los tamaños. En pantallas anchas la barra llega de
