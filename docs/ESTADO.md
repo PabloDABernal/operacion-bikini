@@ -458,6 +458,7 @@ El 20 de agosto arrancó la **v4**, que sale de una auditoría de usabilidad hec
 | 098 | Lo que toca ahora: el plan del momento, en Apuntar (v16) | ✅ completada |
 | 099 | Un solo campo con sugerencias de recetas e ingredientes (v16) | ✅ completada |
 | 100 | El momento lo propone la hora (v16) | ✅ completada |
+| 101 | Lo que toca hoy en Apuntar, y fecha arreglada en Ejercicio (v17) | ✅ completada |
 
 ## Qué toca ahora
 

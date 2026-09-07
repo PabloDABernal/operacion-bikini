@@ -1,6 +1,6 @@
 # 101 — Lo que toca hoy en Apuntar, y la fecha arreglada en "Lo he hecho"
 
-- **Estado:** borrador
+- **Estado:** ✅ completada, probada por el usuario en producción el 7 de septiembre de 2026
 - **Fecha:** 2026-09-06
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (v17: lo mismo, para Ejercicio)", primer punto
 
