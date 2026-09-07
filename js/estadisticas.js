@@ -197,6 +197,58 @@ export function estadisticasDeComidas(comidas, hoy, recetaPorId, ingredientePorI
   };
 }
 
+// --- Qué entrenas (spec 103) ----------------------------------------------
+//
+// Espejo de "Qué comes" (arriba), pero con una sola cosa que contar —el
+// Catálogo de ejercicio (spec 102)— en vez de dos (recetas e ingredientes).
+// No hace falta ningún manejo de "campo viejo": el diario de ejercicio nunca
+// tuvo un enlace antes de la 102, así que `ejercicioIds` es la única forma.
+
+function enlazado(ejercicio) {
+  return Boolean(Array.isArray(ejercicio.ejercicioIds) && ejercicio.ejercicioIds.length);
+}
+
+function ventanaDeEjercicios(ejercicios, hoy, dias) {
+  const desde = sumarDias(hoy, -(dias - 1));
+  const dentro = ejercicios.filter((e) => e.fecha >= desde && e.fecha <= hoy);
+  return {
+    sesiones: dentro.length,
+    enlazadas: dentro.filter(enlazado).length
+  };
+}
+
+// `ejercicioPorId` lo pasa quien llama: aquí no se toca ni el DOM ni la red.
+export function estadisticasDeEjercicios(ejercicios, hoy, ejercicioPorId) {
+  const todas = ejercicios || [];
+
+  // Mismos últimos 30 días que "Qué comes": interesa qué entrenas AHORA.
+  const desde = sumarDias(hoy, -29);
+  const recientes = todas.filter((e) => e.fecha >= desde && e.fecha <= hoy);
+
+  const catalogo = new Map();
+  const sumar = (nombre) => {
+    if (!nombre) return;
+    catalogo.set(nombre, (catalogo.get(nombre) || 0) + 1);
+  };
+
+  recientes.forEach((ejercicio) => {
+    (Array.isArray(ejercicio.ejercicioIds) ? ejercicio.ejercicioIds : []).forEach((id) => {
+      const delCatalogo = ejercicioPorId(id);
+      // Un ejercicio borrado del catálogo no se cuenta: no se sabe qué era.
+      if (!delCatalogo) return;
+      sumar(delCatalogo.nombre);
+    });
+  });
+
+  return {
+    hoy: ventanaDeEjercicios(todas, hoy, 1),
+    siete: ventanaDeEjercicios(todas, hoy, 7),
+    treinta: ventanaDeEjercicios(todas, hoy, 30),
+    total: { sesiones: todas.length, enlazadas: todas.filter(enlazado).length },
+    ejercicios: masRepetidos(catalogo)
+  };
+}
+
 export function estadisticasDePeso(diarios, hoy, pesoObjetivo) {
   return {
     semana: variacion(diarios, hoy, 7),

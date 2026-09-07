@@ -26,7 +26,8 @@ import { pesosPorDia, mediaMovil, calendarioDeConstancia } from "./grafica.js";
 import {
   estadisticasDePeso,
   estadisticasDeDistancia,
-  estadisticasDeComidas
+  estadisticasDeComidas,
+  estadisticasDeEjercicios
 } from "./estadisticas.js";
 
 import { dibujarGrafica, dibujarCalendario } from "./grafica-svg.js";
@@ -1711,6 +1712,7 @@ function refrescarPantallas() {
   refrescarHoy();
   pintarDistanciaRecorrida();
   pintarQueComes();
+  pintarQueEntrenas();
   // El diario cambió: si la comida de "Lo que toca ahora" (spec 098) es la que
   // se acaba de apuntar, tiene que pasar a decir "ya lo tienes apuntado hoy".
   pintarLoQueTocaAhora();
@@ -1799,6 +1801,80 @@ function pintarQueComes() {
 
   masRepetido("Lo que más repites", datos.recetas);
   masRepetido("Lo que más comes", datos.ingredientes);
+}
+
+// Qué entrenas (spec 103): cuántas sesiones apuntas, cuántas van enlazadas de
+// verdad al Catálogo, y qué ejercicios repites más. Espejo de
+// `pintarQueComes()`, con una sola cosa que contar en vez de dos.
+//
+// Cálculo puro sobre lo que ya está en memoria: ni una lectura nueva.
+function pintarQueEntrenas() {
+  const lista = id("ejercicios-estadisticas");
+  const vacio = id("ejercicios-vacio");
+  const listas = id("ejercicios-listas");
+
+  lista.innerHTML = "";
+  listas.innerHTML = "";
+
+  const ejercicios = listaEjercicios.obtenerRegistros();
+  const datos = estadisticasDeEjercicios(
+    ejercicios,
+    hoyISO(),
+    (ejercicioId) => catalogoCargado.find((ejercicio) => ejercicio.id === ejercicioId)
+  );
+
+  if (datos.total.sesiones === 0) {
+    vacio.textContent = "Cuando apuntes ejercicio, aquí verás qué entrenas.";
+    return;
+  }
+
+  if (datos.total.enlazadas === 0) {
+    vacio.textContent =
+      `Tienes ${datos.total.sesiones} ${datos.total.sesiones === 1 ? "sesión apuntada" : "sesiones apuntadas"}, ` +
+      "pero ninguna enlazada a un ejercicio del catálogo. Elige del catálogo al apuntar.";
+    return;
+  }
+  vacio.textContent = "";
+
+  const linea = (etiqueta, ventana) => {
+    const porcentaje = ventana.sesiones
+      ? ` (${Math.round((ventana.enlazadas / ventana.sesiones) * 100)}%)`
+      : "";
+    return lineaDeEstadistica(
+      etiqueta,
+      `${ventana.sesiones} ${ventana.sesiones === 1 ? "sesión" : "sesiones"}`,
+      ventana.sesiones ? `${ventana.enlazadas} enlazadas${porcentaje}` : ""
+    );
+  };
+
+  lista.append(
+    linea("De hoy", datos.hoy),
+    linea("Últimos 7 días", datos.siete),
+    linea("Últimos 30 días", datos.treinta),
+    linea("Desde que empezaste", datos.total)
+  );
+
+  // La lista sale de los últimos 30 días. Si ahí no hay nada enlazado, se
+  // dice: un título con nada debajo parece un fallo.
+  if (datos.ejercicios.length === 0) {
+    listas.appendChild(
+      celda("No has apuntado nada enlazado en los últimos 30 días.", "explicacion")
+    );
+    return;
+  }
+
+  const cabecera = document.createElement("h3");
+  cabecera.textContent = "Lo que más repites";
+  listas.appendChild(cabecera);
+
+  const ul = document.createElement("ul");
+  ul.className = "resumen";
+  datos.ejercicios.forEach((cosa) =>
+    ul.appendChild(
+      lineaDeEstadistica(cosa.nombre, `${cosa.veces} ${cosa.veces === 1 ? "vez" : "veces"}`)
+    )
+  );
+  listas.appendChild(ul);
 }
 
 // Cuánto llevas andado (spec 087).
