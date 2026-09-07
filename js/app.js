@@ -4732,6 +4732,11 @@ async function refrescarCatalogo() {
     return;
   }
   pintarCatalogo();
+  // Las sugerencias y los chips del alta de ejercicio dependen del catálogo
+  // (spec 102): un chip de un ejercicio borrado tiene que decirlo, y uno
+  // recién creado tiene que poder sugerirse sin recargar la página.
+  pintarSugerenciasEjercicio();
+  pintarChipsEjercicio();
 }
 
 id("btn-nuevo-ejercicio-catalogo").addEventListener("click", () =>
@@ -5981,6 +5986,116 @@ id("btn-fecha-hora-ejercicio").addEventListener("click", () => {
   id("btn-fecha-hora-ejercicio").classList.add("oculta");
 });
 
+// --- Un solo campo con sugerencias del catálogo (spec 102) ----------------
+//
+// Espejo del campo único de comidas (spec 099), con una sola fuente de
+// sugerencias —el Catálogo de ejercicio— en vez de dos. Mientras se escribe,
+// se sugieren los ejercicios del catálogo que coincidan; elegir uno lo suma
+// como chip. Sin elegir ninguno, el ejercicio se guarda como texto libre,
+// exactamente igual que antes de esta spec.
+//
+// Cada chip es solo un id: el nombre se resuelve siempre al vuelo contra
+// catalogoCargado, igual que hace `nombreDeChipComida()`.
+let chipsEjercicio = [];
+
+const MAX_SUGERENCIAS_EJERCICIO = 8;
+
+function sugerenciasDeEjercicio(textoBuscado) {
+  const buscado = normalizarIngrediente(textoBuscado);
+  if (buscado.length < 2) return [];
+
+  const elegidos = new Set(chipsEjercicio.map((chip) => chip.id));
+
+  return catalogoCargado
+    .filter((ejercicio) => normalizarIngrediente(ejercicio.nombre).includes(buscado))
+    .filter((ejercicio) => !elegidos.has(ejercicio.id))
+    .slice(0, MAX_SUGERENCIAS_EJERCICIO);
+}
+
+function nombreDeChipEjercicio(chip) {
+  return catalogoCargado.find((ejercicio) => ejercicio.id === chip.id)?.nombre ||
+    "(ejercicio borrado)";
+}
+
+function textoDeChipsEjercicio() {
+  return chipsEjercicio.map(nombreDeChipEjercicio).join(". ");
+}
+
+function pintarSugerenciasEjercicio() {
+  const lista = id("sugerencias-ejercicio");
+  const sugerencias = sugerenciasDeEjercicio(id("ejercicio-texto").value);
+
+  lista.innerHTML = "";
+  lista.classList.toggle("oculta", sugerencias.length === 0);
+
+  sugerencias.forEach((ejercicio) => {
+    const opcion = document.createElement("li");
+    const boton = document.createElement("button");
+    boton.type = "button";
+    boton.className = "sugerencia-comida";
+    boton.appendChild(iconoDeAccion("ejercicio"));
+    boton.appendChild(celda(ejercicio.nombre, "sugerencia-comida-nombre"));
+    boton.setAttribute("aria-label", `${ejercicio.nombre}, ejercicio de tu catálogo`);
+
+    boton.addEventListener("click", () => {
+      chipsEjercicio = [...chipsEjercicio, { id: ejercicio.id }];
+      const campo = id("ejercicio-texto");
+      campo.value = "";
+      pintarChipsEjercicio();
+      pintarSugerenciasEjercicio();
+      campo.focus();
+    });
+
+    opcion.appendChild(boton);
+    lista.appendChild(opcion);
+  });
+}
+
+function pintarChipsEjercicio() {
+  const contenedor = id("chips-ejercicio");
+  contenedor.innerHTML = "";
+
+  chipsEjercicio.forEach((chip) => {
+    const nombre = nombreDeChipEjercicio(chip);
+    const elemento = document.createElement("span");
+    elemento.className = "chip-receta";
+    elemento.append(celda(nombre, "chip-nombre"));
+
+    const quitar = document.createElement("button");
+    quitar.type = "button";
+    quitar.className = "chip-quitar";
+    quitar.setAttribute("aria-label", `Quitar ${nombre}`);
+    quitar.textContent = "×";
+    quitar.addEventListener("click", () => {
+      chipsEjercicio = chipsEjercicio.filter((otro) => otro !== chip);
+      pintarChipsEjercicio();
+      pintarSugerenciasEjercicio();
+    });
+    elemento.appendChild(quitar);
+
+    contenedor.appendChild(elemento);
+  });
+
+  id("texto-ejercicio-chips").textContent = chipsEjercicio.length
+    ? `Se apuntará como: ${textoDeChipsEjercicio()}`
+    : "";
+
+  // Mientras haya chips, el campo solo sirve para buscar MÁS sugerencias: no
+  // se puede mezclar con texto libre en el mismo registro (spec 102, mismo
+  // criterio que la spec 099).
+  id("ejercicio-texto").placeholder = chipsEjercicio.length
+    ? "Busca otro ejercicio para añadir…"
+    : "bici";
+}
+
+id("ejercicio-texto").addEventListener("input", pintarSugerenciasEjercicio);
+
+document.addEventListener("click", (evento) => {
+  const dentro =
+    evento.target.closest("#ejercicio-texto") || evento.target.closest("#sugerencias-ejercicio");
+  if (!dentro) id("sugerencias-ejercicio").classList.add("oculta");
+});
+
 // Los ejercicios que más repites, como chips junto al alta (spec 042).
 // Hermana de pintarLoDeSiempre(), con una diferencia deliberada: aquí el chip
 // rellena el formulario y no guarda nada. Un ejercicio repetido casi nunca
@@ -6008,6 +6123,13 @@ function pintarEjerciciosFrecuentes(ejercicios) {
 }
 
 function rellenarConEjercicio(ejercicio) {
+  // Un chip de "frecuentes" rellena el campo con texto suelto (spec 042):
+  // si hubiera chips del catálogo puestos (spec 102), se sueltan, porque no
+  // se puede mezclar texto libre con chips en el mismo registro.
+  chipsEjercicio = [];
+  pintarChipsEjercicio();
+  pintarSugerenciasEjercicio();
+
   id("ejercicio-texto").value = ejercicio.texto;
   id("ejercicio-minutos").value = ejercicio.minutos ?? "";
   // Sin ?? el <select> se quedaría en su primera opción, que es una intensidad
@@ -6029,13 +6151,21 @@ id("form-ejercicio").addEventListener("submit", async (evento) => {
   const error = id("error-ejercicio");
   error.textContent = "";
 
+  // Con chips, el texto que se guarda son sus nombres unidos (spec 102);
+  // sin ninguno, es el texto libre de siempre.
+  const textoBruto = chipsEjercicio.length
+    ? textoDeChipsEjercicio()
+    : id("ejercicio-texto").value;
+  const ejercicioIds = chipsEjercicio.map((chip) => chip.id);
+
   const resultado = validarEjercicio(
-    id("ejercicio-texto").value,
+    textoBruto,
     id("ejercicio-minutos").value,
     id("ejercicio-intensidad").value,
     id("ejercicio-fecha").value,
     id("ejercicio-hora").value,
-    id("ejercicio-distancia").value
+    id("ejercicio-distancia").value,
+    ejercicioIds
   );
   if (resultado.error) {
     error.textContent = resultado.error;
@@ -6052,10 +6182,15 @@ id("form-ejercicio").addEventListener("submit", async (evento) => {
       resultado.intensidad,
       resultado.fecha,
       resultado.hora,
-      resultado.distanciaKm
+      resultado.distanciaKm,
+      resultado.ejercicioIds
     );
     avisarGuardado("guardado-ejercicio");
     id("ejercicio-texto").value = "";
+    // Los chips son de ese ejercicio, no del siguiente.
+    chipsEjercicio = [];
+    pintarChipsEjercicio();
+    pintarSugerenciasEjercicio();
     id("ejercicio-minutos").value = "";
     id("ejercicio-distancia").value = "";
     id("ejercicio-intensidad").value = INTENSIDAD_POR_DEFECTO;
@@ -7763,6 +7898,9 @@ function limpiarFormularios() {
   chipsComida = [];
   pintarChipsComida();
   pintarSugerenciasComida();
+  chipsEjercicio = [];
+  pintarChipsEjercicio();
+  pintarSugerenciasEjercicio();
   [
     "peso",
     "comida-texto",

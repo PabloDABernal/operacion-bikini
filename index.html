@@ -605,7 +605,18 @@
       <h2>Nuevo ejercicio</h2>
       <form id="form-ejercicio">
         <label for="ejercicio-texto">Qué has hecho</label>
-        <input type="text" id="ejercicio-texto" placeholder="bici">
+
+        <!-- Un solo campo con sugerencias del catálogo (spec 102), espejo de
+             comida-texto (spec 099) con una sola fuente en vez de dos.
+             Elegir una sugerencia añade un chip; sin elegir ninguna, se
+             guarda como texto libre, igual que siempre. -->
+        <div class="campo-con-sugerencias">
+        <input type="text" id="ejercicio-texto" placeholder="bici" autocomplete="off">
+        <ul id="sugerencias-ejercicio" class="sugerencias-comida oculta"></ul>
+        </div>
+
+        <div id="chips-ejercicio" class="chips-receta"></div>
+        <p id="texto-ejercicio-chips" class="registro-detalle"></p>
 
         <!-- Los ejercicios que más repites (spec 042). Al contrario que los
              chips de Comidas, estos NO guardan: rellenan el formulario y

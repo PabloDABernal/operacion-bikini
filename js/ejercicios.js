@@ -69,14 +69,21 @@ export function validarDistancia(distanciaBruta) {
   return { distanciaKm: Math.round(distancia * 10) / 10 };
 }
 
-// Devuelve { texto, minutos, intensidad, fecha, distanciaKm } o { error }.
+// Devuelve { texto, minutos, intensidad, fecha, distanciaKm, ejercicioIds } o
+// { error }.
+//
+// `ejercicioIds` (spec 102) es opcional y va AL FINAL, con valor por defecto,
+// igual que `recetaIds` en comidas (spec 093): los llamadores de siempre —"Lo
+// he hecho", el editor en línea— siguen llamando con los argumentos que ya
+// pasaban y no se enteran de nada.
 export function validarEjercicio(
   textoBruto,
   minutosBruto,
   intensidad,
   fecha,
   hora,
-  distanciaBruta
+  distanciaBruta,
+  ejercicioIds = []
 ) {
   const texto = String(textoBruto ?? "").trim();
 
@@ -118,7 +125,11 @@ export function validarEjercicio(
     intensidad,
     fecha,
     hora: hora || "",
-    distanciaKm: distancia.distanciaKm
+    distanciaKm: distancia.distanciaKm,
+    // Se llama igual que en la comida a propósito (spec 093): mismo
+    // concepto, un enlace al catálogo, así que un futuro lector puede
+    // tratarlos igual si hiciera falta.
+    ejercicioIds: (Array.isArray(ejercicioIds) ? ejercicioIds : []).filter(Boolean)
   };
 }
 
@@ -145,7 +156,8 @@ export function guardarEjercicio(
   intensidad,
   fecha,
   hora,
-  distanciaKm
+  distanciaKm,
+  ejercicioIds = []
 ) {
   const ejercicio = { texto, minutos, intensidad, fecha, creadoEn: serverTimestamp() };
   if (hora) ejercicio.hora = hora;
@@ -153,6 +165,10 @@ export function guardarEjercicio(
   // dicho, no está. Un 0 sería una afirmación falsa, y las estadísticas de la
   // spec 087 tendrían que distinguirlo de "no lo apunté".
   if (distanciaKm != null) ejercicio.distanciaKm = distanciaKm;
+  // Y lo mismo con el enlace al catálogo (spec 102): un ejercicio escrito a
+  // mano se guarda exactamente como antes, sin un array vacío de relleno.
+  const catalogo = (Array.isArray(ejercicioIds) ? ejercicioIds : []).filter(Boolean);
+  if (catalogo.length) ejercicio.ejercicioIds = catalogo;
   return addDoc(coleccionDe(uid), ejercicio);
 }
 
