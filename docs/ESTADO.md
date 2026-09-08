@@ -2,7 +2,16 @@
 
 Documento para retomar el trabajo en frío. Se actualiza al terminar cada spec.
 
-**Última actualización:** 6 de septiembre de 2026. **La v16 "registrar en un toque" (`docs/PRODUCTO.md`) está cerrada del todo**: sus tres specs —**098** (lo que toca ahora, en Apuntar), **099** (un solo campo con sugerencias de recetas e ingredientes) y **100** (el momento lo propone la hora)— están escritas, implementadas, revisadas por `revisor-specs` y `revisor-codigo`, y **probadas y confirmadas por el usuario en producción**, las tres el mismo día. Salió de que el usuario pidió, en una frase, hacer Comidas "mucho más fácil de registrar, con las recetas y los ingredientes claros". Se descartó de nuevo, a petición del usuario, marcar en Mi dieta lo cumplido: sigue igual que decidió `PRODUCTO.md`.
+**Última actualización:** 8 de septiembre de 2026. **La v17 "lo mismo, para Ejercicio" (`docs/PRODUCTO.md`) está cerrada del todo**: sus tres specs —**101** (lo que toca hoy en Apuntar, y la fecha arreglada en "Lo he hecho"), **102** (un solo campo con sugerencias del catálogo) y **103** (estadísticas de qué entrenas)— están escritas, implementadas, revisadas por `revisor-specs` y `revisor-codigo`, y **probadas y confirmadas por el usuario en producción**. Salió de aplicarle a Ejercicio el mismo diagnóstico que la v16 le aplicó a Comidas.
+
+**De paso, la 101 arregló un fallo real que llevaba desde siempre**: "Lo he hecho" (Mi tabla) ya salía en los siete días de la tira, pero guardaba SIEMPRE con la fecha de hoy sin mirar qué día se tocaba — el mismo fallo silencioso que tuvo "Me lo he comido" antes de la spec 094, nunca detectado ni arreglado hasta ahora en ejercicio.
+
+**Lo que deja la v17 para quien toque este código después:**
+- `ejercicio.ejercicioIds` (lista) es campo nuevo en el diario de ejercicio (spec 102) — sin campo viejo que migrar, porque el diario nunca había enlazado con el catálogo antes.
+- **Asimetría anotada y sin cerrar** (spec 102, sección 9): "Lo he hecho" sigue sin llevar al diario los enlaces que una sesión de Mi tabla ya tiene con el catálogo (spec 029). Con `ejercicioIds` ya existiendo, cerrarlo sería sencillo si algún día se quiere.
+- `apuntarDeLaTabla()` recibe ahora `indiceDia` e ids de error/aviso parametrizados, mismo patrón que `apuntarDeLaDieta()` de la v16.
+
+Antes de la v17: **La v16 "registrar en un toque" (`docs/PRODUCTO.md`) estuvo cerrada del todo**: sus tres specs —**098** (lo que toca ahora, en Apuntar), **099** (un solo campo con sugerencias de recetas e ingredientes) y **100** (el momento lo propone la hora)— están escritas, implementadas, revisadas por `revisor-specs` y `revisor-codigo`, y **probadas y confirmadas por el usuario en producción**, las tres el mismo día. Salió de que el usuario pidió, en una frase, hacer Comidas "mucho más fácil de registrar, con las recetas y los ingredientes claros". Se descartó de nuevo, a petición del usuario, marcar en Mi dieta lo cumplido: sigue igual que decidió `PRODUCTO.md`.
 
 **Lo que deja la v16 para quien toque este código después:**
 - `ingredienteId` (comida, spec 084) pasó a `ingredienteIds` (lista, spec 099), mismo patrón que `recetaId`→`recetaIds` de la 088: sin migrar nada, con `idsDeIngredienteDe()` en `js/comidas.js` leyendo las dos formas. `js/estadisticas.js` tiene su PROPIA copia local de esa lógica (`idsDeIngredienteDeLaComida`) a propósito, para no importar `comidas.js` (que toca Firestore) en un archivo que se mantiene cálculo puro.
@@ -459,6 +468,8 @@ El 20 de agosto arrancó la **v4**, que sale de una auditoría de usabilidad hec
 | 099 | Un solo campo con sugerencias de recetas e ingredientes (v16) | ✅ completada |
 | 100 | El momento lo propone la hora (v16) | ✅ completada |
 | 101 | Lo que toca hoy en Apuntar, y fecha arreglada en Ejercicio (v17) | ✅ completada |
+| 102 | Un solo campo con sugerencias del catálogo de ejercicio (v17) | ✅ completada |
+| 103 | Estadísticas de qué entrenas (v17) | ✅ completada |
 
 ## Qué toca ahora
 

@@ -1,6 +1,6 @@
 # 103 — Estadísticas de qué entrenas
 
-- **Estado:** borrador
+- **Estado:** ✅ completada, probada por el usuario en producción el 8 de septiembre de 2026
 - **Fecha:** 2026-09-07
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (v17: lo mismo, para Ejercicio)", tercer punto
 

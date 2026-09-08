@@ -1,6 +1,6 @@
 # 102 — Un solo campo con sugerencias del catálogo de ejercicio
 
-- **Estado:** borrador
+- **Estado:** ✅ completada, probada por el usuario en producción el 8 de septiembre de 2026
 - **Fecha:** 2026-09-07
 - **Referencia en PRODUCTO.md:** apartado "Qué hará (v17: lo mismo, para Ejercicio)", segundo punto
 
