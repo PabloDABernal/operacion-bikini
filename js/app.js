@@ -166,6 +166,7 @@ import {
 } from "./normalizacion.js";
 
 import { reiniciarRecetarioCompartido } from "./migracion-104.js";
+import { anadirRecetasFit } from "./anadir-recetas-fit.js";
 
 // Ingredientes de una receta recién creada que se parecen a algo que ya tenías
 // (spec 072). Se preguntan al terminar la dieta; hasta que se contesten, no se
@@ -8208,6 +8209,8 @@ function pintarZonaDeNormalizar() {
   // El botón de poner en marcha el recetario compartido (spec 104) es solo
   // del admin: las otras dos cuentas no lo necesitan.
   id("zona-migrar").classList.toggle("oculta", !esAdmin(emailActual));
+  // Igual que el de añadir el lote de recetas fit.
+  id("zona-recetas-fit").classList.toggle("oculta", !esAdmin(emailActual));
 }
 
 // La misma confirmación por escrito que el reinicio, y aquí con más motivo:
@@ -8310,5 +8313,32 @@ id("btn-migrar").addEventListener("click", async () => {
       "vaciar y resembrar de nuevo no hace daño.";
   } finally {
     id("btn-migrar").disabled = true;
+  }
+});
+
+// --- Añadir recetas fit (23 de septiembre de 2026) -------------------------
+//
+// Aditivo e idempotente: no hace falta palabra de confirmación, solo
+// deshabilitar el botón mientras dura.
+id("btn-recetas-fit").addEventListener("click", async () => {
+  const estado = id("estado-recetas-fit");
+  const error = id("error-recetas-fit");
+
+  error.textContent = "";
+  estado.textContent = "Añadiendo recetas…";
+  id("btn-recetas-fit").disabled = true;
+
+  try {
+    const resumen = await anadirRecetasFit(uidActual, nombreAutorActual());
+    await Promise.all([refrescarRecetas(), refrescarDespensa()]);
+
+    estado.textContent = resumen.recetas
+      ? `Listo: ${resumen.recetas} recetas nuevas y ${resumen.ingredientes} ingredientes nuevos.`
+      : "No había ninguna receta nueva que añadir: ya estaban todas.";
+  } catch {
+    estado.textContent = "";
+    error.textContent = "No se ha podido terminar. Comprueba tu conexión y vuelve a pulsarlo.";
+  } finally {
+    id("btn-recetas-fit").disabled = false;
   }
 });

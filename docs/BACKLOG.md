@@ -2,6 +2,19 @@
 
 Ideas surgidas durante la implementación, no implementadas. Una línea cada una.
 
+## Anotado el 23 de septiembre de 2026
+
+- **`preparacion` de las 73 recetas sembradas (spec 075) se guarda como un
+  ARRAY de pasos en Firestore, pero toda la app lo trata como un string**
+  (`.textContent =`, `.value =` en js/app.js). Sale como "paso1,paso2" en vez
+  de como texto legible. Viene de antes de la spec 104 —
+  `docs/menus/recetas-transcritas.json` y `js/datos-iniciales.js` llevan
+  `preparacion` como array desde la 075— y no se ha tocado al escribir
+  `js/datos-recetas-fit.js` (23 de septiembre), que usa `preparacion` como
+  string desde el principio para no arrastrar el mismo fallo. Arreglarlo de
+  raíz significa decidir si se une el array al generar `datos-iniciales.js` o
+  si se cambia cómo lo lee la app.
+
 ## Vacío desde el 27 de agosto de 2026
 
 **Está vacío a propósito, no por descuido.** La app lleva en uso diario desde el
