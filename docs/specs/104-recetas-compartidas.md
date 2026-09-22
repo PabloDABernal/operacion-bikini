@@ -210,5 +210,105 @@ vacío inicial de Recetas)*
 
 ## ✅ Para probar a mano
 
-*(la rellena/afina el agente `qa-manual` antes de la prueba, una vez
-implementada)*
+Ya está desplegado en producción (operacion-bikini.vercel.app) y las reglas
+de Firestore publicadas. **Antes de nada, las tres cuentas del grupo tienen
+que ejecutar la migración una vez**: mientras no lo hagan, sus recetas viejas
+siguen donde estaban y no aparecen en el recetario compartido.
+
+### 1. La migración (una vez por cuenta, empezando por `pantonbernal@gmail.com`)
+
+1. Entra con tu cuenta → **Ajustes → Zona de peligro** → busca "Pasar mis
+   recetas al recetario compartido".
+2. Escribe **COMPARTIR** en el campo de confirmación y pulsa el botón.
+3. Espera a que salga "Listo: …". Debería contar tus recetas e ingredientes
+   de antes de esta spec (nuevas + fundidas + actualizadas).
+4. Ve a la pestaña nueva **Recetas** (barra inferior, junto a Comidas): tus
+   recetas de siempre tienen que estar ahí, con tu nombre como autor.
+5. Abre **Comidas → Mi dieta**: la semana que ya tenías tiene que verse
+   exactamente igual que antes (mismos platos, mismas recetas enlazadas).
+6. Repite los pasos 1-3 con la **segunda cuenta**. Si esta cuenta tenía
+   alguna receta con el MISMO NOMBRE que una de la primera cuenta, el
+   resumen debe contarla como "fundida", no como "nueva".
+7. Repite con la **tercera cuenta**.
+8. Con cualquiera de las tres cuentas, vuelve a pulsar el botón de migración
+   (con COMPARTIR otra vez): debe decir "No había nada que migrar" y no
+   duplicar nada.
+
+### 2. Camino feliz: crear y ver una receta compartida
+
+9. Con tu cuenta, en **Recetas → Recetas**, pulsa "Nueva receta" y crea una
+   con 2-3 ingredientes nuevos (que no existan ya) y una preparación corta.
+10. Guárdala. Debe aparecer en la lista con tu nombre como autor.
+11. Ve a **Recetas → Ingredientes**: los ingredientes nuevos de esa receta
+    tienen que estar ahí, sin marcar ("lo tengo" desmarcado).
+12. Cierra sesión y entra con **otra cuenta** del grupo.
+13. Ve a **Recetas**: la receta que acabas de crear con la primera cuenta
+    tiene que verse aquí también, con el nombre de la primera cuenta como
+    autor.
+14. Ábrela: **no debe haber botón "Editar" ni "Borrar"** (o deben salir
+    deshabilitados). Los ingredientes nuevos que creó, en cambio, sí deben
+    aparecer en tu propia lista de Ingredientes (compartidos), y puedes
+    marcarlos "lo tengo" sin problema.
+
+### 3. Pegar una receta y dividirla con IA
+
+15. En **Recetas → Recetas**, pulsa "O pega una receta y repártela con IA".
+16. Pega un texto de receta real (ingredientes con cantidades y unos pasos),
+    por ejemplo algo como "Tortilla de atún, 2 personas: 4 huevos, 1 lata de
+    atún al natural escurrida, sal. Bate los huevos, mezcla con el atún y
+    cuaja en la sartén."
+17. Pulsa "Dividir con IA". Espera unos segundos (puede tardar como al pedir
+    una dieta). El formulario debe abrirse con el nombre, las raciones y la
+    preparación ya rellenos, y una línea por ingrediente detectado, cada una
+    pendiente de enlazar (como al editar una receta vieja de texto libre).
+18. Enlaza o crea cada ingrediente y guarda. Comprueba que la receta queda
+    bien formada (ingredientes correctos, sin duplicados raros).
+
+### 4. Permisos cruzados y admin
+
+19. Con una cuenta que NO sea `pantonbernal@gmail.com`, intenta editar una
+    receta que subió OTRA cuenta que tampoco sea la tuya: no debe poder
+    (sin botón de editar/borrar, como en el paso 14).
+20. Con `pantonbernal@gmail.com` (el admin), abre esa misma receta de otro
+    autor: SÍ debe salir "Editar" y "Borrar". Pruébalo con un cambio menor
+    (por ejemplo, añadir una palabra a la preparación) y guarda: debe
+    funcionar sin error de permisos.
+21. Con el admin, intenta borrar y editar un INGREDIENTE (no una receta) que
+    creó otra cuenta, desde Recetas → Ingredientes: debe poder, igual que
+    con las recetas.
+
+### 5. Casos límite
+
+22. Con dos cuentas distintas, crea (o comprueba que ya migraste) dos
+    recetas con el mismo nombre exacto pero contenido distinto. Tras la
+    migración, solo debe quedar UNA en el recetario compartido — la editada
+    más recientemente — y no debe haber dos entradas duplicadas con el mismo
+    nombre.
+23. Marca "lo tengo" en un ingrediente compartido con tu cuenta. Entra con
+    otra cuenta y comprueba que ese mismo ingrediente sale SIN marcar para
+    ella (la marca es tuya, no del catálogo).
+24. En Ingredientes, crea uno cuyo nombre singular/plural coincida con uno
+    que ya existe (p. ej. si ya hay "tomate", intenta "tomates" desde una
+    receta nueva): debe fundirse con el que ya había, no duplicarse.
+
+### 6. Regresión: lo que ya funcionaba
+
+25. Abre una dieta de la semana que ya tenías antes de esta spec: los platos
+    con receta enlazada tienen que seguir mostrando el icono de "ver
+    receta", y al abrirlo se debe ver la receta bien.
+26. Ve a **Recetas → Ingredientes → (botón de ir a la compra)**: la lista de
+    la compra debe seguir calculándose bien a partir de tu dieta activa y tu
+    despensa marcada.
+27. Apunta una comida en **Comidas → Apuntar** eligiendo una receta del
+    campo con sugerencias: debe enlazar bien y aparecer en tu diario.
+28. En **Comidas → Apuntar**, mira "Qué comes" (estadísticas): debe seguir
+    contando bien tus comidas enlazadas a receta/ingrediente.
+29. En **Ajustes → Zona de peligro**, marca solo la casilla "recetas propias
+    y dietas" y reinicia: debe borrar SOLO las recetas que TÚ subiste (no
+    las de otras cuentas ni las de la siembra original) y tus dietas.
+    Confirma con otra cuenta que sus recetas siguen intactas.
+30. Comprueba que la pestaña **Comidas** ya no tiene la sub-pestaña
+    "Recetario" (ahora solo Apuntar y Mi dieta), y que la navegación entre
+    Recetas → Ingredientes → "ir a la compra" → "volver a los ingredientes"
+    funciona sin saltos raros, en móvil y en escritorio si puedes probar los
+    dos anchos.
