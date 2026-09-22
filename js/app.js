@@ -9,6 +9,8 @@ import {
   ERROR_NO_AUTORIZADO
 } from "./auth.js";
 
+import { esAdmin } from "./firebase-config.js";
+
 import {
   hoyISO,
   horaActual,
@@ -163,7 +165,7 @@ import {
   escribirReparacion
 } from "./normalizacion.js";
 
-import { migrarAlRecetarioCompartido } from "./migracion-104.js";
+import { reiniciarRecetarioCompartido } from "./migracion-104.js";
 
 // Ingredientes de una receta recién creada que se parecen a algo que ya tenías
 // (spec 072). Se preguntan al terminar la dieta; hasta que se contesten, no se
@@ -8203,6 +8205,9 @@ function pintarZonaDeNormalizar() {
     "oculta",
     String(emailActual || "").toLowerCase() !== CUENTA_QUE_NORMALIZA
   );
+  // El botón de poner en marcha el recetario compartido (spec 104) es solo
+  // del admin: las otras dos cuentas no lo necesitan.
+  id("zona-migrar").classList.toggle("oculta", !esAdmin(emailActual));
 }
 
 // La misma confirmación por escrito que el reinicio, y aquí con más motivo:
@@ -8268,14 +8273,16 @@ id("btn-normalizar").addEventListener("click", async () => {
   }
 });
 
-// --- Migrar al recetario compartido (spec 104/v18) ------------------------
+// --- Empezar el recetario compartido de cero (spec 104/v18) ---------------
 //
-// Cada una de las tres cuentas la pulsa una vez: pasa sus recetas e
-// ingredientes al catálogo compartido y borra lo viejo. A diferencia de
-// "Reparar mis recetas", esta SÍ se enseña a las tres cuentas, porque las
-// tres tienen que migrar — no es una prueba con una sola cuenta.
+// Solo el admin la pulsa, una vez (ver pintarZonaDeNormalizar): vacía el
+// recetario compartido y el recetario/despensa viejos del admin, resiembra
+// los 4 menús desde cero y reenlaza por nombre la dieta/diario del admin.
+// Las otras dos cuentas no la ven ni la necesitan — decisión del usuario del
+// 23 de septiembre: no compensa fundir entre las tres si solo el admin usa
+// el recetario.
 id("palabra-migrar").addEventListener("input", (evento) => {
-  id("btn-migrar").disabled = evento.target.value.trim().toUpperCase() !== "COMPARTIR";
+  id("btn-migrar").disabled = evento.target.value.trim().toUpperCase() !== "EMPEZAR";
 });
 
 id("btn-migrar").addEventListener("click", async () => {
@@ -8283,32 +8290,24 @@ id("btn-migrar").addEventListener("click", async () => {
   const error = id("error-migrar");
 
   error.textContent = "";
-  estado.textContent = "Pasando tus recetas al recetario compartido…";
+  estado.textContent = "Vaciando y sembrando el recetario compartido…";
   id("btn-migrar").disabled = true;
 
   try {
-    const resumen = await migrarAlRecetarioCompartido(uidActual, nombreAutorActual());
-
-    if (!resumen) {
-      estado.textContent = "No había nada que migrar: ya está todo en el recetario compartido.";
-      id("palabra-migrar").value = "";
-      return;
-    }
+    const resumen = await reiniciarRecetarioCompartido(uidActual);
 
     await Promise.all([refrescarRecetas(), refrescarDespensa(), refrescarDieta()]);
 
     estado.textContent =
-      `Listo: ${resumen.recetasNuevas} recetas nuevas y ${resumen.recetasFundidas} ` +
-      `fundidas con las que ya había (${resumen.recetasActualizadas} actualizadas por ` +
-      `ser más recientes), ${resumen.ingredientesNuevos} ingredientes nuevos y ` +
-      `${resumen.ingredientesReutilizados} reutilizados. ${resumen.dietasTocadas} dietas y ` +
-      `${resumen.comidasTocadas} comidas de tu diario, actualizadas para seguir enlazadas.`;
+      `Listo: ${resumen.recetas} recetas y ${resumen.ingredientes} ingredientes sembrados. ` +
+      `${resumen.dietasTocadas} dietas y ${resumen.comidasTocadas} comidas de tu diario, ` +
+      `reenlazadas por nombre a las recetas nuevas.`;
     id("palabra-migrar").value = "";
   } catch {
     estado.textContent = "";
     error.textContent =
       "No se ha podido terminar. Comprueba tu conexión y vuelve a pulsarlo: " +
-      "lo que ya se hizo no se repite.";
+      "vaciar y resembrar de nuevo no hace daño.";
   } finally {
     id("btn-migrar").disabled = true;
   }

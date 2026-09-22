@@ -1152,26 +1152,30 @@
         <p id="error-normalizar" class="error" role="alert"></p>
       </div>
 
-      <!-- Migrar al recetario compartido (spec 104/v18). Cada una de las
-           cuentas del grupo la pulsa una vez: pasa SUS recetas e ingredientes
-           al catálogo compartido, fundiendo por nombre con lo que ya haya, y
-           borra lo viejo. Visible para las tres cuentas, no solo la de
-           prueba: las tres tienen que migrar. -->
-      <div class="zona-peligro">
-        <h2>Pasar mis recetas al recetario compartido</h2>
+      <!-- Poner en marcha el recetario compartido (spec 104/v18). Solo para
+           el admin, como "zona-normalizar" arriba: vacía el recetario
+           compartido y el recetario/despensa viejos del admin, resiembra los
+           4 menús de la nutricionista desde cero y reenlaza por nombre la
+           dieta activa y el diario del admin. Las otras dos cuentas no la
+           necesitan: no la pulsan, y su recetario viejo se queda sin usar. -->
+      <div id="zona-migrar" class="zona-peligro oculta">
+        <h2>Empezar el recetario compartido de cero</h2>
         <p class="advertencia">
-          Tus recetas e ingredientes pasan a verlos y usarlos todo el grupo,
-          con tu nombre como autor. Si alguien del grupo ya tiene una receta
-          con el mismo nombre, se queda la más reciente de las dos. Tus
-          dietas y tu diario de comidas se actualizan solos para seguir
-          enlazados. No se puede deshacer, pero volver a pulsarlo no hace
-          daño: la segunda vez no queda nada que migrar.
+          Vacía el recetario compartido (por si algo llegó a crearse) y tu
+          recetario e ingredientes de antes de esta spec, y siembra de nuevo
+          los 4 menús de la nutricionista: 73 recetas, 138 ingredientes,
+          compartidos para todo el grupo. Tu dieta activa y tu diario de
+          comidas se reenlazan solos, por nombre, a las recetas recién
+          sembradas — lo que no coincida con ninguno de los 4 menús se queda
+          sin enlazar. Tus recetas propias de antes de esta spec, si tenías
+          alguna fuera de los 4 menús, se pierden. No se puede deshacer, pero
+          volver a pulsarlo no hace daño: vuelve a vaciar y resembrar igual.
         </p>
 
-        <label for="palabra-migrar">Escribe COMPARTIR para confirmar</label>
+        <label for="palabra-migrar">Escribe EMPEZAR para confirmar</label>
         <input type="text" id="palabra-migrar" autocomplete="off">
         <button type="button" id="btn-migrar" disabled>
-          Pasar mis recetas al recetario compartido
+          Empezar el recetario compartido de cero
         </button>
 
         <p id="estado-migrar"></p>

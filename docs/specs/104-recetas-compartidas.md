@@ -21,6 +21,22 @@
 > recetas con `autorUid` = admin, el reinicio de "mis recetas" del admin se
 > llevaría por delante el recetario sembrado de todo el grupo. Se resuelve
 > dándole a lo sembrado un origen distinto de "escrito a mano por el admin".
+>
+> **Cambio de planes sobre la migración (22 de septiembre de 2026, tras
+> implementar la fusión completa entre las tres cuentas):** el usuario decidió
+> simplificarla del todo. Las otras dos cuentas del grupo no usan el
+> recetario, así que no hace falta fundir nada entre las tres: **se empieza
+> casi de cero**, con los 4 menús de la nutricionista (73 recetas, 138
+> ingredientes, spec 075) como único contenido inicial. Se sustituye el
+> módulo de migración con fusión por nombre (que llegó a implementarse y
+> pasar `revisor-codigo`) por uno mucho más simple: **un solo botón, solo
+> para el admin**, que vacía el recetario compartido y el recetario/despensa
+> viejos del admin, resiembra los 4 menús desde cero, y reenlaza por nombre
+> la dieta activa y el diario de comidas del admin a las recetas recién
+> sembradas. Las recetas propias del admin anteriores a esta spec (si las
+> había, fuera de los 4 menús) **se pierden a propósito**: no se migran. Las
+> cuentas de la mujer y el cuñado no se tocan: su recetario viejo por cuenta
+> queda huérfano y sin usar, sin que haga falta borrarlo.
 
 ## 1. Objetivo
 
@@ -58,9 +74,14 @@ dejando que la IA la divida en ingredientes.
 ## 3. Alcance
 
 ### Entra
-- Migrar `usuarios/{uid}/recetas` y los ingredientes de cada despensa a
-  colecciones compartidas top-level (`recetas`, `ingredientes`).
-- Deduplicar por nombre exacto (recetas e ingredientes) durante la migración.
+- Colecciones compartidas top-level (`recetas`, `ingredientes`).
+- **Botón de reinicio del recetario, solo para el admin** (ver nota de
+  "Cambio de planes" más arriba): vacía `recetas`/`ingredientes` y el
+  recetario/despensa viejos del admin, resiembra los 4 menús desde cero
+  (73 recetas, 138 ingredientes, `autorUid: "sistema"`) y reenlaza por
+  nombre la dieta activa y el diario de comidas del admin a lo recién
+  sembrado. No fusiona nada de las otras dos cuentas: su recetario viejo
+  por cuenta queda huérfano, sin tocar.
 - Campo `autorUid` (+ nombre para mostrar) en cada receta.
 - Reglas de Firestore: lectura para todo el grupo, escritura solo para el
   autor o el admin fijo.
@@ -72,12 +93,12 @@ dejando que la IA la divida en ingredientes.
 - Campo de texto libre + botón "Dividir con IA" para pegar una receta y
   obtener ingredientes estructurados propuestos (nueva función serverless o
   ampliación de una existente en `api/`).
-- Reescribir, durante la migración, los ids de receta/ingrediente en
-  dietas/comidas del usuario cuya receta quedó fundida en otra.
-- **Reescribir también `ingredienteId` dentro de `receta.ingredientes[]`**
-  de TODAS las recetas cuando el ingrediente que referenciaban queda fundido
-  en otro al deduplicar (no solo en dietas/comidas). Mismo patrón que
-  `js/normalizacion.js` (spec 089) ya usa para un problema parecido.
+- Al reenlazar por nombre la dieta/diario del admin, se recorren
+  `recetaId`/`recetaIds` e `ingredienteId`/`ingredienteIds`: donde el nombre
+  del plato coincide con una de las 73 recién sembradas, se enlaza al id
+  nuevo; lo que no coincide (una receta propia del admin, fuera de los 4
+  menús) se queda con el texto tal cual, sin enlazar — no se inventa un
+  enlace que no es.
 - **`js/siembra.js` deja de copiar las 73 recetas del menú a cada cuenta
   nueva.** Se siembran UNA sola vez en la colección compartida (si no existen
   ya), con `autorUid: "sistema"` (no el uid del admin, ver sección 5). Un
@@ -130,20 +151,19 @@ vacío inicial de Recetas)*
 
 ## 6. Casos límite
 
-- Dos recetas con nombres que difieren solo en mayúsculas/espacios: ¿cuentan
-  como "nombre exacto" para deduplicar? (decidir al implementar, mirando los
-  datos reales primero, como manda la regla de ESTADO.md del 2 de septiembre).
-- Una receta fundida por duplicado tenía alias distintos en cada copia: los
-  alias de ambas se unen en la superviviente.
-- **Dos recetas con el mismo nombre exacto pero contenido distinto (otros
-  ingredientes/preparación):** sobrevive la editada más recientemente
-  (`actualizadaEn`/timestamp equivalente); la otra se descarta tras
-  reescribir sus enlaces (dietas, comidas y `ingredienteId` de otras recetas)
-  al id de la superviviente.
 - El texto pegado para dividir con IA no da tiempo/falla (mismo patrón de
   aviso que ya usa el resto de llamadas a IA del proyecto).
 - Un usuario borrado o dado de baja como autor: su nombre sigue en las
   recetas que subió (no se borran en cascada).
+- **Al reenlazar por nombre la dieta/diario del admin tras el reinicio**: un
+  plato cuyo texto no coincide con el nombre exacto de ninguna de las 73
+  recién sembradas (por ejemplo, una receta propia del admin de antes de
+  esta spec) se queda SIN enlazar — el texto del plato se conserva tal cual,
+  pero el botón de "ver receta" deja de salir en él. No se inventa un
+  enlace aproximado.
+- Pulsar el botón de reinicio dos veces: la segunda vuelve a vaciar y
+  resembrar sin romper nada (mismo patrón que "Reparar mis recetas" de las
+  specs 089/090: no hace daño repetirlo).
 
 ## 7. Archivos afectados
 
@@ -153,7 +173,8 @@ vacío inicial de Recetas)*
 - `js/app.js`: pestaña nueva en la navegación.
 - `firestore.rules`: reglas nuevas para `recetas` e `ingredientes`.
 - `api/`: función o ampliación para dividir texto pegado con IA.
-- Script de migración de datos existentes (una vez, no parte del código vivo).
+- Botón de reinicio del recetario (solo admin), que vacía, resiembra y
+  reenlaza por nombre — ver sección 3.
 - `js/dietas.js`, `js/comidas.js`: puntos que hoy asumen receta/ingrediente
   bajo `usuarios/{uid}` y hay que apuntar a la colección compartida.
 - `js/estadisticas.js`, `js/compra.js`: leen hoy `recetaPorId`/`ingredientePorId`
@@ -163,8 +184,6 @@ vacío inicial de Recetas)*
   sección 3.
 - `js/reinicio.js`: casilla "mis recetas" filtrada por `autorUid`, ver
   sección 3.
-- `js/normalizacion.js`: se reutiliza su patrón de reescritura de
-  `ingredienteId` en recetas para la migración de esta spec.
 
 ## 8. Decisiones tomadas
 
@@ -185,9 +204,13 @@ vacío inicial de Recetas)*
 - **Ingredientes: catálogo de nombres compartido, marcado "lo tengo" sigue por
   usuario** → evita duplicar "tomate" tres veces sin fingir que todos tienen
   la despensa de todos.
-- **Migración: deduplicar por nombre exacto, reescribiendo los enlaces rotos
-  al id superviviente** → menos duplicados que dejarlo todo tal cual, con el
-  cuidado de no dejar comidas/dietas huérfanas (lección de las specs 089/090).
+- **Migración simplificada a "empezar casi de cero" (22 de septiembre, tras
+  implementar y revisar la fusión completa entre las tres cuentas)** → las
+  otras dos cuentas no usan el recetario, así que fundir entre las tres no
+  compensaba la complejidad. Un solo botón de admin vacía, resiembra los 4
+  menús y reenlaza por nombre la dieta/diario del propio admin. Se pierden a
+  propósito las recetas propias del admin de antes de esta spec, si las
+  había fuera de los 4 menús.
 - **Pegar receta y dividir con IA** → mismo patrón que ya usa la app para
   generar recetas con IA, aplicado a texto pegado en vez de a una petición
   libre. **No consume el cupo diario de 20 mensajes**: es una acción de
@@ -211,103 +234,107 @@ vacío inicial de Recetas)*
 ## ✅ Para probar a mano
 
 Ya está desplegado en producción (operacion-bikini.vercel.app) y las reglas
-de Firestore publicadas. **Antes de nada, las tres cuentas del grupo tienen
-que ejecutar la migración una vez**: mientras no lo hagan, sus recetas viejas
-siguen donde estaban y no aparecen en el recetario compartido.
+de Firestore publicadas. **Antes de nada, el admin (`pantonbernal@gmail.com`)
+tiene que pulsar el botón de reinicio del recetario, una vez**: las otras dos
+cuentas no tienen que hacer nada, su recetario viejo se queda sin usar.
 
-### 1. La migración (una vez por cuenta, empezando por `pantonbernal@gmail.com`)
+### 1. El reinicio del recetario (solo `pantonbernal@gmail.com`)
 
-1. Entra con tu cuenta → **Ajustes → Zona de peligro** → busca "Pasar mis
-   recetas al recetario compartido".
-2. Escribe **COMPARTIR** en el campo de confirmación y pulsa el botón.
-3. Espera a que salga "Listo: …". Debería contar tus recetas e ingredientes
-   de antes de esta spec (nuevas + fundidas + actualizadas).
-4. Ve a la pestaña nueva **Recetas** (barra inferior, junto a Comidas): tus
-   recetas de siempre tienen que estar ahí, con tu nombre como autor.
-5. Abre **Comidas → Mi dieta**: la semana que ya tenías tiene que verse
-   exactamente igual que antes (mismos platos, mismas recetas enlazadas).
-6. Repite los pasos 1-3 con la **segunda cuenta**. Si esta cuenta tenía
-   alguna receta con el MISMO NOMBRE que una de la primera cuenta, el
-   resumen debe contarla como "fundida", no como "nueva".
-7. Repite con la **tercera cuenta**.
-8. Con cualquiera de las tres cuentas, vuelve a pulsar el botón de migración
-   (con COMPARTIR otra vez): debe decir "No había nada que migrar" y no
-   duplicar nada.
+1. Antes de nada, apunta (o recuerda) qué platos tenía tu dieta activa esta
+   semana: lo vas a comprobar después de reiniciar.
+2. Entra con `pantonbernal@gmail.com` → **Ajustes → Zona de peligro** →
+   busca "Empezar el recetario compartido de cero" (o el texto que tenga el
+   botón nuevo).
+3. Escribe la palabra de confirmación y pulsa el botón.
+4. Espera a que salga "Listo: …". Debe decir algo como "73 recetas y 138
+   ingredientes sembrados" y cuántos platos de tu dieta/diario se han
+   reenlazado.
+5. Ve a la pestaña nueva **Recetas** (barra inferior, junto a Comidas): debe
+   haber 73 recetas y 138 ingredientes, todos con autor "Menús de la
+   nutricionista" (o el texto que se use para lo sembrado), no con tu
+   nombre.
+6. Abre **Comidas → Mi dieta**: los platos que coincidían con uno de los 4
+   menús deben seguir mostrando el icono de "ver receta" y abrirla bien. Los
+   que no coincidían (si tenías alguna receta propia de antes) se ven como
+   texto normal, sin el icono — es lo esperado, no un fallo.
+7. Vuelve a pulsar el botón (con la palabra de confirmación otra vez): debe
+   volver a vaciar y resembrar sin errores, sin dejar recetas duplicadas.
 
 ### 2. Camino feliz: crear y ver una receta compartida
 
-9. Con tu cuenta, en **Recetas → Recetas**, pulsa "Nueva receta" y crea una
+8. Con tu cuenta, en **Recetas → Recetas**, pulsa "Nueva receta" y crea una
    con 2-3 ingredientes nuevos (que no existan ya) y una preparación corta.
-10. Guárdala. Debe aparecer en la lista con tu nombre como autor.
-11. Ve a **Recetas → Ingredientes**: los ingredientes nuevos de esa receta
+9. Guárdala. Debe aparecer en la lista con tu nombre como autor.
+10. Ve a **Recetas → Ingredientes**: los ingredientes nuevos de esa receta
     tienen que estar ahí, sin marcar ("lo tengo" desmarcado).
-12. Cierra sesión y entra con **otra cuenta** del grupo.
-13. Ve a **Recetas**: la receta que acabas de crear con la primera cuenta
+11. Cierra sesión y entra con **otra cuenta** del grupo.
+12. Ve a **Recetas**: la receta que acabas de crear con la primera cuenta
     tiene que verse aquí también, con el nombre de la primera cuenta como
     autor.
-14. Ábrela: **no debe haber botón "Editar" ni "Borrar"** (o deben salir
+13. Ábrela: **no debe haber botón "Editar" ni "Borrar"** (o deben salir
     deshabilitados). Los ingredientes nuevos que creó, en cambio, sí deben
     aparecer en tu propia lista de Ingredientes (compartidos), y puedes
     marcarlos "lo tengo" sin problema.
 
 ### 3. Pegar una receta y dividirla con IA
 
-15. En **Recetas → Recetas**, pulsa "O pega una receta y repártela con IA".
-16. Pega un texto de receta real (ingredientes con cantidades y unos pasos),
+14. En **Recetas → Recetas**, pulsa "O pega una receta y repártela con IA".
+15. Pega un texto de receta real (ingredientes con cantidades y unos pasos),
     por ejemplo algo como "Tortilla de atún, 2 personas: 4 huevos, 1 lata de
     atún al natural escurrida, sal. Bate los huevos, mezcla con el atún y
     cuaja en la sartén."
-17. Pulsa "Dividir con IA". Espera unos segundos (puede tardar como al pedir
+16. Pulsa "Dividir con IA". Espera unos segundos (puede tardar como al pedir
     una dieta). El formulario debe abrirse con el nombre, las raciones y la
     preparación ya rellenos, y una línea por ingrediente detectado, cada una
     pendiente de enlazar (como al editar una receta vieja de texto libre).
-18. Enlaza o crea cada ingrediente y guarda. Comprueba que la receta queda
+17. Enlaza o crea cada ingrediente y guarda. Comprueba que la receta queda
     bien formada (ingredientes correctos, sin duplicados raros).
 
 ### 4. Permisos cruzados y admin
 
-19. Con una cuenta que NO sea `pantonbernal@gmail.com`, intenta editar una
+18. Con una cuenta que NO sea `pantonbernal@gmail.com`, intenta editar una
     receta que subió OTRA cuenta que tampoco sea la tuya: no debe poder
     (sin botón de editar/borrar, como en el paso 14).
-20. Con `pantonbernal@gmail.com` (el admin), abre esa misma receta de otro
+19. Con `pantonbernal@gmail.com` (el admin), abre esa misma receta de otro
     autor: SÍ debe salir "Editar" y "Borrar". Pruébalo con un cambio menor
     (por ejemplo, añadir una palabra a la preparación) y guarda: debe
     funcionar sin error de permisos.
-21. Con el admin, intenta borrar y editar un INGREDIENTE (no una receta) que
+20. Con el admin, intenta borrar y editar un INGREDIENTE (no una receta) que
     creó otra cuenta, desde Recetas → Ingredientes: debe poder, igual que
     con las recetas.
 
 ### 5. Casos límite
 
-22. Con dos cuentas distintas, crea (o comprueba que ya migraste) dos
-    recetas con el mismo nombre exacto pero contenido distinto. Tras la
-    migración, solo debe quedar UNA en el recetario compartido — la editada
-    más recientemente — y no debe haber dos entradas duplicadas con el mismo
-    nombre.
-23. Marca "lo tengo" en un ingrediente compartido con tu cuenta. Entra con
+21. Con tu cuenta, intenta crear una receta con el MISMO nombre exacto que
+    una de las 73 sembradas (por ejemplo, una que ya exista tal cual):
+    guárdala igual — el recetario compartido no impide nombres repetidos, no
+    hay fusión automática al crear (la fusión solo existió en la migración
+    completa que se descartó). Debe quedar como una receta MÁS, no
+    sustituir a la que ya había.
+22. Marca "lo tengo" en un ingrediente compartido con tu cuenta. Entra con
     otra cuenta y comprueba que ese mismo ingrediente sale SIN marcar para
     ella (la marca es tuya, no del catálogo).
-24. En Ingredientes, crea uno cuyo nombre singular/plural coincida con uno
+23. En Ingredientes, crea uno cuyo nombre singular/plural coincida con uno
     que ya existe (p. ej. si ya hay "tomate", intenta "tomates" desde una
     receta nueva): debe fundirse con el que ya había, no duplicarse.
 
 ### 6. Regresión: lo que ya funcionaba
 
-25. Abre una dieta de la semana que ya tenías antes de esta spec: los platos
+24. Abre una dieta de la semana que ya tenías antes de esta spec: los platos
     con receta enlazada tienen que seguir mostrando el icono de "ver
     receta", y al abrirlo se debe ver la receta bien.
-26. Ve a **Recetas → Ingredientes → (botón de ir a la compra)**: la lista de
+25. Ve a **Recetas → Ingredientes → (botón de ir a la compra)**: la lista de
     la compra debe seguir calculándose bien a partir de tu dieta activa y tu
     despensa marcada.
-27. Apunta una comida en **Comidas → Apuntar** eligiendo una receta del
+26. Apunta una comida en **Comidas → Apuntar** eligiendo una receta del
     campo con sugerencias: debe enlazar bien y aparecer en tu diario.
-28. En **Comidas → Apuntar**, mira "Qué comes" (estadísticas): debe seguir
+27. En **Comidas → Apuntar**, mira "Qué comes" (estadísticas): debe seguir
     contando bien tus comidas enlazadas a receta/ingrediente.
-29. En **Ajustes → Zona de peligro**, marca solo la casilla "recetas propias
+28. En **Ajustes → Zona de peligro**, marca solo la casilla "recetas propias
     y dietas" y reinicia: debe borrar SOLO las recetas que TÚ subiste (no
     las de otras cuentas ni las de la siembra original) y tus dietas.
     Confirma con otra cuenta que sus recetas siguen intactas.
-30. Comprueba que la pestaña **Comidas** ya no tiene la sub-pestaña
+29. Comprueba que la pestaña **Comidas** ya no tiene la sub-pestaña
     "Recetario" (ahora solo Apuntar y Mi dieta), y que la navegación entre
     Recetas → Ingredientes → "ir a la compra" → "volver a los ingredientes"
     funciona sin saltos raros, en móvil y en escritorio si puedes probar los
