@@ -12,6 +12,9 @@
     },
     "api/analisis.js": {
       "maxDuration": 60
+    },
+    "api/receta-desde-texto.js": {
+      "maxDuration": 60
     }
   }
 }

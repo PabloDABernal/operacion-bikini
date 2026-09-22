@@ -2486,14 +2486,22 @@ button:disabled {
     display: block;
   }
 
-  /* Comidas y Ejercicio: tres columnas. La del medio, más ancha, porque
-     la semana lleva siete días dentro. Los .subseccion de la spec 035 hacen
-     de columnas tal cual, sin tocar el HTML. */
-  /* El :not(.oculta) NO es adorno. Sin operación en marcha el JavaScript
+  /* Ejercicio: tres columnas. La del medio, más ancha, porque la semana
+     lleva siete días dentro. Los .subseccion de la spec 035 hacen de
+     columnas tal cual, sin tocar el HTML. Comidas pasa a DOS columnas desde
+     la spec 104: el Recetario ganó pestaña propia (data-seccion="recetas")
+     y ya no cuenta como tercera columna aquí.
+     El :not(.oculta) NO es adorno. Sin operación en marcha el JavaScript
      oculta estos contenedores poniéndoles .oculta, que es una sola clase:
      estos selectores tienen más peso y le ganarían, así que el contenido
      reaparecería en escritorio justo cuando no debe verse. */
-  .seccion[data-seccion="comidas"] .contenido-operacion:not(.oculta),
+  .seccion[data-seccion="comidas"] .contenido-operacion:not(.oculta) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+    gap: var(--e6);
+    align-items: start;
+  }
+
   .seccion[data-seccion="ejercicio"] .contenido-operacion:not(.oculta) {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr) minmax(0, 1fr);
@@ -2501,33 +2509,27 @@ button:disabled {
     align-items: start;
   }
 
-  /* Comidas tiene TRES sub-pestañas (el Recetario fundió Recetas y Despensa
-     en la spec 085). Se colocan a mano.
-
-     El Recetario va arriba a la derecha (columna 3, fila 1): con su
-     interruptor Recetas/Ingredientes y los ingredientes paginados, es un
-     bloque corto — ya no hace falta esconderlo debajo de Mi dieta ni
-     apilarlo con la Despensa como antes. La Compra va justo debajo, en la
-     misma columna: al acortarse el Recetario, deja de quedar enterrada al
-     final de la página. */
+  /* Comidas tiene DOS sub-pestañas desde que el Recetario se independizó
+     (spec 104). Apuntar, a la izquierda y alta, porque es la acción del día
+     a día; Mi dieta, a la derecha. */
   .seccion[data-seccion="comidas"] .subseccion[data-subseccion="apuntar"] {
     grid-column: 1;
-    grid-row: 1 / span 2;
   }
 
   .seccion[data-seccion="comidas"] .subseccion[data-subseccion="dieta"] {
     grid-column: 2;
-    grid-row: 1;
   }
 
-  .seccion[data-seccion="comidas"] .subseccion[data-subseccion="recetas"] {
-    grid-column: 3;
-    grid-row: 1;
-  }
-
-  .seccion[data-seccion="comidas"] .subseccion[data-subseccion="compra"] {
-    grid-column: 3;
-    grid-row: 2;
+  /* Recetas (spec 104): una sola columna centrada, como Consulta o Ajustes —
+     no necesita repartirse en varias, el Recetario y la Compra ya caben
+     apilados en una sin quedar enterrados. El Recetario mantiene su propio
+     interruptor interno Recetas/Ingredientes (mostrarPanelDeRecetario() en
+     js/app.js), que NO se ve a la vez ni en móvil ni en escritorio: por eso
+     "esto NO se esconde en escritorio" sigue en el comentario de
+     .subpestanas-internas más arriba. */
+  .seccion[data-seccion="recetas"] {
+    max-width: var(--ancho-columna);
+    margin: 0 auto;
   }
 
   /* Los dos botones de ida y vuelta sobran cuando las dos cosas se ven a la

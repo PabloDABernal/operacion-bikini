@@ -1,14 +1,24 @@
-// La despensa: los ingredientes con los que sueles cocinar (spec 058).
+// El catálogo de ingredientes (COMPARTIDO, spec 104/v18) y la despensa de
+// cada usuario (el marcado "lo tengo", spec 058).
 //
-// Vive en usuarios/{uid}/despensa, FUERA de las operaciones, por el mismo
-// motivo que las recetas (spec 026) y las dietas (spec 028): lo que tienes en
-// la cocina no es el diario de una etapa. Empezar otra operación bikini no te
-// deja sin tomates.
+// Desde la 104, "ingrediente" son dos cosas separadas:
+// - `ingredientes/{id}` (top-level, compartido): el NOMBRE del ingrediente —
+//   "tomate" existe una sola vez para todo el grupo. Excepción a "separado
+//   por uid", igual que el recetario (js/recetas.js).
+// - `usuarios/{uid}/despensa/{ingredienteId}` (por usuario): SOLO el marcado
+//   "lo tengo ahora mismo", apuntando por id al catálogo de arriba. Esto
+//   sigue siendo 100% de cada usuario, sin excepción.
+//
+// Antes de la 104 las dos cosas vivían juntas en usuarios/{uid}/despensa
+// (spec 058/068). Este archivo compone las dos para que el resto de la app
+// siga viendo un único array `despensa` de `{id, nombre, tengo}`, como
+// siempre: todas las funciones puras de más abajo (cruce con recetas,
+// clasificación, lo que falta...) no han cambiado de forma.
 //
 // NO es un inventario: no guarda cuánto queda de cada cosa ni cuándo caduca.
-// Decisión del usuario al escribir la spec, y el motivo importa: un inventario
-// que hay que actualizar después de cada comida acaba mintiendo, y una despensa
-// que miente es peor que no tenerla. Todo el mantenimiento que pide es marcar y
+// Decisión del usuario al escribir la spec 058: un inventario que hay que
+// actualizar después de cada comida acaba mintiendo, y una despensa que
+// miente es peor que no tenerla. Todo el mantenimiento que pide es marcar y
 // desmarcar.
 
 import {
@@ -16,17 +26,29 @@ import {
   addDoc,
   deleteDoc,
   updateDoc,
+  setDoc,
   doc,
   getDocs,
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-import { db } from "./firebase-config.js";
+import { db, esAdmin } from "./firebase-config.js";
 
 export const MAX_NOMBRE = 60;
 
-function coleccionDe(uid) {
+function coleccionIngredientes() {
+  return collection(db, "ingredientes");
+}
+
+function coleccionMarcas(uid) {
   return collection(db, "usuarios", uid, "despensa");
+}
+
+// ¿Puede este usuario editar/borrar este ingrediente del catálogo? Mismo
+// permiso que una receta (js/recetas.js): solo decide qué botón se enseña,
+// el permiso de verdad lo aplican las reglas de Firestore.
+export function puedeEditarIngrediente(ingrediente, uid, email) {
+  return Boolean(ingrediente) && (ingrediente.autorUid === uid || esAdmin(email));
 }
 
 // Para COMPARAR, nunca para guardar: el nombre se guarda tal y como lo escribe
@@ -72,59 +94,61 @@ export function ingredienteIgual(ingredientes, nombre, exceptoId = null) {
   );
 }
 
-// Nace SIN marcar (spec 068, revierte la decisión de la 058).
-//
-// La 058 los creaba marcados, con el argumento de que lo escribes cuando lo
-// compras. Al usarlo resultó falso: se escribe la lista de golpe —o la rellena
-// una receta— y entonces la despensa afirmaba tener cosas que no había. El
-// usuario lo dijo así el 29 de agosto: "realmente solo tengo sal, así que no
-// debería salir como que lo tengo".
-//
-// Ahora la lista es "con esto cocino" y la casilla es "y ahora mismo lo tengo".
-// Escribir no afirma nada sobre la nevera; marcar sí, y es un acto aparte.
-export function guardarIngrediente(uid, nombre) {
-  return addDoc(coleccionDe(uid), {
+// Entra en el catálogo COMPARTIDO (spec 104), sin marcar para nadie: escribir
+// un ingrediente no afirma nada sobre tu nevera, marcarlo sí, y es un acto
+// aparte (spec 068, sigue igual). `autorNombre` es quien lo dio de alta, para
+// pintarlo igual que una receta.
+export function guardarIngrediente(uid, autorNombre, nombre) {
+  return addDoc(coleccionIngredientes(), {
     nombre,
-    tengo: false,
+    autorUid: uid,
+    autorNombre,
     creadoEn: serverTimestamp(),
     actualizadoEn: serverTimestamp()
   });
 }
 
-// Mete de golpe los ingredientes de una receta (spec 068). Sin marcar, como
-// cualquier alta: que una receta mencione el azafrán no significa que lo tengas.
+// Mete de golpe los ingredientes de una receta (spec 068) en el catálogo
+// compartido. Sin marcar, como cualquier alta: que una receta mencione el
+// azafrán no significa que lo tengas.
 //
-// Devuelve cuántos entraron. Los que ya estaban no se tocan —ni se duplican ni
-// se les cambia la marca—, así que llamar a esto dos veces con la misma receta
-// no hace nada la segunda.
-export async function guardarIngredientesDeReceta(uid, receta, despensa) {
-  const { nuevos, dudas } = clasificarIngredientes(receta, despensa);
+// Devuelve cuántos entraron. Los que ya estaban no se tocan —ni se duplican—,
+// así que llamar a esto dos veces con la misma receta no hace nada la segunda.
+export async function guardarIngredientesDeReceta(uid, autorNombre, receta, catalogo) {
+  const { nuevos, dudas } = clasificarIngredientes(receta, catalogo);
   for (const nombre of nuevos) {
-    await guardarIngrediente(uid, nombre);
+    await guardarIngrediente(uid, autorNombre, nombre);
   }
   // Las dudas NO se guardan aquí: se devuelven para preguntárselas al usuario
-  // (spec 072). Guardarlas sería justo lo que se quiere evitar — una despensa
+  // (spec 072). Guardarlas sería justo lo que se quiere evitar — un catálogo
   // con "tomate" y "tomate triturado" como si fueran cosas distintas sin que
   // nadie lo haya decidido.
   return { metidos: nuevos.length, dudas };
 }
 
+// `uid` es quien pide el cambio (las reglas comprueban que sea el autor o el
+// admin); no cambia quién dio de alta el ingrediente.
 export function renombrarIngrediente(uid, ingredienteId, nombre) {
-  return updateDoc(doc(db, "usuarios", uid, "despensa", ingredienteId), {
+  return updateDoc(doc(db, "ingredientes", ingredienteId), {
     nombre,
     actualizadoEn: serverTimestamp()
   });
 }
 
-export function marcarIngrediente(uid, ingredienteId, tengo) {
-  return updateDoc(doc(db, "usuarios", uid, "despensa", ingredienteId), {
-    tengo,
-    actualizadoEn: serverTimestamp()
-  });
+export function borrarIngrediente(uid, ingredienteId) {
+  return deleteDoc(doc(db, "ingredientes", ingredienteId));
 }
 
-export function borrarIngrediente(uid, ingredienteId) {
-  return deleteDoc(doc(db, "usuarios", uid, "despensa", ingredienteId));
+// El marcado "lo tengo" sigue siendo 100% del usuario (spec 104 no lo toca).
+// `setDoc` con merge porque, a diferencia de antes, el documento de la marca
+// puede no existir todavía la primera vez que se marca un ingrediente del
+// catálogo compartido.
+export function marcarIngrediente(uid, ingredienteId, tengo) {
+  return setDoc(
+    doc(db, "usuarios", uid, "despensa", ingredienteId),
+    { tengo, actualizadoEn: serverTimestamp() },
+    { merge: true }
+  );
 }
 
 // El orden se calcula aquí y no con un orderBy de Firestore porque ordena por
@@ -492,13 +516,26 @@ export function loQueTengo(despensa) {
     .map((ingrediente) => ingrediente.nombre);
 }
 
+// Compone el catálogo compartido con las marcas propias del usuario: el
+// resto de la app sigue viendo un único array `{id, nombre, tengo, ...}`,
+// igual que antes de la 104. Un ingrediente sin marca propia sale con
+// `tengo: false` — nadie escribe una marca "no lo tengo" explícita, ahorra
+// una escritura por ingrediente y por usuario que nunca lo ha tocado.
 export async function listarDespensa(uid) {
-  const instantanea = await getDocs(coleccionDe(uid));
+  const [ingredientes, marcas] = await Promise.all([
+    getDocs(coleccionIngredientes()),
+    getDocs(coleccionMarcas(uid))
+  ]);
+
+  const tengoPorId = new Map(
+    marcas.docs.map((documento) => [documento.id, Boolean(documento.data().tengo)])
+  );
 
   return ordenar(
-    instantanea.docs.map((documento) => ({
+    ingredientes.docs.map((documento) => ({
       id: documento.id,
-      ...documento.data()
+      ...documento.data(),
+      tengo: tengoPorId.get(documento.id) ?? false
     }))
   );
 }

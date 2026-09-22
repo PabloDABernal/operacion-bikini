@@ -1,8 +1,16 @@
-// El recetario del usuario (spec 026).
+// El recetario, COMPARTIDO entre todo el grupo (spec 104, v18).
 //
-// Vive en usuarios/{uid}/recetas, FUERA de las operaciones: una receta es
-// conocimiento acumulado, no el diario de una etapa. Por eso no la archiva la
-// spec 018 ni se pierde al empezar otra operación.
+// Vive en recetas/, top-level y fuera de usuarios/{uid}: es la única
+// excepción a "datos separados por uid" del proyecto (ver docs/PRODUCTO.md,
+// apartado "Para quién"). Antes vivía en usuarios/{uid}/recetas (spec 026);
+// esa colección se retiró con la migración de la 104. Sigue fuera de las
+// operaciones por el mismo motivo de siempre: una receta es conocimiento
+// acumulado, no el diario de una etapa.
+//
+// Cada receta lleva `autorUid` (+ `autorNombre`, para no resolver el uid al
+// pintar la lista). Solo el autor o el admin fijo (EMAIL_ADMIN en
+// firebase-config.js) puede editar o borrar — lo hace cumplir
+// firestore.rules; aquí solo se decide qué botones se enseñan.
 
 import {
   collection,
@@ -16,8 +24,17 @@ import {
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-import { db } from "./firebase-config.js";
+import { db, auth, esAdmin } from "./firebase-config.js";
 import { MAX_NOMBRE as MAX_NOMBRE_INGREDIENTE } from "./despensa.js";
+
+const ESPERA_MAXIMA_MS = 55000;
+const URL_RECETA_DESDE_TEXTO = "/api/receta-desde-texto";
+
+function errorConCodigo(codigo, mensaje) {
+  const error = new Error(mensaje);
+  error.codigo = codigo;
+  return error;
+}
 
 const MAX_NOMBRE = 80;
 const MAX_PREPARACION = 2000;
@@ -32,8 +49,14 @@ export const RACIONES_POR_DEFECTO = 2;
 const MAX_CANTIDAD_LINEA = 40;
 const MAX_PREPARACION_LINEA = 200;
 
-function coleccionDe(uid) {
-  return collection(db, "usuarios", uid, "recetas");
+function coleccion() {
+  return collection(db, "recetas");
+}
+
+// ¿Puede este usuario editar/borrar esta receta? Solo decide qué botón se
+// enseña: el permiso de verdad lo aplican las reglas de Firestore.
+export function puedeEditar(receta, uid, email) {
+  return Boolean(receta) && (receta.autorUid === uid || esAdmin(email));
 }
 
 // Las líneas de ingredientes llegan en dos formas (spec 082):
@@ -115,21 +138,31 @@ export function validarReceta(nombreBruto, racionesBruto, ingredientesBruto, pre
   };
 }
 
-export function guardarReceta(uid, receta) {
-  return addDoc(coleccionDe(uid), { ...receta, creadoEn: serverTimestamp() });
+// `autorUid`/`autorNombre` van SIEMPRE al crear: la receta nace de alguien.
+// La siembra (js/siembra.js) es la única que pasa autorUid: "sistema".
+export function guardarReceta(uid, autorNombre, receta) {
+  return addDoc(coleccion(), {
+    ...receta,
+    autorUid: uid,
+    autorNombre,
+    creadoEn: serverTimestamp()
+  });
 }
 
+// `uid` es quien pide la edición (para que las reglas de Firestore puedan
+// comprobar el permiso), no cambia el autor original de la receta.
 export function actualizarReceta(uid, recetaId, receta) {
-  return updateDoc(doc(db, "usuarios", uid, "recetas", recetaId), {
+  return updateDoc(doc(db, "recetas", recetaId), {
     ...receta,
     editadoEn: serverTimestamp()
   });
 }
 
 // Por nombre: un recetario se busca con los ojos, y alfabético es como se
-// encuentra. El orden de creación no le importa a nadie.
-export async function listarRecetas(uid) {
-  const consulta = query(coleccionDe(uid), orderBy("nombre"));
+// encuentra. El orden de creación no le importa a nadie. Ya no recibe `uid`:
+// el recetario es el mismo para todo el grupo.
+export async function listarRecetas() {
+  const consulta = query(coleccion(), orderBy("nombre"));
   const instantanea = await getDocs(consulta);
 
   return instantanea.docs.map((documento) => ({
@@ -138,6 +171,47 @@ export async function listarRecetas(uid) {
   }));
 }
 
-export function borrarReceta(uid, recetaId) {
-  return deleteDoc(doc(db, "usuarios", uid, "recetas", recetaId));
+export function borrarReceta(recetaId) {
+  return deleteDoc(doc(db, "recetas", recetaId));
+}
+
+// Pega el texto de una receta y la IA la divide en nombre, raciones,
+// ingredientes (uno por línea, texto libre — se validan y enlazan con
+// validarReceta()/el editor, igual que una receta escrita a mano) y
+// preparación (spec 104). No consume el cupo diario de 20 mensajes de la
+// conversación: es una acción de utilidad aparte, como pedir la dieta.
+export async function dividirRecetaConIa(texto) {
+  const idToken = await auth.currentUser.getIdToken();
+
+  let respuesta;
+  try {
+    respuesta = await fetch(URL_RECETA_DESDE_TEXTO, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${idToken}`
+      },
+      body: JSON.stringify({ texto }),
+      signal: AbortSignal.timeout(ESPERA_MAXIMA_MS)
+    });
+  } catch (fallo) {
+    throw errorConCodigo(
+      fallo.name === "TimeoutError" ? "tardanza" : "red",
+      "Proxy inalcanzable"
+    );
+  }
+
+  if (!respuesta.ok) {
+    let codigo = "red";
+    try {
+      const datos = await respuesta.json();
+      if (datos.error) codigo = datos.error;
+      if (datos.proveedor) codigo = `${codigo} (${datos.proveedor})`;
+    } catch {
+      // Respuesta sin JSON: nos quedamos con el mensaje genérico.
+    }
+    throw errorConCodigo(codigo, `El proxy respondió ${respuesta.status}`);
+  }
+
+  return respuesta.json();
 }

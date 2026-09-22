@@ -35,6 +35,15 @@ export function estaAutorizado(email) {
   return EMAILS_AUTORIZADOS.includes(email.toLowerCase());
 }
 
+// Admin fijo (spec 104): quien puede editar/borrar la receta o el ingrediente
+// de OTRO autor en el recetario compartido. Un solo email, no un rol
+// configurable — decisión del usuario al escribir la spec.
+export const EMAIL_ADMIN = "pantonbernal@gmail.com";
+
+export function esAdmin(email) {
+  return Boolean(email) && email.toLowerCase() === EMAIL_ADMIN;
+}
+
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);

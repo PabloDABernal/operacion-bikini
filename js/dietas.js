@@ -124,7 +124,7 @@ export function mapaDeRecetas(recetas) {
 
 // Guarda las recetas que propone la IA, sin duplicar las que ya tienes, y
 // devuelve un mapa de nombre a identificador para poder enlazarlas.
-export async function guardarRecetasPropuestas(uid, propuestas, recetasActuales) {
+export async function guardarRecetasPropuestas(uid, autorNombre, propuestas, recetasActuales) {
   const porNombre = mapaDeRecetas(recetasActuales);
 
   for (const propuesta of propuestas) {
@@ -140,7 +140,7 @@ export async function guardarRecetasPropuestas(uid, propuestas, recetasActuales)
     // Una receta mal formada de la IA no debe tirar la dieta entera: se salta.
     if (receta.error) continue;
 
-    const referencia = await guardarReceta(uid, receta);
+    const referencia = await guardarReceta(uid, autorNombre, receta);
     porNombre.set(id, referencia.id);
   }
 

@@ -197,10 +197,11 @@
 
       <!-- Sub-pestañas (spec 035). Comidas y Ejercicio tienen la misma forma
            a propósito: se aprenden una sola vez. -->
+      <!-- Solo dos: el Recetario ganó pestaña propia en la navegación
+           (spec 104/v18) — ver data-seccion="recetas" más abajo. -->
       <div class="subpestanas" data-de="comidas">
         <button type="button" class="subpestana activa" data-subseccion="apuntar" data-icono="apuntar" aria-current="true"><span class="etiqueta">Apuntar</span></button>
         <button type="button" class="subpestana" data-subseccion="dieta" data-icono="dieta"><span class="etiqueta">Mi dieta</span></button>
-        <button type="button" class="subpestana" data-subseccion="recetas" data-icono="recetas"><span class="etiqueta">Recetario</span></button>
       </div>
 
       <!-- Sub-pestaña: Apuntar -->
@@ -431,9 +432,28 @@
       <p id="guardado-dieta" class="guardado" role="status"></p>
       </div>
 
-      <!-- Sub-pestaña: Recetario (spec 085, fusión de Recetas y Despensa) -->
-      <div class="subseccion" data-subseccion="recetas">
+      </div>
+    </div>
+
+    <!-- Sección: Recetas (spec 104/v18). Antes era la sub-pestaña "Recetario"
+         de Comidas (spec 085, fusión de Recetas y Despensa); gana pestaña
+         propia porque desde la 104 el recetario es COMPARTIDO entre todo el
+         grupo, no una copia de cada usuario. -->
+    <div class="seccion" data-seccion="recetas">
+      <p class="aviso-sin-operacion oculta">
+        Primero inicia tu operación bikini desde Hoy.
+      </p>
+      <div class="contenido-operacion">
+
+      <!-- Bloque 1: el Recetario. "recetario" y no "recetas" para no chocar
+           con data-seccion="recetas" de la sección entera. -->
+      <div class="subseccion activa" data-subseccion="recetario">
       <h2>Recetario</h2>
+      <p class="explicacion">
+        Compartido entre todo el grupo: lo que sube uno lo ve y lo usa
+        cualquiera. Cada receta o ingrediente dice quién lo subió, y solo esa
+        persona (o el admin) puede editarlo o borrarlo.
+      </p>
 
       <!-- El interruptor interno: Recetas / Ingredientes. No es una
            sub-pestaña de primer nivel (esas las gestiona abrirSubpestana());
@@ -467,7 +487,21 @@
 
       <button type="button" id="btn-nueva-receta">Nueva receta</button>
 
+      <!-- Pegar una receta y dividirla con IA (spec 104): alternativa a
+           escribir campo a campo. -->
+      <button type="button" id="btn-pegar-receta" class="enlace oculta">O pega una receta y repártela con IA</button>
+      <div id="bloque-pegar-receta" class="oculta">
+        <label for="receta-texto-pegado">Pega aquí el texto de la receta</label>
+        <textarea id="receta-texto-pegado" rows="6"
+          placeholder="Tortilla de atún (2 personas): 4 huevos, 1 lata de atún al natural escurrida, sal. Bate los huevos, mezcla con el atún escurrido y cuaja en la sartén con un poco de aceite."></textarea>
+        <button type="button" id="btn-dividir-receta">Dividir con IA</button>
+        <button type="button" id="btn-cancelar-pegar-receta" class="enlace">Cancelar</button>
+        <p id="error-dividir-receta" class="error" role="alert"></p>
+      </div>
+
       <form id="form-receta" class="oculta">
+        <p id="autor-receta" class="registro-detalle"></p>
+
         <label for="receta-nombre">Nombre</label>
         <input type="text" id="receta-nombre" maxlength="80" placeholder="lentejas con verduras">
 
@@ -476,9 +510,9 @@
 
         <label id="etiqueta-receta-lineas">Ingredientes</label>
         <p class="explicacion">
-          Cada ingrediente enlazado a tu despensa, con su cantidad y, si hace
-          falta, cómo se prepara ("triturado", "en rodajas"…) aparte del
-          nombre.
+          Cada ingrediente enlazado al catálogo compartido, con su cantidad y,
+          si hace falta, cómo se prepara ("triturado", "en rodajas"…) aparte
+          del nombre.
         </p>
         <div id="receta-lineas" aria-labelledby="etiqueta-receta-lineas"></div>
         <datalist id="sugerencias-despensa"></datalist>
@@ -501,8 +535,9 @@
       </div>
 
       <div id="panel-recetario-ingredientes" class="oculta">
-      <!-- La despensa (spec 058). No es un inventario: no lleva cantidades ni
-           caducidades. Marcar y desmarcar es todo el mantenimiento que pide. -->
+      <!-- El catálogo de ingredientes (spec 104, antes despensa por usuario,
+           spec 058). No es un inventario: no lleva cantidades ni caducidades.
+           Marcar y desmarcar "lo tengo" sigue siendo tuyo y de nadie más. -->
       <!-- La compra dejó de ser sub-pestaña (spec 079): se usa una vez por
            semana y le quitaba sitio a lo diario. Se llega desde aquí, con el
            número de lo que falta. -->
@@ -1116,6 +1151,32 @@
         <p id="estado-normalizar"></p>
         <p id="error-normalizar" class="error" role="alert"></p>
       </div>
+
+      <!-- Migrar al recetario compartido (spec 104/v18). Cada una de las
+           cuentas del grupo la pulsa una vez: pasa SUS recetas e ingredientes
+           al catálogo compartido, fundiendo por nombre con lo que ya haya, y
+           borra lo viejo. Visible para las tres cuentas, no solo la de
+           prueba: las tres tienen que migrar. -->
+      <div class="zona-peligro">
+        <h2>Pasar mis recetas al recetario compartido</h2>
+        <p class="advertencia">
+          Tus recetas e ingredientes pasan a verlos y usarlos todo el grupo,
+          con tu nombre como autor. Si alguien del grupo ya tiene una receta
+          con el mismo nombre, se queda la más reciente de las dos. Tus
+          dietas y tu diario de comidas se actualizan solos para seguir
+          enlazados. No se puede deshacer, pero volver a pulsarlo no hace
+          daño: la segunda vez no queda nada que migrar.
+        </p>
+
+        <label for="palabra-migrar">Escribe COMPARTIR para confirmar</label>
+        <input type="text" id="palabra-migrar" autocomplete="off">
+        <button type="button" id="btn-migrar" disabled>
+          Pasar mis recetas al recetario compartido
+        </button>
+
+        <p id="estado-migrar"></p>
+        <p id="error-migrar" class="error" role="alert"></p>
+      </div>
       </div>
     </div>
 
@@ -1138,6 +1199,7 @@
         <button type="button" class="nav-boton" data-seccion="hoy">Hoy</button>
         <button type="button" class="nav-boton" data-seccion="peso" data-icono="peso" aria-label="Peso"></button>
         <button type="button" class="nav-boton" data-seccion="comidas" data-icono="comidas" aria-label="Comidas"></button>
+        <button type="button" class="nav-boton" data-seccion="recetas" data-icono="recetas" aria-label="Recetas"></button>
         <button type="button" class="nav-boton" data-seccion="ejercicio" data-icono="ejercicio" aria-label="Ejercicio"></button>
         <button type="button" class="nav-boton" data-seccion="fotos" data-icono="fotos" aria-label="Fotos"></button>
         <button type="button" class="nav-boton" data-seccion="consulta" data-icono="consulta" aria-label="Consulta"></button>

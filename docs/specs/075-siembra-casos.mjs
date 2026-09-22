@@ -50,7 +50,7 @@ const siembra = await import(
     Buffer.from(fuenteSiembra, "utf8").toString("base64")
 );
 
-const { hayQueSembrar, recetasQueFaltan, ingredientesQueFaltan } = siembra;
+const { faltaSembrar, recetasQueFaltan, ingredientesQueFaltan } = siembra;
 
 let mal = 0;
 const comprobar = (nombre, real, esperado) => {
@@ -232,12 +232,17 @@ comprobar(
 );
 
 // --- Cuándo hay que sembrar ---------------------------------------------
+//
+// Desde la spec 104, la marca es un documento COMPARTIDO (sistema/
+// datosIniciales), no un campo de los ajustes de cada usuario. faltaSembrar()
+// es la parte pura que decide, dada la versión ya guardada; hayQueSembrar()
+// (no probada aquí, hace una lectura real a Firestore) es su envoltorio.
 
-comprobar("cuenta nueva: se siembra", hayQueSembrar({}), true);
-comprobar("sin la marca: se siembra", hayQueSembrar({ nombre: "Pau" }), true);
-comprobar("ya sembrada: no se repite", hayQueSembrar({ datosInicialesVersion: 1 }), false);
-comprobar("versión vieja: se resiembra", hayQueSembrar({ datosInicialesVersion: 0 }), true);
-comprobar("ajustes que no llegaron", hayQueSembrar(null), true);
+comprobar("sin ninguna marca guardada: se siembra", faltaSembrar(undefined), true);
+comprobar("marca a 0: se siembra", faltaSembrar(0), true);
+comprobar("ya sembrada a la versión actual: no se repite", faltaSembrar(1), false);
+comprobar("versión vieja: se resiembra", faltaSembrar(0), true);
+comprobar("documento que no llegó (null): se siembra", faltaSembrar(null), true);
 
 // --- Qué recetas faltan --------------------------------------------------
 

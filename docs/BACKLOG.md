@@ -48,6 +48,16 @@ tres que quedaban declaradas en `PRODUCTO.md` y sin escribir (077, 078 y 087).
 Con eso **no queda ninguna spec declarada sin escribir**, ni ninguna escrita sin
 implementar. A partir de aquí, todo lo que entre sale de este archivo.
 
+## Anotado el 22 de septiembre de 2026
+
+- **El botón "Reparar" de Zona de peligro (herramienta de la 089/090,
+  `js/normalizacion.js`) queda apuntando a las rutas per-usuario que la spec
+  104 retira** (`usuarios/{uid}/recetas`, `usuarios/{uid}/despensa` como
+  catálogo). Tras la 104 fallará con error de permisos si alguien lo pulsa,
+  en vez de escribir en un sitio muerto — no es peligroso, pero es un botón
+  roto en producción. Decidir si se retira del todo o se reescribe contra el
+  catálogo compartido, si algún día vuelve a hacer falta reparar datos.
+
 ## Anotado el 3 de septiembre de 2026
 
 - **El diario de comidas ordenaba el día al revés que la lista.** Los días iban

@@ -101,7 +101,9 @@ import {
   guardarReceta,
   actualizarReceta,
   listarRecetas,
-  borrarReceta
+  borrarReceta,
+  puedeEditar as puedeEditarReceta,
+  dividirRecetaConIa
 } from "./recetas.js";
 
 import {
@@ -121,7 +123,8 @@ import {
   mismoIngrediente,
   loQueFalta,
   esLineaEstructurada,
-  nombreDeLinea
+  nombreDeLinea,
+  puedeEditarIngrediente
 } from "./despensa.js";
 
 import {
@@ -147,9 +150,8 @@ import {
   materialQueFalta
 } from "./material.js";
 
-import { hayQueSembrar, sembrar, olvidarLaSiembra } from "./siembra.js";
+import { hayQueSembrar, sembrar } from "./siembra.js";
 import {
-  VERSION as VERSION_DATOS_INICIALES,
   MENUS,
   RECETAS as RECETAS_INICIALES,
   INGREDIENTES as INGREDIENTES_INICIALES,
@@ -160,6 +162,8 @@ import {
   nuevoIdDeIngrediente,
   escribirReparacion
 } from "./normalizacion.js";
+
+import { migrarAlRecetarioCompartido } from "./migracion-104.js";
 
 // Ingredientes de una receta recién creada que se parecen a algo que ya tenías
 // (spec 072). Se preguntan al terminar la dieta; hasta que se contesten, no se
@@ -334,6 +338,12 @@ function abrirPestana(nombre, subseccion) {
   // Mismo motivo, para "Lo que toca hoy" de Ejercicio (spec 101).
   if (nombre === "ejercicio") pintarLoQueTocaHoyEjercicio();
 
+  // Recetas (spec 104) no tiene una fila de sub-pestañas de primer nivel
+  // (solo dos bloques internos, Recetario y Compra, sin botones propios), así
+  // que no cae en el disparo automático de abajo: se deja dicho a mano, y
+  // siempre aterriza en el Recetario, nunca en la Compra.
+  if (nombre === "recetas") abrirSubpestana("recetas", "recetario");
+
   // Comidas y Ejercicio tienen sub-pestañas dentro (spec 035). Sin decir cuál,
   // se abre la primera: entrar en Comidas es entrar a apuntar, que es lo que se
   // hace veinte veces al día. No se recuerda dónde estabas.
@@ -382,7 +392,11 @@ function abrirSubpestana(seccion, nombre) {
   // Ingredientes en concreto (volver de la compra) lo pide DESPUÉS, con
   // mostrarPanelDeRecetario() — esta llamada no se lo puede comer porque las
   // dos son síncronas y en orden.
-  if (seccion === "comidas" && nombre === "recetas") {
+  //
+  // Desde la spec 104, Recetas es su propia sección (antes, sub-pestaña de
+  // Comidas): "recetario" es el nombre del bloque que lleva dentro el
+  // interruptor Recetas/Ingredientes.
+  if (seccion === "recetas" && nombre === "recetario") {
     mostrarPanelDeRecetario("recetas");
   }
 
@@ -401,7 +415,7 @@ function abrirSubpestana(seccion, nombre) {
 
   // La compra se recalcula al entrar, no se guarda: es la despensa cruzada con
   // las recetas de la dieta (spec 073).
-  if (seccion === "comidas" && nombre === "compra") {
+  if (seccion === "recetas" && nombre === "compra") {
     pintarCompra();
   }
 }
@@ -441,14 +455,14 @@ document.querySelectorAll(".panel-recetario-boton").forEach((boton) => {
 // Ingredientes y se vuelve a Ingredientes. `abrirSubpestana` no necesita que
 // exista el botón, solo la subsección, así que esto basta.
 id("btn-ir-a-compra").addEventListener("click", () => {
-  abrirSubpestana("comidas", "compra");
+  abrirSubpestana("recetas", "compra");
 });
 
 id("btn-volver-despensa").addEventListener("click", () => {
   // Al Recetario primero (aterriza en Recetas por defecto, ver arriba), y
   // LUEGO a Ingredientes: el orden importa, si no el reseteo de arriba se
   // comería este paso.
-  abrirSubpestana("comidas", "recetas");
+  abrirSubpestana("recetas", "recetario");
   mostrarPanelDeRecetario("ingredientes");
 });
 
@@ -619,6 +633,12 @@ btnSalir.addEventListener("click", () => salir());
 // Auth, pero por si acaso queda un interrogante en vez de un círculo mudo.
 // El email del usuario, para cuando aún no ha dicho cómo quiere que le llamen.
 let emailActual = "";
+
+// El nombre a guardar como autor de una receta/ingrediente nuevo (spec 104):
+// el nombre de pila si lo hay, si no el email — igual que pintarNombre().
+function nombreAutorActual() {
+  return (ajustesActuales && ajustesActuales.nombre) || emailActual;
+}
 
 // La cabecera enseña el nombre si lo hay. Un email largo partido en tres
 // líneas quedaba fatal, y además nadie quiere que su app le llame por su
@@ -2196,13 +2216,24 @@ function tarjetaDeReceta(receta) {
 
   tarjeta.appendChild(cuerpoDeReceta(receta));
 
-  const acciones = document.createElement("div");
-  acciones.className = "receta-acciones";
-  acciones.append(
-    botonDeFila("Editar", () => editarReceta(receta)),
-    botonDeFila("Borrar", () => borrarLaReceta(receta))
-  );
-  tarjeta.appendChild(acciones);
+  // Quién la subió (spec 104): visible siempre que está abierta, aunque no
+  // se pueda editar — sirve para saber a quién preguntarle.
+  if (receta.autorNombre) {
+    tarjeta.appendChild(celda(`Subida por ${receta.autorNombre}`, "registro-detalle"));
+  }
+
+  // Solo el autor o el admin edita/borra (spec 104): el resto del grupo la
+  // ve y la usa, pero no la toca. Las reglas de Firestore lo exigen igual;
+  // esto solo decide qué botón se enseña.
+  if (puedeEditarReceta(receta, uidActual, emailActual)) {
+    const acciones = document.createElement("div");
+    acciones.className = "receta-acciones";
+    acciones.append(
+      botonDeFila("Editar", () => editarReceta(receta)),
+      botonDeFila("Borrar", () => borrarLaReceta(receta))
+    );
+    tarjeta.appendChild(acciones);
+  }
 
   return tarjeta;
 }
@@ -2307,7 +2338,7 @@ function filaDeIngredienteReceta(linea, indice) {
     }
     crear.disabled = true;
     try {
-      const referencia = await guardarIngrediente(uidActual, validado.nombre);
+      const referencia = await guardarIngrediente(uidActual, nombreAutorActual(), validado.nombre);
       await refrescarDespensa();
       linea.ingredienteId = referencia.id;
       linea.ingredienteNombre = validado.nombre;
@@ -2385,6 +2416,11 @@ function abrirFormularioDeReceta(receta) {
   id("receta-raciones").value = receta ? receta.raciones : "";
   id("receta-preparacion").value = receta ? receta.preparacion || "" : "";
 
+  // Quién la subió (spec 104): solo se ve editando una que ya existe. Al
+  // guardar una nueva, el autor eres tú — no hace falta decirlo antes.
+  id("autor-receta").textContent =
+    receta && receta.autorNombre ? `Subida por ${receta.autorNombre}` : "";
+
   // Una receta nueva empieza con una línea vacía, lista para escribir. Una
   // receta que ya tiene ingredientes recupera una fila por cada uno: si es
   // vieja (texto libre), cada línea entra SIN ingredienteId, precargada con
@@ -2405,6 +2441,7 @@ function abrirFormularioDeReceta(receta) {
   id("error-receta").textContent = "";
   id("form-receta").classList.remove("oculta");
   id("btn-nueva-receta").classList.add("oculta");
+  id("btn-pegar-receta").classList.add("oculta");
   id("receta-nombre").focus();
 }
 
@@ -2414,6 +2451,7 @@ function cerrarFormularioDeReceta() {
   id("receta-lineas").innerHTML = "";
   id("form-receta").classList.add("oculta");
   id("btn-nueva-receta").classList.remove("oculta");
+  id("btn-pegar-receta").classList.remove("oculta");
   id("error-receta").textContent = "";
 
   // El submit de form-receta llama a esta función al guardar con éxito, así
@@ -2439,7 +2477,7 @@ function editarReceta(receta) {
 // ahora" de Apuntar (specs 083 y 098): abre el mismo editor que el Recetario,
 // cambiando de sub-pestaña, y deja dicho A DÓNDE volver al terminar.
 function editarRecetaDesdeElDia(receta, destino) {
-  abrirPestana("comidas", "recetas");
+  abrirPestana("recetas");
   editarReceta(receta);
   // Después de editarReceta(): abrirFormularioDeReceta(), que llama por
   // dentro, apaga esta variable al principio. Ponerla antes se la comería.
@@ -2450,7 +2488,7 @@ async function borrarLaReceta(receta) {
   if (!confirm(`¿Borrar la receta "${receta.nombre}"?`)) return;
 
   try {
-    await borrarReceta(uidActual, receta.id);
+    await borrarReceta(receta.id);
     if (recetaAbierta === receta.id) recetaAbierta = null;
     await refrescarRecetas();
   } catch {
@@ -2460,7 +2498,7 @@ async function borrarLaReceta(receta) {
 
 async function refrescarRecetas() {
   try {
-    recetasCargadas = await listarRecetas(uidActual);
+    recetasCargadas = await listarRecetas();
   } catch {
     recetasCargadas = [];
     id("estado-recetas").textContent =
@@ -2488,6 +2526,77 @@ async function refrescarRecetas() {
 
 id("btn-nueva-receta").addEventListener("click", () => abrirFormularioDeReceta(null));
 id("btn-cancelar-receta").addEventListener("click", cerrarFormularioDeReceta);
+
+// Pegar una receta y dividirla con IA (spec 104): alternativa a escribir
+// campo a campo. El botón que la abre se enseña siempre (a diferencia de
+// "Nueva receta", no depende de que ya haya recetas), justo debajo de "Nueva
+// receta".
+id("btn-pegar-receta").classList.remove("oculta");
+
+id("btn-pegar-receta").addEventListener("click", () => {
+  id("btn-pegar-receta").classList.add("oculta");
+  id("btn-nueva-receta").classList.add("oculta");
+  id("bloque-pegar-receta").classList.remove("oculta");
+  id("receta-texto-pegado").focus();
+});
+
+function cerrarBloquePegarReceta() {
+  id("bloque-pegar-receta").classList.add("oculta");
+  id("receta-texto-pegado").value = "";
+  id("error-dividir-receta").textContent = "";
+  id("btn-pegar-receta").classList.remove("oculta");
+  id("btn-nueva-receta").classList.remove("oculta");
+}
+
+id("btn-cancelar-pegar-receta").addEventListener("click", cerrarBloquePegarReceta);
+
+id("btn-dividir-receta").addEventListener("click", async () => {
+  const texto = id("receta-texto-pegado").value.trim();
+  const error = id("error-dividir-receta");
+  error.textContent = "";
+
+  if (!texto) {
+    error.textContent = "Pega el texto de la receta.";
+    return;
+  }
+
+  const boton = id("btn-dividir-receta");
+  boton.disabled = true;
+  boton.textContent = "Dividiendo…";
+
+  try {
+    const dividida = await dividirRecetaConIa(texto);
+    if (!dividida.nombre) {
+      error.textContent = "No se ha sabido dividir. Revisa el texto o escríbela a mano.";
+      return;
+    }
+
+    cerrarBloquePegarReceta();
+    // El editor recibe la receta dividida como si fuera una que ya
+    // existiera (mismo camino que editar una vieja: cada línea de texto sin
+    // enlazar, lista para resolverse contra el catálogo compartido). La IA
+    // devuelve los ingredientes como texto, uno por línea (mismo formato que
+    // ingredientesValidados() en js/recetas.js espera de un textarea) — se
+    // parte aquí en líneas, porque abrirFormularioDeReceta() espera un array.
+    const lineas = String(dividida.ingredientes || "")
+      .split("\n")
+      .map((linea) => linea.trim())
+      .filter(Boolean);
+
+    abrirFormularioDeReceta({
+      nombre: dividida.nombre,
+      raciones: dividida.raciones,
+      ingredientes: lineas,
+      preparacion: dividida.preparacion
+    });
+    id("form-receta").scrollIntoView({ block: "center" });
+  } catch (fallo) {
+    error.textContent = mensajeDeErrorDeConsulta(fallo.codigo);
+  } finally {
+    boton.disabled = false;
+    boton.textContent = "Dividir con IA";
+  }
+});
 
 id("btn-desplegar-recetas").addEventListener("click", () => {
   recetasDesplegadas = !recetasDesplegadas;
@@ -2549,7 +2658,7 @@ id("form-receta").addEventListener("submit", async (evento) => {
     if (recetaEditando) {
       await actualizarReceta(uidActual, recetaEditando, resultado);
     } else {
-      await guardarReceta(uidActual, resultado);
+      await guardarReceta(uidActual, nombreAutorActual(), resultado);
     }
     avisarGuardado("guardado-receta");
     cerrarFormularioDeReceta();
@@ -2800,7 +2909,7 @@ async function marcarComprado(cosa) {
       // Está en una receta pero no en tu despensa todavía. Entra YA MARCADO,
       // porque acabas de comprarlo: es la única alta que nace marcada desde la
       // spec 068, y aquí sí es verdad que lo tienes.
-      const referencia = await guardarIngrediente(uidActual, cosa.nombre);
+      const referencia = await guardarIngrediente(uidActual, nombreAutorActual(), cosa.nombre);
       await marcarIngrediente(uidActual, referencia.id, true);
     }
 
@@ -3017,14 +3126,19 @@ function filaDeIngrediente(ingrediente) {
 
   const acciones = document.createElement("div");
   acciones.className = "ingrediente-acciones";
-  acciones.append(
-    botonDeIcono("lapiz", "Editar", () => {
-      ingredienteEditando = ingrediente.id;
-      limpiarAvisosDespensa();
-      pintarDespensa();
-    }),
-    botonDeIcono("papelera", "Borrar", () => borrarElIngrediente(ingrediente))
-  );
+  // Solo el autor o el admin edita/borra el NOMBRE del ingrediente (spec
+  // 104): marcar "lo tengo" (arriba, la casilla) sigue siendo de cualquiera,
+  // porque es 100% tuyo y no toca el catálogo compartido.
+  if (puedeEditarIngrediente(ingrediente, uidActual, emailActual)) {
+    acciones.append(
+      botonDeIcono("lapiz", "Editar", () => {
+        ingredienteEditando = ingrediente.id;
+        limpiarAvisosDespensa();
+        pintarDespensa();
+      }),
+      botonDeIcono("papelera", "Borrar", () => borrarElIngrediente(ingrediente))
+    );
+  }
 
   fila.append(casilla, etiqueta, acciones);
   return fila;
@@ -3183,6 +3297,7 @@ async function llenarDespensaDesde(recetas) {
     for (const receta of recetas) {
       const salida = await guardarIngredientesDeReceta(
         uidActual,
+        nombreAutorActual(),
         receta,
         // La despensa cargada MÁS lo que está pendiente de preguntar: si dos
         // recetas mencionan "tomate triturado", se pregunta una vez.
@@ -3256,7 +3371,7 @@ async function resolverDuda(duda, esNuevo) {
   if (!esNuevo) return;
 
   try {
-    await guardarIngrediente(uidActual, duda.nombre);
+    await guardarIngrediente(uidActual, nombreAutorActual(), duda.nombre);
     await refrescarDespensa();
   } catch (fallo) {
     console.error("No se ha podido añadir el ingrediente:", fallo);
@@ -3346,7 +3461,7 @@ id("form-ingrediente").addEventListener("submit", async (evento) => {
       // sobre lo que hay en la nevera. Marcar es un acto aparte.
       aviso = `"${repetido.nombre}" ya está en tu despensa.`;
     } else {
-      await guardarIngrediente(uidActual, resultado.nombre);
+      await guardarIngrediente(uidActual, nombreAutorActual(), resultado.nombre);
       aviso = "Guardado";
     }
   } catch {
@@ -4189,12 +4304,19 @@ function tarjetaDeRecetaEnDieta(receta, destinoEditar) {
 
   tarjeta.appendChild(cuerpoDeReceta(receta));
 
-  const acciones = document.createElement("div");
-  acciones.className = "receta-acciones";
-  acciones.appendChild(
-    botonDeFila("Editar", () => editarRecetaDesdeElDia(receta, destinoEditar))
-  );
-  tarjeta.appendChild(acciones);
+  if (receta.autorNombre) {
+    tarjeta.appendChild(celda(`Subida por ${receta.autorNombre}`, "registro-detalle"));
+  }
+
+  // Mismo permiso que en el Recetario (spec 104): solo el autor o el admin.
+  if (puedeEditarReceta(receta, uidActual, emailActual)) {
+    const acciones = document.createElement("div");
+    acciones.className = "receta-acciones";
+    acciones.appendChild(
+      botonDeFila("Editar", () => editarRecetaDesdeElDia(receta, destinoEditar))
+    );
+    tarjeta.appendChild(acciones);
+  }
 
   return tarjeta;
 }
@@ -4554,6 +4676,7 @@ async function generarDieta(instrucciones, aprovechar = false) {
   // existir antes.
   const porNombre = await guardarRecetasPropuestas(
     uidActual,
+    nombreAutorActual(),
     respuesta.recetas,
     recetasCargadas
   );
@@ -7877,18 +8000,11 @@ id("btn-borrar-definitivo").addEventListener("click", async () => {
 
   try {
     await borrarSeleccion(uidActual, seleccion);
-    // Borrar las recetas o la despensa quita la marca de la siembra (spec 075),
-    // así que lo que la app trae puesto VUELVE al siguiente arranque. Es lo que
-    // pidió el usuario el 30 de agosto, y revierte lo que decía aquella spec:
-    // vaciar la cuenta es dejarla como recién estrenada, y una cuenta recién
-    // estrenada trae sus recetas y sus ingredientes.
-    //
-    // Solo esas dos casillas: borrar los pesajes no tiene por qué resucitar un
-    // recetario que nadie ha tocado.
-    if (seleccion.includes("recetas") || seleccion.includes("despensa")) {
-      await olvidarLaSiembra(uidActual);
-      if (ajustesActuales) delete ajustesActuales.datosInicialesVersion;
-    }
+    // Desde la spec 104 el recetario y el catálogo de ingredientes son
+    // compartidos y lo sembrado nace con autorUid "sistema", así que borrar
+    // "mis recetas" o "mi despensa" ya no toca ni resucita la siembra: eso
+    // era correcto cuando el recetario era una copia por cuenta (spec 075),
+    // y dejó de serlo al fundirse en uno solo para todo el grupo.
     estado.textContent = "Datos borrados.";
     await refrescarRecuentos();
     // El histórico se pinta desde `operacionesCargadas`, la copia en memoria:
@@ -7935,18 +8051,21 @@ id("btn-borrar-definitivo").addEventListener("click", async () => {
 // siguiente arranque lo reintenta. Lo que ya entró no se duplica, porque se
 // vuelve a comparar contra lo que hay.
 async function sembrarSiHaceFalta() {
-  // `ajustesActuales` lo deja puesto refrescarAjustes(), a la que se ha
-  // esperado antes de llamar aquí. Si aun así no está, es que su lectura falló:
-  // no se siembra, y se reintenta al siguiente arranque.
-  if (!ajustesActuales || !hayQueSembrar(ajustesActuales)) return;
+  // Marca compartida (spec 104): una lectura de sobra si ya sembró otro
+  // miembro del grupo, pero solo pasa una vez en la vida de la app.
+  try {
+    if (!(await hayQueSembrar())) return;
+  } catch (fallo) {
+    console.error("No se ha podido comprobar la siembra:", fallo);
+    return;
+  }
 
   try {
-    const metidos = await sembrar(uidActual, recetasCargadas, despensaCargada);
+    const metidos = await sembrar(recetasCargadas, despensaCargada);
     if (metidos.recetas || metidos.ingredientes) {
       // Lo sembrado no se ve hasta repintar: las listas en memoria son de antes.
       await Promise.all([refrescarRecetas(), refrescarDespensa()]);
     }
-    ajustesActuales.datosInicialesVersion = VERSION_DATOS_INICIALES;
     console.info(
       `Datos iniciales: ${metidos.recetas} recetas y ${metidos.ingredientes} ingredientes.`
     );
@@ -8146,5 +8265,51 @@ id("btn-normalizar").addEventListener("click", async () => {
   } finally {
     // Vuelve a pedir la palabra: cada pasada se confirma entera.
     id("btn-normalizar").disabled = true;
+  }
+});
+
+// --- Migrar al recetario compartido (spec 104/v18) ------------------------
+//
+// Cada una de las tres cuentas la pulsa una vez: pasa sus recetas e
+// ingredientes al catálogo compartido y borra lo viejo. A diferencia de
+// "Reparar mis recetas", esta SÍ se enseña a las tres cuentas, porque las
+// tres tienen que migrar — no es una prueba con una sola cuenta.
+id("palabra-migrar").addEventListener("input", (evento) => {
+  id("btn-migrar").disabled = evento.target.value.trim().toUpperCase() !== "COMPARTIR";
+});
+
+id("btn-migrar").addEventListener("click", async () => {
+  const estado = id("estado-migrar");
+  const error = id("error-migrar");
+
+  error.textContent = "";
+  estado.textContent = "Pasando tus recetas al recetario compartido…";
+  id("btn-migrar").disabled = true;
+
+  try {
+    const resumen = await migrarAlRecetarioCompartido(uidActual, nombreAutorActual());
+
+    if (!resumen) {
+      estado.textContent = "No había nada que migrar: ya está todo en el recetario compartido.";
+      id("palabra-migrar").value = "";
+      return;
+    }
+
+    await Promise.all([refrescarRecetas(), refrescarDespensa(), refrescarDieta()]);
+
+    estado.textContent =
+      `Listo: ${resumen.recetasNuevas} recetas nuevas y ${resumen.recetasFundidas} ` +
+      `fundidas con las que ya había (${resumen.recetasActualizadas} actualizadas por ` +
+      `ser más recientes), ${resumen.ingredientesNuevos} ingredientes nuevos y ` +
+      `${resumen.ingredientesReutilizados} reutilizados. ${resumen.dietasTocadas} dietas y ` +
+      `${resumen.comidasTocadas} comidas de tu diario, actualizadas para seguir enlazadas.`;
+    id("palabra-migrar").value = "";
+  } catch {
+    estado.textContent = "";
+    error.textContent =
+      "No se ha podido terminar. Comprueba tu conexión y vuelve a pulsarlo: " +
+      "lo que ya se hizo no se repite.";
+  } finally {
+    id("btn-migrar").disabled = true;
   }
 });

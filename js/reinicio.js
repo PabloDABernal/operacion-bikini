@@ -16,6 +16,8 @@ import {
   doc,
   deleteDoc,
   getDocs,
+  query,
+  where,
   writeBatch
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
@@ -60,11 +62,15 @@ export const TIPOS = [
   // borrar lo que bebiste.
   { clave: "agua", etiqueta: "vasos de agua", colecciones: ["agua"] },
   // Las recetas no se archivan con la operación (spec 026), así que esta
-  // casilla es la única forma de borrarlas.
+  // casilla es la única forma de borrarlas. Desde la spec 104 el recetario es
+  // COMPARTIDO: "recetas" ya no es una subcolección tuya, así que se trata
+  // aparte (ver borrarMisRecetas/contarMisRecetas más abajo) y solo borra las
+  // que TÚ subiste (autorUid == tu uid) — nunca las de otro autor ni las
+  // sembradas (autorUid "sistema"). Las dietas siguen siendo 100% tuyas.
   {
     clave: "recetas",
-    etiqueta: "recetas y dietas",
-    colecciones: ["recetas", "dietas"]
+    etiqueta: "recetas propias y dietas",
+    colecciones: ["dietas"]
   },
   // La despensa (spec 058). Casilla propia y no metida en la de arriba: no se
   // archiva con la operación, así que esta es la única forma de borrarla, y
@@ -148,6 +154,15 @@ async function borrarPerfil(uid) {
   );
 }
 
+// Las recetas propias en el recetario COMPARTIDO (spec 104): solo las que
+// autorUid == uid, nunca las de otro autor ni las de la siembra.
+async function misRecetas(uid) {
+  const instantanea = await getDocs(
+    query(collection(db, "recetas"), where("autorUid", "==", uid))
+  );
+  return instantanea.docs;
+}
+
 // Cuántos registros hay de cada tipo, para enseñarlo antes de borrar.
 export async function contarTodo(uid) {
   const recuentos = {};
@@ -167,7 +182,11 @@ export async function contarTodo(uid) {
       const porColeccion = await Promise.all(
         tipo.colecciones.map(async (nombre) => (await documentosDe(uid, nombre)).length)
       );
-      recuentos[tipo.clave] = porColeccion.reduce((suma, n) => suma + n, 0);
+      let total = porColeccion.reduce((suma, n) => suma + n, 0);
+
+      if (tipo.clave === "recetas") total += (await misRecetas(uid)).length;
+
+      recuentos[tipo.clave] = total;
     })
   );
 
@@ -282,5 +301,22 @@ export async function borrarSeleccion(uid, clavesSeleccionadas) {
     for (const nombre of tipo.colecciones) {
       await borrarColeccion(uid, nombre);
     }
+
+    if (tipo.clave === "recetas") await borrarMisRecetas(uid);
+  }
+}
+
+// Borra SOLO las recetas propias del catálogo compartido (autorUid == uid).
+// Nunca las de otro autor ni las sembradas (autorUid "sistema"): las reglas
+// de Firestore ya lo impedirían, pero esta consulta ni las intenta tocar.
+async function borrarMisRecetas(uid) {
+  const documentos = await misRecetas(uid);
+
+  for (let inicio = 0; inicio < documentos.length; inicio += MAXIMO_POR_LOTE) {
+    const lote = writeBatch(db);
+    documentos
+      .slice(inicio, inicio + MAXIMO_POR_LOTE)
+      .forEach((documento) => lote.delete(documento.ref));
+    await lote.commit();
   }
 }

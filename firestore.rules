@@ -21,6 +21,20 @@ service cloud.firestore {
         ];
     }
 
+    // Admin fijo (spec 104): puede editar/borrar la receta o el ingrediente de
+    // OTRO autor en el recetario compartido. Duplicado a propósito con
+    // js/firebase-config.js (EMAIL_ADMIN), igual que la lista blanca de arriba.
+    function esAdmin() {
+      return request.auth != null
+        && request.auth.token.email != null
+        && request.auth.token.email.lower() == 'pantonbernal@gmail.com';
+    }
+
+    function esAutorODuenio(autorUidDelDocumento) {
+      return autorizado()
+        && (request.auth.uid == autorUidDelDocumento || esAdmin());
+    }
+
     // Ajustes del usuario: objetivo de peso, altura y fecha objetivo.
     match /usuarios/{uid} {
       allow read, write: if autorizado() && request.auth.uid == uid;
@@ -61,16 +75,42 @@ service cloud.firestore {
       allow read, write: if autorizado() && request.auth.uid == uid;
     }
 
-    // Recetario del usuario (spec 026). Vive fuera de las operaciones a
-    // propósito: una receta es conocimiento acumulado, no el diario de una
-    // etapa, así que no se archiva al cerrar una operación.
-    match /usuarios/{uid}/recetas/{recetaId} {
-      allow read, write: if autorizado() && request.auth.uid == uid;
+    // Recetario COMPARTIDO entre todo el grupo (spec 104, v18). Excepción a
+    // "separado por uid": cualquiera autorizado lee, pero solo el autor
+    // (autorUid) o el admin fijo puede escribir/borrar. Antes vivía en
+    // usuarios/{uid}/recetas (spec 026); esa colección se retira con la
+    // migración de la 104.
+    match /recetas/{recetaId} {
+      allow read: if autorizado();
+      allow create: if autorizado()
+        && (request.resource.data.autorUid == request.auth.uid || esAdmin());
+      allow update, delete: if esAutorODuenio(resource.data.autorUid);
     }
 
-    // La despensa: los ingredientes que tienes en casa (spec 058). Fuera de las
-    // operaciones por el mismo motivo que las recetas: empezar otra operación
-    // bikini no te deja sin tomates.
+    // Catálogo de ingredientes COMPARTIDO entre todo el grupo (spec 104, v18):
+    // el nombre de un ingrediente existe una sola vez para todos. Mismo
+    // permiso que las recetas: solo el autor o el admin edita/borra.
+    match /ingredientes/{ingredienteId} {
+      allow read: if autorizado();
+      allow create: if autorizado()
+        && (request.resource.data.autorUid == request.auth.uid || esAdmin());
+      allow update, delete: if esAutorODuenio(resource.data.autorUid);
+    }
+
+    // TRANSITORIO (spec 104): el recetario viejo por usuario, de solo lectura
+    // y borrado — para que la herramienta de migración de cada cuenta pueda
+    // leer sus recetas de antes de la 104 y limpiarlas al terminar. Nadie
+    // vuelve a ESCRIBIR aquí nunca (por eso no hay "create"/"update"): el
+    // recetario vive en /recetas desde ahora. Quitar este bloque cuando las
+    // tres cuentas hayan migrado.
+    match /usuarios/{uid}/recetas/{recetaId} {
+      allow read, delete: if autorizado() && request.auth.uid == uid;
+    }
+
+    // La despensa (spec 058): SOLO el marcado "lo tengo" de cada usuario,
+    // apuntando por id al catálogo compartido de arriba. Sigue siendo 100%
+    // del usuario, sin excepción — lo que cambia con la 104 es que el nombre
+    // del ingrediente ya no vive aquí dentro.
     match /usuarios/{uid}/despensa/{ingredienteId} {
       allow read, write: if autorizado() && request.auth.uid == uid;
     }
@@ -137,6 +177,13 @@ service cloud.firestore {
     // registro, con los mismos documentos que había en el día a día.
     match /usuarios/{uid}/operaciones/{operacionId}/{coleccion}/{documentoId} {
       allow read, write: if autorizado() && request.auth.uid == uid;
+    }
+
+    // Marca compartida de la siembra de recetas/ingredientes (spec 104): si
+    // ya sembró alguien del grupo, nadie más lo repite. No es dato de nadie
+    // en particular, así que cualquier autorizado puede leerla y escribirla.
+    match /sistema/{documentoId} {
+      allow read, write: if autorizado();
     }
 
     // Todo lo demás, denegado.

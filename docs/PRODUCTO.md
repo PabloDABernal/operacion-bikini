@@ -8,6 +8,8 @@ Esta app sirve para que mi mujer y yo perdamos peso y nos sintamos bien con nues
 
 Un grupo pequeño y cerrado de usuarios personales (empezando por mí y mi mujer; el 21 de agosto de 2026 se sumó un cuñado), cada uno con su cuenta y sus datos completamente separados: peso, comidas, ejercicio, fotos y conversaciones con la IA de un usuario no son visibles para el otro. No es una app pública ni de registro abierto — el acceso se concede manualmente (dando de alta la cuenta o permitiendo el inicio de sesión), no cualquiera con el enlace puede entrar.
 
+**Excepción, desde la v18 (22 de septiembre de 2026): las recetas y el catálogo de ingredientes son compartidos entre todos los usuarios del grupo**, con autoría (quién la subió). Es la única excepción a "datos completamente separados". Ver "Qué hará (v18)".
+
 ## Qué hace (alcance actual — v1 beta, objetivo 31 de agosto)
 
 - Login separado por usuario, con email/contraseña o cuenta de Google (a elección de cada uno).
@@ -867,6 +869,51 @@ Qué NO hace la v17:
 | 102 | Un solo campo con sugerencias del catálogo de ejercicio |
 | 103 | Estadísticas de qué entrenas |
 
+## Qué hará (v18: recetas compartidas, decidida el 22 de septiembre de 2026)
+
+El usuario pidió que las recetas dejen de ser de cada cuenta y pasen a ser del
+grupo: lo que sube uno lo ve el otro, sin duplicar trabajo. Revierte la
+decisión de la v14 ("no colección común... mucho más código para un grupo que
+cabe en una mano") porque ahora sí compensa: el volumen de recetas ha crecido
+y duplicar cada una por usuario ya cuesta más que compartirla.
+
+- **Recetas e ingredientes pasan a colección compartida**, visible para todo
+  el grupo (no por `uid`). Es la única excepción a "datos completamente
+  separados" del apartado "Para quién".
+- **Recetas, pestaña propia** en la barra de navegación (mismo nivel que Hoy,
+  Peso, Comidas, Ejercicio). Deja de vivir dentro de Comidas.
+- **Cada receta lleva quién la subió** (autor), visible en la tarjeta/detalle.
+- **Solo el autor (o un admin) puede editar o borrar una receta.** El resto
+  del grupo la ve y la usa, pero no la toca.
+- **Al crear una receta se crean solos los ingredientes que le falten al
+  catálogo compartido**, igual que ya hace hoy la despensa al guardar una
+  receta (spec 068), pero ahora en el catálogo común en vez de en la despensa
+  de un usuario.
+- **El catálogo de ingredientes es compartido por nombre** ("tomate" existe
+  una sola vez para todos). **Marcar "lo tengo" sigue siendo de cada
+  usuario**: la despensa (qué tienes en casa) no se comparte, solo el nombre
+  del ingrediente existe una vez.
+- **Las recetas se pueden crear pegando el texto de una receta ya escrita**
+  (por ejemplo, un plato en papel), no solo escribiéndola campo a campo o
+  pidiéndosela a la IA.
+- **Dietas, menús y comidas apuntadas siguen enlazando recetas por id, igual
+  que hoy.** Lo que cambia es el modelo de datos de la receta (compartida, con
+  autor), no cómo se referencia desde una dieta o una comida.
+
+Qué NO hace la v18:
+
+- **No comparte nada más.** Peso, comidas apuntadas, ejercicio, fotos y
+  conversaciones con la IA de cada usuario siguen completamente separados.
+- **No migra las recetas existentes de cada usuario automáticamente a una
+  fusión ciega.** Cómo tratar las recetas que ya tiene cada cuenta hoy (posibles
+  duplicados entre usuarios) se decide al escribir la spec.
+- **No cambia quién puede leer una receta**: todo el grupo puede leer y usar
+  cualquiera, solo cambia quién puede editarla/borrarla.
+
+| Spec | Qué |
+|---|---|
+| 104 | Recetas compartidas: colección común, autor y permisos de edición |
+
 ## Ideas para más adelante (27 de agosto de 2026)
 
 El 27 de agosto se vació `docs/BACKLOG.md`: la app está terminada y en uso
@@ -933,7 +980,7 @@ es cosmético.
 
 - No sustituye a un profesional médico real: siempre debe recordar (disclaimer) que ante dudas o falta de resultados hay que consultar a un médico.
 - No da diagnósticos médicos ni detecta enfermedades.
-- No comparte datos entre los dos usuarios: cada uno ve solo lo suyo.
+- No comparte datos entre los dos usuarios: cada uno ve solo lo suyo. **Excepción desde la v18: recetas e ingredientes son compartidos entre todo el grupo.**
 - No entrena modelos propios: usa APIs de IA de terceros tal cual (Google Gemini por defecto, con Groq como reserva automática si falla; desde Ajustes cada usuario puede elegir probar Groq primero).
 - No compara ni clasifica a los dos usuarios entre sí: no hay ranking ni objetivos compartidos.
 - No pesa alimentos ni da calorías exactas: solo estimaciones en rango, porque cualquier otra cosa sería precisión fingida.
