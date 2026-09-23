@@ -423,10 +423,16 @@ function abrirSubpestana(seccion, nombre) {
   }
 }
 
+// Qué panel (Recetas o Ingredientes) estaba activo, para que "volver" desde
+// la compra (spec 106) recuerde de dónde vino en vez de ir siempre a
+// Ingredientes.
+let panelRecetarioActivo = "recetas";
+
 // El interruptor Recetas/Ingredientes dentro del Recetario (spec 085, fusión
 // de las sub-pestañas Recetas y Despensa). No es una sub-pestaña de primer
 // nivel: abrirSubpestana() no sabe nada de esto, y viceversa.
 function mostrarPanelDeRecetario(modo) {
+  panelRecetarioActivo = modo;
   id("panel-recetario-recetas").classList.toggle("oculta", modo !== "recetas");
   id("panel-recetario-ingredientes").classList.toggle("oculta", modo !== "ingredientes");
 
@@ -454,19 +460,29 @@ document.querySelectorAll(".panel-recetario-boton").forEach((boton) => {
   boton.addEventListener("click", () => mostrarPanelDeRecetario(boton.dataset.panelRecetario));
 });
 
-// La compra ya no tiene botón en la barra (spec 079): se llega desde
-// Ingredientes y se vuelve a Ingredientes. `abrirSubpestana` no necesita que
-// exista el botón, solo la subsección, así que esto basta.
+// Qué panel estaba activo justo ANTES de abrir la compra (spec 106): se
+// captura al abrirla, porque entrar en "recetario" fuerza el panel a
+// "recetas" (ver abrirSubpestana) y para entonces panelRecetarioActivo ya
+// habría perdido el valor de origen.
+let panelAntesDeCompra = "recetas";
+
+// La compra es residual desde la spec 106: un botón suelto a nivel del
+// Recetario, visible tanto en el panel Recetas como en el de Ingredientes.
+// `abrirSubpestana` no necesita que exista un botón por subsección, solo la
+// subsección misma, así que esto basta.
 id("btn-ir-a-compra").addEventListener("click", () => {
+  panelAntesDeCompra = panelRecetarioActivo;
   abrirSubpestana("recetas", "compra");
 });
 
 id("btn-volver-despensa").addEventListener("click", () => {
-  // Al Recetario primero (aterriza en Recetas por defecto, ver arriba), y
-  // LUEGO a Ingredientes: el orden importa, si no el reseteo de arriba se
-  // comería este paso.
+  // Vuelve al panel que estaba activo antes de abrir la compra, no siempre
+  // a Ingredientes: si se entró viendo Recetas, se vuelve a Recetas. Al
+  // Recetario primero (aterriza en "recetas" por defecto, ver
+  // abrirSubpestana), y LUEGO al panel recordado: el orden importa, si no
+  // el reseteo de arriba se comería este paso.
   abrirSubpestana("recetas", "recetario");
-  mostrarPanelDeRecetario("ingredientes");
+  mostrarPanelDeRecetario(panelAntesDeCompra);
 });
 
 // La barra de navegación desaparecía en Ejercicio, en móvil. Confirmado con
@@ -2037,9 +2053,30 @@ let recetasDesplegadas = false;
 // contrae el nombre, y viceversa.
 let nombresRecetaDesplegados = new Set();
 
+// Categorías de receta (spec 105): lista cerrada, para que el filtro no se
+// ensucie con variantes del mismo tag ("fit"/"Fit"/"FIT"). Clave en
+// minúscula (lo que se guarda), etiqueta con mayúscula (lo que se ve).
+const CATEGORIAS_RECETA = [
+  { clave: "comida", etiqueta: "Comida" },
+  { clave: "postre", etiqueta: "Postre" },
+  { clave: "fit", etiqueta: "Fit" },
+  { clave: "snack", etiqueta: "Snack" },
+  { clave: "desayuno", etiqueta: "Desayuno" },
+  { clave: "otros", etiqueta: "Otros" }
+];
+
+function etiquetaDeCategoria(clave) {
+  return CATEGORIAS_RECETA.find((c) => c.clave === clave)?.etiqueta || clave;
+}
+
 // Lo escrito en el buscador de recetas (spec 079). Filtra lo que se pinta, no
 // lo que hay.
 let busquedaRecetas = "";
+
+// Las categorías activas del filtro (spec 105): un chip tocado se SUMA, no
+// sustituye — "Postre" + "Fit" enseña las que sean cualquiera de las dos.
+// Vacío significa "sin filtro", igual que `busquedaRecetas` vacío.
+let categoriasFiltro = new Set();
 
 // Las recetas que coinciden, cada una con POR QUÉ ha entrado.
 //
@@ -2048,11 +2085,24 @@ let busquedaRecetas = "";
 //
 // El "porqué" no es un adorno: ver "Crema de calabaza" al buscar "pollo" parece
 // un error hasta que la tarjeta dice que lleva pollo.
-function recetasQueCoinciden() {
-  if (!busquedaRecetas) {
-    return recetasCargadas.map((receta) => ({ receta, porIngrediente: "" }));
-  }
+// Sin filtro de categoría activo, pasan todas. Con filtro, basta con que la
+// receta tenga UNA de las categorías marcadas (spec 105): los chips se
+// suman, no se cruzan.
+function pasaElFiltroDeCategoria(receta) {
+  if (categoriasFiltro.size === 0) return true;
+  const propias = Array.isArray(receta.categorias) ? receta.categorias : [];
+  return propias.some((categoria) => categoriasFiltro.has(categoria));
+}
 
+function recetasQueCoinciden() {
+  const porTexto = !busquedaRecetas
+    ? recetasCargadas.map((receta) => ({ receta, porIngrediente: "" }))
+    : buscarPorTexto();
+
+  return porTexto.filter(({ receta }) => pasaElFiltroDeCategoria(receta));
+}
+
+function buscarPorTexto() {
   const buscado = normalizarIngrediente(busquedaRecetas);
   const encontradas = [];
 
@@ -2074,6 +2124,30 @@ function recetasQueCoinciden() {
   return encontradas;
 }
 
+// Los chips de filtro (spec 105). Se repintan a la vez que la lista, para
+// que la clase "activa" del chip que se acaba de tocar quede al día.
+function pintarFiltroDeCategorias() {
+  const contenedor = id("filtro-categorias-recetas");
+  contenedor.innerHTML = "";
+
+  CATEGORIAS_RECETA.forEach(({ clave, etiqueta }) => {
+    const chip = document.createElement("button");
+    chip.type = "button";
+    chip.className = "chip-categoria";
+    chip.classList.toggle("activa", categoriasFiltro.has(clave));
+    chip.textContent = etiqueta;
+    chip.addEventListener("click", () => {
+      if (categoriasFiltro.has(clave)) {
+        categoriasFiltro.delete(clave);
+      } else {
+        categoriasFiltro.add(clave);
+      }
+      pintarRecetas();
+    });
+    contenedor.appendChild(chip);
+  });
+}
+
 function pintarRecetas() {
   const contenedor = id("lista-recetas");
   const boton = id("btn-desplegar-recetas");
@@ -2091,6 +2165,8 @@ function pintarRecetas() {
     recetasCargadas.length < MINIMO_PARA_BUSCAR
   );
 
+  pintarFiltroDeCategorias();
+
   const coinciden = recetasQueCoinciden();
 
   const visibles = recetasDesplegadas
@@ -2106,12 +2182,15 @@ function pintarRecetas() {
     contenedor.appendChild(tarjeta);
   });
 
-  // Buscar algo que no está no es un error, pero hay que decirlo: si no, la
-  // lista se queda vacía sin explicación.
-  if (busquedaRecetas && coinciden.length === 0) {
-    contenedor.appendChild(
-      celda(`Ninguna receta contiene "${busquedaRecetas}".`, "explicacion")
-    );
+  // Buscar o filtrar y no encontrar nada no es un error, pero hay que
+  // decirlo: si no, la lista se queda vacía sin explicación (spec 105: el
+  // filtro de categoría, solo o combinado con el texto, también cuenta).
+  if ((busquedaRecetas || categoriasFiltro.size > 0) && coinciden.length === 0) {
+    const texto = busquedaRecetas
+      ? `Ninguna receta contiene "${busquedaRecetas}"` +
+        (categoriasFiltro.size > 0 ? " con esas categorías." : ".")
+      : "Ninguna receta tiene esas categorías.";
+    contenedor.appendChild(celda(texto, "explicacion"));
   }
 
   const hayEscondidas = visibles.length < coinciden.length;
@@ -2214,6 +2293,20 @@ function tarjetaDeReceta(receta) {
     celda(`para ${receta.raciones}`, "registro-detalle")
   );
   tarjeta.appendChild(cabecera);
+
+  // Las categorías (spec 105), siempre visibles, abierta o no: son lo que
+  // hace falta ver de un vistazo para reconocer la receta en el listado.
+  if (Array.isArray(receta.categorias) && receta.categorias.length) {
+    const chips = document.createElement("div");
+    chips.className = "chips-categoria-receta";
+    receta.categorias.forEach((clave) => {
+      const chip = document.createElement("span");
+      chip.className = "chip-categoria-receta";
+      chip.textContent = etiquetaDeCategoria(clave);
+      chips.appendChild(chip);
+    });
+    tarjeta.appendChild(chips);
+  }
 
   if (recetaAbierta !== receta.id) return tarjeta;
 
@@ -2408,6 +2501,31 @@ id("btn-anadir-linea-receta").addEventListener("click", () => {
 // no es el que se miraba).
 let destinoTrasEditarReceta = null;
 
+// Las casillas de categoría del editor (spec 105). Se recrean cada vez que
+// se abre el formulario, marcadas según la receta (o ninguna, si es nueva).
+function pintarCasillasDeCategoria(categoriasMarcadas) {
+  const marcadas = new Set(categoriasMarcadas || []);
+  const contenedor = id("receta-categorias");
+  contenedor.innerHTML = "";
+
+  CATEGORIAS_RECETA.forEach(({ clave, etiqueta }) => {
+    const etiquetaEl = document.createElement("label");
+    const casilla = document.createElement("input");
+    casilla.type = "checkbox";
+    casilla.value = clave;
+    casilla.checked = marcadas.has(clave);
+    etiquetaEl.append(casilla, document.createTextNode(etiqueta));
+    contenedor.appendChild(etiquetaEl);
+  });
+}
+
+// Las categorías marcadas ahora mismo en el editor.
+function categoriasDelFormulario() {
+  return Array.from(id("receta-categorias").querySelectorAll("input:checked")).map(
+    (casilla) => casilla.value
+  );
+}
+
 function abrirFormularioDeReceta(receta) {
   // Cualquier apertura del formulario —nueva, o editar desde el Recetario, Mi
   // dieta o Apuntar— empieza "de cero": solo `editarRecetaDesdeElDia()` la
@@ -2423,6 +2541,8 @@ function abrirFormularioDeReceta(receta) {
   // guardar una nueva, el autor eres tú — no hace falta decirlo antes.
   id("autor-receta").textContent =
     receta && receta.autorNombre ? `Subida por ${receta.autorNombre}` : "";
+
+  pintarCasillasDeCategoria(receta ? receta.categorias : []);
 
   // Una receta nueva empieza con una línea vacía, lista para escribir. Una
   // receta que ya tiene ingredientes recupera una fila por cada uno: si es
@@ -2646,7 +2766,8 @@ id("form-receta").addEventListener("submit", async (evento) => {
       cantidad: linea.cantidad,
       preparacion: linea.preparacion
     })),
-    id("receta-preparacion").value
+    id("receta-preparacion").value,
+    categoriasDelFormulario()
   );
 
   if (resultado.error) {
@@ -2807,27 +2928,13 @@ function comidasSinReceta() {
   return nombres;
 }
 
-// El botón que lleva a la compra desde la despensa (spec 079), con lo que falta.
-//
-// Se ve SIEMPRE, también con la lista vacía: esconder el sitio donde se mira es
-// peor que enseñarlo vacío. Sin nada que comprar dice solo "Ver lista de la
-// compra", sin un "(0)" que parece un error.
-function pintarBotonDeCompra() {
-  const cuantas =
-    loQueFalta(recetasDeLaDieta(), despensaCargada).length + apuntesDeCompra.length;
-  id("btn-ir-a-compra").textContent = cuantas
-    ? `Ver lista de la compra (${cuantas})`
-    : "Ver lista de la compra";
-}
-
 // Lo que hay ahora mismo en la lista de la compra (spec 096).
 let compraPintada = [];
 
+// El botón que lleva a la compra (spec 106) ya NO lleva el número de
+// cuántas cosas faltan: era justo lo que "molestaba" según el usuario. El
+// botón es residual a propósito, con texto fijo — no hace falta repintarlo.
 function pintarCompra() {
-  // El botón vive en la despensa pero cuenta lo mismo que esta lista, así que se
-  // repinta con ella y nunca se quedan diciendo cosas distintas.
-  pintarBotonDeCompra();
-
   const contenedor = id("lista-compra");
   const estado = id("estado-compra");
   const aviso = id("sin-receta-compra");

@@ -914,6 +914,44 @@ Qué NO hace la v18:
 |---|---|
 | 104 | Recetas compartidas: colección común, autor y permisos de edición |
 
+## Qué hará (v19: categorías en el recetario y la compra residual, decidida el 23 de septiembre de 2026)
+
+Sale de usar el recetario ya compartido (v18) y de meterle de golpe 43 recetas
+fit por búsqueda web: sin forma de filtrar, un recetario grande se vuelve
+tan difícil de recorrer como la lista de la compra les molesta.
+
+- **Categorías fijas, de una lista cerrada**: Comida, Postre, Fit, Snack,
+  Desayuno, Otros. Una receta puede llevar **varias a la vez** (una receta
+  puede ser Postre y Fit al mismo tiempo), marcadas con casillas, no con un
+  desplegable de una sola opción. Mismo permiso que editar/borrar la receta:
+  solo el autor o el admin las cambia.
+- **Buscar/filtrar el recetario por categoría**, además del buscador de
+  texto que ya hay (spec 079).
+- **La lista de la compra deja de vivir dentro de Ingredientes.** Pasa a un
+  botón suelto en la pantalla Recetas, sin número de "cuántas cosas
+  faltan" al lado ni aviso — se abre solo si se toca. Sigue calculándose
+  igual (la despensa cruzada con las recetas de la dieta, spec 073), lo que
+  cambia es dónde se llega y que deja de recordarte que existe.
+
+Qué NO hace la v19:
+
+- **No cambia cómo se calcula la lista de la compra**, solo dónde se llega a
+  ella.
+- **No añade categorías nuevas a la lista cerrada** sin que el usuario lo
+  decida: si Comida/Postre/Fit/Snack/Desayuno/Otros se quedan cortas, se
+  amplía la lista cuando haga falta, no antes.
+- **No toca el catálogo de ingredientes**: las categorías son solo de
+  recetas.
+
+Se reparte en dos specs, distintas desde el inicio porque son dos cosas
+distintas: una toca el modelo de datos de la receta, la otra solo mueve un
+botón de sitio.
+
+| Spec | Qué |
+|---|---|
+| 105 | Categorías en las recetas, y buscarlas por categoría |
+| 106 | La lista de la compra, residual: un botón en Recetas |
+
 ## Ideas para más adelante (27 de agosto de 2026)
 
 El 27 de agosto se vació `docs/BACKLOG.md`: la app está terminada y en uso

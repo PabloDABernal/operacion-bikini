@@ -53,6 +53,12 @@ const RACIONES_MIN = 1;
 const RACIONES_MAX = 20;
 export const RACIONES_POR_DEFECTO = 2;
 
+// Categorías (spec 105): lista cerrada, para que el filtro no se ensucie
+// con variantes del mismo tag. Las etiquetas que se ven en pantalla viven
+// en js/app.js (CATEGORIAS_RECETA); aquí solo hace falta saber qué claves
+// son válidas, para no guardar cualquier cosa.
+export const CATEGORIAS_VALIDAS = ["comida", "postre", "fit", "snack", "desayuno", "otros"];
+
 // Topes de las líneas de ingrediente estructuradas (spec 082): la cantidad y
 // la preparación son texto libre corto, no hace falta el margen de la
 // preparación de la receta entera (`MAX_PREPARACION`, de arriba, que es otra
@@ -116,8 +122,17 @@ function ingredientesValidados(ingredientesBruto) {
   return { ingredientes };
 }
 
-// Devuelve { nombre, raciones, ingredientes, preparacion } o { error }.
-export function validarReceta(nombreBruto, racionesBruto, ingredientesBruto, preparacionBruto) {
+// Devuelve { nombre, raciones, ingredientes, preparacion, categorias } o
+// { error }. `categoriasBruto` es opcional: sin ella, se guarda sin
+// categorías (spec 105) — pensado para los sitios que todavía no piden
+// categoría (guardarRecetasPropuestas, la siembra).
+export function validarReceta(
+  nombreBruto,
+  racionesBruto,
+  ingredientesBruto,
+  preparacionBruto,
+  categoriasBruto = []
+) {
   const nombre = String(nombreBruto ?? "").trim();
   if (nombre === "") {
     return { error: "Ponle nombre a la receta." };
@@ -141,11 +156,19 @@ export function validarReceta(nombreBruto, racionesBruto, ingredientesBruto, pre
     return { error: resultadoIngredientes.error };
   }
 
+  // Solo las claves de la lista cerrada: cualquier otra cosa que llegue
+  // (un valor viejo, un experimento) se descarta en silencio en vez de
+  // ensuciar el filtro.
+  const categorias = (Array.isArray(categoriasBruto) ? categoriasBruto : []).filter((clave) =>
+    CATEGORIAS_VALIDAS.includes(clave)
+  );
+
   return {
     nombre: nombre.slice(0, MAX_NOMBRE),
     raciones,
     ingredientes: resultadoIngredientes.ingredientes,
-    preparacion: String(preparacionBruto ?? "").trim().slice(0, MAX_PREPARACION)
+    preparacion: String(preparacionBruto ?? "").trim().slice(0, MAX_PREPARACION),
+    categorias
   };
 }
 

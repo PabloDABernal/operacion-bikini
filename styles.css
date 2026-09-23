@@ -641,6 +641,72 @@ button:disabled {
   white-space: nowrap;
 }
 
+/* Categorías de receta (spec 105): el filtro (chips que se tocan) y las
+   casillas del editor comparten la misma lista de seis, así que comparten
+   también el aspecto — igual que `.chips`/`.chip` de arriba, pero con
+   estado "activa" en vez de "quitar". */
+.chips-categoria {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e2);
+  margin: var(--e2) 0;
+}
+
+.chip-categoria {
+  width: auto;
+  padding: var(--e1) var(--e3);
+  font-size: 0.85rem;
+  border-radius: 999px;
+  border: 1px solid var(--borde);
+  background: none;
+  color: var(--tinta-suave);
+  cursor: pointer;
+}
+
+.chip-categoria.activa {
+  border-color: var(--acento);
+  color: var(--acento);
+  font-weight: 600;
+}
+
+.casillas-categoria {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e2) var(--e4);
+  margin: var(--e2) 0 var(--e4);
+}
+
+.casillas-categoria label {
+  display: flex;
+  align-items: center;
+  gap: var(--e1);
+  font-size: 0.9rem;
+  font-weight: 400;
+}
+
+.casillas-categoria input {
+  margin: 0;
+  width: 1.1rem;
+  height: 1.1rem;
+  accent-color: var(--acento);
+}
+
+/* Los chips de solo lectura de cada tarjeta (no se tocan, solo informan). */
+.chips-categoria-receta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e1);
+  margin: 0 0 var(--e2);
+}
+
+.chip-categoria-receta {
+  padding: 0.1rem var(--e2);
+  font-size: 0.75rem;
+  border-radius: 999px;
+  background: var(--superficie-alta);
+  color: var(--tinta-suave);
+}
+
 /* Listas de registros ---------------------------------------------------- */
 
 #lista-pesajes,
@@ -1197,14 +1263,6 @@ button:disabled {
 .casilla-reinicio .cuenta {
   color: var(--tinta-suave);
   font-size: 0.85rem;
-}
-
-/* El botón que lleva a la lista de la compra desde la despensa (spec 079). Va
-   arriba del todo y ancho: es el único camino a la compra desde que dejó de ser
-   sub-pestaña. */
-.ir-a-compra {
-  width: 100%;
-  margin-bottom: var(--e4);
 }
 
 /* "Todo" manda sobre las demás, así que se lee como un encabezado y no como
@@ -2520,22 +2578,21 @@ button:disabled {
     grid-column: 2;
   }
 
-  /* Recetas (spec 104): una sola columna centrada, como Consulta o Ajustes —
-     no necesita repartirse en varias, el Recetario y la Compra ya caben
-     apilados en una sin quedar enterrados. El Recetario mantiene su propio
-     interruptor interno Recetas/Ingredientes (mostrarPanelDeRecetario() en
-     js/app.js), que NO se ve a la vez ni en móvil ni en escritorio: por eso
-     "esto NO se esconde en escritorio" sigue en el comentario de
-     .subpestanas-internas más arriba. */
+  /* Recetas (spec 104): una sola columna centrada, como Consulta o Ajustes.
+     El Recetario mantiene su propio interruptor interno Recetas/
+     Ingredientes (mostrarPanelDeRecetario() en js/app.js), que NO se ve a
+     la vez ni en móvil ni en escritorio: por eso "esto NO se esconde en
+     escritorio" sigue en el comentario de .subpestanas-internas más arriba. */
   .seccion[data-seccion="recetas"] {
     max-width: var(--ancho-columna);
     margin: 0 auto;
   }
 
-  /* Los dos botones de ida y vuelta sobran cuando las dos cosas se ven a la
-     vez: llevarían a un sitio donde ya estás. */
-  #btn-ir-a-compra,
-  #btn-volver-despensa {
+  /* La compra es residual (spec 106): deja de verse siempre apilada debajo
+     del Recetario, también en escritorio — se abre solo con su botón, como
+     en móvil. Deshace, solo para Recetas, el ".subseccion { display: block }"
+     genérico de arriba (mismo patrón que usa Ajustes con sus pestañas). */
+  .seccion[data-seccion="recetas"] .subseccion:not(.activa) {
     display: none;
   }
 
