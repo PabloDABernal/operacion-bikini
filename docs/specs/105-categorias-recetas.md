@@ -23,7 +23,11 @@ buscador de texto que ya existe (spec 079).
 4. Hay un filtro por categoría (chips o botones tipo "Postre", "Fit"...)
    encima o junto al buscador de texto. Al tocar "Fit", el listado se
    reduce a las recetas marcadas como Fit; puedo combinarlo con el
-   buscador de texto a la vez.
+   buscador de texto a la vez. **Al tocar TAMBIÉN "Postre" con "Fit" ya
+   marcado, el listado se reduce más, no se amplía**: solo quedan las
+   recetas que son Postre Y Fit a la vez (corregido el 23 de septiembre de
+   2026 — la primera implementación sumaba, "cualquiera de las dos", y al
+   probarlo el usuario dijo que tenía que cruzar, no sumar).
 5. Quito el filtro y vuelvo a ver el recetario entero.
 6. Con una cuenta que NO es el autor de una receta ni el admin, abro esa
    receta: NO puedo cambiar sus categorías (mismo permiso que editar/
@@ -42,10 +46,10 @@ buscador de texto que ya existe (spec 079).
   en pantalla es la capitalizada: "Comida", "Postre"...).
 - Casillas (checkboxes) en el formulario de crear/editar receta, una por
   categoría — no un `<select>` de una sola opción.
-- Chips o botones de filtro por categoría en el listado del Recetario,
-  combinables entre sí (una receta con Postre Y Fit aparece si se filtra
-  por cualquiera de las dos) y combinables con el buscador de texto que ya
-  existe.
+- Chips o botones de filtro por categoría en el listado del Recetario, que
+  CRUZAN entre sí (marcar Postre y Fit a la vez deja solo las recetas que
+  son las dos cosas, no las que son cualquiera de las dos) y se combinan
+  con el buscador de texto que ya existe.
 - Mismo permiso que editar/borrar la receta (spec 104): solo el autor o el
   admin puede cambiar las categorías de una receta.
 - Las recetas sin `categorias` (todas las anteriores a esta spec, incluidas
@@ -115,6 +119,11 @@ tarjeta y en el filtro, mensaje cuando un filtro no da ningún resultado)*
   categoría obligaría a elegir cuál pesa más.
 - **Mismo permiso que editar/borrar la receta** → consistente con el resto
   de la spec 104, sin un tercer nivel de permisos nuevo.
+- **El filtro CRUZA las categorías marcadas (AND), no las suma (OR)**
+  → corregido el 23 de septiembre de 2026: la primera implementación hacía
+  que marcar una segunda categoría solo pudiera ampliar el listado, nunca
+  acotarlo, que es justo lo contrario de lo que se espera al marcar dos
+  filtros a la vez. El usuario lo vio nada más probarlo en producción.
 
 ## 9. Fuera de spec: ideas apuntadas
 
@@ -138,8 +147,8 @@ Ya desplegado en producción (operacion-bikini.vercel.app).
    filtro. Toca "Fit": el listado se reduce a las recetas marcadas Fit
    (deberían salir tanto la que acabas de crear como alguna de las 43
    recetas fit, si ya las añadiste).
-6. Toca también "Postre" (sin soltar "Fit"): el listado debe AMPLIARSE, no
-   reducirse más — aparecen las que son Fit O Postre.
+6. Toca también "Postre" (sin soltar "Fit"): el listado debe REDUCIRSE más,
+   no ampliarse — solo quedan las que son Fit Y Postre a la vez.
 7. Escribe algo en el buscador de texto a la vez que tienes un filtro de
    categoría activo: el resultado debe combinar los dos (coincide el texto
    Y tiene esa categoría).

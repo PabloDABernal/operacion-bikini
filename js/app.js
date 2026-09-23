@@ -2086,13 +2086,17 @@ let categoriasFiltro = new Set();
 //
 // El "porqué" no es un adorno: ver "Crema de calabaza" al buscar "pollo" parece
 // un error hasta que la tarjeta dice que lleva pollo.
-// Sin filtro de categoría activo, pasan todas. Con filtro, basta con que la
-// receta tenga UNA de las categorías marcadas (spec 105): los chips se
-// suman, no se cruzan.
+// Sin filtro de categoría activo, pasan todas. Con filtro, la receta tiene
+// que llevar TODAS las categorías marcadas (spec 105, corregido el 23 de
+// septiembre de 2026 tras probarlo: Postre + Fit a la vez tiene que
+// enseñar solo lo que es las dos cosas, no cualquiera de las dos — con
+// "suma" (OR), marcar Fit encima de Postre solo podía ampliar la lista,
+// nunca acotarla, que es lo contrario de lo que se espera de dos filtros
+// activos a la vez).
 function pasaElFiltroDeCategoria(receta) {
   if (categoriasFiltro.size === 0) return true;
   const propias = Array.isArray(receta.categorias) ? receta.categorias : [];
-  return propias.some((categoria) => categoriasFiltro.has(categoria));
+  return Array.from(categoriasFiltro).every((categoria) => propias.includes(categoria));
 }
 
 function recetasQueCoinciden() {
