@@ -26,6 +26,7 @@ import {
 import { db } from "./firebase-config.js";
 import { VERSION, RECETAS, INGREDIENTES } from "./datos-iniciales.js";
 import { normalizar, mismoIngrediente } from "./despensa.js";
+import { textoDePreparacion } from "./recetas.js";
 
 // Autor de lo sembrado, tal y como se enseña junto a la receta/ingrediente.
 export const AUTOR_SISTEMA = "sistema";
@@ -166,7 +167,7 @@ export async function sembrar(recetasCompartidas, catalogoCompartido) {
       nombre: receta.nombre,
       raciones: receta.raciones,
       ingredientes: lineasEnlazadas(receta, buscar),
-      preparacion: receta.preparacion,
+      preparacion: textoDePreparacion(receta.preparacion),
       // Los otros nombres por los que se reconoce la receta (spec 089). Antes se
       // quedaban aquí por el camino, así que los platos de los menús no
       // encontraban su receta en una cuenta recién sembrada.

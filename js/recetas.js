@@ -30,6 +30,17 @@ import { MAX_NOMBRE as MAX_NOMBRE_INGREDIENTE } from "./despensa.js";
 const ESPERA_MAXIMA_MS = 55000;
 const URL_RECETA_DESDE_TEXTO = "/api/receta-desde-texto";
 
+// `docs/menus/recetas-transcritas.json` (y por tanto `js/datos-iniciales.js`,
+// spec 075) guarda `preparacion` como un ARRAY de pasos, pero toda la app
+// trata `receta.preparacion` como texto plano (`.textContent =`, `.value =`
+// en js/app.js). Fallo de antes de la spec 104, anotado en docs/BACKLOG.md.
+// Se normaliza AQUÍ, al escribir (js/siembra.js, js/migracion-104.js), para
+// no obligar a cada lector de la app a comprobar si es array o string.
+export function textoDePreparacion(preparacion) {
+  if (Array.isArray(preparacion)) return preparacion.filter(Boolean).join(" ");
+  return String(preparacion || "");
+}
+
 function errorConCodigo(codigo, mensaje) {
   const error = new Error(mensaje);
   error.codigo = codigo;

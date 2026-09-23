@@ -4,16 +4,15 @@ Ideas surgidas durante la implementación, no implementadas. Una línea cada una
 
 ## Anotado el 23 de septiembre de 2026
 
-- **`preparacion` de las 73 recetas sembradas (spec 075) se guarda como un
-  ARRAY de pasos en Firestore, pero toda la app lo trata como un string**
-  (`.textContent =`, `.value =` en js/app.js). Sale como "paso1,paso2" en vez
-  de como texto legible. Viene de antes de la spec 104 —
-  `docs/menus/recetas-transcritas.json` y `js/datos-iniciales.js` llevan
-  `preparacion` como array desde la 075— y no se ha tocado al escribir
-  `js/datos-recetas-fit.js` (23 de septiembre), que usa `preparacion` como
-  string desde el principio para no arrastrar el mismo fallo. Arreglarlo de
-  raíz significa decidir si se une el array al generar `datos-iniciales.js` o
-  si se cambia cómo lo lee la app.
+- ~~**`preparacion` se guardaba como array en vez de texto**~~ **Arreglado el
+  mismo día.** `js/datos-iniciales.js` (spec 075) sigue guardando
+  `preparacion` como array de pasos —no se ha tocado
+  `docs/menus/recetas-transcritas.json` ni el generador—, pero
+  `textoDePreparacion()` (js/recetas.js) lo une en un texto normal justo al
+  escribir en Firestore, en `js/siembra.js` y `js/migracion-104.js`. Quien
+  ya hubiera sembrado con el fallo (el botón "Empezar el recetario
+  compartido de cero") lo arregla solo con volver a pulsar ese botón: es
+  idempotente y ahora escribe bien.
 
 ## Vacío desde el 27 de agosto de 2026
 

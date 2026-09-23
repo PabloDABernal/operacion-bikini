@@ -34,6 +34,9 @@ let fuenteSiembra = fs
   .replace(/^import[\s\S]*?from\s+"\.\/firebase-config\.js";\s*$/gm, "")
   .replace(/^import[\s\S]*?from\s+"\.\/datos-iniciales\.js";\s*$/gm, "")
   .replace(/^import[\s\S]*?from\s+"\.\/despensa\.js";\s*$/gm, "")
+  // textoDePreparacion() (spec 104-y-pico) solo la usa sembrar(), que se
+  // recorta dos líneas más abajo: el import sobra igual que los de arriba.
+  .replace(/^import[\s\S]*?from\s+"\.\/recetas\.js";\s*$/gm, "")
   // sembrar() escribe en Firestore: fuera. Aquí sólo se prueba qué decide.
   .replace(/export async function sembrar[\s\S]*$/m, "");
 

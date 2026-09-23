@@ -25,6 +25,7 @@ import {
 
 import { db } from "./firebase-config.js";
 import { normalizar, mismoIngrediente } from "./despensa.js";
+import { textoDePreparacion } from "./recetas.js";
 import { VERSION, RECETAS, INGREDIENTES } from "./datos-iniciales.js";
 
 const AUTOR_SISTEMA = "sistema";
@@ -94,7 +95,7 @@ async function resembrar() {
     nombre: receta.nombre,
     raciones: receta.raciones,
     ingredientes: lineasEnlazadas(receta, buscar),
-    preparacion: receta.preparacion,
+    preparacion: textoDePreparacion(receta.preparacion),
     alias: receta.alias || []
   }));
 
