@@ -671,5 +671,24 @@ export const RECETAS_FIT = [
       "Sazona el pollo con el pimentón, sal y pimienta. Ensarta en brochetas alternando pollo, pimiento y cebolla, pinta con el aceite y cocina a la plancha o parrilla 3-4 minutos por lado, hasta que el pollo esté hecho por dentro.",
     alias: [],
     categorias: ["comida","fit"]
+  },
+
+  // --- Añadida a mano por el usuario (23 de septiembre de 2026) ---
+
+  {
+    nombre: "Tiramisú rápido con tortitas de arroz y queso fresco batido",
+    raciones: 2,
+    ingredientesEnPiezas: [
+      { ingrediente: "Tortitas de arroz", cantidad: "4 unidades", preparacion: "" },
+      { ingrediente: "Queso fresco batido", cantidad: "100-150 g", preparacion: "" },
+      { ingrediente: "Café", cantidad: "1 taza", preparacion: "solo, frío o templado" },
+      { ingrediente: "Edulcorante", cantidad: "al gusto", preparacion: "estevia, eritritol o pasta de dátil" },
+      { ingrediente: "Esencia de vainilla", cantidad: "un toque", preparacion: "opcional, o canela" },
+      { ingrediente: "Cacao en polvo", cantidad: "para espolvorear", preparacion: "puro" }
+    ],
+    preparacion:
+      "Mezcla el queso fresco batido con el edulcorante y la vainilla o canela hasta que quede homogéneo y cremoso. Haz el café y déjalo en un plato hondo. Pasa cada tortita de arroz rápidamente por el café, sin dejarla demasiado tiempo para que no se rompa, solo lo justo para que se ablande. Monta capas alternando tortita humedecida y crema de queso hasta terminar los ingredientes, y espolvorea cacao puro por encima al final. Se puede comer al momento, pero reposado en la nevera 30 minutos o un par de horas la tortita absorbe mejor los sabores y mejora la textura.",
+    alias: [],
+    categorias: ["postre", "fit"]
   }
 ];
