@@ -26,7 +26,8 @@ export const RECETAS_FIT = [
     ],
     preparacion:
       "Escurre bien el queso cottage y bátelo en la batidora con la leche, la miel y la vainilla hasta que quede una crema fina. Moja cada bizcocho brevemente en el café frío y coloca una capa en un molde rectangular; cubre con un tercio de la crema y repite dos veces más. Tapa y refrigera al menos 4 horas (mejor toda la noche), y espolvorea cacao por encima antes de servir.",
-    alias: ["Tiramisú de queso cottage", "Tiramisú proteico"]
+    alias: ["Tiramisú de queso cottage", "Tiramisú proteico"],
+    categorias: ["postre","fit"]
   },
   {
     nombre: "Tiramisú fit de café con yogur griego",
@@ -41,7 +42,8 @@ export const RECETAS_FIT = [
     ],
     preparacion:
       "Mezcla la avena con el café frío y deja que repose unos minutos hasta ablandarse: será la base, en vez de los bizcochos. Bate el yogur griego con el queso cottage batido y la miel hasta obtener una crema lisa. Monta en vasos individuales alternando la base de avena con café y la crema, termina con la crema arriba y espolvorea cacao antes de servir.",
-    alias: []
+    alias: [],
+    categorias: ["postre","fit"]
   },
   {
     nombre: "Cheesecake proteico de queso cottage",
@@ -54,7 +56,8 @@ export const RECETAS_FIT = [
     ],
     preparacion:
       "Tritura el queso cottage con el queso crema, los huevos y el edulcorante hasta que quede una masa homogénea. Vierte en un molde y hornea a 175 °C durante 30 minutos: los primeros 25 tapado con papel de aluminio, los últimos 5 destapado. Deja atemperar y refrigera unas horas (o toda la noche) antes de desmoldar.",
-    alias: []
+    alias: [],
+    categorias: ["postre","fit"]
   },
   {
     nombre: "Tarta de queso cottage al horno",
@@ -69,7 +72,8 @@ export const RECETAS_FIT = [
     ],
     preparacion:
       "Bate los huevos con la miel, añade el queso cottage, el yogur, la vainilla y la harina de avena, y mezcla hasta que quede una crema sin grumos. Vierte en un molde forrado y hornea a 180 °C durante 30-35 minutos, hasta que cuaje. Deja enfriar del todo antes de desmoldar.",
-    alias: []
+    alias: [],
+    categorias: ["postre","fit"]
   },
   {
     nombre: "Helado de queso cottage sin azúcar",
@@ -83,7 +87,8 @@ export const RECETAS_FIT = [
     ],
     preparacion:
       "Bate todos los ingredientes juntos hasta que quede una crema fina. Vierte en un recipiente apto para congelador y congela 3-4 horas, removiendo cada 30-40 minutos para que no se formen cristales grandes.",
-    alias: []
+    alias: [],
+    categorias: ["postre","fit"]
   },
   {
     nombre: "Mousse de frutos rojos con queso cottage",
@@ -97,7 +102,8 @@ export const RECETAS_FIT = [
     ],
     preparacion:
       "Tritura el queso cottage con los frutos rojos, la miel y la vainilla hasta que quede cremoso. Añade el yogur griego y mezcla con cuidado. Refrigera al menos 30 minutos antes de servir.",
-    alias: []
+    alias: [],
+    categorias: ["postre","fit"]
   },
   {
     nombre: "Peras al horno con queso cottage y miel",
@@ -112,7 +118,8 @@ export const RECETAS_FIT = [
     ],
     preparacion:
       "Corta las peras por la mitad y retira el centro con una cuchara. Mezcla el queso cottage con la vainilla y rellena cada mitad. Hornea a 180 °C durante 20 minutos, y al sacarlas riega con la miel y reparte las nueces picadas por encima.",
-    alias: []
+    alias: [],
+    categorias: ["postre","fit"]
   },
   {
     nombre: "Buñuelos de queso cottage",
@@ -128,7 +135,8 @@ export const RECETAS_FIT = [
     ],
     preparacion:
       "Mezcla todos los ingredientes hasta formar una masa espesa. Forma bolitas con las manos o dos cucharas y fríe en aceite caliente 2-3 minutos por lado, hasta que doren. Escurre sobre papel absorbente antes de servir.",
-    alias: []
+    alias: [],
+    categorias: ["postre","fit"]
   },
   {
     nombre: "Tortitas de avena y queso cottage",
@@ -143,7 +151,8 @@ export const RECETAS_FIT = [
     ],
     preparacion:
       "Mezcla todos los ingredientes hasta obtener una masa homogénea. Cocina en una sartén antiadherente a fuego medio, 2-3 minutos por lado, hasta que doren. Sirve con fruta o un poco más de miel por encima.",
-    alias: []
+    alias: [],
+    categorias: ["desayuno","fit"]
   },
   {
     nombre: "Tostada de queso cottage y aguacate",
@@ -157,7 +166,8 @@ export const RECETAS_FIT = [
     ],
     preparacion:
       "Tuesta el pan. Unta el queso cottage sobre cada rebanada y reparte encima el aguacate en láminas. Termina con sal, pimienta y un chorrito de aceite de oliva.",
-    alias: []
+    alias: [],
+    categorias: ["desayuno","fit"]
   },
   {
     nombre: "Ensalada de espinacas, fresas y queso cottage",
@@ -171,7 +181,8 @@ export const RECETAS_FIT = [
     ],
     preparacion:
       "Lava y escurre las espinacas, y corta las fresas en cuartos. Monta la ensalada con las espinacas de base, las fresas y el queso cottage por encima. Aliña con el aceite, el zumo de limón, sal y pimienta.",
-    alias: []
+    alias: [],
+    categorias: ["comida","fit"]
   },
   {
     nombre: "Patatas asadas rellenas de queso cottage",
@@ -185,7 +196,8 @@ export const RECETAS_FIT = [
     ],
     preparacion:
       "Hornea las patatas enteras a 200 °C durante 40-50 minutos, hasta que estén tiernas por dentro. Córtalas por la mitad, vacía un poco de pulpa y mezcla con el queso cottage, el cebollino, el ajo en polvo, sal y pimienta. Rellena las patatas y hornea 10 minutos más.",
-    alias: []
+    alias: [],
+    categorias: ["comida","fit"]
   },
   {
     nombre: "Pasta integral con salsa de queso cottage y espinacas",
@@ -200,7 +212,8 @@ export const RECETAS_FIT = [
     ],
     preparacion:
       "Cuece la pasta según el paquete. Mientras, sofríe el ajo en el aceite, añade las espinacas hasta que se ablanden, y por último el queso cottage batido con la leche, sal y pimienta. Mezcla la salsa con la pasta escurrida y sirve caliente.",
-    alias: []
+    alias: [],
+    categorias: ["comida","fit"]
   },
   {
     nombre: "Mug cake proteico de chocolate y avena",
@@ -215,7 +228,8 @@ export const RECETAS_FIT = [
     ],
     preparacion:
       "Mezcla todos los ingredientes en una taza grande apta para microondas hasta que quede una masa sin grumos. Cocina en el microondas a máxima potencia 90 segundos, comprobando que ha cuajado (si no, añade 15-20 segundos más). Deja templar un minuto antes de comer.",
-    alias: []
+    alias: [],
+    categorias: ["postre","fit"]
   },
   {
     nombre: "Brownie proteico de garbanzos",
@@ -230,7 +244,8 @@ export const RECETAS_FIT = [
     ],
     preparacion:
       "Tritura los garbanzos con el resto de ingredientes hasta obtener una masa fina y sin grumos. Vierte en un molde pequeño forrado con papel de horno y hornea a 180 °C durante 20-25 minutos. Deja enfriar del todo antes de cortar en cuadrados.",
-    alias: []
+    alias: [],
+    categorias: ["postre","fit"]
   },
   {
     nombre: "Helado proteico de plátano",
@@ -242,7 +257,8 @@ export const RECETAS_FIT = [
     ],
     preparacion:
       "Tritura las rodajas de plátano congelado con la leche y la vainilla en una batidora potente o procesadora, parando a raspar los bordes, hasta que quede una crema tipo helado. Sirve al momento, o congela media hora más si lo quieres más firme.",
-    alias: ["Nice cream de plátano"]
+    alias: ["Nice cream de plátano"],
+    categorias: ["postre","fit"]
   },
   {
     nombre: "Pudding de chía y chocolate",
@@ -255,7 +271,8 @@ export const RECETAS_FIT = [
     ],
     preparacion:
       "Mezcla bien todos los ingredientes en un tarro o bol. Deja reposar en la nevera al menos 4 horas (o toda la noche), removiendo una vez a mitad de reposo para que la chía no se apelmace en el fondo.",
-    alias: []
+    alias: [],
+    categorias: ["postre","desayuno","fit"]
   },
   {
     nombre: "Mousse de chocolate y aguacate",
@@ -269,7 +286,8 @@ export const RECETAS_FIT = [
     ],
     preparacion:
       "Tritura todos los ingredientes juntos hasta obtener una crema lisa y sin grumos de aguacate. Reparte en dos vasitos y refrigera al menos 30 minutos antes de servir.",
-    alias: []
+    alias: [],
+    categorias: ["postre","fit"]
   },
   {
     nombre: "Cookies proteicas de avena y arándanos",
@@ -283,7 +301,8 @@ export const RECETAS_FIT = [
     ],
     preparacion:
       "Mezcla la avena con el plátano chafado, la miel y la vainilla hasta formar una masa pegajosa, y añade los arándanos con cuidado de no romperlos. Forma montoncitos con una cuchara sobre una bandeja con papel de horno y hornea a 180 °C durante 12-15 minutos.",
-    alias: []
+    alias: [],
+    categorias: ["snack","fit"]
   },
   {
     nombre: "Vasitos de yogur griego con granola y frutos rojos",
@@ -296,7 +315,8 @@ export const RECETAS_FIT = [
     ],
     preparacion:
       "Monta el vaso en capas: una de yogur griego, otra de granola y otra de frutos rojos, repitiendo hasta llenar el vaso. Termina con un hilo de miel por encima.",
-    alias: []
+    alias: [],
+    categorias: ["desayuno","snack","fit"]
   },
   {
     nombre: "Flan proteico de chocolate",
@@ -309,7 +329,8 @@ export const RECETAS_FIT = [
     ],
     preparacion:
       "Bate la leche con los huevos, el cacao y la miel hasta que quede bien integrado. Reparte en flaneras individuales y cuece al baño maría, tapado, a 180 °C durante 35-40 minutos, hasta que cuaje. Deja enfriar y refrigera antes de desmoldar.",
-    alias: []
+    alias: [],
+    categorias: ["postre","fit"]
   },
   {
     nombre: "Polos de yogur y frutos rojos",
@@ -321,7 +342,8 @@ export const RECETAS_FIT = [
     ],
     preparacion:
       "Tritura la mitad de los frutos rojos con la miel y mézclalos con el yogur; reserva el resto de frutos rojos enteros. Reparte en moldes de polo alternando con los frutos rojos enteros, coloca los palitos y congela al menos 4 horas.",
-    alias: []
+    alias: [],
+    categorias: ["postre","fit"]
   },
   {
     nombre: "Yogur griego con cottage y cacao (postre exprés)",
@@ -334,7 +356,8 @@ export const RECETAS_FIT = [
     ],
     preparacion:
       "Bate el yogur griego con el queso cottage hasta que quede cremoso. Añade el cacao y la miel, y mezcla bien. Sirve frío, tal cual o con unos frutos rojos por encima.",
-    alias: []
+    alias: [],
+    categorias: ["postre","snack","fit"]
   },
 
   // --- Segunda tanda (23 de septiembre de 2026): platos salados / comidas
@@ -354,7 +377,8 @@ export const RECETAS_FIT = [
     ],
     preparacion:
       "Cuece el arroz integral según el paquete. Marina el pollo con el zumo de limón, ajo, sal y pimienta 10-15 minutos, y cocínalo en una sartén con el aceite hasta que esté dorado. Cocina las judías verdes al vapor o salteadas, y monta el bowl con el arroz de base, el pollo y las judías por encima.",
-    alias: []
+    alias: [],
+    categorias: ["comida","fit"]
   },
   {
     nombre: "Poke bowl de pollo y aguacate",
@@ -370,7 +394,8 @@ export const RECETAS_FIT = [
     ],
     preparacion:
       "Cuece el arroz y déjalo templar. Coloca el arroz de base en un bowl y reparte por encima el pollo a la plancha, el aguacate en láminas, la lechuga y la zanahoria rallada. Riega con la salsa de soja y termina con las semillas de sésamo.",
-    alias: []
+    alias: [],
+    categorias: ["comida","fit"]
   },
   {
     nombre: "Bowl mexicano de pollo y frijoles",
@@ -386,7 +411,8 @@ export const RECETAS_FIT = [
     ],
     preparacion:
       "Cuece el arroz integral y calienta los frijoles. Monta el bowl con el arroz de base y reparte por encima el pollo, los frijoles, el maíz, el tomate y el aguacate. Riega con el zumo de limón, sal y pimienta antes de servir.",
-    alias: []
+    alias: [],
+    categorias: ["comida","fit"]
   },
   {
     nombre: "Pechuga de pollo rellena de espinacas y queso feta",
@@ -400,7 +426,8 @@ export const RECETAS_FIT = [
     ],
     preparacion:
       "Sofríe las espinacas con el ajo hasta que se ablanden, y mézclalas con el queso feta. Haz un corte lateral a cada pechuga para formar un bolsillo y rellénalas con la mezcla, cerrando con un palillo si hace falta. Dóralas en una sartén con el aceite por ambos lados y termina de hacerlas al horno a 200 °C durante 15-20 minutos.",
-    alias: []
+    alias: [],
+    categorias: ["comida","fit"]
   },
   {
     nombre: "Salmón al horno con tomates y aceitunas",
@@ -415,7 +442,8 @@ export const RECETAS_FIT = [
     ],
     preparacion:
       "Coloca el salmón en una bandeja de horno junto con los tomates cherry, el pimiento y las aceitunas. Riega todo con el aceite, sazona con sal, pimienta y orégano, y hornea a 200 °C durante 18-20 minutos, hasta que el salmón esté hecho.",
-    alias: []
+    alias: [],
+    categorias: ["comida","fit"]
   },
   {
     nombre: "Cazuela de huevos con salchicha de pollo y verduras",
@@ -430,7 +458,8 @@ export const RECETAS_FIT = [
     ],
     preparacion:
       "Sofríe la cebolla y el pimiento en el aceite hasta que se ablanden, añade la salchicha y dórala unos minutos, y por último las espinacas hasta que reduzcan. Bate los huevos, viértelos por encima y cocina a fuego medio-bajo, tapado, hasta que cuajen del todo.",
-    alias: []
+    alias: [],
+    categorias: ["desayuno","fit"]
   },
   {
     nombre: "Muffins de huevo y pavo",
@@ -445,7 +474,8 @@ export const RECETAS_FIT = [
     ],
     preparacion:
       "Bate los huevos con las claras y mezcla con el pavo, el queso, el pimiento y la cebolla. Reparte la mezcla en un molde de muffins (con papelitos o engrasado) y hornea a 180 °C durante 18-20 minutos, hasta que cuajen. Se conservan bien en la nevera para varios días.",
-    alias: []
+    alias: [],
+    categorias: ["desayuno","snack","fit"]
   },
   {
     nombre: "Sándwich de pavo y aguacate",
@@ -459,7 +489,8 @@ export const RECETAS_FIT = [
     ],
     preparacion:
       "Chafa el aguacate y úntalo sobre una rebanada de pan. Añade las lonchas de pavo y el tomate, sazona con sal y pimienta, y cierra con la otra rebanada.",
-    alias: []
+    alias: [],
+    categorias: ["comida","snack","fit"]
   },
   {
     nombre: "Sándwich cremoso de atún y aguacate",
@@ -473,7 +504,8 @@ export const RECETAS_FIT = [
     ],
     preparacion:
       "Chafa el atún escurrido con el aguacate y el queso crema hasta que quede una mezcla cremosa. Sazona con sal y pimienta, y extiende entre las dos rebanadas de pan.",
-    alias: []
+    alias: [],
+    categorias: ["comida","snack","fit"]
   },
   {
     nombre: "Tostada de huevo revuelto y aguacate",
@@ -486,7 +518,8 @@ export const RECETAS_FIT = [
     ],
     preparacion:
       "Tuesta el pan y unta el aguacate chafado encima. Revuelve los huevos en una sartén con el aceite a fuego bajo, removiendo hasta que cuajen cremosos, y repártelos sobre las tostadas. Sazona con sal y pimienta.",
-    alias: []
+    alias: [],
+    categorias: ["desayuno","fit"]
   },
   {
     nombre: "Pollo al limón con arroz",
@@ -500,7 +533,8 @@ export const RECETAS_FIT = [
     ],
     preparacion:
       "Marina el pollo con el zumo y la ralladura de limón, el ajo picado, sal y pimienta durante 10-15 minutos. Cuece el arroz aparte. Cocina el pollo en una sartén con el aceite hasta que esté dorado y bien hecho, y sirve sobre el arroz.",
-    alias: []
+    alias: [],
+    categorias: ["comida","fit"]
   },
   {
     nombre: "Ensalada de pollo, quinoa y aguacate",
@@ -515,7 +549,8 @@ export const RECETAS_FIT = [
     ],
     preparacion:
       "Cuece la quinoa según el paquete y déjala templar. Mezcla la quinoa con el pollo, el aguacate y el tomate, y aliña con el aceite, el zumo de limón, sal y pimienta.",
-    alias: []
+    alias: [],
+    categorias: ["comida","fit"]
   },
   {
     nombre: "Wrap de pavo, hummus y verduras",
@@ -529,7 +564,8 @@ export const RECETAS_FIT = [
     ],
     preparacion:
       "Extiende el hummus sobre la tortilla, reparte el pavo, la lechuga y la zanahoria por encima, y enrolla apretando bien. Corta por la mitad para servir.",
-    alias: []
+    alias: [],
+    categorias: ["comida","snack","fit"]
   },
   {
     nombre: "Salteado de ternera y verduras con arroz",
@@ -544,7 +580,8 @@ export const RECETAS_FIT = [
     ],
     preparacion:
       "Cuece el arroz aparte. Saltea la cebolla y el pimiento en el aceite a fuego fuerte, añade la ternera y saltea 2-3 minutos hasta que se dore. Añade la salsa de soja, mezcla bien y sirve sobre el arroz.",
-    alias: []
+    alias: [],
+    categorias: ["comida","fit"]
   },
   {
     nombre: "Tortilla de claras con espinacas y champiñones",
@@ -557,7 +594,8 @@ export const RECETAS_FIT = [
     ],
     preparacion:
       "Saltea los champiñones y las espinacas en el aceite hasta que se ablanden. Bate las claras con sal y pimienta, vierte sobre las verduras y cocina a fuego medio hasta que cuaje, doblando la tortilla por la mitad al final.",
-    alias: []
+    alias: [],
+    categorias: ["desayuno","fit"]
   },
   {
     nombre: "Bowl de garbanzos y pollo especiado",
@@ -572,7 +610,8 @@ export const RECETAS_FIT = [
     ],
     preparacion:
       "Sazona el pollo con el pimentón, el comino, sal y pimienta. Cocina en una sartén con el aceite hasta que esté dorado, añade los garbanzos y saltea 3-4 minutos más para que se calienten y cojan sabor. Termina con un chorrito de zumo de limón.",
-    alias: []
+    alias: [],
+    categorias: ["comida","fit"]
   },
   {
     nombre: "Pasta integral con pollo y brócoli",
@@ -586,7 +625,8 @@ export const RECETAS_FIT = [
     ],
     preparacion:
       "Cuece la pasta junto con el brócoli los últimos 4 minutos de cocción, y escurre ambos juntos. Mientras, dora el pollo con el ajo en una sartén con el aceite. Mezcla la pasta y el brócoli con el pollo, sazona con sal y pimienta y sirve caliente.",
-    alias: []
+    alias: [],
+    categorias: ["comida","fit"]
   },
   {
     nombre: "Lomo de cerdo a la plancha con boniato asado",
@@ -599,7 +639,8 @@ export const RECETAS_FIT = [
     ],
     preparacion:
       "Mezcla el boniato en dados con la mitad del aceite, el pimentón, sal y pimienta, y hornea a 200 °C durante 25-30 minutos, dando la vuelta a mitad de cocción. Sazona el lomo y hazlo a la plancha con el resto del aceite unos 3-4 minutos por lado. Sirve junto al boniato.",
-    alias: []
+    alias: [],
+    categorias: ["comida","fit"]
   },
   {
     nombre: "Merluza al horno con espárragos",
@@ -613,7 +654,8 @@ export const RECETAS_FIT = [
     ],
     preparacion:
       "Coloca la merluza y los espárragos en una bandeja de horno, riega con el aceite, el ajo picado y el zumo de limón, y sazona con sal y pimienta. Hornea a 200 °C durante 15-18 minutos, hasta que la merluza esté hecha.",
-    alias: []
+    alias: [],
+    categorias: ["comida","fit"]
   },
   {
     nombre: "Brochetas de pollo y pimiento a la plancha",
@@ -627,6 +669,7 @@ export const RECETAS_FIT = [
     ],
     preparacion:
       "Sazona el pollo con el pimentón, sal y pimienta. Ensarta en brochetas alternando pollo, pimiento y cebolla, pinta con el aceite y cocina a la plancha o parrilla 3-4 minutos por lado, hasta que el pollo esté hecho por dentro.",
-    alias: []
+    alias: [],
+    categorias: ["comida","fit"]
   }
 ];

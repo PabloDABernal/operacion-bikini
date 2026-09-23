@@ -1224,6 +1224,28 @@
         <p id="estado-recetas-fit"></p>
         <p id="error-recetas-fit" class="error" role="alert"></p>
       </div>
+
+      <!-- Categorizar lo que ya existe (23 de septiembre de 2026): la spec
+           105 dejó explícitamente sin categorizar las recetas de antes de
+           esa spec, y el usuario pidió después que sí se hiciera. Solo toca
+           las que están SIN categoría todavía, así que pulsarlo dos veces
+           no repite trabajo ni pisa lo que alguien ya haya puesto a mano. -->
+      <div id="zona-categorizar" class="zona-peligro oculta">
+        <h2>Categorizar las recetas que ya hay</h2>
+        <p class="advertencia">
+          Les pone categoría a las recetas del recetario compartido que
+          todavía no tienen ninguna: a las 73 sembradas, según en qué
+          momento del día aparecen en los 4 menús; a las recetas fit, con
+          las categorías con las que se añadieron. No toca las que ya
+          tengan categoría puesta, a mano o por esto mismo.
+        </p>
+        <button type="button" id="btn-categorizar">
+          Categorizar las recetas que ya hay
+        </button>
+
+        <p id="estado-categorizar"></p>
+        <p id="error-categorizar" class="error" role="alert"></p>
+      </div>
       </div>
     </div>
 

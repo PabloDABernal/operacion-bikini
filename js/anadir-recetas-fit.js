@@ -74,6 +74,7 @@ export async function anadirRecetasFit(uid, autorNombre) {
     raciones: receta.raciones,
     preparacion: receta.preparacion,
     alias: receta.alias || [],
+    categorias: receta.categorias || [],
     ingredientes: receta.ingredientesEnPiezas.map((pieza) => ({
       ingredienteId: idDeIngrediente(pieza.ingrediente),
       ingredienteNombre: pieza.ingrediente,

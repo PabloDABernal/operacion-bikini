@@ -167,6 +167,7 @@ import {
 
 import { reiniciarRecetarioCompartido } from "./migracion-104.js";
 import { anadirRecetasFit } from "./anadir-recetas-fit.js";
+import { categorizarRecetasExistentes } from "./categorizar-recetas.js";
 
 // Ingredientes de una receta recién creada que se parecen a algo que ya tenías
 // (spec 072). Se preguntan al terminar la dieta; hasta que se contesten, no se
@@ -8318,6 +8319,8 @@ function pintarZonaDeNormalizar() {
   id("zona-migrar").classList.toggle("oculta", !esAdmin(emailActual));
   // Igual que el de añadir el lote de recetas fit.
   id("zona-recetas-fit").classList.toggle("oculta", !esAdmin(emailActual));
+  // Y el de categorizar lo que ya existe.
+  id("zona-categorizar").classList.toggle("oculta", !esAdmin(emailActual));
 }
 
 // La misma confirmación por escrito que el reinicio, y aquí con más motivo:
@@ -8447,5 +8450,32 @@ id("btn-recetas-fit").addEventListener("click", async () => {
     error.textContent = "No se ha podido terminar. Comprueba tu conexión y vuelve a pulsarlo.";
   } finally {
     id("btn-recetas-fit").disabled = false;
+  }
+});
+
+// --- Categorizar lo que ya existe (23 de septiembre de 2026) --------------
+//
+// También aditivo e idempotente: solo toca recetas sin categoría, así que
+// no hace falta palabra de confirmación.
+id("btn-categorizar").addEventListener("click", async () => {
+  const estado = id("estado-categorizar");
+  const error = id("error-categorizar");
+
+  error.textContent = "";
+  estado.textContent = "Categorizando…";
+  id("btn-categorizar").disabled = true;
+
+  try {
+    const resumen = await categorizarRecetasExistentes();
+    await refrescarRecetas();
+
+    estado.textContent = resumen.tocadas
+      ? `Listo: ${resumen.tocadas} de ${resumen.total} recetas categorizadas.`
+      : "No había ninguna receta sin categoría: nada que hacer.";
+  } catch {
+    estado.textContent = "";
+    error.textContent = "No se ha podido terminar. Comprueba tu conexión y vuelve a pulsarlo.";
+  } finally {
+    id("btn-categorizar").disabled = false;
   }
 });
