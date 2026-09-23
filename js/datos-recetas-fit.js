@@ -1,6 +1,7 @@
 // Recetas "fit" (postres altos en proteína, queso cottage, tiramisús fit y
-// similares), pedidas por el usuario el 23 de septiembre de 2026 a partir de
-// una búsqueda web de recetas populares de ese estilo. Mismo formato que
+// similares, más una segunda tanda de platos salados/comidas completas),
+// pedidas por el usuario el 23 de septiembre de 2026 a partir de una
+// búsqueda web de recetas populares de ese estilo. Mismo formato que
 // RECETAS de js/datos-iniciales.js (spec 075), para reutilizar el mismo
 // patrón de siembra/enlazado con el catálogo compartido.
 //
@@ -333,6 +334,299 @@ export const RECETAS_FIT = [
     ],
     preparacion:
       "Bate el yogur griego con el queso cottage hasta que quede cremoso. Añade el cacao y la miel, y mezcla bien. Sirve frío, tal cual o con unos frutos rojos por encima.",
+    alias: []
+  },
+
+  // --- Segunda tanda (23 de septiembre de 2026): platos salados / comidas
+  // completas, no postres — pedido explícito del usuario tras la primera
+  // tanda, que era solo de dulces.
+
+  {
+    nombre: "Bowl fitness de pollo, arroz integral y verduras",
+    raciones: 2,
+    ingredientesEnPiezas: [
+      { ingrediente: "Pechuga de pollo", cantidad: "300 g", preparacion: "en tiras" },
+      { ingrediente: "Arroz integral", cantidad: "150 g", preparacion: "" },
+      { ingrediente: "Judías verdes", cantidad: "150 g", preparacion: "" },
+      { ingrediente: "Ajo", cantidad: "1 diente", preparacion: "" },
+      { ingrediente: "Aceite de oliva virgen extra", cantidad: "1 cucharada", preparacion: "" },
+      { ingrediente: "Limón", cantidad: "1 cucharadita de zumo", preparacion: "" }
+    ],
+    preparacion:
+      "Cuece el arroz integral según el paquete. Marina el pollo con el zumo de limón, ajo, sal y pimienta 10-15 minutos, y cocínalo en una sartén con el aceite hasta que esté dorado. Cocina las judías verdes al vapor o salteadas, y monta el bowl con el arroz de base, el pollo y las judías por encima.",
+    alias: []
+  },
+  {
+    nombre: "Poke bowl de pollo y aguacate",
+    raciones: 2,
+    ingredientesEnPiezas: [
+      { ingrediente: "Pechuga de pollo", cantidad: "250 g", preparacion: "a la plancha, en dados" },
+      { ingrediente: "Arroz", cantidad: "150 g", preparacion: "" },
+      { ingrediente: "Aguacate", cantidad: "1 unidad", preparacion: "" },
+      { ingrediente: "Lechuga", cantidad: "50 g", preparacion: "" },
+      { ingrediente: "Zanahoria", cantidad: "1 unidad", preparacion: "rallada" },
+      { ingrediente: "Salsa de soja", cantidad: "2 cucharadas", preparacion: "" },
+      { ingrediente: "Semillas de sésamo", cantidad: "1 cucharadita", preparacion: "" }
+    ],
+    preparacion:
+      "Cuece el arroz y déjalo templar. Coloca el arroz de base en un bowl y reparte por encima el pollo a la plancha, el aguacate en láminas, la lechuga y la zanahoria rallada. Riega con la salsa de soja y termina con las semillas de sésamo.",
+    alias: []
+  },
+  {
+    nombre: "Bowl mexicano de pollo y frijoles",
+    raciones: 2,
+    ingredientesEnPiezas: [
+      { ingrediente: "Pechuga de pollo", cantidad: "250 g", preparacion: "a la plancha, en dados" },
+      { ingrediente: "Arroz integral", cantidad: "150 g", preparacion: "" },
+      { ingrediente: "Frijoles cocidos", cantidad: "150 g", preparacion: "" },
+      { ingrediente: "Maíz dulce", cantidad: "80 g", preparacion: "" },
+      { ingrediente: "Tomate", cantidad: "1 unidad", preparacion: "en dados" },
+      { ingrediente: "Aguacate", cantidad: "1/2 unidad", preparacion: "" },
+      { ingrediente: "Limón", cantidad: "1 cucharadita de zumo", preparacion: "" }
+    ],
+    preparacion:
+      "Cuece el arroz integral y calienta los frijoles. Monta el bowl con el arroz de base y reparte por encima el pollo, los frijoles, el maíz, el tomate y el aguacate. Riega con el zumo de limón, sal y pimienta antes de servir.",
+    alias: []
+  },
+  {
+    nombre: "Pechuga de pollo rellena de espinacas y queso feta",
+    raciones: 2,
+    ingredientesEnPiezas: [
+      { ingrediente: "Pechuga de pollo", cantidad: "2 unidades", preparacion: "grandes" },
+      { ingrediente: "Espinacas", cantidad: "100 g", preparacion: "frescas" },
+      { ingrediente: "Queso feta", cantidad: "80 g", preparacion: "desmenuzado" },
+      { ingrediente: "Ajo", cantidad: "1 diente", preparacion: "" },
+      { ingrediente: "Aceite de oliva virgen extra", cantidad: "1 cucharada", preparacion: "" }
+    ],
+    preparacion:
+      "Sofríe las espinacas con el ajo hasta que se ablanden, y mézclalas con el queso feta. Haz un corte lateral a cada pechuga para formar un bolsillo y rellénalas con la mezcla, cerrando con un palillo si hace falta. Dóralas en una sartén con el aceite por ambos lados y termina de hacerlas al horno a 200 °C durante 15-20 minutos.",
+    alias: []
+  },
+  {
+    nombre: "Salmón al horno con tomates y aceitunas",
+    raciones: 2,
+    ingredientesEnPiezas: [
+      { ingrediente: "Salmón", cantidad: "300 g", preparacion: "en lomos" },
+      { ingrediente: "Tomates cherry", cantidad: "200 g", preparacion: "" },
+      { ingrediente: "Pimiento rojo", cantidad: "1 unidad", preparacion: "en tiras" },
+      { ingrediente: "Aceitunas", cantidad: "50 g", preparacion: "" },
+      { ingrediente: "Aceite de oliva virgen extra", cantidad: "1 cucharada", preparacion: "" },
+      { ingrediente: "Orégano", cantidad: "al gusto", preparacion: "" }
+    ],
+    preparacion:
+      "Coloca el salmón en una bandeja de horno junto con los tomates cherry, el pimiento y las aceitunas. Riega todo con el aceite, sazona con sal, pimienta y orégano, y hornea a 200 °C durante 18-20 minutos, hasta que el salmón esté hecho.",
+    alias: []
+  },
+  {
+    nombre: "Cazuela de huevos con salchicha de pollo y verduras",
+    raciones: 3,
+    ingredientesEnPiezas: [
+      { ingrediente: "Huevos", cantidad: "6 unidades", preparacion: "" },
+      { ingrediente: "Salchicha de pollo", cantidad: "150 g", preparacion: "en rodajas" },
+      { ingrediente: "Pimiento", cantidad: "1 unidad", preparacion: "en dados" },
+      { ingrediente: "Cebolla", cantidad: "1/2 unidad", preparacion: "en dados" },
+      { ingrediente: "Espinacas", cantidad: "50 g", preparacion: "" },
+      { ingrediente: "Aceite de oliva virgen extra", cantidad: "1 cucharada", preparacion: "" }
+    ],
+    preparacion:
+      "Sofríe la cebolla y el pimiento en el aceite hasta que se ablanden, añade la salchicha y dórala unos minutos, y por último las espinacas hasta que reduzcan. Bate los huevos, viértelos por encima y cocina a fuego medio-bajo, tapado, hasta que cuajen del todo.",
+    alias: []
+  },
+  {
+    nombre: "Muffins de huevo y pavo",
+    raciones: 6,
+    ingredientesEnPiezas: [
+      { ingrediente: "Huevos", cantidad: "4 unidades", preparacion: "" },
+      { ingrediente: "Claras de huevo", cantidad: "4 unidades", preparacion: "" },
+      { ingrediente: "Pavo", cantidad: "80 g", preparacion: "en lonchas, picado" },
+      { ingrediente: "Queso mozzarella", cantidad: "40 g", preparacion: "rallado" },
+      { ingrediente: "Pimiento", cantidad: "1/2 unidad", preparacion: "en dados pequeños" },
+      { ingrediente: "Cebolla", cantidad: "1/4 unidad", preparacion: "en dados pequeños" }
+    ],
+    preparacion:
+      "Bate los huevos con las claras y mezcla con el pavo, el queso, el pimiento y la cebolla. Reparte la mezcla en un molde de muffins (con papelitos o engrasado) y hornea a 180 °C durante 18-20 minutos, hasta que cuajen. Se conservan bien en la nevera para varios días.",
+    alias: []
+  },
+  {
+    nombre: "Sándwich de pavo y aguacate",
+    raciones: 1,
+    ingredientesEnPiezas: [
+      { ingrediente: "Pan integral", cantidad: "2 rebanadas", preparacion: "" },
+      { ingrediente: "Pavo", cantidad: "60 g", preparacion: "en lonchas" },
+      { ingrediente: "Aguacate", cantidad: "1/2 unidad", preparacion: "" },
+      { ingrediente: "Tomate", cantidad: "1/2 unidad", preparacion: "en rodajas" },
+      { ingrediente: "Sal", cantidad: "al gusto", preparacion: "" }
+    ],
+    preparacion:
+      "Chafa el aguacate y úntalo sobre una rebanada de pan. Añade las lonchas de pavo y el tomate, sazona con sal y pimienta, y cierra con la otra rebanada.",
+    alias: []
+  },
+  {
+    nombre: "Sándwich cremoso de atún y aguacate",
+    raciones: 1,
+    ingredientesEnPiezas: [
+      { ingrediente: "Pan integral", cantidad: "2 rebanadas", preparacion: "" },
+      { ingrediente: "Atún", cantidad: "1 lata", preparacion: "al natural, escurrido" },
+      { ingrediente: "Aguacate", cantidad: "1/2 unidad", preparacion: "" },
+      { ingrediente: "Queso crema", cantidad: "2 cucharadas", preparacion: "light" },
+      { ingrediente: "Sal", cantidad: "al gusto", preparacion: "" }
+    ],
+    preparacion:
+      "Chafa el atún escurrido con el aguacate y el queso crema hasta que quede una mezcla cremosa. Sazona con sal y pimienta, y extiende entre las dos rebanadas de pan.",
+    alias: []
+  },
+  {
+    nombre: "Tostada de huevo revuelto y aguacate",
+    raciones: 1,
+    ingredientesEnPiezas: [
+      { ingrediente: "Pan integral", cantidad: "2 rebanadas", preparacion: "" },
+      { ingrediente: "Huevos", cantidad: "2 unidades", preparacion: "" },
+      { ingrediente: "Aguacate", cantidad: "1/2 unidad", preparacion: "" },
+      { ingrediente: "Aceite de oliva virgen extra", cantidad: "1 cucharadita", preparacion: "" }
+    ],
+    preparacion:
+      "Tuesta el pan y unta el aguacate chafado encima. Revuelve los huevos en una sartén con el aceite a fuego bajo, removiendo hasta que cuajen cremosos, y repártelos sobre las tostadas. Sazona con sal y pimienta.",
+    alias: []
+  },
+  {
+    nombre: "Pollo al limón con arroz",
+    raciones: 2,
+    ingredientesEnPiezas: [
+      { ingrediente: "Pechuga de pollo", cantidad: "300 g", preparacion: "en tiras" },
+      { ingrediente: "Arroz", cantidad: "150 g", preparacion: "" },
+      { ingrediente: "Limón", cantidad: "1 unidad", preparacion: "zumo y ralladura" },
+      { ingrediente: "Ajo", cantidad: "2 dientes", preparacion: "" },
+      { ingrediente: "Aceite de oliva virgen extra", cantidad: "1 cucharada", preparacion: "" }
+    ],
+    preparacion:
+      "Marina el pollo con el zumo y la ralladura de limón, el ajo picado, sal y pimienta durante 10-15 minutos. Cuece el arroz aparte. Cocina el pollo en una sartén con el aceite hasta que esté dorado y bien hecho, y sirve sobre el arroz.",
+    alias: []
+  },
+  {
+    nombre: "Ensalada de pollo, quinoa y aguacate",
+    raciones: 2,
+    ingredientesEnPiezas: [
+      { ingrediente: "Pechuga de pollo", cantidad: "250 g", preparacion: "a la plancha, en tiras" },
+      { ingrediente: "Quinoa", cantidad: "100 g", preparacion: "" },
+      { ingrediente: "Aguacate", cantidad: "1 unidad", preparacion: "" },
+      { ingrediente: "Tomate", cantidad: "1 unidad", preparacion: "en dados" },
+      { ingrediente: "Aceite de oliva virgen extra", cantidad: "1 cucharada", preparacion: "" },
+      { ingrediente: "Limón", cantidad: "1 cucharadita de zumo", preparacion: "" }
+    ],
+    preparacion:
+      "Cuece la quinoa según el paquete y déjala templar. Mezcla la quinoa con el pollo, el aguacate y el tomate, y aliña con el aceite, el zumo de limón, sal y pimienta.",
+    alias: []
+  },
+  {
+    nombre: "Wrap de pavo, hummus y verduras",
+    raciones: 1,
+    ingredientesEnPiezas: [
+      { ingrediente: "Tortilla de trigo integral", cantidad: "1 unidad", preparacion: "" },
+      { ingrediente: "Pavo", cantidad: "60 g", preparacion: "en lonchas" },
+      { ingrediente: "Hummus", cantidad: "2 cucharadas", preparacion: "" },
+      { ingrediente: "Lechuga", cantidad: "30 g", preparacion: "" },
+      { ingrediente: "Zanahoria", cantidad: "1/2 unidad", preparacion: "en tiras" }
+    ],
+    preparacion:
+      "Extiende el hummus sobre la tortilla, reparte el pavo, la lechuga y la zanahoria por encima, y enrolla apretando bien. Corta por la mitad para servir.",
+    alias: []
+  },
+  {
+    nombre: "Salteado de ternera y verduras con arroz",
+    raciones: 2,
+    ingredientesEnPiezas: [
+      { ingrediente: "Ternera", cantidad: "250 g", preparacion: "en tiras finas" },
+      { ingrediente: "Arroz", cantidad: "150 g", preparacion: "" },
+      { ingrediente: "Pimiento", cantidad: "1 unidad", preparacion: "en tiras" },
+      { ingrediente: "Cebolla", cantidad: "1/2 unidad", preparacion: "en tiras" },
+      { ingrediente: "Salsa de soja", cantidad: "2 cucharadas", preparacion: "" },
+      { ingrediente: "Aceite de oliva virgen extra", cantidad: "1 cucharada", preparacion: "" }
+    ],
+    preparacion:
+      "Cuece el arroz aparte. Saltea la cebolla y el pimiento en el aceite a fuego fuerte, añade la ternera y saltea 2-3 minutos hasta que se dore. Añade la salsa de soja, mezcla bien y sirve sobre el arroz.",
+    alias: []
+  },
+  {
+    nombre: "Tortilla de claras con espinacas y champiñones",
+    raciones: 1,
+    ingredientesEnPiezas: [
+      { ingrediente: "Claras de huevo", cantidad: "5 unidades", preparacion: "" },
+      { ingrediente: "Espinacas", cantidad: "50 g", preparacion: "" },
+      { ingrediente: "Champiñones", cantidad: "80 g", preparacion: "en láminas" },
+      { ingrediente: "Aceite de oliva virgen extra", cantidad: "1 cucharadita", preparacion: "" }
+    ],
+    preparacion:
+      "Saltea los champiñones y las espinacas en el aceite hasta que se ablanden. Bate las claras con sal y pimienta, vierte sobre las verduras y cocina a fuego medio hasta que cuaje, doblando la tortilla por la mitad al final.",
+    alias: []
+  },
+  {
+    nombre: "Bowl de garbanzos y pollo especiado",
+    raciones: 2,
+    ingredientesEnPiezas: [
+      { ingrediente: "Pechuga de pollo", cantidad: "250 g", preparacion: "en dados" },
+      { ingrediente: "Garbanzos cocidos", cantidad: "1 bote", preparacion: "escurridos" },
+      { ingrediente: "Pimentón", cantidad: "1 cucharadita", preparacion: "" },
+      { ingrediente: "Comino", cantidad: "1/2 cucharadita", preparacion: "" },
+      { ingrediente: "Aceite de oliva virgen extra", cantidad: "1 cucharada", preparacion: "" },
+      { ingrediente: "Limón", cantidad: "1 cucharadita de zumo", preparacion: "" }
+    ],
+    preparacion:
+      "Sazona el pollo con el pimentón, el comino, sal y pimienta. Cocina en una sartén con el aceite hasta que esté dorado, añade los garbanzos y saltea 3-4 minutos más para que se calienten y cojan sabor. Termina con un chorrito de zumo de limón.",
+    alias: []
+  },
+  {
+    nombre: "Pasta integral con pollo y brócoli",
+    raciones: 2,
+    ingredientesEnPiezas: [
+      { ingrediente: "Pasta integral", cantidad: "150 g", preparacion: "" },
+      { ingrediente: "Pechuga de pollo", cantidad: "200 g", preparacion: "en dados" },
+      { ingrediente: "Brócoli", cantidad: "150 g", preparacion: "en árboles pequeños" },
+      { ingrediente: "Ajo", cantidad: "1 diente", preparacion: "" },
+      { ingrediente: "Aceite de oliva virgen extra", cantidad: "1 cucharada", preparacion: "" }
+    ],
+    preparacion:
+      "Cuece la pasta junto con el brócoli los últimos 4 minutos de cocción, y escurre ambos juntos. Mientras, dora el pollo con el ajo en una sartén con el aceite. Mezcla la pasta y el brócoli con el pollo, sazona con sal y pimienta y sirve caliente.",
+    alias: []
+  },
+  {
+    nombre: "Lomo de cerdo a la plancha con boniato asado",
+    raciones: 2,
+    ingredientesEnPiezas: [
+      { ingrediente: "Lomo de cerdo", cantidad: "300 g", preparacion: "en filetes" },
+      { ingrediente: "Boniato", cantidad: "2 unidades", preparacion: "medianos, en dados" },
+      { ingrediente: "Aceite de oliva virgen extra", cantidad: "1 cucharada", preparacion: "" },
+      { ingrediente: "Pimentón", cantidad: "1/2 cucharadita", preparacion: "" }
+    ],
+    preparacion:
+      "Mezcla el boniato en dados con la mitad del aceite, el pimentón, sal y pimienta, y hornea a 200 °C durante 25-30 minutos, dando la vuelta a mitad de cocción. Sazona el lomo y hazlo a la plancha con el resto del aceite unos 3-4 minutos por lado. Sirve junto al boniato.",
+    alias: []
+  },
+  {
+    nombre: "Merluza al horno con espárragos",
+    raciones: 2,
+    ingredientesEnPiezas: [
+      { ingrediente: "Merluza", cantidad: "300 g", preparacion: "en lomos" },
+      { ingrediente: "Espárragos trigueros", cantidad: "200 g", preparacion: "" },
+      { ingrediente: "Ajo", cantidad: "1 diente", preparacion: "" },
+      { ingrediente: "Aceite de oliva virgen extra", cantidad: "1 cucharada", preparacion: "" },
+      { ingrediente: "Limón", cantidad: "1 cucharadita de zumo", preparacion: "" }
+    ],
+    preparacion:
+      "Coloca la merluza y los espárragos en una bandeja de horno, riega con el aceite, el ajo picado y el zumo de limón, y sazona con sal y pimienta. Hornea a 200 °C durante 15-18 minutos, hasta que la merluza esté hecha.",
+    alias: []
+  },
+  {
+    nombre: "Brochetas de pollo y pimiento a la plancha",
+    raciones: 2,
+    ingredientesEnPiezas: [
+      { ingrediente: "Pechuga de pollo", cantidad: "300 g", preparacion: "en dados grandes" },
+      { ingrediente: "Pimiento rojo", cantidad: "1 unidad", preparacion: "en trozos" },
+      { ingrediente: "Cebolla", cantidad: "1 unidad", preparacion: "en trozos" },
+      { ingrediente: "Aceite de oliva virgen extra", cantidad: "1 cucharada", preparacion: "" },
+      { ingrediente: "Pimentón", cantidad: "1/2 cucharadita", preparacion: "" }
+    ],
+    preparacion:
+      "Sazona el pollo con el pimentón, sal y pimienta. Ensarta en brochetas alternando pollo, pimiento y cebolla, pinta con el aceite y cocina a la plancha o parrilla 3-4 minutos por lado, hasta que el pollo esté hecho por dentro.",
     alias: []
   }
 ];
