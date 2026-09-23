@@ -107,5 +107,25 @@ Ninguna surgida al escribir esta spec.
 
 ## ✅ Para probar a mano
 
-*(la rellena/afina el agente `qa-manual` antes de la prueba, una vez
-implementada)*
+Ya desplegado en producción (operacion-bikini.vercel.app).
+
+1. Entra en **Recetas**: debe verse un botón "Lista de la compra" arriba,
+   antes del interruptor Recetas/Ingredientes, SIN ningún número al lado.
+2. Ve a **Recetas → Ingredientes**: el botón de ir a la compra que había
+   ahí ya no está.
+3. Con la dieta activa puesta, toca "Lista de la compra": debe verse el
+   mismo contenido de siempre (ingredientes que faltan + lo apuntado a
+   mano).
+4. Marca un ingrediente como comprado: desaparece de la lista, igual que
+   antes.
+5. Toca "Volver": si entraste a la compra viendo el panel **Recetas**,
+   debes volver a Recetas (no a Ingredientes).
+6. Repite desde **Ingredientes**: toca "Lista de la compra" estando en el
+   panel Ingredientes, y al tocar "Volver" debes caer de nuevo en
+   Ingredientes.
+7. Si puedes probar en pantalla ancha (escritorio): entra en Recetas y
+   comprueba que la lista de la compra NO se ve apilada debajo del
+   Recetario automáticamente — solo aparece al tocar el botón, igual que
+   en móvil.
+8. Comprueba que apuntar algo a mano y el botón "comprado todo" (spec 096)
+   siguen funcionando igual que siempre dentro de la lista.

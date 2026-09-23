@@ -119,5 +119,35 @@ tarjeta y en el filtro, mensaje cuando un filtro no da ningún resultado)*
 
 ## ✅ Para probar a mano
 
-*(la rellena/afina el agente `qa-manual` antes de la prueba, una vez
-implementada)*
+Ya desplegado en producción (operacion-bikini.vercel.app).
+
+1. Ve a **Recetas**, abre "Nueva receta" y rellénala. En el campo
+   **Categorías** debe salir seis casillas (Comida, Postre, Fit, Snack,
+   Desayuno, Otros), no un desplegable.
+2. Marca dos a la vez (por ejemplo Postre y Fit) y guarda.
+3. En la tarjeta de esa receta, con la lista sin desplegar, deben verse los
+   dos chips ("Postre" y "Fit") junto al nombre.
+4. Vuelve a abrir "Editar" en esa receta: las mismas dos casillas deben
+   salir ya marcadas.
+5. Encima del listado (junto al buscador) debe haber seis chips de
+   filtro. Toca "Fit": el listado se reduce a las recetas marcadas Fit
+   (deberían salir tanto la que acabas de crear como alguna de las 43
+   recetas fit, si ya las añadiste).
+6. Toca también "Postre" (sin soltar "Fit"): el listado debe AMPLIARSE, no
+   reducirse más — aparecen las que son Fit O Postre.
+7. Escribe algo en el buscador de texto a la vez que tienes un filtro de
+   categoría activo: el resultado debe combinar los dos (coincide el texto
+   Y tiene esa categoría).
+8. Toca un filtro de categoría que no tenga ninguna receta (si todas tus
+   recetas fit ya están puestas, prueba con una categoría que no hayas
+   usado nunca, como "Snack" si no la has usado): debe salir un mensaje
+   diciendo que ninguna receta tiene esas categorías, no una lista vacía
+   sin explicación.
+9. Quita los filtros (vuelve a tocar los chips activos): el listado vuelve
+   a verse entero.
+10. Con una cuenta que NO es el autor de una receta ni el admin, comprueba
+    que no puede cambiarle las categorías (mismo botón "Editar" ausente que
+    ya se probó en la spec 104).
+11. Abre una de las 73 recetas sembradas o de las 43 fit (todas sin
+    categoría todavía): debe seguir viéndose y encontrándose bien, sin
+    chips y sin romper nada.
