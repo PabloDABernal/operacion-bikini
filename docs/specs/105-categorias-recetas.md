@@ -54,9 +54,14 @@ buscador de texto que ya existe (spec 079).
 
 ### NO entra (explícitamente fuera)
 - No se categorizan los ingredientes, solo las recetas.
-- No hay una pasada retroactiva que le ponga categoría a las recetas ya
-  existentes: quien quiera categorizarlas las abre y las edita a mano,
-  cuando le apetezca.
+- ~~No hay una pasada retroactiva que le ponga categoría a las recetas ya
+  existentes~~ **Revertido el 23 de septiembre de 2026**: filtrar por una
+  categoría no encontraba nada porque ninguna receta vieja tenía ninguna.
+  Se añadió `js/categorizar-recetas.js` (botón de admin en Ajustes): las
+  recetas fit llevan categoría escrita a mano en su origen
+  (`js/datos-recetas-fit.js`), y las 73 sembradas se categorizan derivando
+  el momento del día (desayuno/comida/merienda/cena) en que aparecen dentro
+  de los 4 menús. Solo toca recetas sin categoría todavía.
 - No se amplía la lista de seis categorías en esta spec.
 - No se toca la lista de la compra (spec 106, aparte).
 
